@@ -25,18 +25,19 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef __CUDA_ARCH__
+#if !__CUDACC__
 #include <stdio.h>
-#elif !defined(_INC_STDIOx)
-#define _INC_STDIOx
+#elif !defined(_INC_STDIO)
+#define _INC_STDIO
+#include <crtdefscu.h>
+#include <stddefcu.h>
+#include <stdargcu.h>
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
 	//#define _FSTDIO			// function stdio
-#include <stddefcu.h>
-#include <stdargcu.h>
 
 	// <reent.h> defines __sFILE, _fpos_t.
 	// They must be defined there because struct _reent needs them (and we don't want reent.h to include this file.
@@ -92,7 +93,7 @@ extern "C" {
 	//int     _EXFUN(vfprintf, (FILE *, const char *, __VALIST));
 	//int     _EXFUN(vprintf, (const char *, __VALIST));
 	//int     _EXFUN(vsprintf, (char *, const char *, __VALIST));
-	//__device__ int vsnprintf(const char *buf, size_t bufLen, const char *fmt, va_list *va);
+	//__declspec(__device__) int vsnprintf(const char *buf, size_t bufLen, const char *fmt, va_list *va);
 	//int     _EXFUN(fgetc, (FILE *));
 	//char *  _EXFUN(fgets, (char *, int, FILE *));
 	//int     _EXFUN(fputc, (int, FILE *));
@@ -108,7 +109,7 @@ extern "C" {
 	//size_t  _EXFUN(fwrite, (const void *, size_t _size, size_t _n, FILE *));
 
 #define sprintf(buf, fmt, ...) snprintf(buf, -1, fmt, __VA_ARGS__)
-	//STDARG(int, __snprintf, vsnprintf(buf, bufLen, fmt, &va), const char *buf, size_t bufLen, const char *fmt) 
+	//STDARG(int, snprintf, vsnprintf(buf, bufLen, fmt, &va), const char *buf, size_t bufLen, const char *fmt)
 
 #ifdef __cplusplus
 }

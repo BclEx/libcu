@@ -1,5 +1,5 @@
 /*
-string.h - declarations for string manipulation functions
+errno.h - Errors
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -26,17 +26,16 @@ THE SOFTWARE.
 #pragma once
 
 #if !__CUDACC__
-#include <string.h>
-#elif !defined(_INC_STRINGCU)
-#define _INC_STRINGCU
+#include <errno.h>
+#elif !defined(_ERRNO_H)
+#define _ERRNO_H
 #include <crtdefscu.h>
+#define _CRT_ERRNO_DEFINED
+#include <errno.h>
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
+extern __device__ int *_errno(void);
+#define errno (*_errno())
+extern __device__ errno_t _set_errno(int value);
+extern __device__ errno_t _get_errno(int *value);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* _INC_STRINGCU */
+#endif  /* _ERRNO_H */

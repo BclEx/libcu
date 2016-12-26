@@ -1,5 +1,5 @@
 /*
-string.h - declarations for string manipulation functions
+cuda_runtimecu.h - Inject in cuda_runtime
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,18 +25,7 @@ THE SOFTWARE.
 
 #pragma once
 
-#if !__CUDACC__
-#include <string.h>
-#elif !defined(_INC_STRINGCU)
-#define _INC_STRINGCU
-#include <crtdefscu.h>
+// http://stackoverflow.com/questions/29706730/which-headers-are-included-by-default-in-the-cu-source-file
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* _INC_STRINGCU */
+#undef __CUDA_RUNTIME_H__
+#include <cuda_runtime.h>

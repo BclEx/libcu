@@ -1,5 +1,5 @@
 /*
-string.h - declarations for string manipulation functions
+crtdefscu.h - xxx
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,18 +25,27 @@ THE SOFTWARE.
 
 #pragma once
 
-#if !__CUDACC__
-#include <string.h>
-#elif !defined(_INC_STRINGCU)
-#define _INC_STRINGCU
-#include <crtdefscu.h>
+#include <crtdefs.h>
+
+/* Define NULL pointer value */
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL    0
+#else
+#define NULL    ((void *)0)
+#endif
+#endif
+
+#include <host_defines.h>
+//#include <stddefcu.h>
+//#include <builtin_types.h>
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-#ifdef __cplusplus
+_CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
+
+#ifdef  __cplusplus
 }
 #endif
-
-#endif  /* _INC_STRINGCU */

@@ -19,6 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\bits\libcu_fpmax.h" />
+    <ClInclude Include="..\include\crtdefscu.h" />
+    <ClInclude Include="..\include\ctypecu.h" />
+    <ClInclude Include="..\include\cuda_runtimecu.h" />
+    <ClInclude Include="..\include\errnocu.h" />
     <ClInclude Include="..\include\stdargcu.h" />
     <ClInclude Include="..\include\stddefcu.h" />
     <ClInclude Include="..\include\stdiocu.h" />
@@ -26,11 +31,16 @@
     <ClInclude Include="..\include\stringcu.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="libc.cu" />
+    <CudaCompile Include="libcu.cu" />
+    <CudaCompile Include="program-device.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="stdiocu.cu" />
+    <CudaCompile Include="stdlibcu.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ABDDD338-DC1C-475E-9903-0FC99E18726E}</ProjectGuid>
     <RootNamespace>msvcu</RootNamespace>
+    <ProjectName>libcu</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -97,9 +107,10 @@
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
-    <CudaCompile />
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <Defines>__CUDA_RUNTIME_H__</Defines>
       <Keep>true</Keep>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -119,6 +130,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -141,6 +154,10 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
+    <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -162,6 +179,8 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>

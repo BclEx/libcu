@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\include\stdargcu.h" />
+    <ClInclude Include="..\include\stddefcu.h" />
+    <ClInclude Include="..\include\stdiocu.h" />
+    <ClInclude Include="..\include\stdlibcu.h" />
+    <ClInclude Include="..\include\stringcu.h" />
+    <ClInclude Include="..\include\errnocu.h" />
+    <ClInclude Include="..\include\ctypecu.h" />
+    <ClInclude Include="..\include\cuda_runtimecu.h" />
+    <ClInclude Include="..\include\bits\libcu_fpmax.h">
+      <Filter>bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\crtdefscu.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="stdlibcu.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.cu" />
+    <CudaCompile Include="program-device.cu" />
+    <CudaCompile Include="stdiocu.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="bits">
+      <UniqueIdentifier>{e7438e7e-21c1-414f-82e8-26ff1e32b228}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

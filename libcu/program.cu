@@ -1,17 +1,10 @@
-#include <stdiocu.h>
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <cuda_runtimecu.h>
+//#include <device_launch_parameters.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-
-__global__ void addKernel(int *c, const int *a, const int *b)
-{
-	const char buf[100] = {0};
-	//snprintf(buf, 100, "test");
-	
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
-}
+__global__ void addKernel(int *c, const int *a, const int *b);
 
 int main()
 {

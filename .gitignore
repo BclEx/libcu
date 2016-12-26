@@ -4,10 +4,8 @@ _build/
 
 # Windows
 x64/
-[Dd]ebug.cpu/
-[Dd]ebug.cu/
-[Rr]elease.cpu/
-[Rr]elease.cu/
+[Dd]ebug/
+[Rr]elease/
 [Bb]in/
 [Oo]bj/
 TestResults/

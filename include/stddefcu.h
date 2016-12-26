@@ -25,10 +25,11 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef __CUDA_ARCH__
+#if !__CUDACC__
 #include <stddef.h>
-#elif !defined(_INC_STDDEF)
-#define _INC_STDDEF
+#elif !defined(_INC_STDDEFCU)
+#define _INC_STDDEFCU
+#include <crtdefscu.h>
 
 //#define _CRTIMP
 //#define _In_
@@ -53,14 +54,14 @@ extern "C" {
 #endif
 
 	/* Declare reference to errno */
-//#ifndef _CRT_ERRNO_DEFINED
-//#define _CRT_ERRNO_DEFINED
-//	_CRTIMP extern int * __cdecl _errno(void);
-//#define errno (*_errno())
-//
-//	errno_t __cdecl _set_errno(_In_ int _Value);
-//	errno_t __cdecl _get_errno(_Out_ int * _Value);
-//#endif
+	//#ifndef _CRT_ERRNO_DEFINED
+	//#define _CRT_ERRNO_DEFINED
+	//	_CRTIMP extern int * __cdecl _errno(void);
+	//#define errno (*_errno())
+	//
+	//	errno_t __cdecl _set_errno(_In_ int _Value);
+	//	errno_t __cdecl _get_errno(_Out_ int * _Value);
+	//#endif
 
 	/* Define offsetof macro */
 #ifdef __cplusplus
@@ -81,12 +82,12 @@ extern "C" {
 
 #endif	/* __cplusplus */
 
-//	_CRTIMP extern unsigned long  __cdecl __threadid(void);
-//#define _threadid (__threadid())
-//	_CRTIMP extern uintptr_t __cdecl __threadhandle(void);
+	//	_CRTIMP extern unsigned long  __cdecl __threadid(void);
+	//#define _threadid (__threadid())
+	//	_CRTIMP extern uintptr_t __cdecl __threadhandle(void);
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  /* _INC_STDDEF */
+#endif  /* _INC_STDDEFCU */
