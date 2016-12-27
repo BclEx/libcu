@@ -1,19 +1,16 @@
 #include <stdlibcu.h>
-//<string.h>
 #include <ctypecu.h>
 #include <errnocu.h>
-//#include <limits.h>
-//#include <float.h>
 #include <bits/libcu_fpmax.h>
-#include <math.h>
+#include <cuda_runtimecu.h>
+//typedef struct File FILE;
+#include <sentinel-msg.h>
 
 /* Handle _STRTOD_HEXADECIMAL_FLOATS via libcu config now. */
 #undef _STRTOD_HEXADECIMAL_FLOATS
 #ifdef __LIBCU_HAS_HEXADECIMAL_FLOATS__
 #define _STRTOD_HEXADECIMAL_FLOATS 1
 #endif
-
-/**********************************************************************/
 
 /* Defined if we want to recognize "nan", "inf", and "infinity". (C99) */
 #define _STRTOD_NAN_INF_STRINGS  1
@@ -591,3 +588,5 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 }
 
 #pragma endregion
+
+__device__ int system(const char *c) { stdlib_system msg(c); return msg.RC; }

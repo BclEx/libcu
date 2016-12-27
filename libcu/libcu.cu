@@ -1,8 +1,5 @@
 #include <errnocu.h>
-#include <stdargcu.h>
-#include <cuda_runtimecu.h>
-
-//STDARG(int, snprintf, vsnprintf(buf, bufLen, fmt, &va), const char *buf, size_t bufLen, const char *fmt)
+#include <math.h>
 
 #pragma region ernocu.h
 

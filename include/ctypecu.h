@@ -27,8 +27,8 @@ THE SOFTWARE.
 
 #if !__CUDACC__
 #include <ctype.h>
-#elif !defined(_CTYPECU_H)
-#define _CTYPECU_H
+#elif !defined(_CTYPE_H)
+#define _CTYPE_H
 #include <crtdefscu.h>
 
 // embed
@@ -63,4 +63,4 @@ extern __forceinline __device__ int toupper(int c) { return c&~(__curtCtypeMap[(
 
 extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
 
-#endif  /* _CTYPECU_H */
+#endif  /* _CTYPE_H */

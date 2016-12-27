@@ -1,5 +1,5 @@
 /*
-libcu_fpmax.h - Define a maximal floating point type, and the associated constants
+libcu_fpmax.h - define a maximal floating point type, and the associated constants
 The MIT License
 
 Copyright (c) 2016 Sky Morey

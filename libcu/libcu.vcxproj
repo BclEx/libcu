@@ -20,10 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\bits\libcu_fpmax.h" />
+    <ClInclude Include="..\include\bits\libcu_stdio.h" />
     <ClInclude Include="..\include\crtdefscu.h" />
     <ClInclude Include="..\include\ctypecu.h" />
     <ClInclude Include="..\include\cuda_runtimecu.h" />
     <ClInclude Include="..\include\errnocu.h" />
+    <ClInclude Include="..\include\featurescu.h" />
+    <ClInclude Include="..\include\sentinel-msg.h" />
+    <ClInclude Include="..\include\sentinel.h" />
     <ClInclude Include="..\include\stdargcu.h" />
     <ClInclude Include="..\include\stddefcu.h" />
     <ClInclude Include="..\include\stdiocu.h" />
@@ -34,6 +38,12 @@
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program-device.cu" />
     <CudaCompile Include="program.cu" />
+    <ClCompile Include="sentinel-msg.cpp" />
+    <ClCompile Include="sentinel.cpp" />
+    <CudaCompile Include="sentinel-gpu.cu" />
+    <ClCompile Include="sentinel-host.cpp">
+      <FileType>Document</FileType>
+    </ClCompile>
     <CudaCompile Include="stdiocu.cu" />
     <CudaCompile Include="stdlibcu.cu" />
   </ItemGroup>
@@ -97,6 +107,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -119,6 +130,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -142,6 +154,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -166,6 +179,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
