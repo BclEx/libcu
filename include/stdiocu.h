@@ -99,13 +99,10 @@ extern __constant__ FILE *__iob_file[3];
 
 __BEGIN_NAMESPACE_STD;
 /* Remove file FILENAME.  */
-//extern __device__ int remove(const char *filename);
 __forceinline __device__ int remove(const char *filename) { return -1; }
 /* Rename file OLD to NEW.  */
-//extern __device__ int rename(const char *old, const char *new_);
 __forceinline __device__ int rename(const char *old, const char *new_) { stdio_rename msg(old, new_); return msg.RC; }
 /* Remove file FILENAME.  */
-//extern __device__ int _unlink(const char *filename);
 __forceinline __device__ int _unlink(const char *filename) { stdio_unlink msg(filename); return msg.RC; }
 __END_NAMESPACE_STD;
 
@@ -120,20 +117,16 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Close STREAM. */
-//extern __device__ int fclose(FILE *stream, bool wait = true);
 __forceinline __device__ int fclose(FILE *stream, bool wait = true) { if (stream == stdout || stream == stderr) return 0; stdio_fclose msg(wait, stream); return msg.RC; }
 /* Flush STREAM, or all streams if STREAM is NULL. */
-//extern __device__ int fflush(FILE *stream);
 __forceinline __device__ int fflush(FILE *stream) { if (stream == stdout || stream == stderr) return 0; stdio_fflush msg(false, stream); return msg.RC; }
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 #ifndef __USE_FILE_OFFSET64
 /* Open a file and create a new stream for it. */
-//extern __device__ FILE *fopen(const char *__restrict filename, const char *__restrict modes);
-__forceinline __device__ FILE *fopen(const char *__restrict filename, const char *__restrict modes){ stdio_fopen msg(filename, modes); return msg.RC; }
+__forceinline __device__ FILE *fopen(const char *__restrict filename, const char *__restrict modes) { stdio_fopen msg(filename, modes); return msg.RC; }
 /* Open a file, replacing an existing stream with it. */
-//extern __device__ FILE *freopen(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
 __forceinline __device__ FILE *freopen(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { return nullptr; }
 #else
 #define fopen fopen64
@@ -147,10 +140,8 @@ extern __device__ FILE *freopen64(const char *__restrict filename, const char *_
 
 __BEGIN_NAMESPACE_STD;
 /* If BUF is NULL, make STREAM unbuffered. Else make it use buffer BUF, of size BUFSIZ.  */
-//extern __device__ void setbuf(FILE *__restrict stream, char *__restrict buf);
 __forceinline __device__ void setbuf(FILE *__restrict stream, char *__restrict buf) { }
 /* Make STREAM use buffering mode MODE. If BUF is not NULL, use N bytes of it for buffering; else allocate an internal buffer N bytes long.  */
-//extern __device__ int setvbuf(FILE *__restrict stream, char *__restrict buf, int modes, size_t n);
 __forceinline __device__ int setvbuf(FILE *__restrict stream, char *__restrict buf, int modes, size_t n) { stdio_setvbuf msg(stream, buf, modes, n); return msg.RC; }
 __END_NAMESPACE_STD;
 
@@ -196,7 +187,6 @@ __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Read a character from STREAM.  */
-//extern __device__ int fgetc(FILE *stream);
 __forceinline __device__ int fgetc(FILE *stream) { stdio_fgetc msg(stream); return msg.RC; }
 //extern __device__ int getc(FILE *stream);
 __forceinline __device__ int getc(FILE *stream) { return -1; }
@@ -209,7 +199,6 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Write a character to STREAM.  */
-//extern __device__ int fputc(int c, FILE *stream, bool wait = true);
 __forceinline __device__ int fputc(int c, FILE *stream, bool wait = true) { if (stream == stdout || stream == stderr) { printf("%c", c); return 0; } stdio_fputc msg(wait, c, stream); return msg.RC; }
 //extern __device__ int putc(int c, FILE *stream);
 __forceinline __device__ int putc(int c, FILE *stream) { return -1; }
@@ -223,13 +212,11 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Get a newline-terminated string of finite length from STREAM.  */
-//extern __device__ char *fgets(char *__restrict s, int n, FILE *__restrict stream);
 __forceinline __device__ char *fgets(char *__restrict s, int n, FILE *__restrict stream) { stdio_fgets msg(s, n, stream); return msg.RC; }
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Write a string to STREAM.  */
-//extern __device__ int fputs(const char *__restrict s, FILE *__restrict stream, bool wait = true);
 __forceinline __device__ int fputs(const char *__restrict s, FILE *__restrict stream, bool wait = true) { if (stream == stdout || stream == stderr) { printf(s); return 0; } stdio_fputs msg(wait, s, stream); return msg.RC; }
 
 /* Write a string, followed by a newline, to stdout.  */
@@ -332,7 +319,7 @@ __END_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
-STDARG(int, fprintf, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+STDARG(int, fprintf_, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
 /* Write formatted output to stdout. */
 //builtin: STDARG(int, printf, vprintf(format, va), const char *__restrict format);
 /* Write formatted output to S.  */

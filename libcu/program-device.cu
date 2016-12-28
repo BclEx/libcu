@@ -1,6 +1,7 @@
 #include <stdlibcu.h>
 #include <stdiocu.h>
 #include <cuda_runtimecu.h>
+#include <common_functions.h>
 
 __global__ void addKernel(int *c, const int *a, const int *b)
 {
@@ -12,7 +13,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	printf("%d %s\n", 2, "sky morey");
 
 	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
-	//fprintf(f, "The quick brown fox jumps over the lazy dog");
+	fprintf_(f, "The quick brown fox jumps over the lazy dog");
 	fflush(f);
 	fclose(f);
 

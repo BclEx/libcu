@@ -75,11 +75,11 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("Bad Sentinel Magic");
 			exit(1);
 		}
-		//map->Dump();
-		//cmd->Dump();
+		map->Dump();
+		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.List; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
-		//printf(".");
+		printf(".");
 		*status = (!msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
