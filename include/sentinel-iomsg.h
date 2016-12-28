@@ -1,5 +1,5 @@
 /*
-string.h - declarations for string manipulation functions
+sentinel-iomsg.h - messages for sentinel
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,26 +25,17 @@ THE SOFTWARE.
 
 #pragma once
 
-//#if !__CUDACC__
-//#include <string.h>
-//#elif !defined(_INC_STRINGCU)
-//#define _INC_STRINGCU
-#include <crtdefscu.h>
+#if !defined(_INC_SENTINEL_IOMSG)
+#define _INC_SENTINEL_IOMSG
+#include <sentinel.h>
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
+struct io_close
+{
+	sentinelMessage Base;
+	int Handle;
+	__device__ io_close(int handle)
+		: Base(false, 18, 0, nullptr), Handle(handle) { sentinelSend(this, sizeof(io_close)); }
+	int RC;
+};
 
-	__forceinline __host__ __device__ int strlen_(const char *z)
-	{
-		if (!z) return 0;
-		register const char *z2 = z;
-		while (*z2) { z2++; }
-		return 0x3fffffff & (int)(z2 - z);
-	}
-
-#ifdef __cplusplus
-}
-#endif
-
-//#endif  /* _INC_STRINGCU */
+#endif  /* _INC_SENTINEL_IOMSG */

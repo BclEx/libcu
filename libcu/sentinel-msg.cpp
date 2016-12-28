@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
-#include <sentinel-msg.h>
+#include <sentinel-iomsg.h>
+#include <sentinel-stdiomsg.h>
+#include <sentinel-stdlibmsg.h>
 #include <math.h>
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)

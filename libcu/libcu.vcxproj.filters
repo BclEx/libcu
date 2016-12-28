@@ -16,9 +16,6 @@
     <ClInclude Include="..\include\errnocu.h">
       <Filter>includes</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sentinel-msg.h">
-      <Filter>includes</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\sentinel.h">
       <Filter>includes</Filter>
     </ClInclude>
@@ -41,6 +38,15 @@
       <Filter>includes\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\featurescu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-iomsg.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-stdiomsg.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-stdlibmsg.h">
       <Filter>includes</Filter>
     </ClInclude>
   </ItemGroup>

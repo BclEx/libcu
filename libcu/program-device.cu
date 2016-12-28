@@ -13,8 +13,8 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 
 	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
 	//fprintf(f, "The quick brown fox jumps over the lazy dog");
-	//fflush(f);
-	//fclose(f);
+	fflush(f);
+	fclose(f);
 
 	//const char buf[100] = {0};
 	//snprintf(buf, 100, "test");

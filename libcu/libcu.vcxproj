@@ -26,7 +26,9 @@
     <ClInclude Include="..\include\cuda_runtimecu.h" />
     <ClInclude Include="..\include\errnocu.h" />
     <ClInclude Include="..\include\featurescu.h" />
-    <ClInclude Include="..\include\sentinel-msg.h" />
+    <ClInclude Include="..\include\sentinel-iomsg.h" />
+    <ClInclude Include="..\include\sentinel-stdiomsg.h" />
+    <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
     <ClInclude Include="..\include\sentinel.h" />
     <ClInclude Include="..\include\stdargcu.h" />
     <ClInclude Include="..\include\stddefcu.h" />
@@ -41,9 +43,7 @@
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <CudaCompile Include="sentinel-gpu.cu" />
-    <ClCompile Include="sentinel-host.cpp">
-      <FileType>Document</FileType>
-    </ClCompile>
+    <ClCompile Include="sentinel-host.cpp" />
     <CudaCompile Include="stdiocu.cu" />
     <CudaCompile Include="stdlibcu.cu" />
   </ItemGroup>
@@ -122,7 +122,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <Defines>__CUDA_RUNTIME_H__</Defines>
-      <Keep>true</Keep>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,6 +144,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <Defines>__CUDA_RUNTIME_H__</Defines>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,6 +170,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <Defines>__CUDA_RUNTIME_H__</Defines>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -196,6 +197,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <Defines>__CUDA_RUNTIME_H__</Defines>
     </CudaCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

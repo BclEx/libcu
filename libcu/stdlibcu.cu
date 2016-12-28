@@ -3,8 +3,6 @@
 #include <errnocu.h>
 #include <bits/libcu_fpmax.h>
 #include <cuda_runtimecu.h>
-//typedef struct File FILE;
-#include <sentinel-msg.h>
 
 /* Handle _STRTOD_HEXADECIMAL_FLOATS via libcu config now. */
 #undef _STRTOD_HEXADECIMAL_FLOATS
@@ -588,5 +586,3 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 }
 
 #pragma endregion
-
-__device__ int system(const char *c) { stdlib_system msg(c); return msg.RC; }

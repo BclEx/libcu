@@ -1,5 +1,5 @@
 /*
-sentinel-msg.h - messages for sentinel
+sentinel-stdiomsg.h - messages for sentinel
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,21 +25,11 @@ THE SOFTWARE.
 
 #pragma once
 
-#if !defined(_INC_SENTINEL_MSGS)
-#define _INC_SENTINEL_MSGS
+#if !defined(_INC_SENTINEL_STDIOMSG)
+#define _INC_SENTINEL_STDIOMSG
 #include <sentinel.h>
 #include <string.h>
-
-__host__ __device__ int strlen_(const char *z)
-{
-	if (!z) return 0;
-	register const char *z2 = z;
-	while (*z2) { z2++; }
-	return 0x3fffffff & (int)(z2 - z);
-}
-
-// stdio
-#pragma region stdio
+#include <stringcu.h>
 
 struct stdio_fprintf
 {
@@ -296,44 +286,4 @@ struct stdio_unlink
 	int RC;
 };
 
-#pragma endregion
-
-// io
-#pragma region io
-
-struct io_close
-{
-	sentinelMessage Base;
-	int Handle;
-	__device__ io_close(int handle)
-		: Base(false, 18, 0, nullptr), Handle(handle) { sentinelSend(this, sizeof(io_close)); }
-	int RC;
-};
-
-#pragma endregion
-
-// stdlib
-#pragma region stdlib
-
-struct stdlib_system
-{
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd)
-	{
-		int strLength = (t->Str ? strlen_(t->Str) + 1 : 0);
-		char *str = (char *)(data += ROUND8(sizeof(*t)));
-		char *end = (char *)(data += strLength);
-		if (end > dataEnd) return nullptr;
-		memcpy(str, t->Str, strLength);
-		t->Str = str;
-		return end;
-	}
-	sentinelMessage Base;
-	const char *Str;
-	__device__ stdlib_system(const char *str)
-		: Base(false, 19, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelSend(this, sizeof(stdlib_system)); }
-	int RC;
-};
-
-#pragma endregion
-
-#endif  /* _INC_SENTINEL_MSGS */
+#endif  /* _INC_SENTINEL_STDIOMSG */

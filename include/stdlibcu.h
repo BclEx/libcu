@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include <featurescu.h>
 #include <crtdefscu.h>
 #include <limits.h>
+#include <sentinel-stdlibmsg.h>
 
 extern __device__ unsigned long _stdlib_strto_l(register const char * __restrict str, char **__restrict endptr, int base, int sflag);
 #if defined(ULLONG_MAX)
@@ -186,7 +187,8 @@ extern __device__ int mkstemp64(char *template_);
 
 __BEGIN_NAMESPACE_STD;
 /* Execute the given line as a shell command.  */
-extern __device__ int system(const char *command);
+//extern __device__ int system(const char *command);
+__forceinline __device__ int system(const char *c) { stdlib_system msg(c); return msg.RC; }
 __END_NAMESPACE_STD;
 
 /* Shorthand for type of comparison functions.  */
