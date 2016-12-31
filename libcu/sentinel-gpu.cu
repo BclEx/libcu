@@ -29,7 +29,7 @@ __device__ void sentinelSend(void *msg, int msgLength)
 		abort();
 	}
 	memcpy(cmd->Data, msg, msgLength);
-	printf("Msg: %d[%d]'", msg2->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)cmd->Data)[i] & 0xff); printf("'\n");
+	//printf("Msg: %d[%d]'", msg2->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)cmd->Data)[i] & 0xff); printf("'\n");
 
 	*status = 2;
 	if (msg2->Wait)
