@@ -48,7 +48,7 @@ __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_li
 	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
 	strbldAppendFormat(&b, false, format, args);
 	const char *v = strbldToString(&b);
-	stdio_fprintf msg(wait, s, v);
+	stdio_fputs msg(wait, format, s);
 	free((void *)v);
 	return msg.RC; 
 }

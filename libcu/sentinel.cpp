@@ -9,14 +9,15 @@ void sentinelCommand::Dump()
 {
 	register char *b = Data;
 	register int l = Length;
-	printf("Command: 0x%x[%d] '", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
+	//printf("Command: 0x%x[%d]'", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
+	printf("Command: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
 
 void sentinelMap::Dump()
 {
 	register char *b = (char *)this;
 	register int l = sizeof(sentinelMap);
-	printf("Map: 0x%x[%d] '", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
+	printf("Map: 0x%x[%d]'", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
 
 static sentinelContext _ctx;
@@ -47,7 +48,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.List; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
-		*status = (!msg->Wait ? 4 : 0);
+		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;
@@ -68,7 +69,8 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 		sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 		volatile long *status = (volatile long *)&cmd->Status;
 		unsigned int s_;
-		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("[%d ]", s_);*/ Sleep(50); } //
+		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { printf("(%d)", s_); Sleep(50); }
+		printf("{%d}", s_);
 		if (!_threadDeviceHandle[threadId]) return 0;
 		if (cmd->Magic != SENTINEL_MAGIC)
 		{
@@ -76,11 +78,11 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		//cmd->Dump();
+		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.List; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		printf(".");
-		*status = (!msg->Wait ? 4 : 0);
+		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;

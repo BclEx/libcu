@@ -29,7 +29,7 @@ void sentinelSend(void *msg, int msgLength)
 	}
 	memcpy(cmd->Data, msg, msgLength);
 	*status = 2;
-	if (!msg2->Wait)
+	if (msg2->Wait)
 	{
 		while (InterlockedCompareExchange((long *)status, 5, 4) != 4) { }
 		memcpy(msg, cmd->Data, msgLength);

@@ -9,13 +9,12 @@
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 {
-	printf("%d", data->OP);
 	switch (data->OP)
 	{
-	case 0: {
-		stdio_fprintf *msg = (stdio_fprintf *)data;
-		msg->RC = fprintf(msg->File, msg->Format);
-		return true; }
+	//case 0: {
+	//	stdio_fprintf *msg = (stdio_fprintf *)data;
+	//	msg->RC = fprintf(msg->File, msg->Format);
+	//	return true; }
 	case 1: {
 		stdio_setvbuf *msg = (stdio_setvbuf *)data;
 		msg->RC = setvbuf(msg->File, msg->Buffer, msg->Mode, msg->Size);
