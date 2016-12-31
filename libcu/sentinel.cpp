@@ -36,7 +36,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 		sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 		volatile long *status = (volatile long *)&cmd->Status;
 		unsigned int s_;
-		while (_threadHostHandle && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("[%d ]", s_);*/ Sleep(50); } //
+		while (_threadHostHandle && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); } //
 		if (!_threadHostHandle) return 0;
 		if (cmd->Magic != SENTINEL_MAGIC)
 		{
@@ -69,8 +69,7 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 		sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 		volatile long *status = (volatile long *)&cmd->Status;
 		unsigned int s_;
-		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { printf("(%d)", s_); Sleep(50); }
-		printf("{%d}", s_);
+		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); }
 		if (!_threadDeviceHandle[threadId]) return 0;
 		if (cmd->Magic != SENTINEL_MAGIC)
 		{
@@ -78,10 +77,10 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		cmd->Dump();
+		//cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.List; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
-		printf(".");
+		//printf(".");
 		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
