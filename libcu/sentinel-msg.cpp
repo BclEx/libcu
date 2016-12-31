@@ -9,6 +9,7 @@
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 {
+	printf("%d", data->OP);
 	switch (data->OP)
 	{
 	case 0: {
