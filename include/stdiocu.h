@@ -160,7 +160,7 @@ __BEGIN_NAMESPACE_STD;
 //moved: extern __device__ int sprintf(char *__restrict s, const char *__restrict format, ...);
 
 /* Write formatted output to S from argument list ARG. */
-extern __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list arg);
+extern __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list arg, bool wait = true);
 /* Write formatted output to stdout from argument list ARG. */
 //extern __device__ int vprintf(const char *__restrict format, va_list arg);
 /* Write formatted output to S from argument list ARG.  */
@@ -317,17 +317,20 @@ __END_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
-STDARG(int, fprintf_, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+STDARG(int, _fprintfg, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+#define _fprintf _fprintfg
 /* Write formatted output to stdout. */
 //builtin: STDARG(int, printf, vprintf(format, va), const char *__restrict format);
 /* Write formatted output to S.  */
-STDARG(int, sprintf, vsprintf(s, format, va), char *__restrict s, const char *__restrict format);
-//macro: #define sprintf(s, format, ...) snprintf(s, -1, format, __VA_ARGS__)
+//STDARG(int, sprintf, vsprintf(s, format, va), char *__restrict s, const char *__restrict format);
+//STDARG(int, sprintf, vsprintf(s, format, va), const char *__restrict s, const char *__restrict format);
+#define sprintf(s, format, ...) snprintf(s, 0xffffffff, format, __VA_ARGS__)
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Maximum chars of output to write in MAXLEN.  */
 STDARG(int, snprintf, vsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
+STDARG(int, snprintf, vsnprintf((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;

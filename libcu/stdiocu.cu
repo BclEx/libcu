@@ -1,6 +1,7 @@
 #include <stdiocu.h>
 #include <stringcu.h>
 #include <cuda_runtimecu.h>
+#include <assert.h>
 #include <sentinel-stdiomsg.h>
 
 //__device__ int _close(int a) { io_close msg(a); return msg.RC; }
@@ -14,44 +15,42 @@ __constant__ FILE *__iob_file[3] = { (FILE *)1, (FILE *)2, (FILE *)3 };
 
 #pragma region printf
 
-/*
+#define CORE_MAX_LENGTH 1000000000
+
 __device__ char *vmtagprintf(void *tag, const char *format, va_list args)
 {
-	//if (!RuntimeInitialize()) return nullptr;
 	assert(tag != nullptr);
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), 1000000000); //? tag->Limit[LIMIT_LENGTH]);
-	b.Tag = tag;
-	strbldAppendFormat(b, true, format, args);
-	char *z = strbldToString(b);
-	// if (b->AllocFailed) tagallocfailed(tag);
-	return z;
+	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
+	b.tag = tag;
+	strbldAppendFormat(&b, true, format, args);
+	char *str = strbldToString(&b);
+	// if (b.allocFailed) tagallocfailed(tag);
+	return str;
 }
 
 __device__ char *vmprintf(const char *format, va_list args)
 {
-	//if (!RuntimeInitialize()) return nullptr;
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
 	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
-	b.AllocType = 2;
-	strbldAppendFormat(b, false, format, args);
-	return strbldToString(b);
+	b.allocType = 2;
+	strbldAppendFormat(&b, false, format, args);
+	return strbldToString(&b);
 }
-*/
 
 /* Write formatted output to S from argument list ARG. */
-//__device__ int fprintf(FILE *f, const char *v, bool wait) { stdio_fprintf msg(wait, f, v); _free((void *)v); return msg.RC; }
-__device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list args)
+__device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list args, bool wait)
 {
-	//strbld_t b;
-	//strbldInit(&b, (char *)s, (int)maxlen, 0);
-	//b.AllocType = 0;
-	//strbldAppendFormat(b, false, format, args);
-	//strbldToString(b);
-	//return b->index;
-	return -1;
+	char base[PRINT_BUF_SIZE];
+	strbld_t b;
+	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
+	strbldAppendFormat(&b, false, format, args);
+	const char *v = strbldToString(&b);
+	stdio_fprintf msg(wait, s, v);
+	free((void *)v);
+	return msg.RC; 
 }
 
 /* Write formatted output to stdout from argument list ARG. */
@@ -79,7 +78,6 @@ __device__ char *vmnprintf(char *__restrict s, size_t maxlen, const char *format
 #pragma endregion
 
 __END_DECLS;
-
 
 /* Read formatted input from S into argument list ARG.  */
 __device__ int vfscanf(FILE *__restrict s, const char *__restrict format, va_list arg) { return -1; }

@@ -113,7 +113,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName)
 		CloseHandle(_hostMapHandle);
 		exit(1);
 	}
-	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
 #endif
 
 	// create device maps
@@ -131,7 +131,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName)
 	{
 		//_deviceMap[i] = (int *)VirtualAlloc(NULL, (sizeof(SentinelMap) + MEMORY_ALIGNMENT), MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
 		_deviceMap[i] = (int *)malloc(sizeof(sentinelMap) + MEMORY_ALIGNMENT);
-		_sentinelDeviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)ROUNDN(_deviceMap[i], MEMORY_ALIGNMENT);
+		_sentinelDeviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_ROUNDN(_deviceMap[i], MEMORY_ALIGNMENT);
 		if (!_sentinelDeviceMap[i])
 		{
 			printf("Could not create map.\n");
@@ -198,7 +198,7 @@ void sentinelClientInitialize(char *mapHostName)
 		CloseHandle(_hostMapHandle);
 		exit(1);
 	}
-	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
 }
 #endif
 

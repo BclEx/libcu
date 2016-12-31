@@ -593,17 +593,17 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 
 #pragma region alloc
 
-__device__ void *_malloc_(size_t size)
+__device__ void *_mallocg(size_t size)
 {
 	return malloc(size);
 }
 
-__device__ void _free_(void *p)
+__device__ void _freeg(void *p)
 {
 	return free(p);
 }
 
-__device__ void *_realloc_(void *old, size_t newSize)
+__device__ void *_reallocg(void *old, size_t newSize)
 {
 	return nullptr;
 }

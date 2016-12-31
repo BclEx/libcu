@@ -20,7 +20,7 @@ __device__ void sentinelSend(void *msg, int msgLength)
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
 	//while (atomicCAS((unsigned int *)status, 1, 0) != 0) { __syncthreads(); }
-	cmd->Data = (char *)cmd + ROUND8(sizeof(sentinelCommand));
+	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
 	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length))

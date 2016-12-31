@@ -31,6 +31,7 @@ THE SOFTWARE.
 #define _INC_STRING
 #include <featurescu.h>
 #include <crtdefscu.h>
+#include <stdargcu.h>
 
 __BEGIN_DECLS;
 
@@ -114,6 +115,10 @@ extern char *strerror(int errnum);
 __END_NAMESPACE_STD;
 
 #pragma region PRINT
+
+#ifndef PRINT_BUF_SIZE
+#define PRINT_BUF_SIZE 70
+#endif
 
 typedef struct strbld_t
 {

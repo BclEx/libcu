@@ -135,20 +135,20 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Allocate SIZE bytes of memory.  */
-extern __device__ void *_malloc_(size_t size);
+extern __device__ void *_mallocg(size_t size);
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
-extern __device__ void *_calloc_(size_t nmemb, size_t size);
+extern __device__ void *_callocg(size_t nmemb, size_t size);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
-extern __device__ void *_realloc_(void *ptr, size_t size);
+extern __device__ void *_reallocg(void *ptr, size_t size);
 /* Free a block allocated by `malloc', `realloc' or `calloc'.  */
-extern __device__ void _free_(void *ptr);
+extern __device__ void _freeg(void *ptr);
 __END_NAMESPACE_STD;
-#define malloc _malloc_
-#define realloc _realloc_
-#define free _free_
+#define _malloc _mallocg
+#define _realloc _reallocg
+#define _free _freeg
 
 __BEGIN_NAMESPACE_STD;
 /* Abort execution and generate a core-dump.  */

@@ -35,7 +35,7 @@ struct stdio_fprintf
 	static __forceinline __device__ char *Prepare(stdio_fprintf *t, char *data, char *dataEnd)
 	{
 		int formatLength = (t->Format ? (int)strlen(t->Format) + 1 : 0);
-		char *format = (char *)(data += ROUND8(sizeof(*t)));
+		char *format = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += formatLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(format, t->Format, formatLength);
@@ -54,7 +54,7 @@ struct stdio_setvbuf
 	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd)
 	{
 		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
-		char *buffer = (char *)(data += ROUND8(sizeof(*t)));
+		char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += bufferLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(buffer, t->Buffer, bufferLength);
@@ -74,7 +74,7 @@ struct stdio_fopen
 	{
 		int filenameLength = (t->Filename ? (int)strlen(t->Filename) + 1 : 0);
 		int modeLength = (t->Mode ? (int)strlen(t->Mode) + 1 : 0);
-		char *filename = (char *)(data += ROUND8(sizeof(*t)));
+		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
 		char *mode = (char *)(data += filenameLength);
 		char *end = (char *)(data += modeLength);
 		if (end > dataEnd) return nullptr;
@@ -122,7 +122,7 @@ struct stdio_fgets
 {
 	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd)
 	{
-		t->Str = (char *)(data += ROUND8(sizeof(*t)));
+		t->Str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;
@@ -149,7 +149,7 @@ struct stdio_fputs
 	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += ROUND8(sizeof(*t)));
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -167,7 +167,7 @@ struct stdio_fread
 {
 	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd)
 	{
-		t->Ptr = (char *)(data += ROUND8(sizeof(*t)));
+		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;
@@ -185,7 +185,7 @@ struct stdio_fwrite
 	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd)
 	{
 		size_t size = t->Size * t->Num;
-		char *ptr = (char *)(data += ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += size);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->Ptr, size);
@@ -249,7 +249,7 @@ struct stdio_rename
 	{
 		int oldnameLength = (t->Oldname ? (int)strlen(t->Oldname) + 1 : 0);
 		int newnameLength = (t->Newname ? (int)strlen(t->Newname) + 1 : 0);
-		char *oldname = (char *)(data += ROUND8(sizeof(*t)));
+		char *oldname = (char *)(data += _ROUND8(sizeof(*t)));
 		char *newname = (char *)(data += oldnameLength);
 		char *end = (char *)(data += newnameLength);
 		if (end > dataEnd) return nullptr;
@@ -271,7 +271,7 @@ struct stdio_unlink
 	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += ROUND8(sizeof(*t)));
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
