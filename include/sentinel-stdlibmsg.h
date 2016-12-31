@@ -28,14 +28,13 @@ THE SOFTWARE.
 #if !defined(_INC_SENTINEL_STDLIBMSG)
 #define _INC_SENTINEL_STDLIBMSG
 #include <sentinel.h>
-#include <string.h>
 #include <stringcu.h>
 
 struct stdlib_system
 {
 	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd)
 	{
-		int strLength = (t->Str ? strlen_(t->Str) + 1 : 0);
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;

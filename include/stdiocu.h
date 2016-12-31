@@ -145,6 +145,12 @@ __forceinline __device__ void setbuf(FILE *__restrict stream, char *__restrict b
 __forceinline __device__ int setvbuf(FILE *__restrict stream, char *__restrict buf, int modes, size_t n) { stdio_setvbuf msg(stream, buf, modes, n); return msg.RC; }
 __END_NAMESPACE_STD;
 
+__BEGIN_NAMESPACE_C99;
+/* Maximum chars of output to write in MAXLEN.  */
+//moved: extern __device__ int snprintf(char *__restrict s, size_t maxlen, const char *__restrict format, ...);
+extern __device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restrict format, va_list arg);
+__END_NAMESPACE_C99;
+
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
 //moved: extern __device__ int fprintf(FILE *__restrict stream, const char *__restrict format, ...);
@@ -158,14 +164,8 @@ extern __device__ int vfprintf(FILE *__restrict s, const char *__restrict format
 /* Write formatted output to stdout from argument list ARG. */
 //extern __device__ int vprintf(const char *__restrict format, va_list arg);
 /* Write formatted output to S from argument list ARG.  */
-extern __device__ int vsprintf(char *__restrict s, const char *__restrict format, va_list arg);
+__forceinline __device__ int vsprintf(char *__restrict s, const char *__restrict format, va_list arg) { return vsnprintf(s, 0xffffffff, format, arg); }
 __END_NAMESPACE_STD;
-
-__BEGIN_NAMESPACE_C99;
-/* Maximum chars of output to write in MAXLEN.  */
-//moved: extern __device__ int snprintf(char *__restrict s, size_t maxlen, const char *__restrict format, ...);
-extern __device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restrict format, va_list arg);
-__END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Read formatted input from STREAM.  */
@@ -226,10 +226,8 @@ extern __device__ int puts(const char *s);
 extern __device__ int ungetc(int c, FILE *stream);
 
 /* Read chunks of generic data from STREAM.  */
-//extern __device__ size_t fread(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true);
 __forceinline __device__ size_t fread(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true) { stdio_fread msg(wait, size, n, stream); memcpy(ptr, msg.Ptr, msg.RC); return msg.RC; }
 /* Write chunks of generic data to STREAM.  */
-//extern __device__ size_t fwrite(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict s, bool wait = true);
 __forceinline __device__ size_t fwrite(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict s, bool wait = true) { stdio_fwrite msg(wait, ptr, size, n, s); return msg.RC; }
 
 __END_NAMESPACE_STD;

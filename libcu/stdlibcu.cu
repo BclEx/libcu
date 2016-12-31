@@ -4,6 +4,8 @@
 #include <bits/libcu_fpmax.h>
 #include <cuda_runtimecu.h>
 
+#pragma region header
+
 /* Handle _STRTOD_HEXADECIMAL_FLOATS via libcu config now. */
 #undef _STRTOD_HEXADECIMAL_FLOATS
 #ifdef __LIBCU_HAS_HEXADECIMAL_FLOATS__
@@ -70,6 +72,8 @@
 #define Wuchar unsigned char
 #define ISSPACE(C) isspace((C))
 #endif
+
+#pragma endregion
 
 #pragma region stdlib_strtod
 
@@ -583,6 +587,25 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 	}
 
 	return negative ? (unsigned long long)(-((long long)number)) : number;
+}
+
+#pragma endregion
+
+#pragma region alloc
+
+__device__ void *_malloc_(size_t size)
+{
+	return malloc(size);
+}
+
+__device__ void _free_(void *p)
+{
+	return free(p);
+}
+
+__device__ void *_realloc_(void *old, size_t newSize)
+{
+	return nullptr;
 }
 
 #pragma endregion

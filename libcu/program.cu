@@ -26,6 +26,10 @@ int main()
     printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
         c[0], c[1], c[2], c[3], c[4]);
 
+	// finish
+	printf("\nPress any key to continue.\n");
+	scanf("%c");
+
 	sentinelServerShutdown();
 
     // cudaDeviceReset must be called before exiting in order for profiling and

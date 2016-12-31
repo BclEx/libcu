@@ -28,14 +28,13 @@ THE SOFTWARE.
 #if !defined(_INC_SENTINEL_STDIOMSG)
 #define _INC_SENTINEL_STDIOMSG
 #include <sentinel.h>
-#include <string.h>
 #include <stringcu.h>
 
 struct stdio_fprintf
 {
 	static __forceinline __device__ char *Prepare(stdio_fprintf *t, char *data, char *dataEnd)
 	{
-		int formatLength = (t->Format ? strlen_(t->Format) + 1 : 0);
+		int formatLength = (t->Format ? (int)strlen(t->Format) + 1 : 0);
 		char *format = (char *)(data += ROUND8(sizeof(*t)));
 		char *end = (char *)(data += formatLength);
 		if (end > dataEnd) return nullptr;
@@ -54,7 +53,7 @@ struct stdio_setvbuf
 {
 	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd)
 	{
-		int bufferLength = (t->Buffer ? strlen_(t->Buffer) + 1 : 0);
+		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
 		char *buffer = (char *)(data += ROUND8(sizeof(*t)));
 		char *end = (char *)(data += bufferLength);
 		if (end > dataEnd) return nullptr;
@@ -73,8 +72,8 @@ struct stdio_fopen
 {
 	static __forceinline __device__ char *Prepare(stdio_fopen *t, char *data, char *dataEnd)
 	{
-		int filenameLength = (t->Filename ? strlen_(t->Filename) + 1 : 0);
-		int modeLength = (t->Mode ? strlen_(t->Mode) + 1 : 0);
+		int filenameLength = (t->Filename ? (int)strlen(t->Filename) + 1 : 0);
+		int modeLength = (t->Mode ? (int)strlen(t->Mode) + 1 : 0);
 		char *filename = (char *)(data += ROUND8(sizeof(*t)));
 		char *mode = (char *)(data += filenameLength);
 		char *end = (char *)(data += modeLength);
@@ -149,7 +148,7 @@ struct stdio_fputs
 {
 	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd)
 	{
-		int strLength = (t->Str ? strlen_(t->Str) + 1 : 0);
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -248,8 +247,8 @@ struct stdio_rename
 {
 	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd)
 	{
-		int oldnameLength = (t->Oldname ? strlen_(t->Oldname) + 1 : 0);
-		int newnameLength = (t->Newname ? strlen_(t->Newname) + 1 : 0);
+		int oldnameLength = (t->Oldname ? (int)strlen(t->Oldname) + 1 : 0);
+		int newnameLength = (t->Newname ? (int)strlen(t->Newname) + 1 : 0);
 		char *oldname = (char *)(data += ROUND8(sizeof(*t)));
 		char *newname = (char *)(data += oldnameLength);
 		char *end = (char *)(data += newnameLength);
@@ -271,7 +270,7 @@ struct stdio_unlink
 {
 	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd)
 	{
-		int strLength = (t->Str ? strlen_(t->Str) + 1 : 0);
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;

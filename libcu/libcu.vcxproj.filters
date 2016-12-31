@@ -57,6 +57,7 @@
     <CudaCompile Include="program-device.cu" />
     <CudaCompile Include="stdiocu.cu" />
     <CudaCompile Include="sentinel-gpu.cu" />
+    <CudaCompile Include="stringcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">

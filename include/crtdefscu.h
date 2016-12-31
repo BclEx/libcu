@@ -37,6 +37,7 @@ THE SOFTWARE.
 #define NULL    ((void *)0)
 #endif
 #endif
+#define double64 double
 
 #define MEMORY_ALIGNMENT 4096
 #define ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
@@ -50,6 +51,8 @@ THE SOFTWARE.
 #define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 
+#define LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+
 #include <host_defines.h>
 
 #ifdef  __cplusplus
@@ -57,10 +60,27 @@ extern "C" {
 #endif
 
 _CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
+_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
 _CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
 
 #ifdef  __cplusplus
 }
 #endif
+
+__forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; } //return malloc(size); }
+__forceinline __device__ void tagfree(void *tag, void *p) { }
+__forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
+
+// ASSERT
+//#ifndef NDEBUG
+//#define ASSERTONLY(X) X
+//__device__ __forceinline void Coverage(int line) { }
+//#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
+//#else
+#define ASSERTONLY(X)
+#define ASSERTCOVERAGE(X)
+//#endif
+#define _ALWAYS(X) (X)
+#define _NEVER(X) (X)
 
 #endif  /* _CRTDEFS_H */
