@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\include\bits\libcu_fpmax.h">
+      <Filter>includes\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\crtdefscu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ctypecu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\cuda_runtimecu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\errnocu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stdargcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stddefcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stringcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stdlibcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stdiocu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\libcu_stdio.h">
+      <Filter>includes\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\featurescu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-iomsg.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-stdiomsg.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-stdlibmsg.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="stdlibcu.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.cu" />
+    <CudaCompile Include="program-device.cu" />
+    <CudaCompile Include="stdiocu.cu" />
+    <CudaCompile Include="sentinel-gpu.cu" />
+    <CudaCompile Include="stringcu.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="includes">
+      <UniqueIdentifier>{6b88e2f9-9a89-4cd7-ad56-2d313e018545}</UniqueIdentifier>
+      <Extensions>*.h</Extensions>
+    </Filter>
+    <Filter Include="includes\bits">
+      <UniqueIdentifier>{e7438e7e-21c1-414f-82e8-26ff1e32b228}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sentinel.cpp" />
+    <ClCompile Include="sentinel-msg.cpp" />
+    <ClCompile Include="sentinel-host.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="_content\sample.libcu.cu" />
+    <None Include="_content\sample.libcu.ganging.cu" />
+    <None Include="Libcu.Native.nuspec" />
+    <None Include="Libcu.Native.targets" />
+  </ItemGroup>
+</Project>

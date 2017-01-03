@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Libcu-TinyTcl.Native</id>
+    <version>0.5.0</version>
+    <title>Libcu TinyTcl</title>
+    <authors>Contoso</authors>
+    <owners>Contoso</owners>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package contains an embeded TinyTcl engine.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2010</copyright>
+    <tags>native cuda gpu tcl tinytcl</tags>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Libcu.Tinytcl.Native" version="0.5.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="tinytcl\**\*.cu" target="content" />
+    <file src="tinytcl\**\*.cu" target="src" />
+  </files>
+</package>

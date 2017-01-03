@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Libcu-JimTcl.Native</id>
+    <version>0.5.0</version>
+    <title>Libcu JimTcl</title>
+    <authors>Contoso</authors>
+    <owners>Contoso</owners>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package contains an embeded JimTcl engine.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2010</copyright>
+    <tags>native cuda gpu tcl jimtcl</tags>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Libcu.JimTcl.Native" version="0.5.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="jimtcl\**\*.cu" target="content" />
+    <file src="jimtcl\**\*.cu" target="src" />
+  </files>
+</package>

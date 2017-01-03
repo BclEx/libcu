@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Jim.cu" />
+    <ClCompile Include="Jim+Aio.cu" />
+    <ClCompile Include="Jim+Array.cu" />
+    <ClCompile Include="Jim+Clock.cu" />
+    <ClCompile Include="Jim+EventLoop.cu" />
+    <ClCompile Include="Jim+Exec.cu" />
+    <ClCompile Include="Jim+File.cu" />
+    <ClCompile Include="Jim+Format.cu" />
+    <ClCompile Include="Jim+Gpu.cu" />
+    <ClCompile Include="Jim+History.cu" />
+    <ClCompile Include="Jim+Interactive.cu" />
+    <ClCompile Include="Jim+Load.cu" />
+    <ClCompile Include="Jim+Namespace.cu" />
+    <ClCompile Include="Jim+Pack.cu" />
+    <ClCompile Include="Jim+Package.cu" />
+    <ClCompile Include="Jim+Posix.cu" />
+    <ClCompile Include="Jim+Readdir.cu" />
+    <ClCompile Include="Jim+Readline.cu" />
+    <ClCompile Include="Jim+Regexp.cu" />
+    <ClCompile Include="Jim+Sdl.cu" />
+    <ClCompile Include="Jim+Signal.cu" />
+    <ClCompile Include="Jim+Sqlite3.cu" />
+    <ClCompile Include="Jim+Subcmd.cu" />
+    <ClCompile Include="Jim+Syslog.cu" />
+    <ClCompile Include="Jim+TclPrefix.cu" />
+    <ClCompile Include="Jim+Win32.cu" />
+    <ClCompile Include="Jim+Win32compat.cu" />
+    <ClCompile Include="JimEx.cu" />
+    <ClCompile Include="Init.cu" />
+    <ClCompile Include="Utf8.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Jim.h" />
+    <ClInclude Include="Jim+Autoconf.h" />
+    <ClInclude Include="Jim+Config.h" />
+    <ClInclude Include="Jim+EventLoop.h" />
+    <ClInclude Include="Jim+Signal.h" />
+    <ClInclude Include="Jim+Subcmd.h" />
+    <ClInclude Include="Jim+Win32compat.h" />
+    <ClInclude Include="JimEx.h" />
+    <ClInclude Include="Utf8.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RTcl.cu" />
+    <None Include="Libcu.JimTcl.Native.nuspec" />
+    <None Include="Libcu.Jimtcl.Native.targets" />
+    <None Include="_content\TclContext.cu.h">
+      <Filter>_content</Filter>
+    </None>
+    <None Include="_content\TclContext.cu">
+      <Filter>_content</Filter>
+    </None>
+    <None Include="_content\Libcu.JimTcl.cu.sample">
+      <Filter>_content</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="_content">
+      <UniqueIdentifier>{78e945d0-edef-4ecd-94e0-4b43a3cef4c6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
