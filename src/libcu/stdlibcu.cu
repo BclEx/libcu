@@ -117,7 +117,7 @@ static __device__ __fpmax_t __strtofpmax(const Wchar *str, Wchar **endptr, int e
 #ifdef _STRTOD_ENDPTR
 	Wchar *pos1;
 #endif
-	Wchar *pos = (Wchar *) str;
+	Wchar *pos = (Wchar *)str;
 	int exponent_temp;
 	int negative; /* A flag for the number, a multiplier for the exponent. */
 #ifdef _STRTOD_NEED_NUM_DIGITS

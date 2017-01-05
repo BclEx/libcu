@@ -49,6 +49,9 @@
     <ClInclude Include="..\include\sentinel-stdlibmsg.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\regexcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="stdlibcu.cu" />
@@ -58,6 +61,7 @@
     <CudaCompile Include="stdiocu.cu" />
     <CudaCompile Include="sentinel-gpu.cu" />
     <CudaCompile Include="stringcu.cu" />
+    <CudaCompile Include="regexcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">

@@ -34,9 +34,9 @@ THE SOFTWARE.
 #include <limits.h>
 #include <sentinel-stdlibmsg.h>
 
-extern __device__ unsigned long _stdlib_strto_l(register const char * __restrict str, char **__restrict endptr, int base, int sflag);
+extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
 #if defined(ULLONG_MAX)
-extern __device__ unsigned long long _stdlib_strto_ll(register const char * __restrict str, char ** __restrict endptr, int base, int sflag);
+extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char ** __restrict endptr, int base, int sflag);
 #endif
 
 __BEGIN_DECLS;
@@ -111,11 +111,13 @@ __forceinline __device__ long int strtol(const char *__restrict nptr, char **__r
 __forceinline __device__ unsigned long int strtoul(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
 __END_NAMESPACE_STD;
 
-//#include <sys/types.h> /* for u_quad_t */
-///* Convert a string to a quadword integer.  */
-//extern __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base);
-///* Convert a string to an unsigned quadword integer.  */
-//extern __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base);
+#if 0
+#include <sys/types.h> /* for u_quad_t */
+/* Convert a string to a quadword integer.  */
+extern __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base);
+/* Convert a string to an unsigned quadword integer.  */
+extern __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base);
+#endif
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;

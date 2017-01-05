@@ -114,7 +114,7 @@ __constant__ const char *_strtol_strings[] = {
 	" -",
 	" - 0",
 };
-int _strtol_ntests = _LENGTHOF(_strtol_strings);
+__device__ int _strtol_ntests = _LENGTHOF(_strtol_strings);
 
 static __device__ void strtol_test(int base)
 {
@@ -127,7 +127,7 @@ static __device__ void strtol_test(int base)
 	}
 }
 
-static void strtol_utest(int base)
+static __device__ void strtol_utest(int base)
 {
 	int i;
 	unsigned long n;
@@ -138,7 +138,7 @@ static void strtol_utest(int base)
 	}
 }
 
-static __global__ void stdlib_strtol()
+__global__ void stdlib_strtol()
 {
 	strtol_test(0); strtol_utest(0);
 	strtol_test(8); strtol_utest(8);
@@ -207,20 +207,20 @@ __constant__ const char *_strtoq_strings[] = {
 	" -",
 	" - 0",
 };
-int _strtoq_ntests = _LENGTHOF(_strtoq_strings);
+__device__ int _strtoq_ntests = _LENGTHOF(_strtoq_strings);
 
-void strtoq_test(int base)
+static __device__ void strtoq_test(int base)
 {
 	int i;
-	quad_t n;
+	long long n; //quad_t n;
 	char *endptr;
 	for (i = 0; i < _strtoq_ntests; i++) {
-		n = strtoq(_strtoq_strings[i], &endptr, base);
+		n = strtoll(_strtoq_strings[i], &endptr, base); //n = strtoq(_strtoq_strings[i], &endptr, base);
 		printf("strtoq(\"%s\",%d) len=%lu res=%qd\n", _strtoq_strings[i], base, (unsigned long)(endptr - _strtoq_strings[i]), n);
 	}
 }
 
-static __global__ void stdlib_strtoq()
+__global__ void stdlib_strtoq()
 {
 	strtoq_test(0);
 	strtoq_test(8);
@@ -234,4 +234,6 @@ static __global__ void stdlib_strtoq()
 void stdlib_()
 {
 	stdlib_test1<<<1, 1>>>();
+	stdlib_strtol<<<1, 1>>>();
+	stdlib_strtoq<<<1, 1>>>();
 }

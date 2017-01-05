@@ -14,8 +14,7 @@
 // the three groups of #includes is important.  For example, stdio.h is needed by tcl.h, and the _ANSI_ARGS_ declaration in tcl.h is
 // needed by stdlib.h in some configurations.
 
-#include <RuntimeEx.h>
-//#include <stdio.h>
+#include <stdiocu.h>
 
 #ifndef __TCL_H__
 #include "Tcl.h"
@@ -24,10 +23,14 @@
 #include "Tcl+Hash.h"
 #endif
 #ifndef __UC_LIBC__
-#include <regex.h>
+#include <regexcu.h>
 #else
 #include "regex_compat.h"
 #endif
+
+#include <ctypecu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
 
 //__device__ int _chdir(const char *path);
 //#define	F_OK 0		// test for existence of file

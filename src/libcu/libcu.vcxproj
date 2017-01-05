@@ -31,6 +31,7 @@
     <ClInclude Include="..\include\cuda_runtimecu.h" />
     <ClInclude Include="..\include\errnocu.h" />
     <ClInclude Include="..\include\featurescu.h" />
+    <ClInclude Include="..\include\regexcu.h" />
     <ClInclude Include="..\include\sentinel-iomsg.h" />
     <ClInclude Include="..\include\sentinel-stdiomsg.h" />
     <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
@@ -47,6 +48,9 @@
     <CudaCompile Include="program.cu" />
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
+    <CudaCompile Include="regexcu.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="sentinel-gpu.cu" />
     <ClCompile Include="sentinel-host.cpp" />
     <CudaCompile Include="stdiocu.cu" />
