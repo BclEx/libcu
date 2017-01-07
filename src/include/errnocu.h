@@ -34,8 +34,8 @@ THE SOFTWARE.
 #include <errno.h>
 
 extern __device__ int *_errno(void);
-#define errno (*_errno())
 extern __device__ errno_t _set_errno(int value);
 extern __device__ errno_t _get_errno(int *value);
+#define errno (*_errno())
 
 #endif  /* _ERRNO_H */

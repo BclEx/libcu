@@ -3,7 +3,6 @@
 
 //#include "_/TinySh.cu"
 
-
 //#include "tclAlloc.cu"
 //#include "tclAssem.cu"
 //#include "tclBasic.cu"
@@ -11,14 +10,14 @@
 //#include "tclCmdIL.cu"
 #include "tclCmdMZ.cu"
 //#undef STATIC_SIZE
-//#include "Tcl+Expr.cu"
-//#include "Tcl+Get.cu"
-//#include "Tcl+Glob.cu"
+//#include "tclExpr.cu"
+#include "tclGet.cu"
+//#include "tclGlob.cu"
 //#undef STATIC_SIZE
-//#include "Tcl+GpuAZ.cu"
-//#include "Tcl+GpuEnv.cu"
-//#include "Tcl+GpuStr.cu"
-//#include "Tcl+GpuUtil.cu"
+//#include "TclGpuAZ.cu"
+//#include "TclGpuEnv.cu"
+//#include "TclGpuStr.cu"
+//#include "TclGpuUtil.cu"
 //#include "Tcl+Hash.cu"
 //#include "Tcl+History.cu"
 //#include "Tcl+Load-noop.cu"

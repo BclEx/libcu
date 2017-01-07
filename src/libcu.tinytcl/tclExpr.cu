@@ -10,7 +10,8 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include <errnocu.h>
+#include "tclInt.h"
 
 // The stuff below is a bit of a hack so that this file can be used in environments that include no UNIX, i.e. no errno.  Just define errno here.
 //extern int errno;
@@ -131,16 +132,16 @@ __device__ static int ExprParseString(Tcl_Interp *interp, char *string, Value *v
 	if ((c >= '0' && c <= '9') || c == '-' || c == '.') {
 		char *term;
 		valuePtr->type = TYPE_INT;
-		__errno = 0;
-		valuePtr->intValue = (int)_strtol(string, &term, 0);
+		errno = 0;
+		valuePtr->intValue = (int)strtol(string, &term, 0);
 		c = *term;
-		if (c == '\0' && __errno != ERANGE) {
+		if (c == '\0' && errno != ERANGE) {
 			return TCL_OK;
 		}
-		if (c == '.' || c == 'e' || c == 'E' || __errno == ERANGE) {
-			__errno = 0;
-			valuePtr->doubleValue = _strtod(string, &term);
-			if (__errno == ERANGE) {
+		if (c == '.' || c == 'e' || c == 'E' || errno == ERANGE) {
+			errno = 0;
+			valuePtr->doubleValue = strtod(string, &term);
+			if (errno == ERANGE) {
 				Tcl_ResetResult(interp);
 				if (valuePtr->doubleValue == 0.0) {
 					Tcl_AppendResult(interp, "floating-point value \"", string, "\" too small to represent", (char *)NULL);
@@ -158,13 +159,13 @@ __device__ static int ExprParseString(Tcl_Interp *interp, char *string, Value *v
 	// Not a valid number.  Save a string value (but don't do anything if it's already the value).
 	valuePtr->type = TYPE_STRING;
 	if (string != valuePtr->pv.buffer) {
-		int length = _strlen(string);
+		int length = strlen(string);
 		valuePtr->pv.next = valuePtr->pv.buffer;
 		int shortfall = length - (int)(valuePtr->pv.end - valuePtr->pv.buffer);
 		if (shortfall > 0) {
 			(*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
 		}
-		_strcpy(valuePtr->pv.buffer, string);
+		strcpy(valuePtr->pv.buffer, string);
 	}
 	return TCL_OK;
 }
@@ -191,7 +192,7 @@ __device__ static int ExprLex(Tcl_Interp *interp, register ExprInfo *infoPtr, re
 	int result;
 	register char *p = infoPtr->expr;
 	register char c = *p;
-	while (_isspace(c)) {
+	while (isspace(c)) {
 		p++;
 		c = *p;
 	}
@@ -213,15 +214,15 @@ __device__ static int ExprLex(Tcl_Interp *interp, register ExprInfo *infoPtr, re
 		// number to fit in an integer), parse it as a floating-point number.
 		infoPtr->token = VALUE;
 		valuePtr->type = TYPE_INT;
-		__errno = 0;
+		errno = 0;
 		char *term;
-		valuePtr->intValue = _strtoul(p, &term, 0);
+		valuePtr->intValue = strtoul(p, &term, 0);
 		c = *term;
-		if (c == '.' || c == 'e' || c == 'E' || __errno == ERANGE) {
+		if (c == '.' || c == 'e' || c == 'E' || errno == ERANGE) {
 			char *term2;
-			__errno = 0;
-			valuePtr->doubleValue = _strtod(p, &term2);
-			if (__errno == ERANGE) {
+			errno = 0;
+			valuePtr->doubleValue = strtod(p, &term2);
+			if (errno == ERANGE) {
 				Tcl_ResetResult(interp);
 				if (valuePtr->doubleValue == 0.0) {
 					interp->result = "floating-point value too small to represent";
@@ -704,7 +705,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue < value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) < 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -714,7 +715,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue > value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) > 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -724,7 +725,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue <= value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) <= 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -734,7 +735,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue >= value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) >= 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -744,7 +745,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue == value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) == 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -754,7 +755,7 @@ divideByZero:
 			} else if (valuePtr->type == TYPE_DOUBLE) {
 				valuePtr->intValue = (valuePtr->doubleValue != value2.doubleValue);
 			} else {
-				valuePtr->intValue = (_strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0);
+				valuePtr->intValue = (strcmp(valuePtr->pv.buffer, value2.pv.buffer) != 0);
 			}
 			valuePtr->type = TYPE_INT;
 			break;
@@ -829,9 +830,9 @@ __device__ static void ExprMakeString(register Value *valuePtr)
 		(*valuePtr->pv.expandProc)(&valuePtr->pv, shortfall);
 	}
 	if (valuePtr->type == TYPE_INT) {
-		_sprintf(valuePtr->pv.buffer, "%ld", valuePtr->intValue);
+		sprintf(valuePtr->pv.buffer, "%ld", valuePtr->intValue);
 	} else if (valuePtr->type == TYPE_DOUBLE) {
-		_sprintf(valuePtr->pv.buffer, "%g", valuePtr->doubleValue);
+		sprintf(valuePtr->pv.buffer, "%g", valuePtr->doubleValue);
 	}
 	valuePtr->type = TYPE_STRING;
 }
@@ -971,9 +972,9 @@ __device__ int Tcl_ExprString(Tcl_Interp *interp, char *string)
 	int result = ExprTopLevel(interp, string, &value);
 	if (result == TCL_OK) {
 		if (value.type == TYPE_INT) {
-			_sprintf(interp->result, "%ld", value.intValue);
+			sprintf(interp->result, "%ld", value.intValue);
 		} else if (value.type == TYPE_DOUBLE) {
-			_sprintf(interp->result, "%g", value.doubleValue);
+			sprintf(interp->result, "%g", value.doubleValue);
 		} else {
 			if (value.pv.buffer != value.staticSpace) {
 				interp->result = value.pv.buffer;

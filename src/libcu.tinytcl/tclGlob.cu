@@ -8,8 +8,8 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
-#include <RuntimeOS.h>
+#include "tclInt.h"
+#include "tclGpu.h"
 
 // The structure below is used to keep track of a globbing result being built up (i.e. a partial list of file names).  The list grows dynamically to be as big as needed.
 typedef struct {
@@ -20,8 +20,8 @@ typedef struct {
 } GlobResult;
 
 // Declarations for procedures local to this file:
-__device__ static void AppendResult(Tcl_Interp *interp, char *dir, char *separator, char *name, int nameLength);
-__device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem);
+static __device__ void AppendResult(Tcl_Interp *interp, char *dir, char *separator, char *name, int nameLength);
+static __device__ int DoGlob(Tcl_Interp *interp, char *dir, char *rem);
 
 /*
 *----------------------------------------------------------------------

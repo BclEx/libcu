@@ -46,8 +46,8 @@
     <None Include="tclCmdAH.cu" />
     <None Include="tclCmdIL.cu" />
     <None Include="tclCmdMZ.cu" />
-    <None Include="Tcl+Expr.cu" />
-    <None Include="Tcl+Get.cu" />
+    <None Include="tclExpr.cu" />
+    <None Include="tclGet.cu" />
     <None Include="Tcl+Glob.cu" />
     <None Include="Tcl+GpuAZ.cu" />
     <None Include="Tcl+GpuEnv.cu" />
