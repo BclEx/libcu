@@ -9,7 +9,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 // The following structure defines all of the commands in the Tcl core, and the C procedures that execute them.
 typedef struct {
@@ -18,7 +18,7 @@ typedef struct {
 } CmdInfo;
 
 // Built-in commands, and the procedures associated with them:
-__constant__ static CmdInfo _builtInCmds[] = {
+static __constant__ CmdInfo _builtInCmds[] = {
 	// Commands in the generic core:
 	{"append",		Tcl_AppendCmd},
 	{"array",		Tcl_ArrayCmd},
@@ -112,7 +112,7 @@ __constant__ static CmdInfo _builtInCmds[] = {
 __device__ Tcl_Interp *Tcl_CreateInterp()
 {
 	register Interp *iPtr = (Interp *)_allocFast(sizeof(Interp));
-	_memset(iPtr, 0, sizeof(*iPtr));
+	memset(iPtr, 0, sizeof(*iPtr));
 	iPtr->result = iPtr->resultSpace;
 	iPtr->freeProc = 0;
 	iPtr->errorLine = 0;
@@ -229,9 +229,9 @@ __device__ void Tcl_DeleteInterp(Tcl_Interp *interp)
 				continue;
 			}
 			if (i >= 3) {
-				_fclose(filePtr->f);
+				fclose(filePtr->f);
 				if (filePtr->f2 != NULL) {
-					_fclose(filePtr->f2);
+					fclose(filePtr->f2);
 				}
 				if (filePtr->numPids > 0) {
 					//Tcl_DetachPids(filePtr->numPids, filePtr->pidPtr);
@@ -552,7 +552,7 @@ done:
 				iPtr->result = "invoked \"continue\" outside of a loop";
 			} else {
 				iPtr->result = iPtr->resultSpace;
-				_sprintf(iPtr->resultSpace, "command returned bad code: %d", result);
+				sprintf(iPtr->resultSpace, "command returned bad code: %d", result);
 			}
 			result = TCL_ERROR;
 		}
@@ -575,7 +575,7 @@ done:
 				iPtr->errorLine++;
 			}
 		}
-		for (; _isspace(*p) || *p == ';'; p++) {
+		for (; isspace(*p) || *p == ';'; p++) {
 			if (*p == '\n') {
 				iPtr->errorLine++;
 			}
@@ -587,9 +587,9 @@ done:
 			ellipsis = " ...";
 		}
 		if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-			_sprintf(copyStorage, "\n    while executing\n\"%.*s%s\"", numChars, cmdStart, ellipsis);
+			sprintf(copyStorage, "\n    while executing\n\"%.*s%s\"", numChars, cmdStart, ellipsis);
 		} else {
-			_sprintf(copyStorage, "\n    invoked from within\n\"%.*s%s\"", numChars, cmdStart, ellipsis);
+			sprintf(copyStorage, "\n    invoked from within\n\"%.*s%s\"", numChars, cmdStart, ellipsis);
 		}
 		Tcl_AddErrorInfo(interp, copyStorage);
 		iPtr->flags &= ~ERR_ALREADY_LOGGED;
@@ -714,7 +714,7 @@ __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message)
 *
 *----------------------------------------------------------------------
 */
-__device__ int _Tcl_VarEval(Tcl_Interp *interp, _va_list &argList)
+__device__ int _Tcl_VarEval(Tcl_Interp *interp, va_list va)
 {
 #define FIXED_SIZE 200
 	// Copy the strings one after the other into a single larger string.  Use stack-allocated space for small commands, but if
@@ -724,11 +724,11 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, _va_list &argList)
 	char fixedSpace[FIXED_SIZE+1];
 	char *cmd = fixedSpace;
 	while (true) {
-		char *string = _va_arg(argList, char *);
+		char *string = va_arg(va, char *);
 		if (string == NULL) {
 			break;
 		}
-		int length = _strlen(string);
+		int length = strlen(string);
 		if ((spaceUsed + length) > spaceAvl) {
 			spaceAvl = spaceUsed + length;
 			spaceAvl += spaceAvl/2;
@@ -739,7 +739,7 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, _va_list &argList)
 			}
 			cmd = new_;
 		}
-		_strcpy(cmd + spaceUsed, string);
+		strcpy(cmd + spaceUsed, string);
 		spaceUsed += length;
 	}
 	cmd[spaceUsed] = '\0';

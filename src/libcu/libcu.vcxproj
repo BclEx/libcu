@@ -41,6 +41,8 @@
     <ClInclude Include="..\include\stdiocu.h" />
     <ClInclude Include="..\include\stdlibcu.h" />
     <ClInclude Include="..\include\stringcu.h" />
+    <ClInclude Include="..\include\sys\bitvec.h" />
+    <ClInclude Include="..\include\sys\hash.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />

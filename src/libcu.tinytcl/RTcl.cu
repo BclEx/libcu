@@ -4,12 +4,12 @@
 //#include "_/TinySh.cu"
 
 
-#include "tclAlloc.cu"
-//#include "Tcl+Assem.cu"
-//#include "Tcl+Basic.cu"
-//#include "Tcl+CmdAH.cu"
-//#include "Tcl+CmdIL.cu"
-//#include "Tcl+CmdMZ.cu"
+//#include "tclAlloc.cu"
+//#include "tclAssem.cu"
+//#include "tclBasic.cu"
+//#include "tclCmdAH.cu"
+//#include "tclCmdIL.cu"
+#include "tclCmdMZ.cu"
 //#undef STATIC_SIZE
 //#include "Tcl+Expr.cu"
 //#include "Tcl+Get.cu"

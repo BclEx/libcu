@@ -351,6 +351,8 @@ STDARG(int, fscanf, vfscanf(stream, format, va), FILE *__restrict stream, const 
 STDARG(int, scanf, vscanf(format, va), const char *__restrict format);
 /* Read formatted input from S.  */
 STDARG(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const char *__restrict format);
+STDARG2(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const char *__restrict format);
+STDARG3(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const char *__restrict format);
 __END_NAMESPACE_STD;
 
 #endif  /* _INC_STDIO */

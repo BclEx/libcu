@@ -41,11 +41,11 @@
     <None Include="dos.cu" />
     <None Include="regex_compat.cu" />
     <None Include="tclAlloc.cu" />
-    <None Include="Tcl+Assem.cu" />
-    <None Include="Tcl+Basic.cu" />
-    <None Include="Tcl+CmdAH.cu" />
-    <None Include="Tcl+CmdIL.cu" />
-    <None Include="Tcl+CmdMZ.cu" />
+    <None Include="tclAssem.cu" />
+    <None Include="tclBasic.cu" />
+    <None Include="tclCmdAH.cu" />
+    <None Include="tclCmdIL.cu" />
+    <None Include="tclCmdMZ.cu" />
     <None Include="Tcl+Expr.cu" />
     <None Include="Tcl+Get.cu" />
     <None Include="Tcl+Glob.cu" />

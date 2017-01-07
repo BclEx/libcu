@@ -6,7 +6,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 // The structure below is the internal representation for a command buffer, which is used to hold a piece of a command until a full
 // command is available.  When a full command is available, it will be returned to the user, but it will also be retained in the buffer
@@ -89,7 +89,7 @@ __device__ char *Tcl_AssembleCmd(Tcl_CmdBuf buffer, char *string)
 	register CmdBuf *cbPtr = (CmdBuf *)buffer;
 
 	// If an empty string is passed in, just pretend the current command is complete, whether it really is or not.
-	int length = _strlen(string);
+	int length = strlen(string);
 	if (length == 0) {
 		cbPtr->buffer[cbPtr->bytesUsed] = 0;
 		cbPtr->bytesUsed = 0;
@@ -97,7 +97,7 @@ __device__ char *Tcl_AssembleCmd(Tcl_CmdBuf buffer, char *string)
 	}
 
 	// Add the new information to the buffer.  If the current buffer isn't large enough, grow it by at least a factor of two, or enough to hold the new text.
-	length = _strlen(string);
+	length = strlen(string);
 	int totalLength = cbPtr->bytesUsed + length + 1;
 	if (totalLength > cbPtr->bufSize) {
 		int newSize = cbPtr->bufSize*2;
@@ -105,12 +105,12 @@ __device__ char *Tcl_AssembleCmd(Tcl_CmdBuf buffer, char *string)
 			newSize = totalLength;
 		}
 		char *newBuf = (char *)_allocFast(newSize);
-		_strcpy(newBuf, cbPtr->buffer);
+		strcpy(newBuf, cbPtr->buffer);
 		_freeFast(cbPtr->buffer);
 		cbPtr->buffer = newBuf;
 		cbPtr->bufSize = newSize;
 	}
-	_strcpy(cbPtr->buffer+cbPtr->bytesUsed, string);
+	strcpy(cbPtr->buffer+cbPtr->bytesUsed, string);
 	cbPtr->bytesUsed += length;
 
 	// See if there is now a complete command in the buffer.
@@ -144,7 +144,7 @@ __device__ int Tcl_CommandComplete(char *cmd)
 {
 	register char *p = cmd;
 	while (true) {
-		while (_isspace(*p)) {
+		while (isspace(*p)) {
 			p++;
 		}
 		if (*p == 0) {

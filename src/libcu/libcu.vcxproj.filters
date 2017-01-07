@@ -52,6 +52,12 @@
     <ClInclude Include="..\include\regexcu.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\sys\bitvec.h">
+      <Filter>includes\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sys\hash.h">
+      <Filter>includes\sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="stdlibcu.cu" />
@@ -73,6 +79,9 @@
     </Filter>
     <Filter Include="_content">
       <UniqueIdentifier>{36a9b491-aa04-47a7-80e6-b4500b4b4454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="includes\sys">
+      <UniqueIdentifier>{3b8669b4-7b70-4086-928c-adaec2f08228}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

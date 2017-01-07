@@ -9,10 +9,10 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 // Forward declarations for procedures defined in this file:
-__device__ static int SortCompareProc(const char *first, const char *second);
+static __device__ int SortCompareProc(const char *first, const char *second);
 
 /*
 *----------------------------------------------------------------------
@@ -44,7 +44,7 @@ __device__ int Tcl_IfCmd(ClientData dummy, Tcl_Interp *interp, int argc, const c
 			return result;
 		}
 		i++;
-		if (i < argc && !_strcmp(args[i], "then")) {
+		if (i < argc && !strcmp(args[i], "then")) {
 			i++;
 		}
 		if (i >= argc) {
@@ -60,7 +60,7 @@ __device__ int Tcl_IfCmd(ClientData dummy, Tcl_Interp *interp, int argc, const c
 		if (i >= argc) {
 			return TCL_OK;
 		}
-		if (args[i][0] == 'e' && !_strcmp(args[i], "elseif")) {
+		if (args[i][0] == 'e' && !strcmp(args[i], "elseif")) {
 			i++;
 			continue;
 		}
@@ -68,7 +68,7 @@ __device__ int Tcl_IfCmd(ClientData dummy, Tcl_Interp *interp, int argc, const c
 	}
 
 	// Couldn't find a "then" or "elseif" clause to execute.  Check now for an "else" clause.  We know that there's at least one more argument when we get here.
-	if (!_strcmp(args[i], "else")) {
+	if (!strcmp(args[i], "else")) {
 		i++;
 		if (i >= argc) {
 			Tcl_AppendResult(interp, "wrong # args: no script following \"else\" argument", (char *)NULL);
@@ -118,7 +118,7 @@ __device__ int Tcl_IncrCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 		value += increment;
 	}
 	char newString[30];
-	_sprintf(newString, "%d", value);
+	sprintf(newString, "%d", value);
 	char *result = Tcl_SetVar(interp, (char *)args[1], newString, TCL_LEAVE_ERR_MSG);
 	if (result == NULL) {
 		return TCL_ERROR;
@@ -158,8 +158,8 @@ __device__ int Tcl_InfoCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 		return TCL_ERROR;
 	}
 	c = args[1][0];
-	length = _strlen(args[1]);
-	if (c == 'a' && !_strncmp(args[1], "args", length)) {
+	length = strlen(args[1]);
+	if (c == 'a' && !strncmp(args[1], "args", length)) {
 		if (argc != 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " args procname\"", (char *)NULL);
 			return TCL_ERROR;
@@ -174,7 +174,7 @@ infoNoSuchProc:
 			Tcl_AppendElement(interp, argPtr->name, 0);
 		}
 		return TCL_OK;
-	} else if (c == 'b' && !_strncmp(args[1], "body", length)) {
+	} else if (c == 'b' && !strncmp(args[1], "body", length)) {
 		if (argc != 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " body procname\"", (char *)NULL);
 			return TCL_ERROR;
@@ -185,14 +185,14 @@ infoNoSuchProc:
 		}
 		iPtr->result = procPtr->command;
 		return TCL_OK;
-	} else if (c == 'c' && !_strncmp(args[1], "cmdcount", length) && length >= 2) {
+	} else if (c == 'c' && !strncmp(args[1], "cmdcount", length) && length >= 2) {
 		if (argc != 2) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " cmdcount\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		_sprintf(iPtr->result, "%d", iPtr->cmdCount);
+		sprintf(iPtr->result, "%d", iPtr->cmdCount);
 		return TCL_OK;
-	} else if (c == 'c' && !_strncmp(args[1], "commands", length) && length >= 4) {
+	} else if (c == 'c' && !strncmp(args[1], "commands", length) && length >= 4) {
 		if (argc > 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " commands [pattern]\"", (char *)NULL);
 			return TCL_ERROR;
@@ -205,7 +205,7 @@ infoNoSuchProc:
 			Tcl_AppendElement(interp, name, 0);
 		}
 		return TCL_OK;
-	} else if (c == 'c' && !_strncmp(args[1], "complete", length) && length >= 4) {
+	} else if (c == 'c' && !strncmp(args[1], "complete", length) && length >= 4) {
 		if (argc != 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " complete command\"", (char *)NULL);
 			return TCL_ERROR;
@@ -216,7 +216,7 @@ infoNoSuchProc:
 			interp->result = "0";
 		}
 		return TCL_OK;
-	} else if (c == 'd' && !_strncmp(args[1], "default", length)) {
+	} else if (c == 'd' && !strncmp(args[1], "default", length)) {
 		if (argc != 5) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " default procname arg varname\"", (char *)NULL);
 			return TCL_ERROR;
@@ -230,7 +230,7 @@ infoNoSuchProc:
 				Tcl_AppendResult(interp, "procedure \"", args[2], "\" doesn't have an argument \"", args[3], "\"", (char *)NULL);
 				return TCL_ERROR;
 			}
-			if (_strcmp(args[3], argPtr->name) == 0) {
+			if (strcmp(args[3], argPtr->name) == 0) {
 				if (argPtr->defValue != NULL) {
 					if (Tcl_SetVar((Tcl_Interp *)iPtr, (char *)args[4], argPtr->defValue, 0) == NULL) {
 defStoreError:
@@ -247,7 +247,7 @@ defStoreError:
 				return TCL_OK;
 			}
 		}
-	} else if (c == 'e' && !_strncmp(args[1], "exists", length)) {
+	} else if (c == 'e' && !strncmp(args[1], "exists", length)) {
 		if (argc != 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " exists varName\"", (char *)NULL);
 			return TCL_ERROR;
@@ -255,7 +255,7 @@ defStoreError:
 		char *p = Tcl_GetVar((Tcl_Interp *)iPtr, (char *)args[2], 0);
 		// The code below handles the special case where the name is for an array:  Tcl_GetVar will reject this since you can't read an array variable without an index.
 		if (p == NULL) {
-			if (_strchr(args[2], '(') != NULL) {
+			if (strchr(args[2], '(') != NULL) {
 noVar:
 				iPtr->result = "0";
 				return TCL_OK;
@@ -279,7 +279,7 @@ noVar:
 		}
 		iPtr->result = "1";
 		return TCL_OK;
-	} else if (c == 'g' && !_strncmp(args[1], "globals", length)) {
+	} else if (c == 'g' && !strncmp(args[1], "globals", length)) {
 		if (argc > 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " globals [pattern]\"", (char *)NULL);
 			return TCL_ERROR;
@@ -298,7 +298,7 @@ noVar:
 		return TCL_OK;
 	}
 #ifdef HAVE_GETHOSTNAME
-	else if (c == 'h' && !_strncmp(args[1], "hostname", length)) {
+	else if (c == 'h' && !strncmp(args[1], "hostname", length)) {
 		if (argc != 2) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " hostname\"", (char *)NULL);
 			return TCL_ERROR;
@@ -313,12 +313,12 @@ noVar:
 		return TCL_OK;
 	}
 #endif
-	else if (c == 'l' && !_strncmp(args[1], "level", length) && length >= 2) {
+	else if (c == 'l' && !strncmp(args[1], "level", length) && length >= 2) {
 		if (argc == 2) {
 			if (iPtr->varFramePtr == NULL) {
 				iPtr->result = "0";
 			} else {
-				_sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
+				sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
 			}
 			return TCL_OK;
 		} else if (argc == 3) {
@@ -349,12 +349,12 @@ levelError:
 		}
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " level [number]\"", (char *)NULL);
 		return TCL_ERROR;
-	} else if (c == 'l' && !_strncmp(args[1], "library", length) && length >= 2) {
+	} else if (c == 'l' && !strncmp(args[1], "library", length) && length >= 2) {
 		if (argc != 2) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " library\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		interp->result = _getenv("TCL_LIBRARY");
+		interp->result = getenv("TCL_LIBRARY");
 		if (interp->result == NULL) {
 #ifdef TCL_LIBRARY
 			interp->result = TCL_LIBRARY;
@@ -364,7 +364,7 @@ levelError:
 #endif
 		}
 		return TCL_OK;
-	} else if (c == 'l' && !_strncmp(args[1], "locals", length) && length >= 2) {
+	} else if (c == 'l' && !strncmp(args[1], "locals", length) && length >= 2) {
 		if (argc > 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " locals [pattern]\"", (char *)NULL);
 			return TCL_ERROR;
@@ -384,7 +384,7 @@ levelError:
 			Tcl_AppendElement(interp, name, 0);
 		}
 		return TCL_OK;
-	} else if (c == 'p' && !_strncmp(args[1], "procs", length)) {
+	} else if (c == 'p' && !strncmp(args[1], "procs", length)) {
 		if (argc > 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " procs [pattern]\"", (char *)NULL);
 			return TCL_ERROR;
@@ -401,7 +401,7 @@ levelError:
 			Tcl_AppendElement(interp, name, 0);
 		}
 		return TCL_OK;
-	} else if (c == 's' && !_strncmp(args[1], "script", length)) {
+	} else if (c == 's' && !strncmp(args[1], "script", length)) {
 		if (argc != 2) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " script\"", (char *)NULL);
 			return TCL_ERROR;
@@ -410,7 +410,7 @@ levelError:
 			interp->result = iPtr->scriptFile;
 		}
 		return TCL_OK;
-	} else if (c == 't' && !_strncmp(args[1], "tclversion", length)) {
+	} else if (c == 't' && !strncmp(args[1], "tclversion", length)) {
 		if (argc != 2) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " tclversion\"", (char *)NULL);
 			return TCL_ERROR;
@@ -418,7 +418,7 @@ levelError:
 		// Note:  TCL_VERSION below is expected to be set with a "-D" switch in the Makefile.
 		iPtr->result = TCL_VERSION;
 		return TCL_OK;
-	} else if (c == 'v' && !_strncmp(args[1], "vars", length)) {
+	} else if (c == 'v' && !strncmp(args[1], "vars", length)) {
 		if (argc > 3) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " vars [pattern]\"", (char *)NULL);
 			return TCL_ERROR;
@@ -510,7 +510,7 @@ __device__ int Tcl_LindexCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " list index\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	if (!_strcmp(args[2], "end")) {
+	if (!strcmp(args[2], "end")) {
 		// Find the length of the list
 		for (index = 0, p = (char *)args[1]; *p != 0 ; index++) {
 			result = TclFindElement(interp, p, &element, &p, (int *)NULL, (int *) NULL);
@@ -547,10 +547,10 @@ __device__ int Tcl_LindexCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 	}
 	if (size >= TCL_RESULT_SIZE) {
 		interp->result = (char *) _allocFast((unsigned) size+1);
-		interp->freeProc = (Tcl_FreeProc *) _free;
+		interp->freeProc = (Tcl_FreeProc *)_free;
 	}
 	if (parenthesized) {
-		_memcpy(interp->result, element, size);
+		memcpy(interp->result, element, size);
 		interp->result[size] = 0;
 	} else {
 		TclCopyAndCollapse(size, element, interp->result);
@@ -599,7 +599,7 @@ __device__ int Tcl_LinsertCmd(ClientData dummy, Tcl_Interp *interp, int argc, co
 	} else {
 		char *end = element+size;
 		if (element != args[1]) {
-			while (*end != 0 && !_isspace(*end)) {
+			while (*end != 0 && !isspace(*end)) {
 				end++;
 			}
 		}
@@ -676,7 +676,7 @@ __device__ int Tcl_LlengthCmd(ClientData dummy, Tcl_Interp *interp, int argc, co
 			break;
 		}
 	}
-	_sprintf(interp->result, "%d", count);
+	sprintf(interp->result, "%d", count);
 	return TCL_OK;
 }
 
@@ -708,7 +708,7 @@ __device__ int Tcl_LrangeCmd(ClientData notUsed, Tcl_Interp *interp, int argc, c
 	if (first < 0) {
 		first = 0;
 	}
-	if (*args[3] == 'e' && !_strncmp(args[3], "end", _strlen(args[3]))) {
+	if (*args[3] == 'e' && !strncmp(args[3], "end", strlen(args[3]))) {
 		last = 1000000;
 	} else {
 		if (Tcl_GetInt(interp, args[3], &last) != TCL_OK) {
@@ -740,7 +740,7 @@ __device__ int Tcl_LrangeCmd(ClientData notUsed, Tcl_Interp *interp, int argc, c
 	}
 
 	// Chop off trailing spaces.
-	while (_isspace(end[-1])) {
+	while (isspace(end[-1])) {
 		end--;
 	}
 	c = *end;
@@ -814,7 +814,7 @@ __device__ int Tcl_LreplaceCmd(ClientData notUsed, Tcl_Interp *interp, int argc,
 	// Add the elements before "first" to the result.  Be sure to include quote or brace characters that might terminate the last of these elements.
 	p1 = element+size;
 	if (element != args[1]) {
-		while (*p1 != 0 && !_isspace(*p1)) {
+		while (*p1 != 0 && !isspace(*p1)) {
 			p1++;
 		}
 	}
@@ -871,7 +871,7 @@ __device__ int Tcl_LsearchCmd(ClientData notUsed, Tcl_Interp *interp, int argc, 
 			break;
 		}
 	}
-	_sprintf(interp->result, "%d", match);
+	sprintf(interp->result, "%d", match);
 	_freeFast((char *)listArgs);
 	return TCL_OK;
 }
@@ -894,13 +894,13 @@ __device__ int Tcl_LsearchCmd(ClientData notUsed, Tcl_Interp *interp, int argc, 
 // The procedure below is called back by qsort to determine the proper ordering between two elements.
 __device__ static int SortCompareProc(const char *first, const char *second)
 {
-	return _strcmp(*((char **)first), *((char **)second));
+	return strcmp(*((char **)first), *((char **)second));
 }
 
 __device__ static int IntegerSortCompareProc(const char *first, const char *second)
 {
-	int firstint = _atoi(*((char **) first));
-	int secondint = _atoi(*((char **) second));
+	int firstint = atoi(*((char **) first));
+	int secondint = atoi(*((char **) second));
 	return (firstint < secondint ? -1 : (firstint == secondint ? 0 : 1));
 }
 
@@ -913,7 +913,7 @@ __device__ static int CommandSortCompareProc(const char *first, const char *seco
 {
 	// We have already had an error and we need to return something, so fallback to strcmp
 	if (_sort_result != TCL_OK) {
-		return _strcmp(*((char **)first), *((char **)second));
+		return strcmp(*((char **)first), *((char **)second));
 	}
 	const char *cmdargs[4];
 	cmdargs[0] = _sort_command;
@@ -925,9 +925,9 @@ __device__ static int CommandSortCompareProc(const char *first, const char *seco
 	_freeFast(compare_cmd);
 	if (_sort_result != TCL_OK) {
 		// We need to return something, so fallback to strcmp
-		return _strcmp(cmdargs[1], cmdargs[2]);
+		return strcmp(cmdargs[1], cmdargs[2]);
 	}
-	return _atoi(_sort_interp->result);
+	return atoi(_sort_interp->result);
 }
 
 __device__ int Tcl_LsortCmd(ClientData notUsed, Tcl_Interp *interp, int argc, const char *args[])
@@ -938,11 +938,11 @@ __device__ int Tcl_LsortCmd(ClientData notUsed, Tcl_Interp *interp, int argc, co
 	while (argc > 2) {
 		argc--;
 		args++;
-		if (!_strcmp(args[0], "-integer")) {
+		if (!strcmp(args[0], "-integer")) {
 			compare = (compare_function_type *)IntegerSortCompareProc;
 			break;
 		}
-		if (!_strcmp(args[0], "-command")) {
+		if (!strcmp(args[0], "-command")) {
 			compare = (compare_function_type *)CommandSortCompareProc;
 			_sort_command = (char *)args[1];
 			_sort_interp = interp;
@@ -961,7 +961,7 @@ __device__ int Tcl_LsortCmd(ClientData notUsed, Tcl_Interp *interp, int argc, co
 	if (Tcl_SplitList(interp, (char *)args[1], &listArgc, &listArgs) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	_qsort(listArgs, listArgc, sizeof(char *), compare);
+	qsort(listArgs, listArgc, sizeof(char *), compare);
 	if (_sort_result != TCL_OK) {
 		return _sort_result;
 	}

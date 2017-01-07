@@ -8,7 +8,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 /*
 *----------------------------------------------------------------------
@@ -56,7 +56,7 @@ __device__ int Tcl_CaseCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 	}
 	char *string = (char *)args[1];
 	int body = -1;
-	if (!_strcmp(args[2], "in")) {
+	if (!strcmp(args[2], "in")) {
 		i = 3;
 	} else {
 		i = 2;
@@ -87,12 +87,12 @@ __device__ int Tcl_CaseCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 		// Check for special case of single pattern (no list) with no backslash sequences.
 		register char *p;
 		for (p = (char *)caseArgs[i]; *p != 0; p++) {
-			if (_isspace(*p) || *p == '\\') {
+			if (isspace(*p) || *p == '\\') {
 				break;
 			}
 		}
 		if (*p == 0) {
-			if (*caseArgs[i] == 'd' && !_strcmp(caseArgs[i], "default")) {
+			if (*caseArgs[i] == 'd' && !strcmp(caseArgs[i], "default")) {
 				body = i+1;
 			}
 			if (Tcl_StringMatch(string, (char *)caseArgs[i])) {
@@ -124,7 +124,7 @@ match:
 		result = Tcl_Eval(interp, (char *)caseArgs[body], 0, (char **)NULL);
 		if (result == TCL_ERROR) {
 			char msg[100];
-			_sprintf(msg, "\n    (\"%.50s\" arm line %d)", caseArgs[body-1], interp->errorLine);
+			sprintf(msg, "\n    (\"%.50s\" arm line %d)", caseArgs[body-1], interp->errorLine);
 			Tcl_AddErrorInfo(interp, msg);
 		}
 		goto cleanup;
@@ -168,7 +168,7 @@ __device__ int Tcl_CatchCmd(ClientData dummy, Tcl_Interp *interp, int argc, cons
 		}
 	}
 	Tcl_ResetResult(interp);
-	_sprintf(interp->result, "%d", result);
+	sprintf(interp->result, "%d", result);
 	return TCL_OK;
 }
 
@@ -286,7 +286,7 @@ __device__ int Tcl_EvalCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 	}
 	if (result == TCL_ERROR) {
 		char msg[60];
-		_sprintf(msg, "\n    (\"eval\" body line %d)", interp->errorLine);
+		sprintf(msg, "\n    (\"eval\" body line %d)", interp->errorLine);
 		Tcl_AddErrorInfo(interp, msg);
 	}
 	return result;
@@ -363,7 +363,7 @@ __device__ int Tcl_ForCmd(ClientData dummy, Tcl_Interp *interp, int argc, const 
 		if (result != TCL_OK && result != TCL_CONTINUE) {
 			if (result == TCL_ERROR) {
 				char msg[60];
-				_sprintf(msg, "\n    (\"for\" body line %d)", interp->errorLine);
+				sprintf(msg, "\n    (\"for\" body line %d)", interp->errorLine);
 				Tcl_AddErrorInfo(interp, msg);
 			}
 			break;
@@ -429,7 +429,7 @@ __device__ int Tcl_ForeachCmd(ClientData dummy, Tcl_Interp *interp, int argc, co
 				break;
 			} else if (result == TCL_ERROR) {
 				char msg[100];
-				_sprintf(msg, "\n    (\"foreach\" body line %d)", interp->errorLine);
+				sprintf(msg, "\n    (\"foreach\" body line %d)", interp->errorLine);
 				Tcl_AddErrorInfo(interp, msg);
 				break;
 			} else {
@@ -530,11 +530,11 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			newPtr++;
 			format++;
 		}
-		if (_isdigit(*format)) {
-			width = _atoi(format);
+		if (isdigit(*format)) {
+			width = atoi(format);
 			do {
 				format++;
-			} while (_isdigit(*format));
+			} while (isdigit(*format));
 		} else if (*format == '*') {
 			if (argc <= 0) {
 				goto notEnoughArgs;
@@ -547,7 +547,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			format++;
 		}
 		if (width != 0) {
-			_sprintf(newPtr, "%d", width);
+			sprintf(newPtr, "%d", width);
 			while (*newPtr != 0) {
 				newPtr++;
 			}
@@ -557,11 +557,11 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			newPtr++;
 			format++;
 		}
-		if (_isdigit(*format)) {
-			precision = _atoi(format);
+		if (isdigit(*format)) {
+			precision = atoi(format);
 			do {
 				format++;
-			} while (_isdigit(*format));
+			} while (isdigit(*format));
 		} else if (*format == '*') {
 			if (argc <= 0) {
 				goto notEnoughArgs;
@@ -574,7 +574,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			format++;
 		}
 		if (precision != 0) {
-			_sprintf(newPtr, "%d", precision);
+			sprintf(newPtr, "%d", precision);
 			while (*newPtr != 0) {
 				newPtr++;
 			}
@@ -603,7 +603,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			} else {
 				valSize = sizeof(int);
 			}
-			newPtr[-1] = __tolower(*format);
+			newPtr[-1] = _tolower(*format);
 			newPtr[-2] = 'l';
 			*newPtr = 0;
 		case 'd':
@@ -620,7 +620,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			break;
 		case 's':
 			oneWordValue = (char *)*curArg;
-			size = _strlen(*curArg);
+			size = strlen(*curArg);
 			valSize = 0;
 			break;
 		case 'c':
@@ -632,7 +632,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 				valSize = sizeof(int);
 			break;
 		case 'F':
-			newPtr[-1] = __tolower(newPtr[-1]);
+			newPtr[-1] = _tolower(newPtr[-1]);
 		case 'e':
 		case 'E':
 		case 'f':
@@ -651,7 +651,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			interp->result = "format string ended in middle of field specifier";
 			goto fmtError;
 		default:
-			_sprintf(interp->result, "bad field specifier \"%c\"", *format);
+			sprintf(interp->result, "bad field specifier \"%c\"", *format);
 			goto fmtError;
 		}
 		argc--;
@@ -667,7 +667,7 @@ doField:
 			int newSpace = 2*(dstSize + size);
 			char *newDst = (char *)_allocFast((unsigned)newSpace+1);
 			if (dstSize != 0) {
-				_memcpy(newDst, dst, dstSize);
+				memcpy(newDst, dst, dstSize);
 			}
 			if (dstSpace != TCL_RESULT_SIZE) {
 				_freeFast(dst);
@@ -676,25 +676,25 @@ doField:
 			dstSpace = newSpace;
 		}
 		if (noPercent) {
-			_memcpy((dst+dstSize), oneWordValue, size);
+			memcpy((dst+dstSize), oneWordValue, size);
 			dstSize += size;
 			dst[dstSize] = 0;
 		} else {
 			if (useTwoWords) {
-				_sprintf(dst+dstSize, newFormat, twoWordValue);
+				sprintf(dst+dstSize, newFormat, twoWordValue);
 			} else if (valSize == sizeof(short)) {
 				// The double cast below is needed for a few machines (e.g. Pyramids as of 1/93) that don't like casts directly from pointers to shorts.
-				_sprintf(dst+dstSize, newFormat, (short)intValue);
+				sprintf(dst+dstSize, newFormat, (short)intValue);
 			} else if (valSize == sizeof(int)) {
-				_sprintf(dst+dstSize, newFormat, intValue);
+				sprintf(dst+dstSize, newFormat, intValue);
 			} else if (valSize == sizeof(long)) {
-				_sprintf(dst+dstSize, newFormat, (long)intValue);
+				sprintf(dst+dstSize, newFormat, (long)intValue);
 			} else if (valSize != 0) {
-				_sprintf(dst+dstSize, newFormat, (char *)(long)intValue);
+				sprintf(dst+dstSize, newFormat, (char *)(long)intValue);
 			} else {
-				_sprintf(dst+dstSize, newFormat, (char *)oneWordValue);
+				sprintf(dst+dstSize, newFormat, (char *)oneWordValue);
 			}
-			dstSize += _strlen(dst+dstSize);
+			dstSize += strlen(dst+dstSize);
 		}
 	}
 
