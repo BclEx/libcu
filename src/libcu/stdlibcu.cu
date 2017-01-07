@@ -1,3 +1,4 @@
+#include <crtdefscu.h>
 #include <stdlibcu.h>
 #include <ctypecu.h>
 #include <errnocu.h>
@@ -590,6 +591,245 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 }
 
 #pragma endregion
+
+/* Return a random integer between 0 and RAND_MAX inclusive.  */
+__device__ int rand(void)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Seed the random number generator with the given number.  */
+__device__ void srand(unsigned int seed)
+{
+	panic("Not Implemented");
+}
+
+/* Return the value of envariable NAME, or NULL if it doesn't exist.  */
+__device__ char *__environ[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
+__device__ char *getenv(const char *name)
+{
+	//if (!strcmp(name, "HOME")) return "gpu:\\";
+	//if (!strcmp(name, "PATH")) return "gpu:\\";
+	panic("Not Implemented");
+	return nullptr;
+}
+
+/* Set NAME to VALUE in the environment. If REPLACE is nonzero, overwrite an existing value.  */
+__device__ int setenv(const char *name, const char *value, int replace)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Remove the variable NAME from the environment.  */
+__device__ int unsetenv(const char *name)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+__device__ char *mktemp(char *template_)
+{
+	panic("Not Implemented");
+	return nullptr;
+}
+
+/* Do a binary search for KEY in BASE, which consists of NMEMB elements of SIZE bytes each, using COMPAR to perform the comparisons.  */
+__device__ void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar)
+{
+	panic("Not Implemented");
+	return nullptr;
+}
+
+// qsort
+#pragma region qsort
+
+#define min(a, b) ((a) < (b) ? a : b)
+#define swapcode(TYPE, parmi, parmj, n) {\
+	long i = (n) / sizeof(TYPE);\
+	register TYPE *pi = (TYPE *)(parmi);\
+	register TYPE *pj = (TYPE *)(parmj);\
+	do { register TYPE t = *pi; *pi++ = *pj; *pj++ = t; } while (--i > 0);\
+}
+#define SWAPINIT(a, size) swaptype = (((char*)a-(char*)0)%sizeof(long)||size%sizeof(long)?2:(size==sizeof(long)?0:1));
+__forceinline __device__ void swapfunc(char *a, char *b, int n, int swaptype)
+{
+	if (swaptype <= 1) swapcode(long, a, b, n)
+	else swapcode(char, a, b, n)
+}
+#define swap(a, b)\
+	if (swaptype == 0) { long t = *(long *)(a); *(long *)(a) = *(long *)(b); *(long *)(b) = t; }\
+	else swapfunc(a, b, size, swaptype)
+#define vecswap(a, b, n) if ((n) > 0) swapfunc(a, b, n, swaptype)
+__forceinline __device__ char *med3(char *a, char *b, char *c, __compar_fn_t compar)
+{
+	return (compar(a, b)<0 ? (compar(b, c)<0?b:(compar(a, c)<0?c:a)) : (compar(b, c)>0?b:(compar(a, c)<0?a:c)));
+}
+
+__device__ void qsort(void *base, size_t nmemb, size_t size, __compar_fn_t compar)
+{
+	char *a = (char *)base;
+	char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
+	int d, r, swaptype, swap_cnt;
+loop:
+	SWAPINIT(a, size);
+	swap_cnt = 0;
+	if (nmemb < 7)
+	{
+		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
+			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
+				swap(pl, pl - size);
+		return;
+	}
+	pm = a + (nmemb / 2) * size;
+	if (nmemb > 7)
+	{
+		pl = a;
+		pn = a + (nmemb - 1) * size;
+		if (nmemb > 40)
+		{
+			d = (nmemb / 8) * size;
+			pl = med3(pl, pl + d, pl + 2 * d, compar);
+			pm = med3(pm - d, pm, pm + d, compar);
+			pn = med3(pn - 2 * d, pn - d, pn, compar);
+		}
+		pm = med3(pl, pm, pn, compar);
+	}
+	swap(a, pm);
+	pa = pb = a + size;
+	//
+	pc = pd = a + (nmemb - 1) * size;
+	for (;;)
+	{
+		while (pb <= pc && (r = compar(pb, a)) <= 0)
+		{
+			if (r == 0)
+			{
+				swap_cnt = 1;
+				swap(pa, pb);
+				pa += size;
+			}
+			pb += size;
+		}
+		while (pb <= pc && (r = compar(pc, a)) >= 0)
+		{
+			if (r == 0)
+			{
+				swap_cnt = 1;
+				swap(pc, pd);
+				pd -= size;
+			}
+			pc -= size;
+		}
+		if (pb > pc)
+			break;
+		swap(pb, pc);
+		swap_cnt = 1;
+		pb += size;
+		pc -= size;
+	}
+	if (swap_cnt == 0) // Switch to insertion sort
+	{  
+		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
+			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
+				swap(pl, pl - size);
+		return;
+	}
+	//
+	pn = a + nmemb * size;
+	r = min(pa - (char *)a, pb - pa);
+	vecswap(a, pb - r, r);
+	r = min(pd - pc, pn - pd - size);
+	vecswap(pb, pn - r, r);
+	if ((r = pb - pa) > size)
+		qsort(a, r / size, size, compar);
+	if ((r = pd - pc) > size)
+	{
+		// Iterate rather than recurse to save stack space
+		a = pn - r;
+		nmemb = r / size;
+		goto loop;
+	}
+	/*qsort(pn - r, r / size, size, compar);*/
+}
+
+#pragma endregion
+
+__device__ div_t div(int numer, int denom)
+{
+	div_t r;
+	r.quot = numer / denom;
+	r.rem = numer % denom;
+	if (numer >= 0 && r.rem < 0)
+	{
+		r.quot++;
+		r.rem -= denom;
+	}
+	return r;
+}
+
+__device__ ldiv_t ldiv(long int numer, long int denom)
+{
+	ldiv_t r;
+	r.quot = numer / denom;
+	r.rem = numer % denom;
+	if (numer >= 0 && r.rem < 0)
+	{
+		r.quot++;
+		r.rem -= denom;
+	}
+	return r;
+}
+
+#if defined(ULLONG_MAX)
+
+__device__ lldiv_t ldiv(long long int numer, long long int denom)
+{
+	lldiv_t r;
+	r.quot = numer / denom;
+	r.rem = numer % denom;
+	if (numer >= 0 && r.rem < 0)
+	{
+		r.quot++;
+		r.rem -= denom;
+	}
+	return r;
+}
+
+#endif
+
+/* Return the length of the multibyte character in S, which is no longer than N.  */
+__device__ int mblen(const char *s, size_t n)
+{
+	panic("Not Implemented");
+	return 0;
+}
+/* Return the length of the given multibyte character, putting its `wchar_t' representation in *PWC.  */
+__device__ int mbtowc(wchar_t *__restrict __pwc, const char *__restrict s, size_t n)
+{
+	panic("Not Implemented");
+	return 0;
+}
+/* Put the multibyte character represented by WCHAR in S, returning its length.  */
+__device__ int wctomb(char *s, wchar_t wchar)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Convert a multibyte string to a wide char string.  */
+__device__ size_t mbstowcs(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n)
+{
+	panic("Not Implemented");
+	return 0;
+}
+/* Convert a wide char string to multibyte string.  */
+__device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, size_t n)
+{
+	panic("Not Implemented");
+	return 0;
+}
 
 #pragma region alloc
 

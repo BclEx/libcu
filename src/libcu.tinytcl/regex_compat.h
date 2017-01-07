@@ -14,7 +14,7 @@
 /* Compatibility wrapper for V8 regexp to emulate POSIX regex
  * Provides compatibility across a limited range of functionality
  */
-#include <regexp.h>
+#include <regexpcu.h>
 
 typedef struct {
         regexp *preg;

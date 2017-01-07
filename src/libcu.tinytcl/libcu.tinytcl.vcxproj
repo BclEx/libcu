@@ -25,10 +25,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="regex_compat.h" />
-    <ClInclude Include="Tcl.h" />
+    <ClInclude Include="tcl.h" />
     <ClInclude Include="Tcl+Gpu.h" />
-    <ClInclude Include="Tcl+Hash.h" />
-    <ClInclude Include="Tcl+Int.h" />
+    <ClInclude Include="tclHash.h" />
+    <ClInclude Include="tclInt.h" />
     <ClInclude Include="Tcl+Load.h" />
     <ClInclude Include="Tcl+Unix.h" />
     <ClInclude Include="Tcl+Win.h" />
@@ -40,7 +40,7 @@
     <CudaCompile Include="RTcl.cu" />
     <None Include="dos.cu" />
     <None Include="regex_compat.cu" />
-    <None Include="Tcl+Alloc.cu" />
+    <None Include="tclAlloc.cu" />
     <None Include="Tcl+Assem.cu" />
     <None Include="Tcl+Basic.cu" />
     <None Include="Tcl+CmdAH.cu" />
@@ -53,7 +53,7 @@
     <None Include="Tcl+GpuEnv.cu" />
     <None Include="Tcl+GpuStr.cu" />
     <None Include="Tcl+GpuUtil.cu" />
-    <None Include="Tcl+Hash.cu" />
+    <None Include="tclHash.cu" />
     <None Include="Tcl+History.cu" />
     <None Include="Tcl+Load.cu" />
     <None Include="Tcl+Load-noop.cu" />
@@ -88,8 +88,8 @@
     <None Include="tcl_sys\system.tcl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libcu.TinyTcl.Native.nuspec" />
-    <None Include="Libcu.TinyTcl.Native.targets" />
+    <None Include="libcu.tinytcl.native.nuspec" />
+    <None Include="libcu.tinytcl.native.targets" />
     <None Include="_content\runtime.tinytcl.cu" />
     <None Include="_content\TclContext.cu" />
     <None Include="_content\TclContext.cu.h" />

@@ -1,12 +1,235 @@
 #include <stdlibcu.h>
 #include <stringcu.h>
+#include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
 #include <cuda_runtimecu.h>
 
 __BEGIN_DECLS;
 
-#pragma region printf
+/* Copy N bytes of SRC to DEST.  */
+//builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
+
+/* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
+__device__ void *memmove(void *dest, const void *src, size_t n)
+{
+	if (!n)
+		return dest;
+	register unsigned char *a = (unsigned char *)dest;
+	register unsigned char *b = (unsigned char *)src;
+	if (a == b) return a; // No need to do that thing.
+	if (a < b && b < a + n) // Check for destructive overlap.
+	{
+		a += n; b += n; // Destructive overlap ...
+		while (n-- > 0) { *--a= *--b; } // have to copy backwards.
+		return a;
+	}
+	while (n-- > 0) { *a++ = *b++; } // Do an ascending copy.
+	return a;
+}
+
+/* Set N bytes of S to C.  */
+//builtin: extern __device__ void *memset(void *s, int c, size_t n);
+
+/* Compare N bytes of S1 and S2.  */
+__device__ int memcmp(const void *s1, const void *s2, size_t n)
+{
+	if (!n)
+		return 0;
+	register unsigned char *a = (unsigned char *)s1;
+	register unsigned char *b = (unsigned char *)s2;
+	while (--n > 0 && *a == *b) { a++; b++; }
+	return *a - *b;
+}
+
+/* Search N bytes of S for C.  */
+__device__ void *memchr(const void *s, int c, size_t n)
+{
+	if (!n)
+		return nullptr;
+	register const char *p = (const char *)s;
+	do {
+		if (*p++ == c)
+			return (void *)(p - 1);
+	} while (--n > 0);
+	return nullptr;
+}
+
+/* Copy SRC to DEST.  */
+__device__ char *strcpy(char *__restrict dest, const char *__restrict src)
+{
+	register unsigned char *d = (unsigned char *)dest;
+	register unsigned char *s = (unsigned char *)src;
+	while (*s) { *d++ = *s++; } *d = *s;
+	return (char *)d;
+}
+
+/* Copy no more than N characters of SRC to DEST.  */
+__device__ char *strncpy(char *__restrict dest, const char *__restrict src, size_t n)
+{
+	register unsigned char *d = (unsigned char *)dest;
+	register unsigned char *s = (unsigned char *)src;
+	size_t i = 0;
+	for (; i < n && *s; ++i, ++d, ++s) *d = *s;
+	for (; i < n; ++i, ++d, ++s) *d = 0;
+	return (char *)d;
+}
+
+/* Append SRC onto DEST.  */
+__device__ char *strcat(char *__restrict dest, const char *__restrict src)
+{
+	register unsigned char *d = (unsigned char *)dest;
+	while (*d) d++;
+	register unsigned char *s = (unsigned char *)src;
+	while (*s) { *d++ = *s++; } *d = *s;
+	return (char *)d;
+}
+
+/* Append no more than N characters from SRC onto DEST.  */
+__device__ char *strncat(char *__restrict dest, const char *__restrict src, size_t n)
+{
+	register unsigned char *d = (unsigned char *)dest;
+	while (*d) d++;
+	register unsigned char *s = (unsigned char *)src;
+	while (*s && !--n) { *d++ = *s++; } *d = *s;
+	return (char *)d;
+}
+
+/* Compare S1 and S2.  */
+__device__ int strcmp(const char *s1, const char *s2)
+{
+	register unsigned char *a = (unsigned char *)s1;
+	register unsigned char *b = (unsigned char *)s2;
+	while (*a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
+	return __curtUpperToLower[*a] - __curtUpperToLower[*b];
+}
+
+/* Compare N characters of S1 and S2.  */
+__device__ int strncmp(const char *s1, const char *s2, size_t n)
+{
+	register unsigned char *a = (unsigned char *)s1;
+	register unsigned char *b = (unsigned char *)s2;
+	while (n-- > 0 && *a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
+	return (!n ? 0 : __curtUpperToLower[*a] - __curtUpperToLower[*b]);
+}
+
+/* Compare the collated forms of S1 and S2.  */
+__device__ int strcoll(const char *s1, const char *s2)
+{
+	panic("Not Implemented");
+	return -1;
+}
+
+/* Put a transformation of SRC into no more than N bytes of DEST.  */
+__device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, size_t n)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Find the first occurrence of C in S.  */
+__device__ char *strchr(const char *s, int c)
+{
+	register unsigned char *s1 = (unsigned char *)s;
+	register unsigned char l = (unsigned char)__curtUpperToLower[c];
+	while (*s1 && __curtUpperToLower[*s1] != l) s++;
+	return (char *)(*s1 ? s1 : nullptr);
+}
+
+/* Find the last occurrence of C in S.  */
+__device__ char *strrchr(const char *s, int c)
+{
+	char *save;
+	char c1;
+	for (save = (char *)0; c1 = *s; s++)
+		if (c1 == c)
+			save = (char *)s;
+	return save;
+}
+
+/* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
+__device__ size_t strcspn(const char *s, const char *reject)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Return the length of the initial segment of S which consists entirely of characters in ACCEPT.  */
+__device__ size_t strspn(const char *s, const char *accept)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Find the first occurrence in S of any character in ACCEPT.  */
+__device__ char *strpbrk(const char *s, const char *accept)
+{
+	register const char *scanp;
+	register int c, sc;
+	while (c = *s++) {
+		for (scanp = accept; sc = *scanp++;)
+			if (sc == c)
+				return (char *)(s - 1);
+	}
+	return nullptr;
+}
+
+/* Find the first occurrence of NEEDLE in HAYSTACK.  */
+__device__ char *strstr(const char *haystack, const char *needle)
+{
+	if (!*needle)
+		return (char *)haystack;
+	char *p1 = (char *)haystack, *p2 = (char *)needle;
+	char *p1Adv = (char *)haystack;
+	while (*++p2)
+		p1Adv++;
+	while (*p1Adv)
+	{
+		char *p1Begin = p1;
+		p2 = (char *)needle;
+		while (*p1 && *p2 && *p1 == *p2)
+		{
+			p1++;
+			p2++;
+		}
+		if (!*p2)
+			return p1Begin;
+		p1 = p1Begin + 1;
+		p1Adv++;
+	}
+	return nullptr;
+}
+
+/* Divide S into tokens separated by characters in DELIM.  */
+extern __device__ char *strtok(char *__restrict s, const char *__restrict delim)
+{
+	panic("Not Implemented");
+	return nullptr;
+}
+
+/* inline: Return the length of S.  */
+//__device__ size_t strlen(const char *s)
+//{
+//	if (!s)
+//		return 0;
+//	register const char *s2 = s;
+//	while (*s2) { s2++; }
+//	return 0x3fffffff & (int)(s2 - s);
+//}
+
+extern __device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n)
+{
+	panic("Not Implemented");
+	return nullptr;
+}
+
+/* Return a string describing the meaning of the `errno' code in ERRNUM.  */
+__device__ char *strerror(int errnum)
+{
+	return "ERROR";
+}
+
+#pragma region strbld
 
 #define BUFSIZE PRINT_BUF_SIZE  // Size of the output buffer
 

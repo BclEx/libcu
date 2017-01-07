@@ -4,7 +4,7 @@
 //#include "_/TinySh.cu"
 
 
-#include "Tcl+Alloc.cu"
+#include "tclAlloc.cu"
 //#include "Tcl+Assem.cu"
 //#include "Tcl+Basic.cu"
 //#include "Tcl+CmdAH.cu"

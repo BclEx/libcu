@@ -29,12 +29,16 @@ THE SOFTWARE.
 #define _INC_SENTINEL_IOMSG
 #include <sentinel.h>
 
+enum {
+	IO_CLOSE = 31,
+};
+
 struct io_close
 {
 	sentinelMessage Base;
 	int Handle;
 	__device__ io_close(int handle)
-		: Base(false, 18, 0, nullptr), Handle(handle) { sentinelSend(this, sizeof(io_close)); }
+		: Base(false, IO_CLOSE, 0, nullptr), Handle(handle) { sentinelSend(this, sizeof(io_close)); }
 	int RC;
 };
 

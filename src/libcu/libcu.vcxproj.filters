@@ -71,6 +71,9 @@
     <Filter Include="includes\bits">
       <UniqueIdentifier>{e7438e7e-21c1-414f-82e8-26ff1e32b228}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_content">
+      <UniqueIdentifier>{36a9b491-aa04-47a7-80e6-b4500b4b4454}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sentinel.cpp" />
@@ -78,9 +81,13 @@
     <ClCompile Include="sentinel-host.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="_content\sample.libcu.cu" />
-    <None Include="_content\sample.libcu.ganging.cu" />
     <None Include="Libcu.Native.nuspec" />
     <None Include="Libcu.Native.targets" />
+    <None Include="_content\sample.libcu.cu">
+      <Filter>_content</Filter>
+    </None>
+    <None Include="_content\sample.libcu.ganging.cu">
+      <Filter>_content</Filter>
+    </None>
   </ItemGroup>
 </Project>

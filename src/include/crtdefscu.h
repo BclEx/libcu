@@ -59,9 +59,12 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
+// BUILDIN
 _CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
 _Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
 _CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
+_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+#define panic(fmt, ...) printf(fmt, __VA_ARGS__); asm("trap;")
 
 #ifdef  __cplusplus
 }

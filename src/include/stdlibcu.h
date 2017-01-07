@@ -32,13 +32,13 @@ THE SOFTWARE.
 #include <featurescu.h>
 #include <crtdefscu.h>
 #include <limits.h>
-#include <sentinel-stdlibmsg.h>
 
 extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
 #if defined(ULLONG_MAX)
 extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char ** __restrict endptr, int base, int sflag);
 #endif
 
+#include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;
 
 __BEGIN_NAMESPACE_STD;
@@ -57,6 +57,10 @@ typedef struct
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
+/* Returned by `strtoq'.  */
+typedef long long int quad_t;
+/* Returned by `strtouq'.  */
+typedef unsigned long long int u_quad_t;
 __BEGIN_NAMESPACE_C99;
 /* Returned by `lldiv'.  */
 typedef struct
@@ -111,15 +115,12 @@ __forceinline __device__ long int strtol(const char *__restrict nptr, char **__r
 __forceinline __device__ unsigned long int strtoul(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
 __END_NAMESPACE_STD;
 
-#if 0
-#include <sys/types.h> /* for u_quad_t */
-/* Convert a string to a quadword integer.  */
-extern __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base);
-/* Convert a string to an unsigned quadword integer.  */
-extern __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base);
-#endif
 
 #if defined(ULLONG_MAX)
+/* Convert a string to a quadword integer.  */
+__forceinline __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)_stdlib_strto_l(nptr, endptr, base, 1); }
+/* Convert a string to an unsigned quadword integer.  */
+__forceinline __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)_stdlib_strto_l(nptr, endptr, base, 0); }
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a quadword integer.  */
 __forceinline __device__ long long int strtoll(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 1); }
@@ -170,14 +171,14 @@ extern __device__ char *getenv(const char *name);
 __END_NAMESPACE_STD;
 
 /* Set NAME to VALUE in the environment. If REPLACE is nonzero, overwrite an existing value.  */
-//extern __device__ int setenv(const char *name, const char *value, int replace);
+extern __device__ int setenv(const char *name, const char *value, int replace);
 /* Remove the variable NAME from the environment.  */
-//extern __device__ int unsetenv(const char *name);
+extern __device__ int unsetenv(const char *name);
 
 /* Generate a unique temporary file name from TEMPLATE.
 The last six characters of TEMPLATE must be "XXXXXX"; they are replaced with a string that makes the file name unique.
 Returns TEMPLATE, or a null pointer if it cannot get a unique file name.  */
-//extern __device__ char *mktemp(char *template_);
+extern __device__ char *mktemp(char *template_);
 /* Generate a unique temporary file name from TEMPLATE.
 The last six characters of TEMPLATE must be "XXXXXX"; they are replaced with a string that makes the filename unique.
 Returns a file descriptor open on the file for reading and writing, or -1 if it cannot create a uniquely-named file. */
@@ -192,8 +193,7 @@ extern __device__ int mkstemp64(char *template_);
 
 __BEGIN_NAMESPACE_STD;
 /* Execute the given line as a shell command.  */
-//extern __device__ int system(const char *command);
-__forceinline __device__ int system(const char *c) { stdlib_system msg(c); return msg.RC; }
+__forceinline __device__ int system(const char *command) { stdlib_system msg(command); return msg.RC; }
 __END_NAMESPACE_STD;
 
 /* Shorthand for type of comparison functions.  */
@@ -235,7 +235,7 @@ extern __device__ int mblen(const char *s, size_t n);
 /* Return the length of the given multibyte character, putting its `wchar_t' representation in *PWC.  */
 extern __device__ int mbtowc(wchar_t *__restrict __pwc, const char *__restrict s, size_t n);
 /* Put the multibyte character represented by WCHAR in S, returning its length.  */
-extern __device__ int wctomb (char *s, wchar_t wchar);
+extern __device__ int wctomb(char *s, wchar_t wchar);
 
 /* Convert a multibyte string to a wide char string.  */
 extern __device__ size_t mbstowcs(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n);

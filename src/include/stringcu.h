@@ -35,71 +35,77 @@ THE SOFTWARE.
 
 __BEGIN_DECLS;
 
+// builtin
+extern void *__cdecl memset(void *, int, size_t);
+extern void *__cdecl memcpy(void *, const void *, size_t);
+
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
-extern void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
+//builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
+#define _memcpy(dest, src, length) if (length) memcpy(dest, src, length)
+
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
-extern void *memmove(void *dest, const void *src, size_t n);
+extern __device__ void *memmove(void *dest, const void *src, size_t n);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Set N bytes of S to C.  */
-extern void *memset(void *s, int c, size_t n);
+//builtin: extern __device__ void *memset(void *s, int c, size_t n);
+#define _memset(dest, value, length) if (length) memset(dest, value, length)
 /* Compare N bytes of S1 and S2.  */
-extern int memcmp(const void *s1, const void *s2, size_t n);
+extern __device__ int memcmp(const void *s1, const void *s2, size_t n);
 /* Search N bytes of S for C.  */
-extern void *memchr(const void *s, int c, size_t n);
+extern __device__ void *memchr(const void *s, int c, size_t n);
 __END_NAMESPACE_STD;
-
 
 __BEGIN_NAMESPACE_STD;
 /* Copy SRC to DEST.  */
-extern char *strcpy(char *__restrict dest, const char *__restrict src);
+extern __device__ char *strcpy(char *__restrict dest, const char *__restrict src);
 /* Copy no more than N characters of SRC to DEST.  */
-extern char *strncpy(char *__restrict dest, const char *__restrict src, size_t n);
+extern __device__ char *strncpy(char *__restrict dest, const char *__restrict src, size_t n);
 
 /* Append SRC onto DEST.  */
-extern char *strcat(char *__restrict dest, const char *__restrict src);
+extern __device__ char *strcat(char *__restrict dest, const char *__restrict src);
 /* Append no more than N characters from SRC onto DEST.  */
-extern char *strncat(char *__restrict dest, const char *__restrict src, size_t n);
+extern __device__ char *strncat(char *__restrict dest, const char *__restrict src, size_t n);
 
 /* Compare S1 and S2.  */
-extern int strcmp(const char *s1, const char *s2);
+extern __device__ int strcmp(const char *s1, const char *s2);
 /* Compare N characters of S1 and S2.  */
-extern int strncmp(const char *s1, const char *s2, size_t n);
+extern __device__ int strncmp(const char *s1, const char *s2, size_t n);
 
 /* Compare the collated forms of S1 and S2.  */
-extern int strcoll(const char *s1, const char *s2);
+extern __device__ int strcoll(const char *s1, const char *s2);
 /* Put a transformation of SRC into no more than N bytes of DEST.  */
-extern size_t strxfrm(char *__restrict dest, const char *__restrict src, size_t n);
+extern __device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, size_t n);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Find the first occurrence of C in S.  */
-extern char *strchr(const char *s, int c);
+extern __device__ char *strchr(const char *s, int c);
 /* Find the last occurrence of C in S.  */
-extern char *strrchr(const char *s, int c);
+extern __device__ char *strrchr(const char *s, int c);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD
-/* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
-extern size_t strcspn(const char *s, const char *reject);
+	/* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
+	extern __device__ size_t strcspn(const char *s, const char *reject);
 /* Return the length of the initial segment of S which consists entirely of characters in ACCEPT.  */
-extern size_t strspn(const char *s, const char *accept);
+extern __device__ size_t strspn(const char *s, const char *accept);
 /* Find the first occurrence in S of any character in ACCEPT.  */
-extern char *strpbrk(const char *s, const char *accept);
+extern __device__ char *strpbrk(const char *s, const char *accept);
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
-extern char *strstr(const char *haystack, const char *needle);
+extern __device__ char *strstr(const char *haystack, const char *needle);
 
 /* Divide S into tokens separated by characters in DELIM.  */
-extern char *strtok(char *__restrict s, const char *__restrict delim);
+extern __device__ char *strtok(char *__restrict s, const char *__restrict delim);
 __END_NAMESPACE_STD;
 
-extern void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n);
+extern __device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n);
 
 __BEGIN_NAMESPACE_STD;
 /* Return the length of S.  */
-//extern size_t strlen(const char *s);
+//extern __device__ size_t strlen(const char *s);
 __forceinline __device__ size_t strlen(const char *s)
 {
 	if (!s) return 0;
@@ -107,11 +113,18 @@ __forceinline __device__ size_t strlen(const char *s)
 	while (*s2) { s2++; }
 	return 0x3fffffff & (int)(s2 - s);
 }
+__forceinline __device__ size_t strlen16(const void *s)
+{
+	if (!s) return 0;
+	register const char *s2 = (const char *)s;
+	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
+	return n;
+}
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Return a string describing the meaning of the `errno' code in ERRNUM.  */
-extern char *strerror(int errnum);
+extern __device__ char *strerror(int errnum);
 __END_NAMESPACE_STD;
 
 #pragma region PRINT

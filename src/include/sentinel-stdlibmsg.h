@@ -30,6 +30,10 @@ THE SOFTWARE.
 #include <sentinel.h>
 #include <stringcu.h>
 
+enum {
+	STDLIB_SYSTEM = 30,
+};
+
 struct stdlib_system
 {
 	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd)
@@ -45,7 +49,7 @@ struct stdlib_system
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_system(const char *str)
-		: Base(false, 19, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelSend(this, sizeof(stdlib_system)); }
+		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelSend(this, sizeof(stdlib_system)); }
 	int RC;
 };
 

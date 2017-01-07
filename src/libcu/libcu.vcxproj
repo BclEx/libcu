@@ -58,8 +58,8 @@
     <CudaCompile Include="stringcu.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libcu.Native.nuspec" />
-    <None Include="Libcu.Native.targets" />
+    <None Include="libcu.native.nuspec" />
+    <None Include="libcu.native.targets" />
     <None Include="_content\sample.libcu.cu" />
     <None Include="_content\sample.libcu.ganging.cu" />
   </ItemGroup>

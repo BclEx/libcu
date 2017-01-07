@@ -8,7 +8,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 // When there are this many entries per bucket, on average, rebuild the hash table to make it larger.
 #define REBUILD_MULTIPLIER	3

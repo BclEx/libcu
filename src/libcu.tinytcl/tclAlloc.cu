@@ -6,7 +6,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include "Tcl+Int.h"
+#include "tclInt.h"
 
 #ifdef TCL_MEM_DEBUG
 #define GUARD_SIZE 8
@@ -148,7 +148,7 @@ __device__ int Tcl_DumpActiveMemory(char *fileName)
 	for (memScanP = _allocHead; memScanP != NULL; memScanP = memScanP->flink) {
 		char *address = &memScanP->body[0];
 		_fprintf(fileP, "%8lx - %8lx  %7ld @ %s %d", address, address + memScanP->length - 1, memScanP->length, memScanP->file, memScanP->line);
-		if (!strcmp(memScanP->file, "Tcl+Hash.cpp") && memScanP->line == 515) {
+		if (!strcmp(memScanP->file, "tclHash.cu") && memScanP->line == 515) {
 			_fprintf(fileP, "\t|%s|", ((Tcl_HashEntry *)address)->key.string);
 		}
 		fputc('\n', fileP);

@@ -12,7 +12,7 @@
 #define __TCL_HASH_H__
 
 #ifndef __TCL_H__
-#include <Tcl.h>
+#include <tcl.h>
 #endif
 
 // Structure definition for an entry in a hash table.  No-one outside Tcl should access any of these fields directly;  use the macros defined below.

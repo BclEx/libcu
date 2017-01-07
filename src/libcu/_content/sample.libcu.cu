@@ -1,8 +1,10 @@
 // set to 1 for examples
 #if 0
 
-#include <RuntimeHost.h>
-#include <Runtime.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cuda_runtimecu.h>
+#include <sentinel.h>
 
 void addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
@@ -14,16 +16,16 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	// snprintf example
 #if 0
 	char buf[100];
-	__snprintf(buf, sizeof(buf), "%d> c[%d] = a[%d] + b[%d]\n", i, c[i], a[i], b[i]);
+	snprintf(buf, sizeof(buf), "%d> c[%d] = a[%d] + b[%d]\n", i, c[i], a[i], b[i]);
 	printf(buf);
 #endif
 
 	// file writing example (x64)
 #if 0
 	if (threadIdx.x != 0) return;
-	FILE *f = _fopen("fopen.txt", "w");
-	_fprintfR(f, "The quick brown fox jumps over the lazy dog");
-	_fcloseR(f);
+	FILE *f = fopen("fopen.txt", "w");
+	fprintf(f, "The quick brown fox jumps over the lazy dog");
+	fclose(f);
 #endif
 }
 
@@ -60,9 +62,9 @@ void addWithCuda(int *c, const int *a, const int *b, unsigned int size)
 
 	deviceHeap = cudaDeviceHeapCreate();
 	cudaDeviceHeapSelect(deviceHeap);
-#if OS_MAP
-	RuntimeSentinel::ServerInitialize();
-#endif
+
+	// Start Sentinel
+	sentinelServerInitialize();
 
 	// Allocate GPU buffers for three vectors (two input, one output)    .
 	cudaErrorCheckF(cudaMalloc((void**)&dev_c, size * sizeof(int)), goto Error);
@@ -94,9 +96,9 @@ Error:
 	cudaFree(dev_a);
 	cudaFree(dev_b);
 
-#if OS_MAP
-	RuntimeSentinel::ServerShutdown();
-#endif
+	// Shutdown Sentinel
+	sentinelServerShutdown();
+
 	cudaDeviceHeapDestroy(deviceHeap);
 }
 

@@ -17,10 +17,10 @@
 #include <stdiocu.h>
 
 #ifndef __TCL_H__
-#include "Tcl.h"
+#include "tcl.h"
 #endif
 #ifndef __TCL_HASH_H__
-#include "Tcl+Hash.h"
+#include "tclHash.h"
 #endif
 #ifndef __UC_LIBC__
 #include <regexcu.h>
@@ -31,22 +31,7 @@
 #include <ctypecu.h>
 #include <stdlibcu.h>
 #include <stringcu.h>
-
-//__device__ int _chdir(const char *path);
-//#define	F_OK 0		// test for existence of file
-//#define	X_OK 0x01	// test for execute or search permission
-//#define	W_OK 0x02	// test for write permission
-//#define	R_OK 0x04	// test for read permission
-//__device__ int _access(const char *path, int amode);
-
-//#include <ctype.h>
-//#include <stdlib.h>
-//#include <string.h>
-
-// At present (12/91) not all stdlib.h implementations declare strtod. The declaration below is here to ensure that it's declared, so that
-// the compiler won't take the default approach of assuming it returns an int.  There's no ANSI prototype for it because there would end
-// up being too many conflicts with slightly-different prototypes.
-//extern double strtod();
+#include <cuda_runtimecu.h>
 
 /*
 *----------------------------------------------------------------
@@ -312,7 +297,7 @@ extern __constant__ char _tclTypeTable[];
 * Procedures shared among Tcl modules but not used by the outside world:
 *----------------------------------------------------------------
 */
-extern __device__ void panic();
+//extern __device__ void panic();
 extern __device__ regex_t *TclCompileRegexp(Tcl_Interp *interp, char *string, int nocase);
 extern __device__ void TclCopyAndCollapse(int count, char *src, char *dst);
 extern __device__ void TclDeleteVars(Interp *iPtr, Tcl_HashTable *tablePtr);
