@@ -5,6 +5,8 @@
 #include <bits/libcu_fpmax.h>
 #include <cuda_runtimecu.h>
 
+__BEGIN_DECLS;
+
 #pragma region header
 
 /* Handle _STRTOD_HEXADECIMAL_FLOATS via libcu config now. */
@@ -784,7 +786,7 @@ __device__ ldiv_t ldiv(long int numer, long int denom)
 
 #if defined(ULLONG_MAX)
 
-__device__ lldiv_t ldiv(long long int numer, long long int denom)
+__device__ lldiv_t lldiv(long long int numer, long long int denom)
 {
 	lldiv_t r;
 	r.quot = numer / denom;
@@ -849,3 +851,5 @@ __device__ void *_reallocg(void *old, size_t newSize)
 }
 
 #pragma endregion
+
+__END_DECLS;

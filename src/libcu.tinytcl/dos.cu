@@ -21,7 +21,7 @@ int cmdbios_memsize(ClientData clientData, Tcl_Interp *interp, int argc, const c
 		return TCL_ERROR;
 	}
 	long memsize = _bios_memsize() * 1024;
-	_sprintf(interp->result, "%ld", memsize);
+	sprintf(interp->result, "%ld", memsize);
 	return TCL_OK;
 }
 #endif
@@ -37,7 +37,7 @@ int cmdbios_equiplist(ClientData clientData, Tcl_Interp *interp, int argc, const
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], "\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%u", _bios_equiplist());
+	sprintf(interp->result, "%u", _bios_equiplist());
 	return TCL_OK;
 }
 #endif
@@ -49,7 +49,7 @@ int cmdkbhit(ClientData clientData, Tcl_Interp *interp, int argc, const char *ar
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], "\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%d", kbhit());
+	sprintf(interp->result, "%d", kbhit());
 	return TCL_OK;
 }
 
@@ -60,7 +60,7 @@ int cmdgetkey(ClientData clientData, Tcl_Interp *interp, int argc, const char *a
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], "\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%d", getch());
+	sprintf(interp->result, "%d", getch());
 	return TCL_OK;
 }
 
@@ -92,7 +92,7 @@ int cmdgetdate(ClientData clientData, Tcl_Interp *interp, int argc, const char *
 	}
 	struct dosdate_t date;
 	_dos_getdate(&date);
-	_sprintf(interp->result,  "%d %d %d", date.month, date.day, date.year);
+	sprintf(interp->result,  "%d %d %d", date.month, date.day, date.year);
 	return TCL_OK;
 }
 
@@ -136,7 +136,7 @@ int cmdgettime(ClientData clientData, Tcl_Interp *interp, int argc, const char *
 	}
 	struct dostime_t time;
 	_dos_gettime(&time);
-	_sprintf(interp->result, "%d %d %d", time.hour, time.minute, time.second);
+	sprintf(interp->result, "%d %d %d", time.hour, time.minute, time.second);
 	return TCL_OK;
 }
 
@@ -214,7 +214,7 @@ int cmddiskfree(ClientData clientData, Tcl_Interp *interp, int argc, const char 
 	long freeClusters = diskfree.avail_clusters;
 	long totalClusters = diskfree.total_clusters;
 	int kbytesPerCluster = (diskfree.bytes_per_sector * diskfree.sectors_per_cluster) / 1024;
-	_sprintf(interp->result, "%ld %ld", (long)(freeClusters * kbytesPerCluster), (long)(totalClusters * kbytesPerCluster));
+	sprintf(interp->result, "%ld %ld", (long)(freeClusters * kbytesPerCluster), (long)(totalClusters * kbytesPerCluster));
 	return TCL_OK;
 }
 #endif
@@ -233,7 +233,7 @@ int cmdgetfat(ClientData clientData, Tcl_Interp *interp, int argc, const char *a
 	}
 	struct fatinfo dtable;
 	getfat(drive, &dtable);
-	_sprintf(interp->result, "%u %u %u %u", dtable.fi_fatid, dtable.fi_sclus, dtable.fi_nclus, dtable.fi_bysec);
+	sprintf(interp->result, "%u %u %u %u", dtable.fi_fatid, dtable.fi_sclus, dtable.fi_nclus, dtable.fi_bysec);
 	return TCL_OK;
 }
 #endif
@@ -251,7 +251,7 @@ int cmdgetdfree(ClientData clientData, Tcl_Interp *interp, int argc, const char 
 	}
 	struct dfree dtable;
 	getdfree(drive, &dtable);
-	_sprintf(interp->result, "%u %u %u %u", dtable.df_avail, dtable.df_total, dtable.df_bsec, dtable.df_sclus);
+	sprintf(interp->result, "%u %u %u %u", dtable.df_avail, dtable.df_total, dtable.df_bsec, dtable.df_sclus);
 	return TCL_OK;
 }
 
@@ -266,7 +266,7 @@ int cmddrive(ClientData clientData, Tcl_Interp *interp, int argc, const char *ar
 	unsigned drive;
 	if (argc == 1) {
 		_dos_getdrive(&drive);
-		_sprintf(interp->result, "%c", drive + 'A' - 1);
+		sprintf(interp->result, "%c", drive + 'A' - 1);
 		return TCL_OK;
 	}
 	if ((drive = convert_drive_id(interp, args[1])) < 0) {
@@ -285,14 +285,14 @@ int cmddrive(ClientData clientData, Tcl_Interp *interp, int argc, const char *ar
 // memfree - returns the amount of RAM left on the system
 int cmdmemfree(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[])
 {
-	_sprintf(interp->result, "%lu", farcoreleft());
+	sprintf(interp->result, "%lu", farcoreleft());
 	return TCL_OK;
 }
 
 // stackfree - returns the amount of stack left on the system
 int cmdstackfree(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[])
 {
-	_sprintf(interp->result, "%u", stackavail());
+	sprintf(interp->result, "%u", stackavail());
 	return TCL_OK;
 }
 
@@ -344,7 +344,7 @@ argcount:
 	if (needData && Tcl_GetInt(interp, args[3], &data) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%u", _bios_serialcom(command, port, data));
+	sprintf(interp->result, "%u", _bios_serialcom(command, port, data));
 	return TCL_OK;
 }
 #endif
@@ -356,7 +356,7 @@ int cmdrawclock(ClientData clientData, Tcl_Interp *interp, int argc, const char 
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], "\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%lu", clock());
+	sprintf(interp->result, "%lu", clock());
 	return TCL_OK;
 }
 
@@ -368,7 +368,7 @@ int cmdgetverify(ClientData clientData, Tcl_Interp *interp, int argc, const char
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], "\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_sprintf(interp->result, "%d", getverify());
+	sprintf(interp->result, "%d", getverify());
 	return TCL_OK;
 }
 #endif
@@ -618,7 +618,7 @@ bad2arg:
 	if (STREQU(args[1], "direct")) {
 		int directvideo;
 		if (argc == 2) {
-			_sprintf(interp->result, "%d", _directvideo);
+			sprintf(interp->result, "%d", _directvideo);
 			return TCL_OK;
 		}
 		if (argc > 3) goto argcount;

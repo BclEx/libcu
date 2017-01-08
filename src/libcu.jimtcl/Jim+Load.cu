@@ -92,7 +92,7 @@ __device__ void Jim_FreeLoadHandles(Jim_Interp *interp)
 #endif
 
 // [load]
-__device__ static int Jim_LoadCoreCommand(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int Jim_LoadCoreCommand(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	if (argc < 2) {
 		Jim_WrongNumArgs(interp, 1, argv, "libraryFile");

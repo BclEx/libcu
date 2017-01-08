@@ -26,14 +26,12 @@
   <ItemGroup>
     <ClInclude Include="regex_compat.h" />
     <ClInclude Include="tcl.h" />
-    <ClInclude Include="Tcl+Gpu.h" />
+    <ClInclude Include="tclGpu.h" />
     <ClInclude Include="tclHash.h" />
     <ClInclude Include="tclInt.h" />
-    <ClInclude Include="Tcl+Load.h" />
-    <ClInclude Include="Tcl+Unix.h" />
-    <ClInclude Include="Tcl+Win.h" />
-    <ClInclude Include="TclEx.h" />
-    <ClInclude Include="TclEx+Int.h" />
+    <ClInclude Include="tclLoad.h" />
+    <ClInclude Include="tclEx.h" />
+    <ClInclude Include="tclExInt.h" />
     <ClInclude Include="TclMod.h" />
   </ItemGroup>
   <ItemGroup>
@@ -48,34 +46,23 @@
     <None Include="tclCmdMZ.cu" />
     <None Include="tclExpr.cu" />
     <None Include="tclGet.cu" />
-    <None Include="Tcl+Glob.cu" />
-    <None Include="Tcl+GpuAZ.cu" />
-    <None Include="Tcl+GpuEnv.cu" />
-    <None Include="Tcl+GpuStr.cu" />
-    <None Include="Tcl+GpuUtil.cu" />
+    <None Include="tclGlob.cu" />
+    <None Include="tclGpuAZ.cu" />
+    <None Include="tclGpuEnv.cu" />
+    <None Include="tclGpuStr.cu" />
+    <None Include="tclGpuUtil.cu" />
     <None Include="tclHash.cu" />
-    <None Include="Tcl+History.cu" />
-    <None Include="Tcl+Load.cu" />
-    <None Include="Tcl+Load-noop.cu" />
-    <None Include="Tcl+Load-unix.cu" />
-    <None Include="Tcl+Load-win.cu" />
-    <None Include="Tcl+Obj.cu" />
-    <None Include="Tcl+Parse.cu" />
-    <None Include="Tcl+Proc.cu" />
-    <None Include="Tcl+UnixAZ.cu" />
-    <None Include="Tcl+UnixEnv.cu" />
-    <None Include="Tcl+UnixStr.cu" />
-    <None Include="Tcl+UnixUtil.cu" />
-    <None Include="Tcl+WinAZ.cu" />
-    <None Include="Tcl+WinEnv.cu" />
-    <None Include="Tcl+WinStr.cu" />
-    <None Include="Tcl+WinUtil.cu" />
-    <None Include="Tcl+Util.cu" />
-    <None Include="Tcl+Var.cu" />
-    <None Include="TclEx+Dbg.cu" />
-    <None Include="TclEx+Extensions.cu" />
-    <None Include="TclEx+Gen.cu" />
-    <None Include="TclEx+UnixReaddir.cu" />
+    <None Include="tclHistory.cu" />
+    <None Include="tclLoad.cu" />
+    <None Include="tclLoad-noop.cu" />
+    <None Include="tclObj.cu" />
+    <None Include="tclParse.cu" />
+    <None Include="tclProc.cu" />
+    <None Include="tclUtil.cu" />
+    <None Include="tclVar.cu" />
+    <None Include="tclExDbg.cu" />
+    <None Include="tclExtensions.cu" />
+    <None Include="tclExGen.cu" />
     <None Include="TclMod.cu" />
   </ItemGroup>
   <ItemGroup>

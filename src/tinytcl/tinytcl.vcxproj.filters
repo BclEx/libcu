@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <CudaCompile Include="TinySh.cu" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="tests\all">
       <Filter>tests</Filter>
     </None>
@@ -136,11 +133,14 @@
     <None Include="tests\while.test">
       <Filter>tests</Filter>
     </None>
-    <None Include="Libcu-TinyTcl.Native.nuspec" />
+    <None Include="libcu-tinytcl.native.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="tests">
       <UniqueIdentifier>{4db761ad-9db1-4c30-8707-84c910d08f2c}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="tinySh.cu" />
   </ItemGroup>
 </Project>

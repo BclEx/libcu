@@ -34,7 +34,7 @@ __device__ int Jim_PackageProvide(Jim_Interp *interp, const char *name, const ch
 
 // Searches along a of paths for the given package.
 // Returns the allocated path to the package file if found, or NULL if not found.
-__device__ static char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListObj, const char *pkgName)
+static __device__ char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListObj, const char *pkgName)
 {
 	char *buf = (char *)Jim_Alloc(JIM_PATH_LEN);
 	int prefixc = Jim_ListLength(interp, prefixListObj);
@@ -59,7 +59,7 @@ __device__ static char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListOb
 }
 
 // Search for a suitable package under every dir specified by JIM_LIBPATH, and load it if possible. If a suitable package was loaded with success JIM_OK is returned, otherwise JIM_ERROR is returned.
-__device__ static int JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
+static __device__ int JimLoadPackage(Jim_Interp *interp, const char *name, int flags)
 {
 	int retCode = JIM_ERROR;
 	Jim_Obj *libPathObjPtr = Jim_GetVariableStr(interp, JIM_LIBPATH, JIM_GLOBAL);
@@ -118,7 +118,7 @@ __device__ int Jim_PackageRequire(Jim_Interp *interp, const char *name, int flag
 //      This procedure is invoked to declare that a particular package is now present in an interpreter. The package must not already be provided in the interpreter.
 // Results:
 //      Returns JIM_OK and sets results as "1.0" (the given version is ignored)
-__device__ static int package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	return Jim_PackageProvide(interp, Jim_String(argv[0]), _package_version_1, JIM_ERRMSG);
 }
@@ -128,7 +128,7 @@ __device__ static int package_cmd_provide(Jim_Interp *interp, int argc, Jim_Obj 
 //
 // Results:
 //      Returns JIM_OK and sets the package version.
-__device__ static int package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	// package require failing is important enough to add to the stack
 	interp->addStackTrace++;
@@ -140,7 +140,7 @@ __device__ static int package_cmd_require(Jim_Interp *interp, int argc, Jim_Obj 
 //
 // Results:
 //      Returns JIM_OK and sets a list of known packages.
-__device__ static int package_cmd_list(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int package_cmd_list(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	Jim_Obj *listObjPtr = Jim_NewListObj(interp, NULL, 0);
 	Jim_HashEntry *he;

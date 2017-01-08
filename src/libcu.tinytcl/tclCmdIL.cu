@@ -892,12 +892,12 @@ __device__ int Tcl_LsearchCmd(ClientData notUsed, Tcl_Interp *interp, int argc, 
 */
 
 // The procedure below is called back by qsort to determine the proper ordering between two elements.
-__device__ static int SortCompareProc(const char *first, const char *second)
+static __device__ int SortCompareProc(const char *first, const char *second)
 {
 	return strcmp(*((char **)first), *((char **)second));
 }
 
-__device__ static int IntegerSortCompareProc(const char *first, const char *second)
+static __device__ int IntegerSortCompareProc(const char *first, const char *second)
 {
 	int firstint = atoi(*((char **) first));
 	int secondint = atoi(*((char **) second));
@@ -905,11 +905,11 @@ __device__ static int IntegerSortCompareProc(const char *first, const char *seco
 }
 
 // Why doesn't qsort allow a user arg!!!
-__device__ static char *_sort_command = 0;
-__device__ static int _sort_result = TCL_OK;
-__device__ static Tcl_Interp *_sort_interp = 0;
+static __device__ char *_sort_command = 0;
+static __device__ int _sort_result = TCL_OK;
+static __device__ Tcl_Interp *_sort_interp = 0;
 
-__device__ static int CommandSortCompareProc(const char *first, const char *second)
+static __device__ int CommandSortCompareProc(const char *first, const char *second)
 {
 	// We have already had an error and we need to return something, so fallback to strcmp
 	if (_sort_result != TCL_OK) {

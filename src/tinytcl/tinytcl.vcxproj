@@ -24,10 +24,10 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <CudaCompile Include="TinySh.cu" />
+    <CudaCompile Include="tinySh.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libcu-TinyTcl.Native.nuspec" />
+    <None Include="libcu-tinytcl.native.nuspec" />
     <None Include="tests\all" />
     <None Include="tests\append.test" />
     <None Include="tests\case.test" />

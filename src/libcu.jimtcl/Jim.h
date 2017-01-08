@@ -1,4 +1,3 @@
-#pragma region License
 /* Jim - A small embeddable Tcl interpreter
 *
 * Copyright 2005 Salvatore Sanfilippo <antirez@invece.org>
@@ -62,25 +61,24 @@
 *
 * This will be an "ongoing work in progress" for some time.
 **/
-#pragma endregion
 
 #ifndef __JIM__H
 #define __JIM__H
 #ifdef __cplusplus
 extern "C" {
 #endif
+	//#include <limitscu.h>
+	#include <stdiocu.h>
+	#include <stdlibcu.h>
+	#include <stdargcu.h>
 	//#include <time.h>
-	//#include <stdiocu.h>
-	//#include <stdlibcu.h>
-	//#include <stdargcu.h>
-	//#include <limits.h>
 
 	// -----------------------------------------------------------------------------
 	// System configuration autoconf (configure) will set these
 	// -----------------------------------------------------------------------------
-#include "Jim+Win32compat.h"
+#include "jim-win32Compat.h"
 #ifndef HAVE_NO_AUTOCONF
-#include "Jim+Config.h"
+#include "jim-config.h"
 #endif
 
 	// -----------------------------------------------------------------------------
@@ -540,7 +538,7 @@ extern "C" {
 	JIM_EXPORT __device__ Jim_Obj *Jim_NewStringObjNoAlloc(Jim_Interp *interp, char *s, int len);
 	JIM_EXPORT __device__ void Jim_AppendString(Jim_Interp *interp, Jim_Obj *objPtr, const char *str, int len);
 	JIM_EXPORT __device__ void Jim_AppendObj(Jim_Interp *interp, Jim_Obj *objPtr, Jim_Obj *appendObjPtr);
-	JIM_EXPORT __device__ void Jim_AppendStrings_(Jim_Interp *interp, Jim_Obj *objPtr, _va_list &args);
+	JIM_EXPORT __device__ void Jim_AppendStrings_(Jim_Interp *interp, Jim_Obj *objPtr, va_list va);
 	JIM_EXPORT __device__ int Jim_StringEqObj(Jim_Obj *aObjPtr, Jim_Obj *bObjPtr);
 	JIM_EXPORT __device__ int Jim_StringMatchObj(Jim_Interp *interp, Jim_Obj *patternObjPtr, Jim_Obj *objPtr, int nocase);
 	JIM_EXPORT __device__ Jim_Obj *Jim_StringRangeObj (Jim_Interp *interp, Jim_Obj *strObjPtr, Jim_Obj *firstObjPtr, Jim_Obj *lastObjPtr);
@@ -569,7 +567,7 @@ extern "C" {
 	JIM_EXPORT __device__ void Jim_FreeInterp(Jim_Interp *i);
 	JIM_EXPORT __device__ int Jim_GetExitCode(Jim_Interp *interp);
 	JIM_EXPORT __device__ const char *Jim_ReturnCode(int code);
-	JIM_EXPORT __device__ void Jim_SetResultFormatted_(Jim_Interp *interp, const char *format, _va_list &args);
+	JIM_EXPORT __device__ void Jim_SetResultFormatted_(Jim_Interp *interp, const char *format, va_list va);
 
 	// commands
 	JIM_EXPORT __device__ void Jim_RegisterCoreCommands(Jim_Interp *interp);
@@ -719,12 +717,10 @@ extern "C" {
 #define JIM_LINK_READ_ONLY 0
 #define JIM_LINK_INT 0
 
-
 	// Misc
 	JIM_EXPORT __device__ int Jim_InitStaticExtensions(Jim_Interp *interp);
 	JIM_EXPORT __device__ int Jim_StringToWide(const char *str, jim_wide *widePtr, int base);
 	JIM_EXPORT __device__ int Jim_IsBigEndian();
-
 
 	// Returns 1 if a signal has been received while in a catch -signal {} clause.
 #define Jim_CheckSignal(i) ((i)->signal_level && (i)->sigmask)
@@ -744,7 +740,7 @@ extern "C" {
 }
 #endif
 
-STDARGvoid(Jim_AppendStrings, objPtr, interp COMMA objPtr, Jim_Interp *interp, Jim_Obj *objPtr);
-STDARGvoid(Jim_SetResultFormatted, format, interp COMMA format, Jim_Interp *interp, const char *format);
+STDARGvoid(Jim_AppendStrings, objPtr(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
+STDARGvoid(Jim_SetResultFormatted, format(interp, format, va), Jim_Interp *interp, const char *format);
 
 #endif // __JIM__H

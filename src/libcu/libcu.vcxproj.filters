@@ -52,11 +52,26 @@
     <ClInclude Include="..\include\regexcu.h">
       <Filter>includes</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sys\bitvec.h">
+    <ClInclude Include="..\include\direntcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sys\bitveccu.h">
       <Filter>includes\sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sys\hash.h">
+    <ClInclude Include="..\include\sys\hashcu.h">
       <Filter>includes\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sys\statcu.h">
+      <Filter>includes\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\libcu_dirent.h">
+      <Filter>includes\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\libcu_stat.h">
+      <Filter>includes\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\unistdcu.h">
+      <Filter>includes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

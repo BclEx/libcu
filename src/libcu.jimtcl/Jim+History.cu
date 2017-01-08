@@ -5,7 +5,7 @@
 #include "Jim+Autoconf.h"
 #include "Jim+Subcmd.h"
 
-__device__ static int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 #if __CUDACC__
 	char *line = nullptr; //Jim_HistoryGetline(Jim_String(argv[0]));
@@ -32,7 +32,7 @@ __device__ static int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj 
 	return JIM_OK;
 }
 
-__device__ static int history_cmd_load(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int history_cmd_load(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 #if __CUDACC__
 	//Jim_HistoryLoad(Jim_String(argv[0]));
@@ -42,7 +42,7 @@ __device__ static int history_cmd_load(Jim_Interp *interp, int argc, Jim_Obj *co
 	return JIM_OK;
 }
 
-__device__ static int history_cmd_save(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int history_cmd_save(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 #if __CUDACC__
 	//Jim_HistorySave(Jim_String(argv[0]));
@@ -52,7 +52,7 @@ __device__ static int history_cmd_save(Jim_Interp *interp, int argc, Jim_Obj *co
 	return JIM_OK;
 }
 
-__device__ static int history_cmd_add(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int history_cmd_add(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 #if __CUDACC__
 	//Jim_HistoryAdd(Jim_String(argv[0]));
@@ -62,7 +62,7 @@ __device__ static int history_cmd_add(Jim_Interp *interp, int argc, Jim_Obj *con
 	return JIM_OK;
 }
 
-__device__ static int history_cmd_show(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int history_cmd_show(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 #if __CUDACC__
 	//Jim_HistoryShow();
@@ -81,12 +81,12 @@ __constant__ static const jim_subcmd_type _history_command_table[] = {
 	{ NULL }
 };
 
-__device__ static int JimHistorySubCmdProc(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int JimHistorySubCmdProc(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	return Jim_CallSubCmd(interp, Jim_ParseSubCmd(interp, _history_command_table, argc, argv), argc, argv);
 }
 
-__device__ static void JimHistoryDelProc(ClientData privData, Jim_Interp *interp)
+static __device__ void JimHistoryDelProc(ClientData privData, Jim_Interp *interp)
 {
 	Jim_Free(privData);
 }

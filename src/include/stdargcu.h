@@ -208,6 +208,12 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_listD _crt_va_listD
 #define va_listE _crt_va_listE
 #define va_listF _crt_va_listF
+// extended-2
+#define va_list11 _crt_va_list11
+#define va_list12 _crt_va_list12
+#define va_list13 _crt_va_list13
+#define va_list14 _crt_va_list14
+#define va_list15 _crt_va_list15
 
 #define _INC_SWPRINTF_INL_
 

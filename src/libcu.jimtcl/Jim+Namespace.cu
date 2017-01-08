@@ -124,14 +124,14 @@ __device__ Jim_Obj *Jim_NamespaceTail(Jim_Interp *interp, Jim_Obj *ns)
 	return (pt && pt != name && pt[-1] == ':' ? Jim_NewStringObj(interp, pt + 1, -1) : ns);
 }
 
-__device__ static Jim_Obj *JimNamespaceCurrent(Jim_Interp *interp)
+static __device__ Jim_Obj *JimNamespaceCurrent(Jim_Interp *interp)
 {
 	Jim_Obj *objPtr = Jim_NewStringObj(interp, "::", 2);
 	Jim_AppendObj(interp, objPtr, interp->framePtr->nsObj);
 	return objPtr;
 }
 
-__device__ static int JimVariableCmd(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int JimVariableCmd(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	int retcode = JIM_OK;
 	if (argc > 3) {
@@ -153,7 +153,7 @@ __device__ static int JimVariableCmd(ClientData dummy, Jim_Interp *interp, int a
 }
 
 // Used to invoke script-based helpers. It would be ideal if ensembles were supported in the core
-__device__ static int Jim_EvalEnsemble2(Jim_Interp *interp, const char *basecmd, const char *subcmd, int argc, Jim_Obj *const *argv)
+static __device__ int Jim_EvalEnsemble2(Jim_Interp *interp, const char *basecmd, const char *subcmd, int argc, Jim_Obj *const *argv)
 {
 	Jim_Obj *prefixObj = Jim_NewStringObj(interp, basecmd, -1);
 	Jim_AppendString(interp, prefixObj, " ", 1);
@@ -161,13 +161,13 @@ __device__ static int Jim_EvalEnsemble2(Jim_Interp *interp, const char *basecmd,
 	return Jim_EvalObjPrefix(interp, prefixObj, argc, argv);
 }
 
-__device__ static const char *const _namespace_options[] = {
+static __device__ const char *const _namespace_options[] = {
 	"eval", "current", "canonical", "qualifiers", "parent", "tail", "delete",
 	"origin", "code", "inscope", "import", "export",
 	"which", "upvar", NULL
 };
 
-__device__ static int JimNamespaceCmd(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int JimNamespaceCmd(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	enum
 	{

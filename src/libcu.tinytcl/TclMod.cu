@@ -9,7 +9,7 @@
 
 __device__ int tcl_split_one_arg(Tcl_Interp *interp, int *argc, const char **args[])
 {
-	if (*argc == 1 && _strchr(*args[0], ' ')) {
+	if (*argc == 1 && strchr(*args[0], ' ')) {
 		if (Tcl_SplitList(interp, (char *)*args[0], argc, args) == TCL_OK) {
 			return 1;
 		}
@@ -20,7 +20,7 @@ __device__ int tcl_split_one_arg(Tcl_Interp *interp, int *argc, const char **arg
 /*
 * Implements the common 'commands' subcommand
 */
-__device__ static int tclmod_cmd_commands(Tcl_Interp *interp, int argc, const char *args[])
+static __device__ int tclmod_cmd_commands(Tcl_Interp *interp, int argc, const char *args[])
 {
 	return TCL_OK; // Nothing to do, since the result has already been created
 }
@@ -43,10 +43,10 @@ __constant__ static const tclmod_command_type tclmod_command_entry = {
 * Returns 1 if match and args OK.
 * Returns -1 if match but args not OK (leaves error in interp->result)
 */
-__device__ static int check_match_command(Tcl_Interp *interp, const tclmod_command_type *ct, int argc, const char *args[])
+static __device__ int check_match_command(Tcl_Interp *interp, const tclmod_command_type *ct, int argc, const char *args[])
 {
-	if (!_strcmp(ct->cmd, args[1])) {
-		if (argc == 3 && !_strcmp(args[2], "?")) {
+	if (!strcmp(ct->cmd, args[1])) {
+		if (argc == 3 && !strcmp(args[2], "?")) {
 			Tcl_AppendResult (interp, "Usage: ", args[0], " ", ct->cmd, " ", ct->args, "\n\n", ct->description, (char *)NULL);
 			return -1;
 		}
@@ -79,7 +79,7 @@ __device__ const tclmod_command_type *tclmod_parse_cmd(Tcl_Interp *interp, const
 	}
 
 	// No match, so see if it is a builtin command
-	if (!_strcmp(args[1], "commands")) {
+	if (!strcmp(args[1], "commands")) {
 		const tclmod_command_type *ct;
 		for (ct = command_table; ct->cmd; ct++) {
 			if (!(ct->flags & TCL_MODFLAG_HIDDEN)) {
@@ -90,7 +90,7 @@ __device__ const tclmod_command_type *tclmod_parse_cmd(Tcl_Interp *interp, const
 	}
 
 	// No, so show usage
-	if (!_strcmp(args[1], "?")) {
+	if (!strcmp(args[1], "?")) {
 		Tcl_AppendResult(interp, "Usage: \"", args[0], " command ...\", where command is one of: ", (char *)NULL);
 	}
 	else {

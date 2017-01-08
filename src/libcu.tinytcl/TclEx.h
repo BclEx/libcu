@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #ifndef __TCL_H__
-#include "Tcl.h"
+#include "tcl.h"
 #endif
 
 // Version suffix for extended Tcl, this is appended to the standard Tcl version to form the actual extended Tcl version.

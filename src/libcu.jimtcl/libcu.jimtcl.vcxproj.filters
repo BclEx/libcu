@@ -1,15 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Jim.cu" />
-    <ClCompile Include="Jim+Aio.cu" />
-    <ClCompile Include="Jim+Array.cu" />
-    <ClCompile Include="Jim+Clock.cu" />
-    <ClCompile Include="Jim+EventLoop.cu" />
-    <ClCompile Include="Jim+Exec.cu" />
-    <ClCompile Include="Jim+File.cu" />
     <ClCompile Include="Jim+Format.cu" />
-    <ClCompile Include="Jim+Gpu.cu" />
     <ClCompile Include="Jim+History.cu" />
     <ClCompile Include="Jim+Interactive.cu" />
     <ClCompile Include="Jim+Load.cu" />
@@ -23,25 +15,32 @@
     <ClCompile Include="Jim+Sdl.cu" />
     <ClCompile Include="Jim+Signal.cu" />
     <ClCompile Include="Jim+Sqlite3.cu" />
-    <ClCompile Include="Jim+Subcmd.cu" />
     <ClCompile Include="Jim+Syslog.cu" />
     <ClCompile Include="Jim+TclPrefix.cu" />
-    <ClCompile Include="Jim+Win32.cu" />
-    <ClCompile Include="Jim+Win32compat.cu" />
     <ClCompile Include="JimEx.cu" />
-    <ClCompile Include="Init.cu" />
     <ClCompile Include="Utf8.cu" />
+    <ClCompile Include="jim.cu" />
+    <ClCompile Include="jim-win32compat.cu" />
+    <ClCompile Include="jim-array.cu" />
+    <ClCompile Include="jim-subcmd.cu" />
+    <ClCompile Include="jim-clock.cu" />
+    <ClCompile Include="jim-eventloop.cu" />
+    <ClCompile Include="jim-exec.cu" />
+    <ClCompile Include="jim-file.cu" />
+    <ClCompile Include="jim-gpu.cu" />
+    <ClCompile Include="init.cu" />
+    <ClCompile Include="jim-aio.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Jim.h" />
-    <ClInclude Include="Jim+Autoconf.h" />
-    <ClInclude Include="Jim+Config.h" />
-    <ClInclude Include="Jim+EventLoop.h" />
     <ClInclude Include="Jim+Signal.h" />
-    <ClInclude Include="Jim+Subcmd.h" />
-    <ClInclude Include="Jim+Win32compat.h" />
     <ClInclude Include="JimEx.h" />
     <ClInclude Include="Utf8.h" />
+    <ClInclude Include="jim.h" />
+    <ClInclude Include="jim-win32compat.h" />
+    <ClInclude Include="jim-config.h" />
+    <ClInclude Include="jim-subcmd.h" />
+    <ClInclude Include="jim-autoconf.h" />
+    <ClInclude Include="jim-eventLoop.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RTcl.cu" />

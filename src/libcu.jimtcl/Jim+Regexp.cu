@@ -53,7 +53,7 @@
 #include "Regex.h"
 #include "Jim.h"
 
-__device__ static void FreeRegexpInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
+static __device__ void FreeRegexpInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
 {
 	regfree((regex_t *)objPtr->internalRep.regexpValue.compre);
 	Jim_Free(objPtr->internalRep.regexpValue.compre);
@@ -67,7 +67,7 @@ __constant__ static const Jim_ObjType _regexpObjType = {
 	JIM_TYPE_NONE
 };
 
-__device__ static regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned flags)
+static __device__ regex_t *SetRegexpFromAny(Jim_Interp *interp, Jim_Obj *objPtr, unsigned flags)
 {
 	// Check if the object is already an uptodate variable
 	if (objPtr->typePtr == &_regexpObjType && objPtr->internalRep.regexpValue.compre && objPtr->internalRep.regexpValue.flags == flags)

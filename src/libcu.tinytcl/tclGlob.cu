@@ -38,7 +38,7 @@ static __device__ int DoGlob(Tcl_Interp *interp, char *dir, char *rem);
 *
 *----------------------------------------------------------------------
 */
-__device__ static void AppendResult(Tcl_Interp *interp, char *dir, char *separator, char *name, int nameLength)
+static __device__ void AppendResult(Tcl_Interp *interp, char *dir, char *separator, char *name, int nameLength)
 {
 	// Next, see if we can put together a valid list element from dir and name by calling Tcl_AppendResult.
 	int dirFlags;
@@ -63,8 +63,8 @@ __device__ static void AppendResult(Tcl_Interp *interp, char *dir, char *separat
 
 	// This name has weird characters in it, so we have to convert it to a list element.  To do that, we have to merge the characters
 	// into a single name.  To do that, malloc a buffer to hold everything.
-	char *p = (char *)_allocFast((unsigned)(_strlen(dir) + _strlen(separator) + nameLength + 1));
-	_sprintf(p, "%s%s%s", dir, separator, name);
+	char *p = (char *)_allocFast((unsigned)(strlen(dir) + strlen(separator) + nameLength + 1));
+	sprintf(p, "%s%s%s", dir, separator, name);
 	name[nameLength] = saved;
 	Tcl_AppendElement(interp, p, 0);
 	_freeFast(p);
@@ -87,7 +87,8 @@ __device__ static void AppendResult(Tcl_Interp *interp, char *dir, char *separat
 *
 *----------------------------------------------------------------------
 */
-__device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
+#undef STATIC_SIZE
+static __device__ int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 {
 #define STATIC_SIZE 200 // When generating information for the next lower call, use static areas if the name is short, and malloc if the name is longer.
 	// When this procedure is entered, the name to be globbed may already have been partly expanded by ancestor invocations of
@@ -133,7 +134,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 			interp->result = "unmatched open-brace in file name";
 			return TCL_ERROR;
 		}
-		int remLength = _strlen(rem) + 1;
+		int remLength = strlen(rem) + 1;
 		char *newRem;
 		if (remLength <= STATIC_SIZE) {
 			newRem = static1;
@@ -141,13 +142,13 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 			newRem = (char *)_allocFast((unsigned)remLength);
 		}
 		int l1 = (int)(openBrace-rem);
-		_strncpy(newRem, rem, l1);
+		strncpy(newRem, rem, l1);
 		for (p = openBrace; *p != '}'; ) {
 			char *element = p+1;
 			for (p = element; ((*p != '}') && (*p != ',')); p++) { } /* Empty loop body:  just find end of this element. */
 			int l2 = (int)(p - element);
-			_strncpy(newRem+l1, element, l2);
-			_strcpy(newRem+l1+l2, closeBrace+1);
+			strncpy(newRem+l1, element, l2);
+			strcpy(newRem+l1+l2, closeBrace+1);
 			if (DoGlob(interp, dir, newRem) != TCL_OK) {
 				return TCL_ERROR;
 			}
@@ -170,16 +171,16 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 			dirName = dir;
 		}
 		struct stat statBuf;
-		if (__stat(dirName, &statBuf) != 0 || !S_ISDIR(statBuf.st_mode)) {
+		if (stat(dirName, &statBuf) != 0 || !S_ISDIR(statBuf.st_mode)) {
 			return TCL_OK;
 		}
-		DIR *d = _opendir(dirName);
+		DIR *d = opendir(dirName);
 		if (d == NULL) {
 			Tcl_ResetResult(interp);
 			Tcl_AppendResult(interp, "couldn't read directory \"", dirName, "\": ", Tcl_OSError(interp), (char *)NULL);
 			return TCL_ERROR;
 		}
-		int l1 = _strlen(dir);
+		int l1 = strlen(dir);
 		int l2 = (int)(p - rem);
 		char static2[STATIC_SIZE];
 		char *pattern;
@@ -188,11 +189,11 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 		} else {
 			pattern = (char *)_allocFast((unsigned)(l2+1));
 		}
-		_strncpy(pattern, rem, l2);
+		strncpy(pattern, rem, l2);
 		pattern[l2] = '\0';
 		result = TCL_OK;
 		while (true) {
-			struct _dirent *entryPtr = _readdir(d);
+			struct dirent *entryPtr = readdir(d);
 			if (entryPtr == NULL) {
 				break;
 			}
@@ -201,7 +202,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 				continue;
 			}
 			if (Tcl_StringMatch(entryPtr->d_name, pattern)) {
-				int nameLength = _strlen(entryPtr->d_name);
+				int nameLength = strlen(entryPtr->d_name);
 				if (*p == 0) {
 					AppendResult(interp, dir, separator, entryPtr->d_name, nameLength);
 				} else {
@@ -212,7 +213,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 					} else {
 						newDir = (char *)_allocFast((unsigned)(l1+nameLength+2));
 					}
-					_sprintf(newDir, "%s%s%s", dir, separator, entryPtr->d_name);
+					sprintf(newDir, "%s%s%s", dir, separator, entryPtr->d_name);
 					result = DoGlob(interp, newDir, p+1);
 					if (newDir != static1) {
 						_freeFast(newDir);
@@ -223,7 +224,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 				}
 			}
 		}
-		_closedir(d);
+		closedir(d);
 		if (pattern != static2) {
 			_freeFast(pattern);
 		}
@@ -235,7 +236,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 	if (*p == 0) {
 		AppendResult(interp, dir, separator, rem, (int)(p-rem));
 	} else {
-		int l1 = _strlen(dir);
+		int l1 = strlen(dir);
 		int l2 = l1 + (int)(p - rem) + 2;
 		char static1[STATIC_SIZE];
 		char *newDir;
@@ -244,7 +245,7 @@ __device__ static int DoGlob(Tcl_Interp *interp, char *dir, char *rem)
 		} else {
 			newDir = (char *) _allocFast((unsigned) l2);
 		}
-		_sprintf(newDir, "%s%s%.*s", dir, separator, (int)(p-rem), rem);
+		sprintf(newDir, "%s%s%.*s", dir, separator, (int)(p-rem), rem);
 		result = DoGlob(interp, newDir, p+1);
 		if (newDir != static1) {
 			_freeFast(newDir);
@@ -291,7 +292,7 @@ __device__ char *Tcl_TildeSubst(Tcl_Interp *interp, char *name)
 	bool fromPw = false;
 	char *dir;
 	if (name[1] == '/' || name[1] == '\0') {
-		dir = _getenv("HOME");
+		dir = getenv("HOME");
 		if (dir == NULL) {
 			Tcl_ResetResult(interp);
 			Tcl_AppendResult(interp, "couldn't find HOME environment ", "variable to expand \"", name, "\"", (char *)NULL);
@@ -305,7 +306,7 @@ __device__ char *Tcl_TildeSubst(Tcl_Interp *interp, char *name)
 		if (length >= curSize) {
 			length = curSize-1;
 		}
-		_memcpy(curBuf, (name+1), length);
+		memcpy(curBuf, (name+1), length);
 		curBuf[length] = '\0';
 		pwPtr = getpwnam(curBuf);
 		if (pwPtr == NULL) {
@@ -319,18 +320,18 @@ __device__ char *Tcl_TildeSubst(Tcl_Interp *interp, char *name)
 	}
 
 	// Grow the buffer if necessary to make enough space for the full file name.
-	length = _strlen(dir) + _strlen(p);
+	length = strlen(dir) + strlen(p);
 	if (length >= curSize) {
 		if (curBuf != staticBuf) {
 			_freeFast(curBuf);
 		}
 		curSize = length + 1;
-		curBuf = (char *) _allocFast((unsigned) curSize);
+		curBuf = (char *)_allocFast((unsigned)curSize);
 	}
 
 	// Finally, concatenate the directory name with the remainder of the path in the buffer.
-	_strcpy(curBuf, dir);
-	_strcat(curBuf, p);
+	strcpy(curBuf, dir);
+	strcat(curBuf, p);
 	if (fromPw) {
 		endpwent();
 	}
@@ -365,7 +366,7 @@ notEnoughArgs:
 		return TCL_ERROR;
 	}
 	bool noComplain = false;
-	if (args[1][0] == '-' && !_strcmp(args[1], "-nocomplain")) {
+	if (args[1][0] == '-' && !strcmp(args[1], "-nocomplain")) {
 		if (argc < 3) {
 			goto notEnoughArgs;
 		}

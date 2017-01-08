@@ -30,12 +30,13 @@ THE SOFTWARE.
 #elif !defined(_ERRNO_H)
 #define _ERRNO_H
 #include <crtdefscu.h>
-#define _CRT_ERRNO_DEFINED
-#include <errno.h>
 
 extern __device__ int *_errno(void);
-extern __device__ errno_t _set_errno(int value);
-extern __device__ errno_t _get_errno(int *value);
 #define errno (*_errno())
 
+extern __device__ errno_t _set_errno(int value);
+extern __device__ errno_t _get_errno(int *value);
+
+#define _CRT_ERRNO_DEFINED
+#include <errno.h>
 #endif  /* _ERRNO_H */

@@ -103,11 +103,11 @@ __constant__ char *_operatorStrings[] = {
 };
 
 // Declarations for local procedures to this file:
-__device__ static int ExprGetValue(Tcl_Interp *interp, ExprInfo *infoPtr, int prec, Value *valuePtr);
-__device__ static int ExprLex(Tcl_Interp *interp, ExprInfo *infoPtr, Value *valuePtr);
-__device__ static void ExprMakeString(Value *valuePtr);
-__device__ static int ExprParseString(Tcl_Interp *interp, char *string, Value *valuePtr);
-__device__ static int ExprTopLevel(Tcl_Interp *interp, char *string, Value *valuePtr);
+static __device__ int ExprGetValue(Tcl_Interp *interp, ExprInfo *infoPtr, int prec, Value *valuePtr);
+static __device__ int ExprLex(Tcl_Interp *interp, ExprInfo *infoPtr, Value *valuePtr);
+static __device__ void ExprMakeString(Value *valuePtr);
+static __device__ int ExprParseString(Tcl_Interp *interp, char *string, Value *valuePtr);
+static __device__ int ExprTopLevel(Tcl_Interp *interp, char *string, Value *valuePtr);
 
 /*
 *--------------------------------------------------------------
@@ -125,7 +125,7 @@ __device__ static int ExprTopLevel(Tcl_Interp *interp, char *string, Value *valu
 *
 *--------------------------------------------------------------
 */
-__device__ static int ExprParseString(Tcl_Interp *interp, char *string, Value *valuePtr)
+static __device__ int ExprParseString(Tcl_Interp *interp, char *string, Value *valuePtr)
 {
 	// Try to convert the string to a number.
 	register char c = *string;
@@ -187,7 +187,7 @@ __device__ static int ExprParseString(Tcl_Interp *interp, char *string, Value *v
 *
 *----------------------------------------------------------------------
 */
-__device__ static int ExprLex(Tcl_Interp *interp, register ExprInfo *infoPtr, register Value *valuePtr)
+static __device__ int ExprLex(Tcl_Interp *interp, register ExprInfo *infoPtr, register Value *valuePtr)
 {
 	int result;
 	register char *p = infoPtr->expr;
@@ -409,7 +409,7 @@ __device__ static int ExprLex(Tcl_Interp *interp, register ExprInfo *infoPtr, re
 *
 *----------------------------------------------------------------------
 */
-__device__ static int ExprGetValue(Tcl_Interp *interp, register ExprInfo *infoPtr, int prec, Value *valuePtr)
+static __device__ int ExprGetValue(Tcl_Interp *interp, register ExprInfo *infoPtr, int prec, Value *valuePtr)
 {
 	Interp *iPtr = (Interp *)interp;
 	int operator_; // Current operator (either unary or binary).
@@ -823,7 +823,7 @@ illegalType:
 *
 *--------------------------------------------------------------
 */
-__device__ static void ExprMakeString(register Value *valuePtr)
+static __device__ void ExprMakeString(register Value *valuePtr)
 {
 	int shortfall = 150 - (int)(valuePtr->pv.end - valuePtr->pv.buffer);
 	if (shortfall > 0) {
@@ -854,7 +854,7 @@ __device__ static void ExprMakeString(register Value *valuePtr)
 *
 *--------------------------------------------------------------
 */
-__device__ static int ExprTopLevel(Tcl_Interp *interp, char *string, Value *valuePtr)
+static __device__ int ExprTopLevel(Tcl_Interp *interp, char *string, Value *valuePtr)
 {
 	ExprInfo info;
 	info.originalExpr = string;

@@ -6,8 +6,8 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#ifndef _TCL_INT_H_
-#define _TCL_INT_H_
+#ifndef _TCLINT_H_
+#define _TCLINT_H_
 
 // Common include files needed by most of the Tcl source files are included here, so that system-dependent personalizations for the
 // include files only have to be made in once place.  This results in a few extra includes, but greater modularity.  The order of
@@ -19,10 +19,10 @@
 #ifndef __TCL_H__
 #include "tcl.h"
 #endif
-#ifndef __TCL_HASH_H__
+#ifndef __TCLHASH_H__
 #include "tclHash.h"
 #endif
-#ifndef __UC_LIBC__
+#ifndef __LIBCU__
 #include <regexcu.h>
 #else
 #include "regex_compat.h"
@@ -369,7 +369,7 @@ extern __device__ int Tcl_Cmd(ClientData clientData, Tcl_Interp *interp, int arg
 
 /*
 *----------------------------------------------------------------
-* Command procedures in the UNIX core:
+* Command procedures in the SYSTEM core:
 *----------------------------------------------------------------
 */
 extern __device__ int Tcl_CdCmd(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[]);
@@ -392,4 +392,4 @@ extern __device__ int Tcl_TimeCmd(ClientData clientData, Tcl_Interp *interp, int
 extern __device__ int Tcl_LoadCmd(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[]);
 extern __device__ int Tcl_PidCmd(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[]);
 
-#endif /* _TCL_INT_H_ */
+#endif /* _TCLINT_H_ */

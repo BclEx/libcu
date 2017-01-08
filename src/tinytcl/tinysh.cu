@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <RuntimeHost.h>
-#include <Tcl.h>
-#include <TclEx+Int.h>
+#include <tcl.h>
+#include <tclExInt.h>
 #ifdef DEBUGGER
-#include <TclEx+Dbg.h>
+#include <tclExDbg.h>
 #endif
 
 __device__ void TclEx_InitExtensions(Tcl_Interp *interp);
@@ -19,7 +19,7 @@ __device__ int cmdCheckmem(ClientData clientData, Tcl_Interp *interp, int argc, 
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " fileName\"", (char *)NULL);
 		return TCL_ERROR;
 	}
-	_strcpy(_dumpFile, args[1]);
+	strcpy(_dumpFile, args[1]);
 	_quitFlag = true;
 	return TCL_OK;
 }

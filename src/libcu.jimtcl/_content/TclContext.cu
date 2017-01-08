@@ -11,7 +11,7 @@
 #ifndef OMIT_INCRBLOB
 
 // Close all incrblob channels opened using database connection pDb. This is called when shutting down the database connection.
-__device__ static void CloseIncrblobChannels(TclContext *tctx)
+static __device__ void CloseIncrblobChannels(TclContext *tctx)
 {
 	IncrblobChannel *next;
 	for (IncrblobChannel *p = tctx->Incrblobs; p; p = next)
@@ -23,7 +23,7 @@ __device__ static void CloseIncrblobChannels(TclContext *tctx)
 }
 
 // Close an incremental blob channel.
-__device__ static int IncrblobClose(ClientData instanceData, Jim_Interp *interp)
+static __device__ int IncrblobClose(ClientData instanceData, Jim_Interp *interp)
 {
 	IncrblobChannel *p = (IncrblobChannel *)instanceData;
 	int rc = Vdbe::Blob_Close(p->Blob);
@@ -49,7 +49,7 @@ __device__ static int IncrblobClose(ClientData instanceData, Jim_Interp *interp)
 }
 
 // Read data from an incremental blob channel.
-__device__ static int IncrblobInput(ClientData instanceData, char *buf, int bufSize, int *errorCodePtr)
+static __device__ int IncrblobInput(ClientData instanceData, char *buf, int bufSize, int *errorCodePtr)
 {
 	IncrblobChannel *p = (IncrblobChannel *)instanceData;
 	int read = bufSize; // Number of bytes to read
@@ -69,7 +69,7 @@ __device__ static int IncrblobInput(ClientData instanceData, char *buf, int bufS
 }
 
 //  Write data to an incremental blob channel.
-__device__ static int IncrblobOutput(ClientData instanceData, const char *buf, int toWrite, int *errorCodePtr)
+static __device__ int IncrblobOutput(ClientData instanceData, const char *buf, int toWrite, int *errorCodePtr)
 {
 	IncrblobChannel *p = (IncrblobChannel *)instanceData;
 	int write = toWrite; // Number of bytes to write
@@ -92,7 +92,7 @@ __device__ static int IncrblobOutput(ClientData instanceData, const char *buf, i
 }
 
 // Seek an incremental blob channel.
-__device__ static int IncrblobSeek(ClientData instanceData, long offset, int seekMode, int *errorCodePtr)
+static __device__ int IncrblobSeek(ClientData instanceData, long offset, int seekMode, int *errorCodePtr)
 {
 	IncrblobChannel *p = (IncrblobChannel *)instanceData;
 	switch (seekMode)
@@ -105,8 +105,8 @@ __device__ static int IncrblobSeek(ClientData instanceData, long offset, int see
 	return p->Seek;
 }
 
-__device__ static void IncrblobWatch(ClientData instanceData, int mode) { } // NO-OP
-__device__ static int IncrblobHandle(ClientData instanceData, int dir, ClientData *ptr)
+static __device__ void IncrblobWatch(ClientData instanceData, int mode) { } // NO-OP
+static __device__ int IncrblobHandle(ClientData instanceData, int dir, ClientData *ptr)
 {
 	return JIM_ERROR;
 }
@@ -130,7 +130,7 @@ __constant__ static Jim_ChannelType IncrblobChannelType = {
 };
 
 // Create a new incrblob channel.
-__device__ static int CreateIncrblobChannel(Jim_Interp *interp, TclContext *pDb, const char *dbName, const char *tableName, const char *columnName, int64 row, bool isReadonly)
+static __device__ int CreateIncrblobChannel(Jim_Interp *interp, TclContext *pDb, const char *dbName, const char *tableName, const char *columnName, int64 row, bool isReadonly)
 {
 	IncrblobChannel *p;
 	Context *ctx = tctx->Ctx;
@@ -178,7 +178,7 @@ __device__ static int CreateIncrblobChannel(Jim_Interp *interp, TclContext *pDb,
 //
 // Scripts that are safe to use with Jim_EvalObjv() consists of a command name followed by zero or more arguments with no [...] or $
 // or {...} or ; to be seen anywhere.  Most callback scripts consist of just a single procedure name and they meet this requirement.
-__device__ static bool SafeToUseEvalObjv(Jim_Interp *interp, Jim_Obj *cmd)
+static __device__ bool SafeToUseEvalObjv(Jim_Interp *interp, Jim_Obj *cmd)
 {
 	// We could try to do something with Jim_Parse().  But we will instead just do a search for forbidden characters.  If any of the forbidden
 	// characters appear in pCmd, we will report the string as unsafe.
@@ -193,7 +193,7 @@ __device__ static bool SafeToUseEvalObjv(Jim_Interp *interp, Jim_Obj *cmd)
 }
 
 // Find an SqlFunc structure with the given name.  Or create a new one if an existing one cannot be found.  Return a pointer to the structure.
-__device__ static SqlFunc *FindSqlFunc(TclContext *tctx, const char *name)
+static __device__ SqlFunc *FindSqlFunc(TclContext *tctx, const char *name)
 {
 	SqlFunc *newFunc = (SqlFunc *)Jim_Alloc(sizeof(*newFunc) + _strlen(name) + 1);
 	newFunc->Name = (char *)&newFunc[1];
@@ -217,7 +217,7 @@ __device__ static SqlFunc *FindSqlFunc(TclContext *tctx, const char *name)
 }
 
 // Free a single SqlPreparedStmt object.
-__device__ static void DbFreeStmt(SqlPreparedStmt *stmt)
+static __device__ void DbFreeStmt(SqlPreparedStmt *stmt)
 {
 #ifdef _TEST
 	if (!Vdbe::Sql(stmt->Stmt))
@@ -228,7 +228,7 @@ __device__ static void DbFreeStmt(SqlPreparedStmt *stmt)
 }
 
 // Finalize and free a list of prepared statements
-__device__ static void FlushStmtCache(TclContext *tctx)
+static __device__ void FlushStmtCache(TclContext *tctx)
 {
 	SqlPreparedStmt *next;
 	for (SqlPreparedStmt *p = tctx->Stmts.data; p; p = next)
@@ -242,7 +242,7 @@ __device__ static void FlushStmtCache(TclContext *tctx)
 }
 
 // JIM calls this procedure when an sqlite3 database command is deleted.
-__device__ static void DbDeleteCmd(ClientData data, Jim_Interp *interp)
+static __device__ void DbDeleteCmd(ClientData data, Jim_Interp *interp)
 {
 	TclContext *tctx = (TclContext *)data;
 	FlushStmtCache(tctx);
@@ -288,7 +288,7 @@ __device__ static void DbDeleteCmd(ClientData data, Jim_Interp *interp)
 #pragma region Hooks
 
 // This routine is called when a database file is locked while trying to execute SQL.
-__device__ static int DbBusyHandler(void *cd, int tries)
+static __device__ int DbBusyHandler(void *cd, int tries)
 {
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
@@ -304,7 +304,7 @@ __device__ static int DbBusyHandler(void *cd, int tries)
 
 #ifndef OMIT_PROGRESS_CALLBACK
 // This routine is invoked as the 'progress callback' for the database.
-__device__ static int DbProgressHandler(void *cd)
+static __device__ int DbProgressHandler(void *cd)
 {
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
@@ -318,7 +318,7 @@ __device__ static int DbProgressHandler(void *cd)
 
 #ifndef OMIT_TRACE
 // This routine is called by the SQLite trace handler whenever a new block of SQL is executed.  The JIM script in pDb->zTrace is executed.
-__device__ static void DbTraceHandler(void *cd, const char *sql)
+static __device__ void DbTraceHandler(void *cd, const char *sql)
 {
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
@@ -329,7 +329,7 @@ __device__ static void DbTraceHandler(void *cd, const char *sql)
 }
 
 // This routine is called by the SQLite profile handler after a statement SQL has executed.  The JIM script in pDb->zProfile is evaluated.
-__device__ static void DbProfileHandler(void *cd, const char *sql, uint64 tm)
+static __device__ void DbProfileHandler(void *cd, const char *sql, uint64 tm)
 {
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
@@ -345,7 +345,7 @@ __device__ static void DbProfileHandler(void *cd, const char *sql, uint64 tm)
 
 // This routine is called when a transaction is committed.  The JIM script in pDb->zCommit is executed.  If it returns non-zero or
 // if it throws an exception, the transaction is rolled back instead of being committed.
-__device__ static ::RC DbCommitHandler(void *cd)
+static __device__ ::RC DbCommitHandler(void *cd)
 {
 	TclContext *tctx = (TclContext *)cd;
 	int rc = Jim_Eval(tctx->Interp, tctx->Commit);
@@ -354,7 +354,7 @@ __device__ static ::RC DbCommitHandler(void *cd)
 	return RC_OK;
 }
 
-__device__ static void DbRollbackHandler(void *clientData)
+static __device__ void DbRollbackHandler(void *clientData)
 {
 	TclContext *tctx = (TclContext *)clientData;
 	_assert(tctx->RollbackHook);
@@ -362,7 +362,7 @@ __device__ static void DbRollbackHandler(void *clientData)
 }
 
 // This procedure handles wal_hook callbacks.
-__device__ static int DbWalHandler(void *clientData, Context *ctx, const char *dbName,  int entrys)
+static __device__ int DbWalHandler(void *clientData, Context *ctx, const char *dbName,  int entrys)
 {
 	TclContext *tctx = (TclContext *)clientData;
 	Jim_Interp *interp = tctx->Interp;
@@ -379,7 +379,7 @@ __device__ static int DbWalHandler(void *clientData, Context *ctx, const char *d
 }
 
 #if defined(_TEST) && defined(ENABLE_UNLOCK_NOTIFY)
-__device__ static void SetTestUnlockNotifyVars(Jim_Interp *interp, int argId, int argsLength)
+static __device__ void SetTestUnlockNotifyVars(Jim_Interp *interp, int argId, int argsLength)
 {
 	char b[64];
 	__snprintf(b, sizeof(b), "%d", argId);
@@ -392,7 +392,7 @@ __device__ static void SetTestUnlockNotifyVars(Jim_Interp *interp, int argId, in
 #endif
 
 #ifdef ENABLE_UNLOCK_NOTIFY
-__device__ static void DbUnlockNotify(void **args, int argsLength)
+static __device__ void DbUnlockNotify(void **args, int argsLength)
 {
 	for (int i = 0; i < argsLength; i++)
 	{
@@ -408,7 +408,7 @@ __device__ static void DbUnlockNotify(void **args, int argsLength)
 }
 #endif
 
-__device__ static void DbUpdateHandler(void *p, TK op, const char *dbName, const char *tableName, int64 rowid)
+static __device__ void DbUpdateHandler(void *p, TK op, const char *dbName, const char *tableName, int64 rowid)
 {
 	TclContext *tctx = (TclContext *)p;
 	Jim_Interp *interp = tctx->Interp;
@@ -423,7 +423,7 @@ __device__ static void DbUpdateHandler(void *p, TK op, const char *dbName, const
 	Jim_EvalObj(interp, cmd);
 }
 
-__device__ static void TclCollateNeeded(void *p, Context *ctx, TEXTENCODE encode, const char *name)
+static __device__ void TclCollateNeeded(void *p, Context *ctx, TEXTENCODE encode, const char *name)
 {
 	TclContext *tctx = (TclContext *)p;
 	Jim_Interp *interp = tctx->Interp;
@@ -435,7 +435,7 @@ __device__ static void TclCollateNeeded(void *p, Context *ctx, TEXTENCODE encode
 }
 
 // This routine is called to evaluate an SQL collation function implemented using JIM script.
-__device__ static int TclSqlCollate(void *p1, int aLength, const void *a, int bLength, const void *b)
+static __device__ int TclSqlCollate(void *p1, int aLength, const void *a, int bLength, const void *b)
 {
 	SqlCollate *p = (SqlCollate *)p1;
 	Jim_Interp *interp = p->Interp;
@@ -449,7 +449,7 @@ __device__ static int TclSqlCollate(void *p1, int aLength, const void *a, int bL
 }
 
 // This routine is called to evaluate an SQL function implemented using JIM script.
-__device__ static void TclSqlFunc(FuncContext *fctx, int argc, Mem **argv)
+static __device__ void TclSqlFunc(FuncContext *fctx, int argc, Mem **argv)
 {
 	SqlFunc *p = (SqlFunc *)Vdbe::User_Data(fctx);
 	Jim_Interp *interp = p->Interp;
@@ -557,7 +557,7 @@ __device__ static void TclSqlFunc(FuncContext *fctx, int argc, Mem **argv)
 #ifndef OMIT_AUTHORIZATION
 // This is the authentication function.  It appends the authentication type code and the two arguments to zCmd[] then invokes the result
 // on the interpreter.  The reply is examined to determine if the authentication fails or succeeds.
-__device__ static ARC AuthCallback(void *arg, int code, const char *arg1, const char *arg2, const char *arg3, const char *arg4)
+static __device__ ARC AuthCallback(void *arg, int code, const char *arg1, const char *arg2, const char *arg3, const char *arg4)
 {
 	TclContext *tctx = (TclContext *)arg;
 	Jim_Interp *interp = tctx->Interp;
@@ -624,11 +624,11 @@ __device__ static ARC AuthCallback(void *arg, int code, const char *arg1, const 
 #pragma endregion
 
 // JIM: Note that Jim Tcl can't do encoding conversion, so this simply returns the string as an object.
-__device__ static Jim_Obj *dbTextToObj(Jim_Interp *interp, char const *text) { return Jim_NewStringObj(interp, (text ? text : ""), -1); }
+static __device__ Jim_Obj *dbTextToObj(Jim_Interp *interp, char const *text) { return Jim_NewStringObj(interp, (text ? text : ""), -1); }
 
 #pragma region GetLine
 
-__device__ static char *LocalGetLine(char *prompt, FILE *in)
+static __device__ char *LocalGetLine(char *prompt, FILE *in)
 {
 	int lineLength = 100;
 	char *line = (char *)_alloc(lineLength);
@@ -675,7 +675,7 @@ __constant__ static const char *_trans_ends[] = {
 	"ROLLBACK TO _tcl_transaction ; RELEASE _tcl_transaction",
 	"ROLLBACK"                         // rc==JIM_ERROR, nTransaction==0
 };
-__device__ static int DbTransPostCmd(ClientData data[], Jim_Interp *interp, int result)
+static __device__ int DbTransPostCmd(ClientData data[], Jim_Interp *interp, int result)
 {
 	TclContext *tctx = (TclContext *)data[0];
 	Context *ctx = tctx->Ctx;
@@ -704,7 +704,7 @@ __device__ static int DbTransPostCmd(ClientData data[], Jim_Interp *interp, int 
 	return rc;
 }
 
-__device__ static RC DbPrepare(TclContext *tctx, const char *sql, Vdbe **stmt, const char **out)
+static __device__ RC DbPrepare(TclContext *tctx, const char *sql, Vdbe **stmt, const char **out)
 {
 #ifdef _TEST
 	if (tctx->LegacyPrepare)
@@ -713,7 +713,7 @@ __device__ static RC DbPrepare(TclContext *tctx, const char *sql, Vdbe **stmt, c
 	return Prepare::Prepare_v2(tctx->Ctx, sql, -1, stmt, out);
 }
 
-__device__ static RC DbPrepareAndBind(TclContext *tctx, char const *sql, char const **out, SqlPreparedStmt **preStmt)
+static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char const **out, SqlPreparedStmt **preStmt)
 {
 	Context *ctx = tctx->Ctx;
 	Jim_Interp *interp = tctx->Interp;
@@ -855,7 +855,7 @@ __device__ static RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 	return RC_OK;
 }
 
-__device__ static void DbReleaseStmt(TclContext *tctx, SqlPreparedStmt *preStmt, bool discard)
+static __device__ void DbReleaseStmt(TclContext *tctx, SqlPreparedStmt *preStmt, bool discard)
 {
 	// Free the bound string and blob parameters
 	Jim_Interp *interp = tctx->Interp;
@@ -918,7 +918,7 @@ struct DbEvalContext
 };
 
 // Release any cache of column names currently held as part of the DbEvalContext structure passed as the first argument.
-__device__ static void DbReleaseColumnNames(DbEvalContext *p)
+static __device__ void DbReleaseColumnNames(DbEvalContext *p)
 {
 	Jim_Interp *interp = p->Ctx->Interp;
 	if (p->ColNames)
@@ -938,7 +938,7 @@ __device__ static void DbReleaseColumnNames(DbEvalContext *p)
 // of the returned columns are a, b and c, it does the equivalent of the tcl command:
 //
 //     set ${pArray}(*) {a b c}
-__device__ static void DbEvalInit(DbEvalContext *p, TclContext *tctx, Jim_Obj *sql, Jim_Obj *array_)
+static __device__ void DbEvalInit(DbEvalContext *p, TclContext *tctx, Jim_Obj *sql, Jim_Obj *array_)
 {
 	_memset(p, 0, sizeof(DbEvalContext));
 	p->Ctx = tctx;
@@ -953,7 +953,7 @@ __device__ static void DbEvalInit(DbEvalContext *p, TclContext *tctx, Jim_Obj *s
 }
 
 // Obtain information about the row that the DbEvalContext passed as the first argument currently points to.
-__device__ static void DbEvalRowInfo(DbEvalContext *p, int *colsOut, Jim_Obj ***colNamesOut)
+static __device__ void DbEvalRowInfo(DbEvalContext *p, int *colsOut, Jim_Obj ***colNamesOut)
 {
 	Jim_Interp *interp = p->Ctx->Interp;
 	// Compute column names
@@ -997,7 +997,7 @@ __device__ static void DbEvalRowInfo(DbEvalContext *p, int *colsOut, Jim_Obj ***
 // A return value of JIM_OK means there is a row of data available. The data may be accessed using dbEvalRowInfo() and dbEvalColumnValue(). This
 // is analogous to a return of SQLITE_ROW from sqlite3_step(). If JIM_BREAK is returned, then the SQL script has finished executing and there are
 // no further rows available. This is similar to SQLITE_DONE.
-__device__ static RC DbEvalStep(DbEvalContext *p)
+static __device__ RC DbEvalStep(DbEvalContext *p)
 {
 	Jim_Interp *interp = p->Ctx->Interp;
 	const char *prevSql = nullptr; // Previous value of p->zSql
@@ -1057,7 +1057,7 @@ __device__ static RC DbEvalStep(DbEvalContext *p)
 
 // Free all resources currently held by the DbEvalContext structure passed as the first argument. There should be exactly one call to this function
 // for each call to dbEvalInit().
-__device__ static void DbEvalFinalize(DbEvalContext *p)
+static __device__ void DbEvalFinalize(DbEvalContext *p)
 {
 	Jim_Interp *interp = p->Ctx->Interp;
 	if (p->PreStmt)
@@ -1077,7 +1077,7 @@ __device__ static void DbEvalFinalize(DbEvalContext *p)
 
 // Return a pointer to a Jim_Obj structure with ref-count 0 that contains the value for the iCol'th column of the row currently pointed to by
 // the DbEvalContext structure passed as the first argument.
-__device__ static Jim_Obj *DbEvalColumnValue(DbEvalContext *p, int colId)
+static __device__ Jim_Obj *DbEvalColumnValue(DbEvalContext *p, int colId)
 {
 	Jim_Interp *interp = p->Ctx->Interp;
 	Vdbe *stmt = p->PreStmt->Stmt;
@@ -1100,12 +1100,12 @@ __device__ static Jim_Obj *DbEvalColumnValue(DbEvalContext *p, int colId)
 	return dbTextToObj(interp, (char *)Vdbe::Column_Text(stmt, colId));
 }
 
-//__inline __device__ static int Jim_ObjSetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, Jim_Obj *valObjPtr) { return Jim_SetDictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, valObjPtr, 0); }
+//__inline static __device__ int Jim_ObjSetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, Jim_Obj *valObjPtr) { return Jim_SetDictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, valObjPtr, 0); }
 
 // This function is part of the implementation of the command:
 //
 //   $db eval SQL ?ARRAYNAME? SCRIPT
-__device__ static int DbEvalNextCmd(ClientData data[], Jim_Interp *interp, int result)
+static __device__ int DbEvalNextCmd(ClientData data[], Jim_Interp *interp, int result)
 {
 	int rc = result;
 
@@ -1191,7 +1191,7 @@ enum TTYPE_enum { TTYPE_DEFERRED, TTYPE_EXCLUSIVE, TTYPE_IMMEDIATE };
 //       db1 close
 //
 // The first command opens a connection to the "my_database" database and calls that connection "db1".  The second command causes this subroutine to be invoked.
-__device__ static int DbObjCmd(ClientData clientData, Jim_Interp *interp, int argc, Jim_Obj *const args[])
+static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int argc, Jim_Obj *const args[])
 {
 	if (argc < 2)
 	{
@@ -2306,7 +2306,7 @@ __device__ static int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 // DBNAME that is used to control that connection.  The database connection is deleted when the DBNAME command is deleted.
 //
 // The second argument is the name of the database file.
-__device__ static int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *const args[])
+static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *const args[])
 {
 	// In normal use, each JIM interpreter runs in a single thread.  So by default, we can turn of mutexing on SQLite database connections.
 	// However, for testing purposes it is useful to have mutexes turned on.  So, by default, mutexes default off.  But if compiled with

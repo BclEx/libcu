@@ -33,13 +33,13 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 #include <limits.h>
 
-extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
-#if defined(ULLONG_MAX)
-extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char ** __restrict endptr, int base, int sflag);
-#endif
-
 #include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;
+
+extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
+#if defined(ULLONG_MAX)
+extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
+#endif
 
 __BEGIN_NAMESPACE_STD;
 /* Returned by `div'.  */
