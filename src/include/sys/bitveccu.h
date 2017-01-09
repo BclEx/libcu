@@ -56,8 +56,8 @@ struct bitvec_t
 
 extern __device__ bitvec_t *bitvecNew(uint32 size);
 extern __device__ bool bitvecGet(bitvec_t *p, uint32 index);
-extern __device__ bool Set(bitvec_t *p, uint32 index);
-extern __device__ void Clear(bitvec_t *p, uint32 index, void *buffer);
+extern __device__ bool bitvecSet(bitvec_t *p, uint32 index);
+extern __device__ void bitvecClear(bitvec_t *p, uint32 index, void *buffer);
 __forceinline __device__ void bitvecDestroy(bitvec_t *p, )
 {
 	if (!p)

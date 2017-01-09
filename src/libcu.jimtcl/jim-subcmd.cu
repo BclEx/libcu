@@ -103,7 +103,7 @@ __device__ const jim_subcmd_type *Jim_ParseSubCmd(Jim_Interp *interp, const jim_
 		// Found an exact match
 		if (Jim_CompareStringImmediate(interp, cmd, ct->cmd))
 			break;
-		if (!_strncmp(cmdstr, ct->cmd, cmdlen)) {
+		if (!strncmp(cmdstr, ct->cmd, cmdlen)) {
 			if (partial) {
 				// Ambiguous
 				if (help) {

@@ -195,14 +195,14 @@ static __device__ bool SafeToUseEvalObjv(Jim_Interp *interp, Jim_Obj *cmd)
 // Find an SqlFunc structure with the given name.  Or create a new one if an existing one cannot be found.  Return a pointer to the structure.
 static __device__ SqlFunc *FindSqlFunc(TclContext *tctx, const char *name)
 {
-	SqlFunc *newFunc = (SqlFunc *)Jim_Alloc(sizeof(*newFunc) + _strlen(name) + 1);
+	SqlFunc *newFunc = (SqlFunc *)Jim_Alloc(sizeof(*newFunc) + strlen(name) + 1);
 	newFunc->Name = (char *)&newFunc[1];
 	int i;
-	for (i = 0; name[i]; i++) { newFunc->Name[i] = __tolower(name[i]); }
+	for (i = 0; name[i]; i++) { newFunc->Name[i] = _tolower(name[i]); }
 	newFunc->Name[i] = 0;
 	for (SqlFunc *p = tctx->Funcs; p; p = p->Next)
 	{ 
-		if (!_strcmp(p->Name, newFunc->Name))
+		if (!strcmp(p->Name, newFunc->Name))
 		{
 			Jim_Free((char *)newFunc);
 			return p;
@@ -521,26 +521,26 @@ static __device__ void TclSqlFunc(FuncContext *fctx, int argc, Mem **argv)
 		const char *typeName = (var->typePtr ? var->typePtr->name : "");
 		char c = typeName[0];
 #if 0
-		if (c == 'b' && !_strcmp(typeName, "bytearray") && var->Bytes == 0)
+		if (c == 'b' && !strcmp(typeName, "bytearray") && var->Bytes == 0)
 		{
 			// Only return a BLOB type if the Tcl variable is a bytearray and has no string representation.
 			data = Jim_GetByteArray(var, &n);
 			Vdbe::Result_Blob(fctx, data, n, DESTRUCTOR_TRANSIENT);
 		}
-		else if (c == 'b' && !_strcmp(typeName, "boolean"))
+		else if (c == 'b' && !strcmp(typeName, "boolean"))
 		{
 			Jim_GetWide(nullptr, var, &n);
 			Vdbe::Result_Int(fctx, n);
 		} else
 #endif
-			if (c == 'd' && !_strcmp(typeName, "double"))
+			if (c == 'd' && !strcmp(typeName, "double"))
 			{
 				double r;
 				Jim_GetDouble(nullptr, var, &r);
 				Vdbe::Result_Double(fctx, r);
 			}
 			// XXX: Is a cooerced double better as a double or an int?
-			else if ((c == 'c' && !_strcmp(typeName, "coerced-double")) || (c == 'i' && !_strcmp(typeName, "int")))
+			else if ((c == 'c' && !strcmp(typeName, "coerced-double")) || (c == 'i' && !strcmp(typeName, "int")))
 			{
 				int64 v;
 				Jim_GetWide(interp, var, &v);
@@ -613,9 +613,9 @@ static __device__ ARC AuthCallback(void *arg, int code, const char *arg1, const 
 	Jim_DecrRefCount(interp, str);
 	rc = ARC_OK;
 	const char *reply = (rc == RC_OK ? Jim_String(Jim_GetResult(interp)) : "ARC_DENY");
-	if (!_strcmp(reply, "ARC_OK")) rc = ARC_OK;
-	else if (!_strcmp(reply, "ARC_DENY")) rc = ARC_DENY;
-	else if (!_strcmp(reply, "ARC_IGNORE")) rc = ARC_IGNORE;
+	if (!strcmp(reply, "ARC_OK")) rc = ARC_OK;
+	else if (!strcmp(reply, "ARC_DENY")) rc = ARC_DENY;
+	else if (!strcmp(reply, "ARC_IGNORE")) rc = ARC_IGNORE;
 	else rc = 999;
 	return (ARC)rc;
 }
@@ -720,8 +720,8 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 	*preStmt = nullptr;
 
 	// Trim spaces from the start of zSql and calculate the remaining length.
-	while (_isspace(sql[0])) sql++;
-	int sqlLength = _strlen(sql);
+	while (isspace(sql[0])) sql++;
+	int sqlLength = strlen(sql);
 
 	SqlPreparedStmt *p;
 	Vdbe *stmt;
@@ -729,7 +729,7 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 	for (p = tctx->Stmts; p; p = p->Next)
 	{
 		int n = p->SqlLength;
-		if (sqlLength >= n && !_memcmp(p->Sql, sql, n) && (sql[n] == 0 || sql[n-1] == ';'))
+		if (sqlLength >= n && !memcmp(p->Sql, sql, n) && (sql[n] == 0 || sql[n-1] == ';'))
 		{
 			stmt = p->Stmt;
 			*out = &sql[p->SqlLength];
@@ -775,7 +775,7 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 		vars = Vdbe::Bind_ParameterCount(stmt);
 		int bytes = sizeof(SqlPreparedStmt) + vars * sizeof(Jim_Obj *);
 		p = (SqlPreparedStmt *)_alloc(bytes);
-		_memset(p, 0, bytes);
+		memset(p, 0, bytes);
 
 		p->Stmt = stmt;
 		p->SqlLength = (int)(*out - sql);
@@ -785,15 +785,15 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 		if (!p->Sql)
 		{
 			char *copy = (char *)_alloc(p->SqlLength + 1);
-			_memcpy(copy, sql, p->SqlLength);
+			memcpy(copy, sql, p->SqlLength);
 			copy[p->SqlLength] = '\0';
 			p->Sql = copy;
 		}
 #endif
 	}
 	_assert(p);
-	_assert(_strlen(p->Sql) == p->SqlLength);
-	_assert(!_memcmp(p->Sql, sql, p->SqlLength));
+	_assert(strlen(p->Sql) == p->SqlLength);
+	_assert(!memcmp(p->Sql, sql, p->SqlLength));
 
 	// Bind values to parameters that begin with $ or :
 	int parmsLength = 0;
@@ -810,7 +810,7 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 				const char *typeName = (var->typePtr ? var->typePtr->name : "");
 				char c = typeName[0];
 				// XXX: Jim Tcl doesn't have bytearray or boolean
-				if (varName[0] == '@') //|| (c == 'b' && !_strcmp(typeName, "bytearray") && var->Bytes == 0))
+				if (varName[0] == '@') //|| (c == 'b' && !strcmp(typeName, "bytearray") && var->Bytes == 0))
 				{
 					// Load a BLOB type if the Tcl variable is a bytearray and it has no string representation or the host parameter name begins with "@".
 					data = (char *)Jim_GetByteArray(var, &n);
@@ -819,19 +819,19 @@ static __device__ RC DbPrepareAndBind(TclContext *tctx, char const *sql, char co
 					p->Parms[parmsLength++] = var;
 #if 0
 				}
-				else if (c == 'b' && !_strcmp(typeName, "boolean"))
+				else if (c == 'b' && !strcmp(typeName, "boolean"))
 				{
 					Jim_GetWide(interp, var, &n);
 					Vdbe::Bind_Int(stmt, i, n);
 #endif
 				}
-				else if (c == 'd' && !_strcmp(typeName, "double"))
+				else if (c == 'd' && !strcmp(typeName, "double"))
 				{
 					double r;
 					Jim_GetDouble(interp, var, &r);
 					Vdbe::Bind_Double(stmt, i, r);
 				}
-				else if ((c == 'c' && !_strcmp(typeName, "coerced-double")) || (c == 'i' && !_strcmp(typeName, "int")))
+				else if ((c == 'c' && !strcmp(typeName, "coerced-double")) || (c == 'i' && !strcmp(typeName, "int")))
 				{
 					int64 v;
 					Jim_GetWide(interp, var, &v);
@@ -940,7 +940,7 @@ static __device__ void DbReleaseColumnNames(DbEvalContext *p)
 //     set ${pArray}(*) {a b c}
 static __device__ void DbEvalInit(DbEvalContext *p, TclContext *tctx, Jim_Obj *sql, Jim_Obj *array_)
 {
-	_memset(p, 0, sizeof(DbEvalContext));
+	memset(p, 0, sizeof(DbEvalContext));
 	p->Ctx = tctx;
 	p->SqlAsString = Jim_String(sql);
 	p->Sql = sql;
@@ -1243,7 +1243,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (auth && len > 0)
 			{
 				p->Auth = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Auth, auth, len + 1);
+				memcpy(p->Auth, auth, len + 1);
 			}
 			else
 				p->Auth = nullptr;
@@ -1330,7 +1330,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (busy && len > 0)
 			{
 				p->Busy = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Busy, busy, len + 1);
+				memcpy(p->Busy, busy, len + 1);
 			}
 			else
 				p->Busy = nullptr;
@@ -1355,7 +1355,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			return JIM_ERROR;
 		}
 		const char *subCmd = Jim_String(args[2]);
-		if (subCmd[0] == 'f' && !_strcmp(subCmd, "flush"))
+		if (subCmd[0] == 'f' && !strcmp(subCmd, "flush"))
 		{
 			if (argc != 3)
 			{
@@ -1365,7 +1365,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			else
 				FlushStmtCache(p);
 		}
-		else if (subCmd[0] == 's' && !_strcmp(subCmd, "size"))
+		else if (subCmd[0] == 's' && !strcmp(subCmd, "size"))
 		{
 			if (argc != 4)
 			{
@@ -1438,7 +1438,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		collate->Next = p->Collates;
 		collate->Script = (char *)&collate[1];
 		p->Collates = collate;
-		_memcpy(collate->Script, script, scriptLength+1);
+		memcpy(collate->Script, script, scriptLength+1);
 		if (DataEx::CreateCollation(p->Ctx, name, TEXTENCODE_UTF8, collate, TclSqlCollate))
 		{
 			Jim_SetResultString(interp, (char *)DataEx::ErrMsg(p->Ctx), -1);
@@ -1485,7 +1485,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (commit && len > 0)
 			{
 				p->Commit = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Commit, commit, len+1);
+				memcpy(p->Commit, commit, len+1);
 			}
 			else
 				p->Commit = nullptr;
@@ -1538,14 +1538,14 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		const char *conflict = Jim_String(args[2]); // The conflict algorithm to use
 		const char *table = Jim_String(args[3]); // Insert data into this table
 		const char *file = Jim_String(args[4]); // The file from which to extract data
-		int sepLength = _strlen(sep); // Number of bytes in zSep[]
-		int nullLength = _strlen(null); // Number of bytes in zNull[]
+		int sepLength = strlen(sep); // Number of bytes in zSep[]
+		int nullLength = strlen(null); // Number of bytes in zNull[]
 		if (sepLength == 0)
 		{
 			Jim_SetResultString(interp, "Error: non-null separator required for copy", -1);
 			return JIM_ERROR;
 		}
-		if (_strcmp(conflict, "rollback") && _strcmp(conflict, "abort") && _strcmp(conflict, "fail") && _strcmp(conflict, "ignore") && _strcmp(conflict, "replace"))
+		if (strcmp(conflict, "rollback") && strcmp(conflict, "abort") && strcmp(conflict, "fail") && strcmp(conflict, "ignore") && strcmp(conflict, "replace"))
 		{
 			Jim_SetResultFormatted(interp, "Error: \"%s\", conflict-algorithm must be one of: rollback, abort, fail, ignore, or replace", conflict);
 			return JIM_ERROR;
@@ -1556,7 +1556,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			Jim_SetResultFormatted(interp, "Error: no such table: %s", table);
 			return JIM_ERROR;
 		}
-		int bytes = _strlen(sql); // Number of bytes in an SQL string
+		int bytes = strlen(sql); // Number of bytes in an SQL string
 		Vdbe *stmt; // A statement
 		rc = Prepare::Prepare_(p->Ctx, sql, -1, &stmt, 0);
 		_free(sql);
@@ -1578,7 +1578,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			return JIM_ERROR;
 		}
 		__snprintf(sql, bytes+50, "INSERT OR %q INTO '%q' VALUES(?", conflict, table);
-		int j = _strlen(sql);
+		int j = strlen(sql);
 		for (i = 1; i < cols; i++)
 		{
 			sql[j++] = ',';
@@ -1621,7 +1621,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			colNames[0] = line;
 			for (i = 0, z = line; *z; z++)
 			{
-				if (*z == sep[0] && !_strncmp(z, sep, sepLength))
+				if (*z == sep[0] && !strncmp(z, sep, sepLength))
 				{
 					*z = 0;
 					i++;
@@ -1634,7 +1634,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			}
 			if (i+1 != cols)
 			{
-				int errLength = _strlen(file) + 200;
+				int errLength = strlen(file) + 200;
 				char *err = (char *)malloc(errLength);
 				if (err)
 				{
@@ -1648,7 +1648,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			for (i = 0; i < cols; i++)
 			{
 				// check for null data, if so, bind as null
-				if ((nullLength > 0 && !_strcmp(colNames[i], null)) || !_strlen(colNames[i]))
+				if ((nullLength > 0 && !strcmp(colNames[i], null)) || !strlen(colNames[i]))
 					Vdbe::Bind_Null(stmt, i+1);
 				else
 					Vdbe::Bind_Text(stmt, i+1, colNames[i], -1, DESTRUCTOR_STATIC);
@@ -1800,8 +1800,8 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		if (argc == 6)
 		{
 			const char *z = Jim_String(args[3]);
-			int n = _strlen(z);
-			if (n > 2 && !_strncmp(z, "-argcount",n))
+			int n = strlen(z);
+			if (n > 2 && !strncmp(z, "-argcount",n))
 			{
 				if (Jim_GetInt(interp, args[4], &args4)) return JIM_ERROR;
 				if (args4 < 0)
@@ -1842,7 +1842,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		return JIM_ERROR;
 #else
 		// Check for the -readonly option
-		int isReadonly = (argc > 3 && !_strcmp(Jim_String(args[2]), "-readonly") ? 1 : 0);
+		int isReadonly = (argc > 3 && !strcmp(Jim_String(args[2]), "-readonly") ? 1 : 0);
 		if (argc != (5+isReadonly) && argc != (6+isReadonly))
 		{
 			Jim_WrongNumArgs(interp, 2, args, "?-readonly? ?DB? TABLE COLUMN ROWID");
@@ -1886,7 +1886,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (null && len > 0)
 			{
 				p->NullText = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->NullText, null, len);
+				memcpy(p->NullText, null, len);
 				p->NullText[len] = '\0';
 			}
 			else
@@ -1931,7 +1931,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (progress && len > 0)
 			{
 				p->Progress = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Progress, progress, len+1);
+				memcpy(p->Progress, progress, len+1);
 			}
 			else
 				p->Progress = nullptr;
@@ -1976,7 +1976,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (profile && len > 0)
 			{
 				p->Profile = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Profile, profile, len+1);
+				memcpy(p->Profile, profile, len+1);
 			}
 			else
 				p->Profile = nullptr;
@@ -2084,9 +2084,9 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		}
 		const char *op = Jim_String(args[2]);
 		int v;
-		if (!_strcmp(op, "step")) v = p->Steps;
-		else if (!_strcmp(op, "sort")) v = p->Sorts;
-		else if (!_strcmp(op, "autoindex")) v = p->Indexs;
+		if (!strcmp(op, "step")) v = p->Steps;
+		else if (!strcmp(op, "sort")) v = p->Sorts;
+		else if (!strcmp(op, "autoindex")) v = p->Indexs;
 		else
 		{
 			Jim_SetResultString(interp, "bad argument: should be autoindex, step, or sort", -1);
@@ -2145,7 +2145,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			if (trace && len > 0)
 			{
 				p->Trace = (char *)Jim_Alloc(len + 1);
-				_memcpy(p->Trace, trace, len+1);
+				memcpy(p->Trace, trace, len+1);
 			}
 			else
 				p->Trace = nullptr;
@@ -2321,12 +2321,12 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 	if (argc == 2)
 	{
 		arg = Jim_String(args[1]);
-		if (!_strcmp(arg, "-version"))
+		if (!strcmp(arg, "-version"))
 		{
 			Jim_SetResultString(interp, CORE_VERSION, -1);
 			return JIM_OK;
 		}
-		if (!_strcmp(arg, "-has-codec"))
+		if (!strcmp(arg, "-has-codec"))
 		{
 #ifdef HAS_CODEC
 			Jim_SetResultInt(interp, 1);
@@ -2345,15 +2345,15 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 	{
 		arg = Jim_String(args[i]);
 		bool b;
-		if (!_strcmp(arg, "-key"))
+		if (!strcmp(arg, "-key"))
 		{
 #ifdef HAS_CODEC
 			key = Jim_GetByteArray(args[i+1], &keyLength);
 #endif
 		}
-		else if (!_strcmp(arg, "-vfs"))
+		else if (!strcmp(arg, "-vfs"))
 			vfsName = Jim_String(args[i+1]);
-		else if (!_strcmp(arg, "-readonly"))
+		else if (!strcmp(arg, "-readonly"))
 		{
 			if (Jim_GetBoolean(interp, args[i+1], &b)) return JIM_ERROR;
 			if (b)
@@ -2367,7 +2367,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 				flags |= VSystem::OPEN_READWRITE;
 			}
 		}
-		else if (!_strcmp(arg, "-create"))
+		else if (!strcmp(arg, "-create"))
 		{
 			if (Jim_GetBoolean(interp, args[i+1], &b)) return JIM_ERROR;
 			if (b && (flags & VSystem::OPEN_READONLY) == 0)
@@ -2375,7 +2375,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 			else
 				flags &= ~VSystem::OPEN_CREATE;
 		}
-		else if (!_strcmp(arg, "-nomutex"))
+		else if (!strcmp(arg, "-nomutex"))
 		{
 			if (Jim_GetBoolean(interp, args[i+1], &b)) return JIM_ERROR;
 			if (b)
@@ -2386,7 +2386,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 			else
 				flags &= ~VSystem::OPEN_NOMUTEX;
 		}
-		else if (!_strcmp(arg, "-fullmutex"))
+		else if (!strcmp(arg, "-fullmutex"))
 		{
 			if (Jim_GetBoolean(interp, args[i+1], &b)) return JIM_ERROR;
 			if (b)
@@ -2397,7 +2397,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 			else
 				flags &= ~VSystem::OPEN_FULLMUTEX;
 		}
-		else if (!_strcmp(arg, "-uri"))
+		else if (!strcmp(arg, "-uri"))
 		{
 			if (Jim_GetBoolean(interp, args[i+1], &b)) return JIM_ERROR;
 			if (b)

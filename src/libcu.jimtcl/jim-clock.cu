@@ -34,7 +34,7 @@ static __device__ int clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *co
 	time_t t = seconds;
 	char buf[100];
 #if __CUDACC__
-	_memcpy(buf, "TIME", 5);
+	memcpy(buf, "TIME", 5);
 #else
 	if (!strftime(buf, sizeof(buf), format, localtime(&t))) {
 		Jim_SetResultString(interp, "format string too long", -1);
@@ -67,7 +67,7 @@ static __device__ int clock_cmd_scan(ClientData dummy, Jim_Interp *interp, int a
 
 static __device__ int clock_cmd_seconds(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
-	Jim_SetResultInt(interp, _time(NULL));
+	Jim_SetResultInt(interp, time(NULL));
 	return JIM_OK;
 }
 

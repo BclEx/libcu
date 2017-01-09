@@ -29,7 +29,9 @@ THE SOFTWARE.
 #include <unistd.h>
 #elif !defined(_UNISTD_H)
 #define	_UNISTD_H
+#include <crtdefscu.h>
 #include <featurescu.h>
+#include <sys/types.h>
 
 __BEGIN_DECLS;
 
@@ -54,12 +56,12 @@ extern __device__ int access(const char *name, int type);
 the current position (if WHENCE is SEEK_CUR), or the end of the file (if WHENCE is SEEK_END).
 Return the new file position.  */
 #ifndef __USE_FILE_OFFSET64
-extern off_t lseek(int fd, off_t offset, int whence);
+extern __device__ off_t lseek(int fd, off_t offset, int whence);
 #else
 #define lseek lseek64
 #endif
 #ifdef __USE_LARGEFILE64
-extern off64_t lseek64(int fd, off64_t offset, int whence);
+extern __device__ off64_t lseek64(int fd, off64_t offset, int whence);
 #endif
 
 /* Close the file descriptor FD.  */
@@ -85,7 +87,8 @@ The signal may come late due to processor scheduling.  */
 than SECONDS which it actually slept (thus zero if it slept the full time). If a signal handler does a `longjmp' or modifies the handling of the
 SIGALRM signal while inside `sleep' call, the handling of the SIGALRM signal afterwards is undefined.  There is no return value to indicate
 error, but if `sleep' returns SECONDS, it probably didn't work.  */
-extern __device__ unsigned int sleep(unsigned int seconds);
+extern __device__ void usleep(unsigned long milliseconds);
+__forceinline __device__ void sleep(unsigned int seconds) { usleep(seconds * 1000); }
 
 /* Suspend the process until a signal arrives. This always returns -1 and sets `errno' to EINTR.  */
 //nosupport: extern int pause(void);

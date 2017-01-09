@@ -38,7 +38,7 @@ extern "C" {
 #define JIM_WIDE_MAX LLONG_MAX
 #define JIM_WIDE_MODIFIER "I64d"
 #define strcasecmp _stricmp
-//#define strtoull _strtoull
+//#define strtoull strtoull
 //#define snprintf __snprintf
 
 #include <io.h>

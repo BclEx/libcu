@@ -1,4 +1,3 @@
-#pragma region License
 /*
 * Implements the internals of the format command for jim
 *
@@ -40,7 +39,6 @@
 * See the file "tcl.license.terms" for information on usage and redistribution of
 * this file, and for a DISCLAIMER OF ALL WARRANTIES.
 */
-#pragma endregion
 
 #include <ctype.h>
 #include <string.h>
@@ -111,8 +109,8 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 
 		// Step 1. XPG3 position specifier
 		newXpg = 0;
-		if (_isdigit(ch)) {
-			int position = _strtoul(format, &end, 10);
+		if (isdigit(ch)) {
+			int position = strtoul(format, &end, 10);
 			if (*end == '$') {
 				newXpg = 1;
 				objIndex = position - 1;
@@ -167,8 +165,8 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 
 		// Step 3. Minimum field width.
 		width = 0;
-		if (_isdigit(ch)) {
-			width = _strtoul(format, &end, 10);
+		if (isdigit(ch)) {
+			width = strtoul(format, &end, 10);
 			format = end;
 			step = utf8_tounicode(format, &ch);
 		} else if (ch == '*') {
@@ -197,8 +195,8 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 			format += step;
 			step = utf8_tounicode(format, &ch);
 		}
-		if (_isdigit(ch)) {
-			precision = _strtoul(format, &end, 10);
+		if (isdigit(ch)) {
+			precision = strtoul(format, &end, 10);
 			format = end;
 			step = utf8_tounicode(format, &ch);
 		} else if (ch == '*') {
@@ -311,9 +309,9 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 
 			// Fill in the width and precision
 			if (width)
-				p += _sprintf(p, "%ld", width);
+				p += sprintf(p, "%ld", width);
 			if (gotPrecision)
-				p += _sprintf(p, ".%ld", precision);
+				p += sprintf(p, ".%ld", precision);
 
 			// Now the modifier, and get the actual value here
 			int length;
@@ -358,7 +356,7 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 				__snprintf(num_buffer, length + 1, spec, d);
 			else
 				formatted_bytes = __snprintf(num_buffer, length + 1, spec, w);
-			formatted_chars = formatted_bytes = _strlen(num_buffer);
+			formatted_chars = formatted_bytes = strlen(num_buffer);
 			formatted_buf = num_buffer;
 			break; }
 		default: {

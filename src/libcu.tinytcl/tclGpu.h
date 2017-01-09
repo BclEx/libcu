@@ -1,7 +1,7 @@
 #ifndef __TCLGPU_H__
 #define __TCLGPU_H__
 
-#include <errnocu.h>
+//#include <errnocu.h>
 #include <unistdcu.h>
 #include <direntcu.h>
 #include <sys/statcu.h>

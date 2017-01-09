@@ -9,8 +9,7 @@
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 {
-	switch (data->OP)
-	{
+	switch (data->OP) {
 	case STDIO_REMOVE: { stdio_remove *msg = (stdio_remove *)data; msg->RC = remove(msg->Str); return true; }
 	case STDIO_RENAME: { stdio_rename *msg = (stdio_rename *)data; msg->RC = rename(msg->Oldname, msg->Newname); return true; }
 	case STDIO_UNLINK: { stdio_unlink *msg = (stdio_unlink *)data; msg->RC = _unlink(msg->Str); return true; }

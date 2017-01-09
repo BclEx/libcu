@@ -39,16 +39,16 @@
 
 #ifdef jim_ext_aio
 
-#include "jim-Autoconf.h"
+#include "jimautoconf.h"
 #include <stdiocu.h>
 #include <stringcu.h>
 #include <errnocu.h>
+#include <cuda_runtimecu.h>
 #include <fcntl.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #include <sys/stat.h>
 #endif
-#include <cuda_runtimecu.h>
 
 #include "jim.h"
 
@@ -64,8 +64,8 @@
 #define JIM_ANSIC
 #endif
 
-#include "jim+eventLoop.h"
-#include "jim+subcmd.h"
+#include "jim-eventLoop.h"
+#include "jim-subcmd.h"
 
 #define AIO_CMD_LEN 32      /* e.g. aio.handleXXXXXX */
 #define AIO_BUF_LEN 256     /* Can keep this small and rely on stdio buffering */
@@ -274,7 +274,6 @@ static int JimFormatIpAddress(Jim_Interp *interp, Jim_Obj *varObjPtr, const unio
 {
 	/* INET6_ADDRSTRLEN is 46. Add some for [] and port */
 	char addrbuf[60];
-
 #if IPV6
 	if (sa->sa.sa_family == PF_INET6) {
 		addrbuf[0] = '[';
@@ -293,7 +292,6 @@ static int JimFormatIpAddress(Jim_Interp *interp, Jim_Obj *varObjPtr, const unio
 			/* recvfrom still works on unix domain sockets, etc */
 			addrbuf[0] = 0;
 		}
-
 		return Jim_SetVariable(interp, varObjPtr, Jim_NewStringObj(interp, addrbuf, -1));
 }
 
@@ -302,30 +300,25 @@ static int JimFormatIpAddress(Jim_Interp *interp, Jim_Obj *varObjPtr, const unio
 static __device__ void JimAioSetError(Jim_Interp *interp, Jim_Obj *name)
 {
 	if (name) {
-		Jim_SetResultFormatted(interp, "%#s: %s", name, __strerror(__errno));
+		Jim_SetResultFormatted(interp, "%#s: %s", name, strerror(errno));
 	}
 	else {
-		Jim_SetResultString(interp, __strerror(__errno), -1);
+		Jim_SetResultString(interp, strerror(errno), -1);
 	}
 }
 
 static __device__ void JimAioDelProc(ClientData privData, Jim_Interp *interp)
 {
 	AioFile *af = (AioFile *)privData;
-
 	JIM_NOTUSED(interp);
-
 	Jim_DecrRefCount(interp, af->filename);
-
 #ifdef jim_ext_eventloop
 	/* remove all existing EventHandlers */
 	Jim_DeleteFileHandler(interp, af->fp, JIM_EVENT_READABLE | JIM_EVENT_WRITABLE | JIM_EVENT_EXCEPTION);
 #endif
-
 	if (!(af->openFlags & AIO_KEEPOPEN)) {
-		_fclose(af->fp);
+		fclose(af->fp);
 	}
-
 	Jim_Free(af);
 }
 
@@ -336,16 +329,16 @@ static __device__ int JimCheckStreamError(Jim_Interp *interp, AioFile *af)
 	}
 	_clearerr(af->fp);
 	/* EAGAIN and similar are not error conditions. Just treat them like eof */
-	if (_feof(af->fp) || __errno == EAGAIN || __errno == EINTR) {
+	if (_feof(af->fp) || errno == EAGAIN || errno == EINTR) {
 		return JIM_OK;
 	}
 #ifdef ECONNRESET
-	if (__errno == ECONNRESET) {
+	if (errno == ECONNRESET) {
 		return JIM_OK;
 	}
 #endif
 #ifdef ECONNABORTED
-	if (__errno != ECONNABORTED) {
+	if (errno != ECONNABORTED) {
 		return JIM_OK;
 	}
 #endif
@@ -388,7 +381,7 @@ static __device__ int aio_cmd_read(Jim_Interp *interp, int argc, Jim_Obj *const 
 		else {
 			readlen = (int)(neededLen > AIO_BUF_LEN ? AIO_BUF_LEN : neededLen);
 		}
-		retval = (int)_fread(buf, 1, readlen, af->fp);
+		retval = (int)fread(buf, 1, readlen, af->fp);
 		if (retval > 0) {
 			Jim_AppendString(interp, objPtr, buf, retval);
 			if (neededLen != -1) {
@@ -434,23 +427,23 @@ static __device__ int aio_cmd_copy(Jim_Interp *interp, int argc, Jim_Obj *const 
 	}
 
 	while (count < maxlen) {
-		int ch = _fgetc(af->fp);
+		int ch = fgetc(af->fp);
 
-		if (ch == EOF || _fputcR(ch, outfh) == EOF) {
+		if (ch == EOF || fputc(ch, outfh) == EOF) {
 			break;
 		}
 		count++;
 	}
 
-	if (_ferror(af->fp)) {
-		Jim_SetResultFormatted(interp, "error while reading: %s", __strerror(__errno));
-		_clearerr(af->fp);
+	if (ferror(af->fp)) {
+		Jim_SetResultFormatted(interp, "error while reading: %s", strerror(errno));
+		clearerr(af->fp);
 		return JIM_ERROR;
 	}
 
-	if (_ferror(outfh)) {
-		Jim_SetResultFormatted(interp, "error while writing: %s", __strerror(__errno));
-		_clearerr(outfh);
+	if (ferror(outfh)) {
+		Jim_SetResultFormatted(interp, "error while writing: %s", strerror(errno));
+		clearerr(outfh);
 		return JIM_ERROR;
 	}
 
@@ -466,19 +459,19 @@ static __device__ int aio_cmd_gets(Jim_Interp *interp, int argc, Jim_Obj *const 
 	Jim_Obj *objPtr;
 	int len;
 
-	__errno = 0;
+	errno = 0;
 
 	objPtr = Jim_NewStringObj(interp, NULL, 0);
 	while (1) {
 		buf[AIO_BUF_LEN - 1] = '_';
-		if (_fgets(buf, AIO_BUF_LEN, af->fp) == NULL)
+		if (fgets(buf, AIO_BUF_LEN, af->fp) == NULL)
 			break;
 
 		if (buf[AIO_BUF_LEN - 1] == '\0' && buf[AIO_BUF_LEN - 2] != '\n') {
 			Jim_AppendString(interp, objPtr, buf, AIO_BUF_LEN - 1);
 		}
 		else {
-			len = _strlen(buf);
+			len = strlen(buf);
 
 			if (len && (buf[len - 1] == '\n')) {
 				/* strip "\n" */
@@ -503,7 +496,7 @@ static __device__ int aio_cmd_gets(Jim_Interp *interp, int argc, Jim_Obj *const 
 
 		len = Jim_Length(objPtr);
 
-		if (len == 0 && _feof(af->fp)) {
+		if (len == 0 && feof(af->fp)) {
 			/* On EOF returns -1 if varName was specified */
 			len = -1;
 		}
@@ -1366,8 +1359,8 @@ __device__ int Jim_aioInit(Jim_Interp *interp)
 #endif
 	// Create filehandles for stdin, stdout and stderr
 	JimMakeChannel(interp, _stdin, -1, NULL, "stdin", 0, "r");
-	JimMakeChannel(interp, _stdout, -1, NULL, "stdout", 0, "w");
-	JimMakeChannel(interp, _stderr, -1, NULL, "stderr", 0, "w");
+	JimMakeChannel(interp, stdout, -1, NULL, "stdout", 0, "w");
+	JimMakeChannel(interp, stderr, -1, NULL, "stderr", 0, "w");
 	return JIM_OK;
 }
 

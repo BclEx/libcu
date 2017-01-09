@@ -64,14 +64,18 @@
 
 #ifndef __JIM__H
 #define __JIM__H
+
+#include <limitscu.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <stdargcu.h>
+#include <cuda_runtimecu.h>
+//#include <time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-	//#include <limitscu.h>
-	#include <stdiocu.h>
-	#include <stdlibcu.h>
-	#include <stdargcu.h>
-	//#include <time.h>
+
 
 	// -----------------------------------------------------------------------------
 	// System configuration autoconf (configure) will set these
@@ -676,7 +680,7 @@ extern "C" {
 	JIM_EXPORT __device__ void Jim_MakeErrorMessage(Jim_Interp *interp);
 
 	// interactive mode
-	JIM_EXPORT int Jim_InteractivePrompt(cudaDeviceHeap *heap, Jim_Interp *interp);
+	JIM_EXPORT int Jim_InteractivePrompt(void *heap, Jim_Interp *interp);
 	JIM_EXPORT void Jim_HistoryLoad(const char *filename);
 	JIM_EXPORT void Jim_HistorySave(const char *filename);
 	JIM_EXPORT char *Jim_HistoryGetline(const char *prompt);
@@ -736,11 +740,13 @@ extern "C" {
 	JIM_EXPORT __device__ int Jim_IsDict(Jim_Obj *objPtr);
 	JIM_EXPORT __device__ int Jim_IsList(Jim_Obj *objPtr);
 
+	STDARGvoid(Jim_AppendStrings, Jim_AppendStrings_(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
+	STDARGvoid(Jim_SetResultFormatted, Jim_SetResultFormatted_(interp, format, va), Jim_Interp *interp, const char *format);
+
+
 #ifdef __cplusplus
 }
 #endif
 
-STDARGvoid(Jim_AppendStrings, objPtr(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
-STDARGvoid(Jim_SetResultFormatted, format(interp, format, va), Jim_Interp *interp, const char *format);
 
 #endif // __JIM__H

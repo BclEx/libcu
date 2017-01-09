@@ -34,6 +34,7 @@
     <ClInclude Include="..\include\direntcu.h" />
     <ClInclude Include="..\include\errnocu.h" />
     <ClInclude Include="..\include\featurescu.h" />
+    <ClInclude Include="..\include\limitscu.h" />
     <ClInclude Include="..\include\regexcu.h" />
     <ClInclude Include="..\include\sentinel-iomsg.h" />
     <ClInclude Include="..\include\sentinel-stdiomsg.h" />
@@ -50,19 +51,25 @@
     <ClInclude Include="..\include\unistdcu.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="libcu.cu" />
-    <CudaCompile Include="program-device.cu" />
-    <CudaCompile Include="program.cu" />
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
-    <CudaCompile Include="regexcu.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="sentinel-gpu.cu" />
     <ClCompile Include="sentinel-host.cpp" />
-    <CudaCompile Include="stdiocu.cu" />
-    <CudaCompile Include="stdlibcu.cu" />
-    <CudaCompile Include="stringcu.cu" />
+    <CudaCompile Include="libcu.cu" />
+    <None Include="direntcu.cu" />
+    <None Include="errnocu.cu" />
+    <CudaCompile Include="program-device.cu" />
+    <CudaCompile Include="program.cu" />
+    <None Include="regexcu.cu" />
+    <CudaCompile Include="sentinel-gpu.cu" />
+    <None Include="setjmpcu.cu" />
+    <None Include="stdiocu.cu" />
+    <None Include="stdlibcu.cu" />
+    <None Include="stringcu.cu" />
+    <None Include="sys\bitveccu.cu" />
+    <None Include="sys\hashcu.cu" />
+    <None Include="sys\statcu.cu" />
+    <None Include="timecu.cu" />
+    <None Include="unistdcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.native.nuspec" />
@@ -146,7 +153,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" "$(IntDir)stdiocu.cu.obj" "$(IntDir)stdlibcu.cu.obj" "$(IntDir)stringcu.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -168,7 +175,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" "$(IntDir)stdiocu.cu.obj" "$(IntDir)stdlibcu.cu.obj" "$(IntDir)stringcu.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -195,7 +202,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" "$(IntDir)stdiocu.cu.obj" "$(IntDir)stdlibcu.cu.obj" "$(IntDir)stringcu.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -221,7 +228,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" "$(IntDir)stdiocu.cu.obj" "$(IntDir)stdlibcu.cu.obj" "$(IntDir)stringcu.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-gpu.cu.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

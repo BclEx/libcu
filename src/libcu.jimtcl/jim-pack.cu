@@ -135,7 +135,7 @@ static __device__ float JimIntToFloat(jim_wide value)
 	// Skip offs to get to least significant bytes
 	int offs = (Jim_IsBigEndian() ? (sizeof(jim_wide) - sizeof(float)) : 0);
 	float val;
-	_memcpy(&val, (unsigned char *)&value + offs, sizeof(float));
+	memcpy(&val, (unsigned char *)&value + offs, sizeof(float));
 	return val;
 }
 
@@ -146,7 +146,7 @@ static __device__ double JimIntToDouble(jim_wide value)
 	// Skip offs to get to least significant bytes
 	int offs = (Jim_IsBigEndian() ? (sizeof(jim_wide) - sizeof(double)) : 0);
 	double val;
-	_memcpy(&val, (unsigned char *)&value + offs, sizeof(double));
+	memcpy(&val, (unsigned char *)&value + offs, sizeof(double));
 	return val;
 }
 
@@ -158,7 +158,7 @@ static __device__ jim_wide JimFloatToInt(float value)
 	// Skip offs to get to least significant bytes
 	int offs = (Jim_IsBigEndian() ? (sizeof(jim_wide) - sizeof(float)) : 0);
 	jim_wide val = 0;
-	_memcpy((unsigned char *)&val + offs, &value, sizeof(float));
+	memcpy((unsigned char *)&val + offs, &value, sizeof(float));
 	return val;
 }
 
@@ -169,7 +169,7 @@ static __device__ jim_wide JimDoubleToInt(double value)
 	// Skip offs to get to least significant bytes
 	int offs = (Jim_IsBigEndian() ? (sizeof(jim_wide) - sizeof(double)) : 0);
 	jim_wide val = 0;
-	_memcpy((unsigned char *)&val + offs, &value, sizeof(double));
+	memcpy((unsigned char *)&val + offs, &value, sizeof(double));
 	return val;
 }
 
@@ -314,7 +314,7 @@ static __device__ int Jim_PackCmd(ClientData dummy, Jim_Interp *interp, int argc
 		width /= 8;
 		if (width > Jim_Length(argv[2]))
 			width = Jim_Length(argv[2]);
-		_memcpy(stringObjPtr->bytes + pos, Jim_String(argv[2]), width);
+		memcpy(stringObjPtr->bytes + pos, Jim_String(argv[2]), width);
 		// No padding is needed since the string is already extended
 	}
 	if (Jim_SetVariable(interp, argv[1], stringObjPtr) != JIM_OK) {

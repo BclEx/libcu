@@ -76,7 +76,7 @@ extern __device__ int fstat(int fd, struct stat *buf);
 #define fstat fstat64
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int stat64(const char *__restrict __file, struct stat64 *__restrict __buf);
+extern __device__ int stat64(const char *__restrict file, struct stat64 *__restrict buf);
 extern __device__ int fstat64(int fd, struct stat64 *buf);
 #endif
 

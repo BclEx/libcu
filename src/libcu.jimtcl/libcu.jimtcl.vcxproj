@@ -25,14 +25,14 @@
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="jim.h" />
-    <ClInclude Include="jim-autoconf.h" />
+    <ClInclude Include="jimautoconf.h" />
     <ClInclude Include="jim-config.h" />
     <ClInclude Include="jim-eventLoop.h" />
-    <ClInclude Include="Jim+Signal.h" />
+    <ClInclude Include="jim-signal.h" />
     <ClInclude Include="jim-subcmd.h" />
     <ClInclude Include="jim-win32compat.h" />
-    <ClInclude Include="JimEx.h" />
-    <ClInclude Include="Utf8.h" />
+    <ClInclude Include="jimex.h" />
+    <ClInclude Include="utf8.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RTcl.cu" />
@@ -43,22 +43,22 @@
     <ClCompile Include="jim-eventloop.cu" />
     <ClCompile Include="jim-exec.cu" />
     <ClCompile Include="jim-file.cu" />
-    <ClCompile Include="Jim+Format.cu" />
+    <ClCompile Include="jim-format.cu" />
     <ClCompile Include="jim-gpu.cu" />
-    <ClCompile Include="Jim+History.cu" />
-    <ClCompile Include="Jim+Interactive.cu" />
-    <ClCompile Include="Jim+Load.cu" />
-    <ClCompile Include="Jim+Namespace.cu" />
-    <ClCompile Include="Jim+Pack.cu" />
-    <ClCompile Include="Jim+Package.cu" />
+    <ClCompile Include="jim-history.cu" />
+    <ClCompile Include="jim-interactive.cu" />
+    <ClCompile Include="jim-load.cu" />
+    <ClCompile Include="jim-namespace.cu" />
+    <ClCompile Include="jim-pack.cu" />
+    <ClCompile Include="jim-package.cu" />
     <ClCompile Include="Jim+Posix.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Jim+Readdir.cu" />
+    <ClCompile Include="jim-readdir.cu" />
     <ClCompile Include="Jim+Readline.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Jim+Regexp.cu" />
+    <ClCompile Include="jim-regexp.cu" />
     <ClCompile Include="Jim+Sdl.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -72,11 +72,11 @@
     <ClCompile Include="Jim+Syslog.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Jim+TclPrefix.cu" />
+    <ClCompile Include="jim-tclprefix.cu" />
     <ClCompile Include="jim-win32compat.cu" />
-    <ClCompile Include="JimEx.cu" />
+    <ClCompile Include="jimex.cu" />
     <ClCompile Include="init.cu" />
-    <ClCompile Include="Utf8.cu" />
+    <ClCompile Include="utf8.cu" />
   </ItemGroup>
   <ItemGroup Condition="'$(Configuration)'=='Debug.cu' Or '$(Configuration)'=='Release.cu'">
     <CudaCompile Include="RTcl.cu" />
@@ -112,8 +112,8 @@
     <None Include="Utf8.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libcu.JimTcl.Native.nuspec" />
-    <None Include="Libcu.Jimtcl.Native.targets" />
+    <None Include="libcu.jimtcl.native.nuspec" />
+    <None Include="libcu.jimtcl.native.targets" />
     <None Include="_content\Libcu.JimTcl.cu.sample" />
     <None Include="_content\TclContext.cu" />
     <None Include="_content\TclContext.cu.h" />

@@ -31,7 +31,12 @@
 #include <ctypecu.h>
 #include <stdlibcu.h>
 #include <stringcu.h>
+
+#include <stddef.h>
+#include <errnocu.h>
+
 #include <cuda_runtimecu.h>
+
 
 /*
 *----------------------------------------------------------------

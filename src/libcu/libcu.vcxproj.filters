@@ -73,16 +73,12 @@
     <ClInclude Include="..\include\unistdcu.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\limitscu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="stdlibcu.cu" />
-    <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
-    <CudaCompile Include="program-device.cu" />
-    <CudaCompile Include="stdiocu.cu" />
-    <CudaCompile Include="sentinel-gpu.cu" />
-    <CudaCompile Include="stringcu.cu" />
-    <CudaCompile Include="regexcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">
@@ -98,6 +94,9 @@
     <Filter Include="includes\sys">
       <UniqueIdentifier>{3b8669b4-7b70-4086-928c-adaec2f08228}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sys">
+      <UniqueIdentifier>{4f137845-9d32-4ce7-b3a2-38806776a209}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sentinel.cpp" />
@@ -112,6 +111,27 @@
     </None>
     <None Include="_content\sample.libcu.ganging.cu">
       <Filter>_content</Filter>
+    </None>
+    <None Include="direntcu.cu" />
+    <None Include="errnocu.cu" />
+    <None Include="program-device.cu" />
+    <None Include="program.cu" />
+    <None Include="regexcu.cu" />
+    <None Include="sentinel-gpu.cu" />
+    <None Include="setjmpcu.cu" />
+    <None Include="stdiocu.cu" />
+    <None Include="stdlibcu.cu" />
+    <None Include="stringcu.cu" />
+    <None Include="timecu.cu" />
+    <None Include="unistdcu.cu" />
+    <None Include="sys\hashcu.cu">
+      <Filter>sys</Filter>
+    </None>
+    <None Include="sys\bitveccu.cu">
+      <Filter>sys</Filter>
+    </None>
+    <None Include="sys\statcu.cu">
+      <Filter>sys</Filter>
     </None>
   </ItemGroup>
 </Project>

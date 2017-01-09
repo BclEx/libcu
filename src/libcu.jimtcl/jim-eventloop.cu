@@ -136,7 +136,7 @@ __device__ void Jim_BackgroundError(Jim_Interp *interp)
 			else {
 				// Report the error to stderr
 				Jim_MakeErrorMessage(interp);
-				_fprintf(_stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
+				_fprintf(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
 				// And reset the result
 				Jim_SetResultString(interp, "", -1);
 			}
@@ -222,7 +222,7 @@ static __device__ jim_wide JimParseAfterId(Jim_Obj *idObj)
 {
 	const char *tok = Jim_String(idObj);
 	jim_wide id;
-	return (!_strncmp(tok, "after#", 6) && Jim_StringToWide(tok + 6, &id, 10) == JIM_OK ? id : -1); // Got an event by id
+	return (!strncmp(tok, "after#", 6) && Jim_StringToWide(tok + 6, &id, 10) == JIM_OK ? id : -1); // Got an event by id
 }
 
 static __device__ jim_wide JimFindAfterByScript(Jim_EventLoop *eventLoop, Jim_Obj *scriptObj)
@@ -341,7 +341,7 @@ __device__ int Jim_ProcessEvents(Jim_Interp *interp, int flags)
 		}
 		int retval = select(maxfd + 1, &rfds, &wfds, &efds, tvp);
 		if (retval < 0) {
-			if (__errno == EINVAL) {
+			if (errno == EINVAL) {
 				// This can happen on mingw32 if a non-socket filehandle is passed
 				Jim_SetResultString(interp, "non-waitable filehandle", -1);
 				return -2;
@@ -593,7 +593,7 @@ __device__ int Jim_eventloopInit(Jim_Interp *interp)
 	if (Jim_PackageProvide(interp, "eventloop", "1.0", JIM_ERRMSG))
 		return JIM_ERROR;
 	Jim_EventLoop *eventLoop = (Jim_EventLoop *)Jim_Alloc(sizeof(*eventLoop));
-	_memset(eventLoop, 0, sizeof(*eventLoop));
+	memset(eventLoop, 0, sizeof(*eventLoop));
 	Jim_SetAssocData(interp, "eventloop", JimELAssocDataDeleProc, eventLoop);
 	Jim_CreateCommand(interp, "vwait", JimELVwaitCommand, eventLoop, NULL);
 	Jim_CreateCommand(interp, "update", JimELUpdateCommand, eventLoop, NULL);

@@ -18,8 +18,7 @@ __device__ void *memmove(void *dest, const void *src, size_t n)
 	register unsigned char *a = (unsigned char *)dest;
 	register unsigned char *b = (unsigned char *)src;
 	if (a == b) return a; // No need to do that thing.
-	if (a < b && b < a + n) // Check for destructive overlap.
-	{
+	if (a < b && b < a + n) { // Check for destructive overlap.
 		a += n; b += n; // Destructive overlap ...
 		while (n-- > 0) { *--a= *--b; } // have to copy backwards.
 		return a;
@@ -183,12 +182,10 @@ __device__ char *strstr(const char *haystack, const char *needle)
 	char *p1Adv = (char *)haystack;
 	while (*++p2)
 		p1Adv++;
-	while (*p1Adv)
-	{
+	while (*p1Adv) {
 		char *p1Begin = p1;
 		p2 = (char *)needle;
-		while (*p1 && *p2 && *p1 == *p2)
-		{
+		while (*p1 && *p2 && *p1 == *p2) {
 			p1++;
 			p2++;
 		}
@@ -309,7 +306,7 @@ __device__ static const info_t _info[] = {
 #ifndef OMIT_FLOATING_POINT
 __device__ static char GetDigit(double64 *val, int *cnt)
 {
-	if ((*cnt) <= 0) return '0';
+	if (*cnt <= 0) return '0';
 	(*cnt)--;
 	int digit = (int)*val;
 	double64 d = digit;
@@ -334,8 +331,7 @@ __device__ void strbldInit(strbld_t *b, char *text, int capacity, int maxSize)
 static __constant__ const char _spaces[] = "                             ";
 __device__ void strbldAppendSpace(strbld_t *b, int length)
 {
-	while (length >= (int)sizeof(_spaces)-1)
-	{
+	while (length >= (int)sizeof(_spaces)-1) {
 		strbldAppend(b, _spaces, sizeof(_spaces)-1);
 		length -= sizeof(_spaces)-1;
 	}
@@ -352,18 +348,15 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 	bool flag_leftjustify = false; // True if "-" flag is present
 	int width = 0; // Width of the current field
 	int length = 0; // Length of the field
-	for (; (c = *fmt); ++fmt)
-	{
-		if (c != '%')
-		{
+	for (; (c = *fmt); ++fmt) {
+		if (c != '%') {
 			bufpt = (char *)fmt;
 			int amt = 1;
 			while ((c = *++fmt) != '%' && c) amt++;
 			strbldAppend(b, bufpt, amt);
 			if (!c) break;
 		}
-		if (!(c = (*++fmt)))
-		{
+		if (!(c = (*++fmt))) {
 			strbldAppend(b, "%", 1);
 			break;
 		}
@@ -375,10 +368,8 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		bool flag_altform2 = false; // True if "!" flag is present
 		bool flag_zeropad = false; // True if field width constant starts with zero
 		bool done = false; // Loop termination flag
-		do
-		{
-			switch (c)
-			{
+		do {
+			switch (c) {
 			case '-': flag_leftjustify = true; break;
 			case '+': flag_plussign = true; break;
 			case ' ': flag_blanksign = true; break;
@@ -390,35 +381,29 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		} while (!done && (c = *++fmt));
 		// Get the field width
 		width = 0; // Width of the current field
-		if (c == '*')
-		{
+		if (c == '*') {
 			width = va_arg(args, int);
-			if (width < 0)
-			{
+			if (width < 0) {
 				flag_leftjustify = true;
 				width = -width;
 			}
 			c = *++fmt;
 		}
-		else while (c >= '0' && c <= '9')
-		{
+		else while (c >= '0' && c <= '9') {
 			width = width*10 + c - '0';
 			c = *++fmt;
 		}
 		// Get the precision
 		int precision; // Precision of the current field
-		if (c == '.')
-		{
+		if (c == '.') {
 			precision = 0;
 			c = *++fmt;
-			if (c == '*')
-			{
+			if (c == '*') {
 				precision = va_arg(args, int);
 				if (precision < 0) precision = -precision;
 				c = *++fmt;
 			}
-			else while (c >= '0' && c <= '9')
-			{
+			else while (c >= '0' && c <= '9') {
 				precision = precision*10 + c - '0';
 				c = *++fmt;
 			}
@@ -428,12 +413,10 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		// Get the conversion type modifier
 		bool flag_long; // True if "l" flag is present
 		bool flag_longlong; // True if the "ll" flag is present
-		if (c == 'l')
-		{
+		if (c == 'l') {
 			flag_long = true;
 			c = *++fmt;
-			if (c == 'l')
-			{
+			if (c == 'l') {
 				flag_longlong = true;
 				c = *++fmt;
 			}
@@ -446,10 +429,8 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		const info_t *info = &_info[0]; // Pointer to the appropriate info structure
 		TYPE type = TYPE_INVALID; // Conversion paradigm
 		int i;
-		for (i = 0; i < _LENGTHOF(_info); i++)
-		{
-			if (c == _info[i].fmtType)
-			{
+		for (i = 0; i < _LENGTHOF(_info); i++) {
+			if (c == _info[i].fmtType) {
 				info = &_info[i];
 				if (useExtended || (info->flags & FLAG_INTERN) == 0) type = info->type;
 				else return;
@@ -484,35 +465,30 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		char *extra = nullptr; // Malloced memory used by some conversion
 		char *out_; // Rendering buffer
 		int outLength; // Size of the rendering buffer
-		switch (type)
-		{
+		switch (type) {
 		case TYPE_POINTER:
 			flag_longlong = (sizeof(char *) == sizeof(long long));
 			flag_long = (sizeof(char *) == sizeof(long int));
 			// Fall through into the next case
 		case TYPE_ORDINAL:
 		case TYPE_RADIX:
-			if (info->flags & FLAG_SIGNED)
-			{
+			if (info->flags & FLAG_SIGNED) {
 				long long v;
 				if (flag_longlong) v = va_arg(args, long long);
 				else if (flag_long) v = va_arg(args, long int);
 				else v = va_arg(args, int);
-				if (v < 0)
-				{
+				if (v < 0) {
 					longvalue = (v == LLONG_MIN ? ((unsigned long long)1)<<63 : -v);
 					prefix = '-';
 				}
-				else
-				{
+				else {
 					longvalue = v;
 					if (flag_plussign) prefix = '+';
 					else if (flag_blanksign) prefix = ' ';
 					else prefix = '\0';
 				}
 			}
-			else
-			{
+			else {
 				if (flag_longlong) longvalue = va_arg(args, unsigned long long);
 				else if (flag_long) longvalue = va_arg(args, unsigned long int);
 				else longvalue = va_arg(args, unsigned int);
@@ -521,24 +497,20 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			if (longvalue == 0) flag_alternateform = false;
 			if (flag_zeropad && precision < width - (prefix != '\0'))
 				precision = width-(prefix!=0);
-			if (precision < BUFSIZE-10)
-			{
+			if (precision < BUFSIZE-10) {
 				outLength = BUFSIZE;
 				out_ = buf;
 			}
-			else
-			{
+			else {
 				outLength = precision + 10;
 				out_ = extra = (char *)_malloc(outLength);
-				if (!out_)
-				{
+				if (!out_) {
 					b->allocFailed = true;
 					return;
 				}
 			}
 			bufpt = &out_[outLength-1];
-			if (type == TYPE_ORDINAL)
-			{
+			if (type == TYPE_ORDINAL) {
 				int x = (int)(longvalue % 10);
 				if (x >= 4 || (longvalue/10)%10 == 1) x = 0;
 				*--bufpt = _ord[x*2+1];
@@ -547,8 +519,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			{
 				register const char *cset = &_digits[info->charset]; // Use registers for speed
 				register int base = info->base;
-				do // Convert to ascii
-				{                                           
+				do { // Convert to ascii
 					*--bufpt = cset[longvalue % base];
 					longvalue = longvalue / base;
 				} while (longvalue > 0);
@@ -556,8 +527,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			length = (int)(&out_[outLength-1]-bufpt);
 			for (i = precision - length; i > 0; i--) *--bufpt = '0'; // Zero pad
 			if (prefix) *--bufpt = prefix; // Add sign
-			if (flag_alternateform && info->prefix) // Add "0" or "0x"
-			{
+			if (flag_alternateform && info->prefix) { // Add "0" or "0x"
 				char x;
 				const char *pre = &_prefix[info->prefix];
 				for (; (x = *pre); pre++) *--bufpt = x;
@@ -572,13 +542,11 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			length = 0;
 #else
 			if (precision < 0) precision = 6; // Set default precision
-			if (realvalue < 0.0)
-			{
+			if (realvalue < 0.0) {
 				realvalue = -realvalue;
 				prefix = '-';
 			}
-			else
-			{
+			else {
 				if (flag_plussign) prefix = '+';
 				else if (flag_blanksign) prefix = ' ';
 				else prefix = 0;
@@ -594,14 +562,12 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			if (type == TYPE_FLOAT) realvalue += rounder;
 			// Normalize realvalue to within 10.0 > realvalue >= 1.0
 			exp = 0;
-			if (isnan((double)realvalue))
-			{
+			if (isnan((double)realvalue)) {
 				bufpt = "NaN";
 				length = 3;
 				break;
 			}
-			if (realvalue > 0.0)
-			{
+			if (realvalue > 0.0) {
 				double64 scale = 1.0;
 				while (realvalue >= 1e100*scale && exp <= 350) { scale *= 1e100; exp += 100; }
 				while (realvalue >= 1e64*scale && exp <= 350) { scale *= 1e64; exp += 64; }
@@ -610,8 +576,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 				realvalue /= scale;
 				while (realvalue < 1e-8) { realvalue *= 1e8; exp -= 8; }
 				while (realvalue < 1.0) { realvalue *= 10.0; exp--; }
-				if (exp > 350)
-				{
+				if (exp > 350) {
 					if (prefix == '-') bufpt = "-Inf";
 					else if (prefix == '+') bufpt = "+Inf";
 					else bufpt = "Inf";
@@ -621,13 +586,11 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			}
 			bufpt = buf;
 			// If the field type is etGENERIC, then convert to either etEXP or etFLOAT, as appropriate.
-			if (type != TYPE_FLOAT)
-			{
+			if (type != TYPE_FLOAT) {
 				realvalue += rounder;
 				if (realvalue >= 10.0) { realvalue *= 0.1; exp++; }
 			}
-			if (type == TYPE_GENERIC)
-			{
+			if (type == TYPE_GENERIC) {
 				flag_rtz = !flag_alternateform;
 				if (exp < -4 || exp > precision) type = TYPE_EXP;
 				else { precision = precision - exp; type = TYPE_FLOAT; }
@@ -635,11 +598,9 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			else
 				flag_rtz = flag_altform2;
 			e2 = (type == TYPE_EXP ? 0 : exp);
-			if (e2+precision+width > BUFSIZE - 15)
-			{
+			if (e2+precision+width > BUFSIZE - 15) {
 				bufpt = extra = (char *)_malloc(e2+precision+width+15);
-				if (!bufpt)
-				{
+				if (!bufpt) {
 					b->allocFailed = true;
 					return;
 				}
@@ -659,19 +620,16 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			// Significant digits after the decimal point
 			while (precision-- > 0) *bufpt++ = GetDigit(&realvalue, &nsd);
 			// Remove trailing zeros and the "." if no digits follow the "."
-			if (flag_rtz && flag_dp)
-			{
+			if (flag_rtz && flag_dp) {
 				while (bufpt[-1] == '0') *--bufpt = 0;
 				assert(bufpt > out_);
-				if (bufpt[-1] == '.')
-				{
+				if (bufpt[-1] == '.') {
 					if (flag_altform2) *bufpt++ = '0';
 					else *(--bufpt) = 0;
 				}
 			}
 			// Add the "eNNN" suffix
-			if (type == TYPE_EXP)
-			{
+			if (type == TYPE_EXP) {
 				*bufpt++ = _digits[info->charset];
 				if (exp < 0) { *bufpt++ = '-'; exp = -exp; }
 				else *bufpt++ = '+';
@@ -686,8 +644,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			bufpt = out_;
 
 			// Special case:  Add leading zeros if the flag_zeropad flag is set and we are not left justified
-			if (flag_zeropad && !flag_leftjustify && length < width)
-			{
+			if (flag_zeropad && !flag_leftjustify && length < width) {
 				int pad = width - length;
 				for (i = width; i >= pad; i--) bufpt[i] = bufpt[i-pad];
 				i = (prefix != '\0');
@@ -708,8 +665,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		case TYPE_CHARX:
 			c = va_arg(args, int);
 			buf[0] = (char)c;
-			if (precision >= 0)
-			{
+			if (precision >= 0) {
 				for (i = 1; i < precision; i++) buf[i] = (char)c;
 				length = precision;
 			}
@@ -738,11 +694,9 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 				if (ch == q) n++;
 			bool needQuote = (!isnull && type == TYPE_SQLESCAPE2);
 			n += i + 1 + needQuote*2;
-			if (n > BUFSIZE)
-			{
+			if (n > BUFSIZE) {
 				bufpt = extra = (char *)_malloc(n);
-				if (!bufpt)
-				{
+				if (!bufpt) {
 					b->allocFailed = true;
 					return;
 				}
@@ -752,8 +706,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			j = 0;
 			if (needQuote) bufpt[j++] = q;
 			k = i;
-			for (i = 0; i < k; i++)
-			{
+			for (i = 0; i < k; i++) {
 				bufpt[j++] = ch = escarg[i];
 				if (ch == q) bufpt[j++] = ch;
 			}
@@ -776,14 +729,12 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			return; }
 		}
 		// The text of the conversion is pointed to by "bufpt" and is "length" characters long.  The field width is "width".  Do the output.
-		if (!flag_leftjustify)
-		{
+		if (!flag_leftjustify) {
 			register int nspace = width-length;
 			if (nspace > 0) strbldAppendSpace(b, nspace);
 		}
 		if (length > 0) strbldAppend(b, bufpt, length);
-		if (flag_leftjustify)
-		{
+		if (flag_leftjustify) {
 			register int nspace = width-length;
 			if (nspace > 0) strbldAppendSpace(b, nspace);
 		}
@@ -794,8 +745,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 {
 	assert(str != nullptr || length == 0);
-	if (b->overflowed | b->allocFailed)
-	{
+	if (b->overflowed | b->allocFailed) {
 		ASSERTCOVERAGE(b->overflowed);
 		ASSERTCOVERAGE(b->allocFailed);
 		return;
@@ -805,23 +755,19 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 		length = strlen(str);
 	if (length == 0 || _NEVER(str == nullptr))
 		return;
-	if (b->index + length >= b->size)
-	{
+	if (b->index + length >= b->size) {
 		char *newText;
-		if (!b->allocType)
-		{
+		if (!b->allocType) {
 			b->overflowed = true;
 			length = (int)(b->size - b->index - 1);
 			if (length <= 0)
 				return;
 		}
-		else
-		{
+		else {
 			char *oldText = (b->text == b->base ? nullptr : b->text);
 			long long newSize = b->index;
 			newSize += length + 1;
-			if (newSize > b->maxSize)
-			{
+			if (newSize > b->maxSize) {
 				strbldReset(b);
 				b->overflowed = true;
 				return;
@@ -829,13 +775,11 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 			else
 				b->size = (int)newSize;
 			newText = (char *)(b->allocType == 1 ? tagrealloc(b->tag, oldText, b->size) : _realloc(oldText, b->size));
-			if (newText)
-			{
+			if (newText) {
 				if (!oldText && b->index > 0) memcpy(newText, b->text, b->index);
 				b->text = newText;
 			}
-			else
-			{
+			else {
 				b->allocFailed = true;
 				strbldReset(b);
 				return;
@@ -849,11 +793,9 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 
 __device__ char *strbldToString(strbld_t *b)
 {
-	if (b->text)
-	{
+	if (b->text) {
 		b->text[b->index] = 0;
-		if (b->allocType && b->text == b->base)
-		{
+		if (b->allocType && b->text == b->base) {
 			b->text = (char *)(b->allocType == 1 ? tagalloc(b->tag, b->index + 1) : _malloc(b->index + 1));
 			if (b->text) memcpy(b->text, b->base, b->index + 1);
 			else b->allocFailed = true;
@@ -864,8 +806,7 @@ __device__ char *strbldToString(strbld_t *b)
 
 __device__ void strbldReset(strbld_t *b)
 {
-	if (b->text != b->base)
-	{
+	if (b->text != b->base) {
 		if (b->allocType == 1)
 			tagfree(b->tag, b->text);
 		else

@@ -1,24 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Jim+Format.cu" />
-    <ClCompile Include="Jim+History.cu" />
-    <ClCompile Include="Jim+Interactive.cu" />
-    <ClCompile Include="Jim+Load.cu" />
-    <ClCompile Include="Jim+Namespace.cu" />
-    <ClCompile Include="Jim+Pack.cu" />
-    <ClCompile Include="Jim+Package.cu" />
     <ClCompile Include="Jim+Posix.cu" />
-    <ClCompile Include="Jim+Readdir.cu" />
     <ClCompile Include="Jim+Readline.cu" />
-    <ClCompile Include="Jim+Regexp.cu" />
     <ClCompile Include="Jim+Sdl.cu" />
     <ClCompile Include="Jim+Signal.cu" />
     <ClCompile Include="Jim+Sqlite3.cu" />
     <ClCompile Include="Jim+Syslog.cu" />
-    <ClCompile Include="Jim+TclPrefix.cu" />
-    <ClCompile Include="JimEx.cu" />
-    <ClCompile Include="Utf8.cu" />
     <ClCompile Include="jim.cu" />
     <ClCompile Include="jim-win32compat.cu" />
     <ClCompile Include="jim-array.cu" />
@@ -30,22 +18,32 @@
     <ClCompile Include="jim-gpu.cu" />
     <ClCompile Include="init.cu" />
     <ClCompile Include="jim-aio.cu" />
+    <ClCompile Include="jim-format.cu" />
+    <ClCompile Include="jim-history.cu" />
+    <ClCompile Include="jim-interactive.cu" />
+    <ClCompile Include="jim-load.cu" />
+    <ClCompile Include="jim-namespace.cu" />
+    <ClCompile Include="jim-pack.cu" />
+    <ClCompile Include="jim-package.cu" />
+    <ClCompile Include="jim-readdir.cu" />
+    <ClCompile Include="jim-regexp.cu" />
+    <ClCompile Include="jim-tclprefix.cu" />
+    <ClCompile Include="jimex.cu" />
+    <ClCompile Include="utf8.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Jim+Signal.h" />
-    <ClInclude Include="JimEx.h" />
-    <ClInclude Include="Utf8.h" />
     <ClInclude Include="jim.h" />
     <ClInclude Include="jim-win32compat.h" />
     <ClInclude Include="jim-config.h" />
     <ClInclude Include="jim-subcmd.h" />
-    <ClInclude Include="jim-autoconf.h" />
     <ClInclude Include="jim-eventLoop.h" />
+    <ClInclude Include="jim-signal.h" />
+    <ClInclude Include="jimex.h" />
+    <ClInclude Include="utf8.h" />
+    <ClInclude Include="jimautoconf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="RTcl.cu" />
-    <None Include="Libcu.JimTcl.Native.nuspec" />
-    <None Include="Libcu.Jimtcl.Native.targets" />
     <None Include="_content\TclContext.cu.h">
       <Filter>_content</Filter>
     </None>
@@ -55,6 +53,8 @@
     <None Include="_content\Libcu.JimTcl.cu.sample">
       <Filter>_content</Filter>
     </None>
+    <None Include="libcu.jimtcl.native.targets" />
+    <None Include="libcu.jimtcl.native.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">

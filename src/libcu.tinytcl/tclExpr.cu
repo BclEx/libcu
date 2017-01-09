@@ -10,7 +10,7 @@
 // makes no representations about the suitability of this software for any purpose.  It is provided "as is" without
 // express or implied warranty.
 
-#include <errnocu.h>
+//#include <errnocu.h>
 #include "tclInt.h"
 
 // The stuff below is a bit of a hack so that this file can be used in environments that include no UNIX, i.e. no errno.  Just define errno here.

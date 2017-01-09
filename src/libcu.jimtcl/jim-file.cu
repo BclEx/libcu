@@ -43,20 +43,19 @@
 * express or implied warranty.
 */
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim+Subcmd.h"
+#include <limitscu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
+#include <stdiocu.h>
+#include <errnocu.h>
+#include <sys/statcu.h>
+#include "jimautoconf.h"
+#include "jim-subcmd.h"
 #ifdef HAVE_UTIMES
 #include <sys/time.h>
 #endif
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#include <unistdcu.h>
 #elif defined(_MSC_VER)
 #include <direct.h>
 #define F_OK 0
@@ -166,7 +165,7 @@ static __device__ int StoreStatData(Jim_Interp *interp, Jim_Obj *varName, const 
 static __device__ int file_cmd_dirname(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	const char *path = Jim_String(argv[0]);
-	const char *p = _strrchr((char *)path, '/');
+	const char *p = strrchr((char *)path, '/');
 	if (!p && path[0] == '.' && path[1] == '.' && path[2] == '\0') Jim_SetResultString(interp, "..", -1);
 	else if (!p) Jim_SetResultString(interp, ".", -1);
 	else if (p == path) Jim_SetResultString(interp, "/", -1);
@@ -178,8 +177,8 @@ static __device__ int file_cmd_dirname(Jim_Interp *interp, int argc, Jim_Obj *co
 static __device__ int file_cmd_rootname(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	const char *path = Jim_String(argv[0]);
-	const char *lastSlash = _strrchr((char *)path, '/');
-	const char *p = _strrchr((char *)path, '.');
+	const char *lastSlash = strrchr((char *)path, '/');
+	const char *p = strrchr((char *)path, '.');
 	if (p == NULL || (lastSlash != NULL && lastSlash > p))
 		Jim_SetResult(interp, argv[0]);
 	else
@@ -190,8 +189,8 @@ static __device__ int file_cmd_rootname(Jim_Interp *interp, int argc, Jim_Obj *c
 static __device__ int file_cmd_extension(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	const char *path = Jim_String(argv[0]);
-	const char *lastSlash = _strrchr((char *)path, '/');
-	const char *p = _strrchr((char *)path, '.');
+	const char *lastSlash = strrchr((char *)path, '/');
+	const char *p = strrchr((char *)path, '.');
 	if (p == NULL || (lastSlash != NULL && lastSlash >= p))
 		p = "";
 	Jim_SetResultString(interp, p, -1);
@@ -201,7 +200,7 @@ static __device__ int file_cmd_extension(Jim_Interp *interp, int argc, Jim_Obj *
 static __device__ int file_cmd_tail(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	const char *path = Jim_String(argv[0]);
-	const char *lastSlash = _strrchr((char *)path, '/');
+	const char *lastSlash = strrchr((char *)path, '/');
 	if (lastSlash)
 		Jim_SetResultString(interp, lastSlash + 1, -1);
 	else
@@ -242,7 +241,7 @@ static __device__ int file_cmd_join(Jim_Interp *interp, int argc, Jim_Obj *const
 		if (*part == '/')
 			last = newname;
 		// Absolute component on mingw, so go back to the start
-		else if (ISWINDOWS && _strchr(part, ':'))
+		else if (ISWINDOWS && strchr(part, ':'))
 			last = newname;
 		else if (part[0] == '.') {
 			if (part[1] == '/') { part += 2; len -= 2; }
@@ -258,7 +257,7 @@ static __device__ int file_cmd_join(Jim_Interp *interp, int argc, Jim_Obj *const
 				Jim_SetResultString(interp, "Path too long", -1);
 				return JIM_ERROR;
 			}
-			_memcpy(last, part, len);
+			memcpy(last, part, len);
 			last += len;
 		}
 		// Remove a slash if needed
@@ -313,10 +312,10 @@ static __device__ int file_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *con
 	}
 	while (argc--) {
 		const char *path = Jim_String(argv[0]);
-		if (__unlink(path) == -1 && __errno != ENOENT) {
+		if (__unlink(path) == -1 && errno != ENOENT) {
 			if (__rmdir(path) == -1)
 				if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) { // Maybe try using the script helper
-					Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path, __strerror(__errno));
+					Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path, strerror(errno));
 					return JIM_ERROR;
 				}
 		}
@@ -346,7 +345,7 @@ static __device__ int mkdir_all(char *path)
 	while (ok--) {
 		// Must have failed the first time, so recursively make the parent and try again
 		{
-			char *slash = _strrchr(path, '/');
+			char *slash = strrchr(path, '/');
 			if (slash && slash != path) {
 				*slash = 0;
 				if (mkdir_all(path) != 0)
@@ -357,15 +356,15 @@ static __device__ int mkdir_all(char *path)
 first:
 		if (MKDIR_DEFAULT(path) == 0)
 			return 0;
-		if (__errno == ENOENT)
+		if (errno == ENOENT)
 			continue; // Create the parent and try again
 		// Maybe it already exists as a directory
-		if (__errno == EEXIST) {
+		if (errno == EEXIST) {
 			struct stat sb;
 			if (__stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
 				return 0;
 			// Restore errno
-			__errno = EEXIST;
+			errno = EEXIST;
 		}
 		// Failed
 		break;
@@ -380,7 +379,7 @@ static __device__ int file_cmd_mkdir(Jim_Interp *interp, int argc, Jim_Obj *cons
 		int rc = mkdir_all(path);
 		Jim_Free(path);
 		if (rc != 0) {
-			Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0], __strerror(__errno));
+			Jim_SetResultFormatted(interp, "can't create directory \"%#s\": %s", argv[0], strerror(errno));
 			return JIM_ERROR;
 		}
 		argv++;
@@ -414,7 +413,7 @@ static __device__ int file_cmd_rename(Jim_Interp *interp, int argc, Jim_Obj *con
 		return JIM_ERROR;
 	}
 	if (_rename(source, dest) != 0) {
-		Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1], __strerror(__errno));
+		Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1], strerror(errno));
 		return JIM_ERROR;
 	}
 	return JIM_OK;
@@ -436,7 +435,7 @@ static __device__ int file_cmd_link(Jim_Interp *interp, int argc, Jim_Obj *const
 	const char *source = Jim_String(argv[1]);
 	int ret = (option == OPT_HARD ? link(source, dest) : symlink(source, dest));
 	if (ret != 0) {
-		Jim_SetResultFormatted(interp, "error linking \"%#s\" to \"%#s\": %s", argv[0], argv[1], __strerror(__errno));
+		Jim_SetResultFormatted(interp, "error linking \"%#s\" to \"%#s\": %s", argv[0], argv[1], strerror(errno));
 		return JIM_ERROR;
 	}
 	return JIM_OK;
@@ -447,7 +446,7 @@ static __device__ int file_stat(Jim_Interp *interp, Jim_Obj *filename, struct st
 {
 	const char *path = Jim_String(filename);
 	if (__stat(path, sb) == -1) {
-		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, __strerror(__errno));
+		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
 		return JIM_ERROR;
 	}
 	return JIM_OK;
@@ -458,7 +457,7 @@ static __device__ int file_lstat(Jim_Interp *interp, Jim_Obj *filename, struct _
 {
 	const char *path = Jim_String(filename);
 	if (_lstat(path, sb) == -1) {
-		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, __strerror(__errno));
+		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
 		return JIM_ERROR;
 	}
 	return JIM_OK;
@@ -556,7 +555,7 @@ static __device__ int file_cmd_readlink(Jim_Interp *interp, int argc, Jim_Obj *c
 	int linkLength = readlink(path, linkValue, MAXPATHLEN);
 	if (linkLength == -1) {
 		Jim_Free(linkValue);
-		Jim_SetResultFormatted(interp, "couldn't readlink \"%#s\": %s", argv[0], __strerror(__errno));
+		Jim_SetResultFormatted(interp, "couldn't readlink \"%#s\": %s", argv[0], strerror(errno));
 		return JIM_ERROR;
 	}
 	linkValue[linkLength] = 0;
@@ -638,7 +637,7 @@ static __device__ int Jim_CdCmd(ClientData dummy, Jim_Interp *interp, int argc, 
 	}
 	const char *path = Jim_String(argv[1]);
 	if (__chdir(path) != 0) {
-		Jim_SetResultFormatted(interp, "couldn't change working directory to \"%s\": %s", path, __strerror(__errno));
+		Jim_SetResultFormatted(interp, "couldn't change working directory to \"%s\": %s", path, strerror(errno));
 		return JIM_ERROR;
 	}
 	return JIM_OK;
@@ -655,7 +654,7 @@ static __device__ int Jim_PwdCmd(ClientData dummy, Jim_Interp *interp, int argc,
 	else if (ISWINDOWS) {
 		// Try to keep backslashes out of paths
 		char *p = cwd;
-		while ((p = (char *)_strchr(p, '\\')) != NULL)
+		while ((p = (char *)strchr(p, '\\')) != NULL)
 			*p++ = '/';
 	}
 	Jim_SetResultString(interp, cwd, -1);

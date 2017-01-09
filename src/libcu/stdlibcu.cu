@@ -608,7 +608,6 @@ __device__ void srand(unsigned int seed)
 }
 
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
-__device__ char *__environ[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
 __device__ char *getenv(const char *name)
 {
 	//if (!strcmp(name, "HOME")) return "gpu:\\";
@@ -677,20 +676,17 @@ __device__ void qsort(void *base, size_t nmemb, size_t size, __compar_fn_t compa
 loop:
 	SWAPINIT(a, size);
 	swap_cnt = 0;
-	if (nmemb < 7)
-	{
+	if (nmemb < 7) {
 		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
 			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
 				swap(pl, pl - size);
 		return;
 	}
 	pm = a + (nmemb / 2) * size;
-	if (nmemb > 7)
-	{
+	if (nmemb > 7) {
 		pl = a;
 		pn = a + (nmemb - 1) * size;
-		if (nmemb > 40)
-		{
+		if (nmemb > 40) {
 			d = (nmemb / 8) * size;
 			pl = med3(pl, pl + d, pl + 2 * d, compar);
 			pm = med3(pm - d, pm, pm + d, compar);
@@ -702,22 +698,17 @@ loop:
 	pa = pb = a + size;
 	//
 	pc = pd = a + (nmemb - 1) * size;
-	for (;;)
-	{
-		while (pb <= pc && (r = compar(pb, a)) <= 0)
-		{
-			if (r == 0)
-			{
+	for (;;) {
+		while (pb <= pc && (r = compar(pb, a)) <= 0) {
+			if (r == 0) {
 				swap_cnt = 1;
 				swap(pa, pb);
 				pa += size;
 			}
 			pb += size;
 		}
-		while (pb <= pc && (r = compar(pc, a)) >= 0)
-		{
-			if (r == 0)
-			{
+		while (pb <= pc && (r = compar(pc, a)) >= 0) {
+			if (r == 0) {
 				swap_cnt = 1;
 				swap(pc, pd);
 				pd -= size;
@@ -731,8 +722,7 @@ loop:
 		pb += size;
 		pc -= size;
 	}
-	if (swap_cnt == 0) // Switch to insertion sort
-	{  
+	if (swap_cnt == 0) { // Switch to insertion sort
 		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
 			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
 				swap(pl, pl - size);
@@ -746,8 +736,7 @@ loop:
 	vecswap(pb, pn - r, r);
 	if ((r = pb - pa) > size)
 		qsort(a, r / size, size, compar);
-	if ((r = pd - pc) > size)
-	{
+	if ((r = pd - pc) > size) {
 		// Iterate rather than recurse to save stack space
 		a = pn - r;
 		nmemb = r / size;
@@ -763,8 +752,7 @@ __device__ div_t div(int numer, int denom)
 	div_t r;
 	r.quot = numer / denom;
 	r.rem = numer % denom;
-	if (numer >= 0 && r.rem < 0)
-	{
+	if (numer >= 0 && r.rem < 0) {
 		r.quot++;
 		r.rem -= denom;
 	}
@@ -776,8 +764,7 @@ __device__ ldiv_t ldiv(long int numer, long int denom)
 	ldiv_t r;
 	r.quot = numer / denom;
 	r.rem = numer % denom;
-	if (numer >= 0 && r.rem < 0)
-	{
+	if (numer >= 0 && r.rem < 0) {
 		r.quot++;
 		r.rem -= denom;
 	}
@@ -791,8 +778,7 @@ __device__ lldiv_t lldiv(long long int numer, long long int denom)
 	lldiv_t r;
 	r.quot = numer / denom;
 	r.rem = numer % denom;
-	if (numer >= 0 && r.rem < 0)
-	{
+	if (numer >= 0 && r.rem < 0) {
 		r.quot++;
 		r.rem -= denom;
 	}

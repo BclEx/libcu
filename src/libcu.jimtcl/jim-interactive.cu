@@ -268,7 +268,7 @@ int Jim_InteractivePrompt(cudaDeviceHeap *heap, Jim_Interp *interp)
 		while (1) {
 			char *line = Jim_HistoryGetline(prompt);
 			if (line == NULL) {
-				if (__errno == EINTR)
+				if (errno == EINTR)
 					continue;
 				Jim_DecrRefCount(interp, scriptObjPtr);
 				retcode = JIM_OK;

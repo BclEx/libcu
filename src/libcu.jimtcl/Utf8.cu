@@ -6,10 +6,11 @@
  * See LICENCE for licence details.
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <ctypecu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
+#include <stdiocu.h>
+#include <cuda_runtimecu.h>
 #include <assert.h>
 #include "utf8.h"
 

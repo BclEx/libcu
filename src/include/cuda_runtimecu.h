@@ -25,6 +25,11 @@ THE SOFTWARE.
 
 #pragma once
 
+#ifndef __CUDA_RUNTIMECU_H__
+#define __CUDA_RUNTIMECU_H__
+
+#include <crtdefscu.h>
+
 // http://stackoverflow.com/questions/29706730/which-headers-are-included-by-default-in-the-cu-source-file
 
 #undef __CUDA_RUNTIME_H__
@@ -118,3 +123,5 @@ __forceinline int gpuGetMaxGflopsDeviceId()
 	}
 	return bestDevice;
 }
+
+#endif /* __CUDA_RUNTIMECU_H__ */

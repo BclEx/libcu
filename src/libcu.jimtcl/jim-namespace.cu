@@ -113,14 +113,14 @@ __device__ int Jim_CreateNamespaceVariable(Jim_Interp *interp, Jim_Obj *varNameO
 __device__ Jim_Obj *Jim_NamespaceQualifiers(Jim_Interp *interp, Jim_Obj *ns)
 {
 	const char *name = Jim_String(ns);
-	const char *pt = _strrchr((char *)name, ':');
+	const char *pt = strrchr((char *)name, ':');
 	return (pt && pt != name && pt[-1] == ':' ? Jim_NewStringObj(interp, name, (int)(pt - name - 1)) : interp->emptyObj);
 }
 
 __device__ Jim_Obj *Jim_NamespaceTail(Jim_Interp *interp, Jim_Obj *ns)
 {
 	const char *name = Jim_String(ns);
-	const char *pt = _strrchr((char *)name, ':');
+	const char *pt = strrchr((char *)name, ':');
 	return (pt && pt != name && pt[-1] == ':' ? Jim_NewStringObj(interp, pt + 1, -1) : ns);
 }
 

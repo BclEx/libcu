@@ -74,7 +74,7 @@ __device__ int Jim_ReaddirCmd(ClientData dummy, Jim_Interp *interp, int argc, Ji
 	if (dirPtr == NULL) {
 		if (nocomplain)
 			return JIM_OK;
-		Jim_SetResultString(interp, __strerror(__errno), -1);
+		Jim_SetResultString(interp, strerror(errno), -1);
 		return JIM_ERROR;
 	}
 	else {

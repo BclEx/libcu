@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <dirent.h>
 #elif !defined(_DIRENT_H)
 #define	_DIRENT_H
+#include <crtdefscu.h>
 #include <featurescu.h>
 #include <sys/types.h>
 

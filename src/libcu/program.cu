@@ -27,8 +27,8 @@ int main()
         c[0], c[1], c[2], c[3], c[4]);
 
 	// finish
-	printf("\nPress any key to continue.\n");
-	scanf("%c");
+	//printf("\nPress any key to continue.\n");
+	//scanf("%c");
 
 	sentinelServerShutdown();
 

@@ -27,16 +27,15 @@ THE SOFTWARE.
 
 #if !__CUDACC__
 #include <errno.h>
-#elif !defined(_ERRNO_H)
-#define _ERRNO_H
+#elif !defined(_INC_ERRNO)
 #include <crtdefscu.h>
 
+#define _CRT_ERRNO_DEFINED
 extern __device__ int *_errno(void);
 #define errno (*_errno())
-
 extern __device__ errno_t _set_errno(int value);
 extern __device__ errno_t _get_errno(int *value);
 
-#define _CRT_ERRNO_DEFINED
 #include <errno.h>
-#endif  /* _ERRNO_H */
+#define _INC_ERRNO
+#endif  /* _INC_ERRNO */

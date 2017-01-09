@@ -286,8 +286,7 @@ static __device__ const char *__sccl(char *tab, const char *fmt)
 	// first 'clear' the whole table
 	int c, n, v;
 	c = *fmt++; // first char hat => negated scanset
-	if (c == '^')
-	{
+	if (c == '^') {
 		v = 1; // default => accept
 		c = *fmt++; // get new first char
 	} else
@@ -298,13 +297,11 @@ static __device__ const char *__sccl(char *tab, const char *fmt)
 	// Now set the entries corresponding to the actual scanset to the opposite of the above.
 	// The first character may be ']' (or '-') without being special; the last character may be '-'.
 	v = 1 - v;
-	for (;;)
-	{
+	for (;;) {
 		tab[c] = v; // take character c
 doswitch:
 		n = *fmt++; // and examine the next
-		switch (n)
-		{
+		switch (n) {
 		case 0: // format ended too soon
 			return (fmt - 1);
 		case '-':
@@ -318,15 +315,13 @@ doswitch:
 			// it is either a close bracket (required by ANSI) or is not numerically greater than the character
 			// we just stored in the table (c).
 			n = *fmt;
-			if (n == ']' || n < c)
-			{
+			if (n == ']' || n < c) {
 				c = '-';
 				break; // resume the for(;;)
 			}
 			fmt++;
 			// fill in the range
-			do
-			{
+			do {
 				tab[++c] = v;
 			} while (c < n);
 			c = n;
@@ -361,13 +356,11 @@ __device__ int _sscanf_(const char *str, const char *fmt, va_list va)
 	int base = 0; // base argument to conversion function
 
 	int inr = strlen(str);
-	for (;;)
-	{
+	for (;;) {
 		c = *fmt++;
 		if (c == 0)
 			return nassigned;
-		if (isspace(c))
-		{
+		if (isspace(c)) {
 			while (inr > 0 && isspace(*str)) nread++, inr--, str++;
 			continue;
 		}
@@ -473,10 +466,8 @@ literal_:
 			goto input_failure;
 
 		// Consume leading white space, except for formats that suppress this.
-		if ((flags & NOSKIP) == 0)
-		{
-			while (isspace(*str))
-			{
+		if ((flags & NOSKIP) == 0) {
+			while (isspace(*str)) {
 				nread++;
 				if (--inr > 0) str++;
 				else goto input_failure;
@@ -492,10 +483,8 @@ literal_:
 				width = 1;
 			if (flags & SUPPRESS) {
 				size_t sum = 0;
-				for (;;)
-				{
-					if ((n = inr) < (int)width)
-					{
+				for (;;) {
+					if ((n = inr) < (int)width) {
 						sum += n;
 						width -= n;
 						str += n;
@@ -503,8 +492,7 @@ literal_:
 							goto input_failure;
 						break;
 					}
-					else
-					{
+					else {
 						sum += width;
 						inr -= width;
 						str += width;
@@ -513,8 +501,7 @@ literal_:
 				}
 				nread += sum;
 			}
-			else
-			{
+			else {
 				memcpy(va_arg(va, char *), str, width);
 				inr -= width;
 				str += width;
@@ -527,11 +514,9 @@ literal_:
 			if (width == 0)
 				width = (size_t)~0;	// 'infinity'
 			// take only those things in the class
-			if (flags & SUPPRESS)
-			{
+			if (flags & SUPPRESS) {
 				n = 0;
-				while (ccltab[(unsigned char)*str])
-				{
+				while (ccltab[(unsigned char)*str]) {
 					n++, inr--, str++;
 					if (--width == 0) break;
 					if (inr <= 0) {
@@ -543,11 +528,9 @@ literal_:
 				if (n == 0)
 					goto match_failure;
 			}
-			else
-			{
+			else {
 				p0 = p = va_arg(va, char *);
-				while (ccltab[(unsigned char)*str])
-				{
+				while (ccltab[(unsigned char)*str]) {
 					inr--;
 					*p++ = *str++;
 					if (--width == 0) break;
@@ -571,17 +554,16 @@ literal_:
 				width = (size_t)~0;
 			if (flags & SUPPRESS) {
 				n = 0;
-				while (!isspace(*str))
-				{
+				while (!isspace(*str)) {
 					n++, inr--, str++;
 					if (--width == 0) break;
 					if (inr <= 0) break;
 				}
 				nread += n;
-			} else {
+			}
+			else {
 				p0 = p = va_arg(va, char *);
-				while (!isspace(*str))
-				{
+				while (!isspace(*str)) {
 					inr--;
 					*p++ = *str++;
 					if (--width == 0) break;

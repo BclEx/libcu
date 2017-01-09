@@ -1,20 +1,31 @@
+#include <crtdefscu.h>
+#include <direntcu.h>
 #include <errnocu.h>
-#include <math.h>
-
-#pragma region ernocu.h
-
-__device__ int errno_;
-extern __device__ int *_errno(void) { return &errno_; }
-extern __device__ errno_t _set_errno(int value) { return (errno_ = value); }
-extern __device__ errno_t _get_errno(int *value) { if (value) *value = errno_; return errno_; }
-
-#pragma endregion
+//#include <setjmpcu.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
+#include <unistdcu.h>
+//#include <timecu.h>
+#include <cuda_runtimecu.h>
+//#include "sys/bitveccu.cu"
+//#include "sys/hashcu.cu"
+#include "sys/statcu.cu"
+#include "direntcu.cu"
+#include "errnocu.cu"
+//#include "regexcu.cu"
+#include "setjmpcu.cu"
+#include "stdiocu.cu"
+#include "stdlibcu.cu"
+#include "stringcu.cu"
+#include "timecu.cu"
+#include "unistdcu.cu"
 
 //////////////////////
 // EMBED
 #pragma region EMBED
 
-__constant__ unsigned char __curtUpperToLower[256] = {
+extern __constant__ unsigned char __curtUpperToLower[256] = {
 	0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
 	18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
 	36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
@@ -32,7 +43,7 @@ __constant__ unsigned char __curtUpperToLower[256] = {
 	252,253,254,255
 };
 
-__constant__ unsigned char __curtCtypeMap[256] = {
+extern __constant__ unsigned char __curtCtypeMap[256] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 00..07    ........ */
 	0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,  /* 08..0f    ........ */
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /* 10..17    ........ */

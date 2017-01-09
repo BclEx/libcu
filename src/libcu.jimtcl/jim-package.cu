@@ -47,7 +47,7 @@ static __device__ char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListOb
 		if (__access(buf, R_OK) == 0)
 			return buf;
 #endif
-		if (_strcmp(prefix, ".") == 0)
+		if (strcmp(prefix, ".") == 0)
 			__snprintf(buf, JIM_PATH_LEN, "%s.tcl", pkgName);
 		else
 			__snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
@@ -70,8 +70,8 @@ static __device__ int JimLoadPackage(Jim_Interp *interp, const char *name, int f
 			// Note: Even if the file fails to load, we consider the package loaded. This prevents issues with recursion. Use a dummy version of "" to signify this case.
 			Jim_PackageProvide(interp, name, "", 0);
 			// Try to load/source it
-			const char *p = _strrchr(path, '.');
-			if (p && !_strcmp(p, ".tcl")) {
+			const char *p = strrchr(path, '.');
+			if (p && !strcmp(p, ".tcl")) {
 				Jim_IncrRefCount(libPathObjPtr);
 				retCode = Jim_EvalFileGlobal(interp, path);
 				Jim_DecrRefCount(interp, libPathObjPtr);
