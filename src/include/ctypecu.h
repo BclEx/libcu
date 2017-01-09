@@ -31,6 +31,10 @@ THE SOFTWARE.
 #define _INC_CTYPE
 #include <crtdefscu.h>
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 // embed
 extern __constant__ unsigned char __curtUpperToLower[256];
 extern __constant__ unsigned char __curtCtypeMap[256]; 
@@ -65,5 +69,9 @@ extern __forceinline __device__ int toupper(int c) { return c&~(__curtCtypeMap[(
 //extern __forceinline __device__ int isblank(int c);
 
 extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif  /* _INC_CTYPE */

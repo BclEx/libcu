@@ -13,7 +13,7 @@
 #include "sys/statcu.cu"
 #include "direntcu.cu"
 #include "errnocu.cu"
-//#include "regexcu.cu"
+#include "regexcu.cu"
 #include "setjmpcu.cu"
 #include "stdiocu.cu"
 #include "stdlibcu.cu"
@@ -24,6 +24,7 @@
 //////////////////////
 // EMBED
 #pragma region EMBED
+__BEGIN_DECLS;
 
 extern __constant__ unsigned char __curtUpperToLower[256] = {
 	0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -81,4 +82,5 @@ extern __constant__ unsigned char __curtCtypeMap[256] = {
 	0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40   /* f8..ff    ........ */
 };
 
+__END_DECLS;
 #pragma endregion

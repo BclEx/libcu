@@ -84,4 +84,7 @@ __device__ int dup2(int fd, int fd2)
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
 __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
+
+__BEGIN_DECLS;
 extern __device__ char **__environ = (char **)__environ_device;
+__END_DECLS;

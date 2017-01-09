@@ -3,6 +3,17 @@
 #include <stdiocu.h>
 #include <cuda_runtimecu.h>
 
+// No utf-8 support. 1 byte = 1 char
+#define utf8_strlen(S, B) ((B) < 0 ? strlen(S) : (B))
+#define utf8_tounicode(S, CP) (*(CP) = (unsigned char)*(S), 1)
+#define utf8_getchars(CP, C) (*(CP) = (C), 1)
+#define utf8_upper(C) _toupper(C)
+#define utf8_title(C) _toupper(C)
+#define utf8_lower(C) _tolower(C)
+#define utf8_index(C, I) (I)
+#define utf8_charlen(C) 1
+#define utf8_prev_len(S, L) 1
+
 #define REG_MAX_PAREN 100
 
 // Structure for regexp "program".  This is essentially a linear encoding of a nondeterministic finite-state machine (aka syntax charts or
@@ -96,7 +107,7 @@ static __device__ const char *regprop(int op);
 #endif
 
 // Returns the length of the null-terminated integer sequence.
-static __device__ __inline int _strlenint(const int *seq)
+static __forceinline __device__ int _strlenint(const int *seq)
 {
 	int n = 0;
 	while (*seq++) { n++; }
@@ -594,7 +605,7 @@ de_fault:
 			if (ch == '\\' && preg->regparse[n])
 			{
 				// Non-trailing backslash. Is this a special escape, or a regular escape?
-				if (_strchr("<>mMwds", preg->regparse[n]))
+				if (strchr("<>mMwds", preg->regparse[n]))
 					break; // A special escape. All done with EXACTLY
 				// Decode it. Note that we add the length for the escape sequence to the length for the backlash so we can skip
 				// the entire sequence, or not as required.
@@ -1013,7 +1024,7 @@ static __device__ int regmatch(regex_t *preg, int prog)
 				{
 					c = preg->reginput[-1];
 					// Previous must be word
-					if (_isalnum(c) || c == '_')
+					if (isalnum(c) || c == '_')
 						break;
 				}
 			}
