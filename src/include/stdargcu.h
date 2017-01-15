@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <stdarg.h>
-#elif !defined(_INC_STDARG)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_STDARG
 #define _INC_STDARG
 #include <crtdefscu.h>
 
@@ -218,3 +215,6 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define _INC_SWPRINTF_INL_
 
 #endif  /* _INC_STDARG */
+#else
+#include <stdarg.h>
+#endif

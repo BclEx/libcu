@@ -32,4 +32,3 @@ __device__ struct dirent64 *readdir64(DIR *dirp)
 __device__ void rewinddir(DIR *dirp)
 {
 }
-

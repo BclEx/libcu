@@ -1,4 +1,5 @@
 #include <errnocu.h>
+#include <cuda_runtimecu.h>
 
 __device__ int errno_;
 extern __device__ int *_errno(void) { return &errno_; }

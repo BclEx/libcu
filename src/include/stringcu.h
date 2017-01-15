@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <string.h>
-#elif !defined(_INC_STRING)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_STRING
 #define _INC_STRING
 #include <featurescu.h>
 #include <crtdefscu.h>
@@ -157,3 +154,6 @@ __device__ void strbldReset(strbld_t *b);
 __END_DECLS;
 
 #endif  /* _INC_STRING */
+#else
+#include <string.h>
+#endif

@@ -23,9 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#if !__CUDACC__
-#include <sys/stat.h>
-#elif !defined(_SYS_STAT_H)
+#ifdef __CUDA_ARCH__
+#ifndef _SYS_STAT_H
 #define	_SYS_STAT_H
 #include <featurescu.h>
 #include <sys/types.h>
@@ -95,3 +94,6 @@ extern __device__ int mkfifo(const char *path, mode_t mode);
 __END_DECLS;
 
 #endif /* _SYS_STAT_H  */
+#else
+#include <sys/stat.h>
+#endif

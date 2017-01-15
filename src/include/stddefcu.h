@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <stddef.h>
-#elif !defined(_INC_STDDEF)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_STDDEF
 #define _INC_STDDEF
 #include <crtdefscu.h>
 
@@ -108,3 +105,6 @@ __forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { r
 #endif
 
 #endif  /* _INC_STDDEF */
+#else
+#include <stddef.h>
+#endif

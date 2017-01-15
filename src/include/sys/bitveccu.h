@@ -23,10 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#elif !defined(_BITVEC_H)
+#ifdef __CUDA_ARCH__
+#ifndef _BITVEC_H
 #define _BITVEC_H
 
 #define BITVEC_SZ 512
@@ -71,3 +69,4 @@ __forceinline __device__ void bitvecDestroy(bitvec_t *p, )
 //__forceinline __device__ uint32 bitvecGetLength() { return _size; }
 
 #endif // _BITVEC_H
+#endif

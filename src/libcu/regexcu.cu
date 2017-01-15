@@ -1354,3 +1354,7 @@ __device__ void regfree(regex_t *preg)
 {
 	free(preg->program);
 }
+
+#undef OP
+#undef NEXT
+#undef OPERAND

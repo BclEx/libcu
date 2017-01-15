@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <limits.h>
-#elif !defined(_INC_LIMITS)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_LIMITS
 #define _INC_LIMITS
 #include <crtdefscu.h>
 #include <limits.h>
 #endif  /* _INC_LIMITS */
+#else
+#include <limits.h>
+#endif

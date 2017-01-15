@@ -28,7 +28,7 @@ THE SOFTWARE.
 #define HAS_GPU 1
 #define HAS_HOSTSENTINEL 0
 
-#if !defined(_INC_SENTINEL)
+#ifndef _INC_SENTINEL
 #define _INC_SENTINEL
 #include <crtdefscu.h>
 

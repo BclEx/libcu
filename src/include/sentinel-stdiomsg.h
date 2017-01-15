@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 #pragma once
 
-#if !defined(_INC_SENTINEL_STDIOMSG)
+#ifndef _INC_SENTINEL_STDIOMSG
 #define _INC_SENTINEL_STDIOMSG
 #include <sentinel.h>
 #include <stringcu.h>

@@ -23,20 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
-#if !__CUDACC__
-#include <unistd.h>
-#elif !defined(_UNISTD_H)
-#define	_UNISTD_H
+#ifdef __CUDA_ARCH__
+#ifndef _UNISTD_H
+#define _UNISTD_H
 #include <crtdefscu.h>
 #include <featurescu.h>
 #include <sys/types.h>
 
 __BEGIN_DECLS;
 
-/* Values for the second argument to access.
-These may be OR'd together.  */
+/* Values for the second argument to access. These may be OR'd together.  */
 #define	R_OK	4		/* Test for read permission.  */
 #define	W_OK	2		/* Test for write permission.  */
 #define	X_OK	1		/* Test for execute permission.  */
@@ -126,3 +124,6 @@ extern __device__ char **__environ;
 __END_DECLS;
 
 #endif  /* _UNISTD_H */
+#else
+//#include <_unistd.h>
+#endif

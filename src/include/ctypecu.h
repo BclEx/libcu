@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <ctype.h>
-#elif !defined(_INC_CTYPE)
+#ifdef __CUDACC__
+#ifndef _INC_CTYPE
 #define _INC_CTYPE
 #include <crtdefscu.h>
 
@@ -75,3 +72,6 @@ extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(un
 #endif
 
 #endif  /* _INC_CTYPE */
+#else
+#include <ctype.h>
+#endif

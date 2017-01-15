@@ -23,18 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
 #include <host_definescu.h>
-
-#if !__CUDACC__
-#include <crtdefs.h>
-#elif !defined(_INC_CRTDEFS)
-
+#ifdef __CUDA_ARCH__
+#ifndef INC_CRTDEFS
 #define _INC_VADEFS
 #include <crtdefs.h>
 #define _INC_SWPRINTF_INL_
 #define _INC_CRTDEFS
 #include <stddefcu.h>
-
 #endif  /* _INC_CRTDEFS */
+#else
+#include <crtdefs.h>
+#endif

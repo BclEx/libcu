@@ -23,13 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
 #ifndef __CUDA_RUNTIMECU_H__
 #define __CUDA_RUNTIMECU_H__
-
 #include <crtdefscu.h>
-
 #undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>
 #include <host_functions.h>

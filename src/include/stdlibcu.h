@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <stdlib.h>
-#elif !defined(_INC_STDLIB)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_STDLIB
 #define _INC_STDLIB
 #include <featurescu.h>
 #include <crtdefscu.h>
@@ -256,3 +253,6 @@ __END_NAMESPACE_STD;
 __END_DECLS;
 
 #endif  /* _INC_STDLIB */
+#else
+#include <stdlib.h>
+#endif

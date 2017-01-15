@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 #pragma once
 
-#if !defined(_FEATURES_H)
+#ifndef _FEATURES_H
 #define _FEATURES_H
 
 // sys/cdefs.h

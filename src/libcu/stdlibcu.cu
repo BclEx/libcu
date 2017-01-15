@@ -689,23 +689,24 @@ __device__ void *bsearch(const void *key, const void *base, size_t nmemb, size_t
 // qsort
 #pragma region qsort
 
-#define min(a, b) ((a) < (b) ? a : b)
-#define swapcode(TYPE, parmi, parmj, n) {\
-	long i = (n) / sizeof(TYPE);\
-	register TYPE *pi = (TYPE *)(parmi);\
-	register TYPE *pj = (TYPE *)(parmj);\
-	do { register TYPE t = *pi; *pi++ = *pj; *pj++ = t; } while (--i > 0);\
+#define MIN(a, b) ((a) < (b) ? a : b)
+#define SWAPCODE(TYPE, parmi, parmj, n) { \
+	long i = (n) / sizeof(TYPE); \
+	register TYPE *pi = (TYPE *)(parmi); \
+	register TYPE *pj = (TYPE *)(parmj); \
+	do { register TYPE t = *pi; *pi++ = *pj; *pj++ = t; } while (--i > 0); \
 }
 #define SWAPINIT(a, size) swaptype = (((char*)a-(char*)0)%sizeof(long)||size%sizeof(long)?2:(size==sizeof(long)?0:1));
 __forceinline __device__ void swapfunc(char *a, char *b, int n, int swaptype)
 {
-	if (swaptype <= 1) swapcode(long, a, b, n)
-	else swapcode(char, a, b, n)
+	if (swaptype <= 1) SWAPCODE(long, a, b, n)
+	else SWAPCODE(char, a, b, n)
 }
-#define swap(a, b)\
-	if (swaptype == 0) { long t = *(long *)(a); *(long *)(a) = *(long *)(b); *(long *)(b) = t; }\
+#define SWAP(a, b) \
+	if (swaptype == 0) { long t = *(long *)(a); *(long *)(a) = *(long *)(b); *(long *)(b) = t; } \
 	else swapfunc(a, b, size, swaptype)
-#define vecswap(a, b, n) if ((n) > 0) swapfunc(a, b, n, swaptype)
+#define VECSWAP(a, b, n) if ((n) > 0) swapfunc(a, b, n, swaptype)
+
 __forceinline __device__ char *med3(char *a, char *b, char *c, __compar_fn_t compar)
 {
 	return (compar(a, b)<0 ? (compar(b, c)<0?b:(compar(a, c)<0?c:a)) : (compar(b, c)>0?b:(compar(a, c)<0?a:c)));
@@ -722,7 +723,7 @@ loop:
 	if (nmemb < 7) {
 		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
 			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
-				swap(pl, pl - size);
+				SWAP(pl, pl - size);
 		return;
 	}
 	pm = a + (nmemb / 2) * size;
@@ -737,7 +738,7 @@ loop:
 		}
 		pm = med3(pl, pm, pn, compar);
 	}
-	swap(a, pm);
+	SWAP(a, pm);
 	pa = pb = a + size;
 	//
 	pc = pd = a + (nmemb - 1) * size;
@@ -745,7 +746,7 @@ loop:
 		while (pb <= pc && (r = compar(pb, a)) <= 0) {
 			if (r == 0) {
 				swap_cnt = 1;
-				swap(pa, pb);
+				SWAP(pa, pb);
 				pa += size;
 			}
 			pb += size;
@@ -753,14 +754,14 @@ loop:
 		while (pb <= pc && (r = compar(pc, a)) >= 0) {
 			if (r == 0) {
 				swap_cnt = 1;
-				swap(pc, pd);
+				SWAP(pc, pd);
 				pd -= size;
 			}
 			pc -= size;
 		}
 		if (pb > pc)
 			break;
-		swap(pb, pc);
+		SWAP(pb, pc);
 		swap_cnt = 1;
 		pb += size;
 		pc -= size;
@@ -768,15 +769,15 @@ loop:
 	if (swap_cnt == 0) { // Switch to insertion sort
 		for (pm = a + size; pm < (char *)a + nmemb * size; pm += size)
 			for (pl = pm; pl > (char *)a && compar(pl - size, pl) > 0; pl -= size)
-				swap(pl, pl - size);
+				SWAP(pl, pl - size);
 		return;
 	}
 	//
 	pn = a + nmemb * size;
-	r = min(pa - (char *)a, pb - pa);
-	vecswap(a, pb - r, r);
-	r = min(pd - pc, pn - pd - size);
-	vecswap(pb, pn - r, r);
+	r = MIN(pa - (char *)a, pb - pa);
+	VECSWAP(a, pb - r, r);
+	r = MIN(pd - pc, pn - pd - size);
+	VECSWAP(pb, pn - r, r);
 	if ((r = pb - pa) > size)
 		qsort(a, r / size, size, compar);
 	if ((r = pd - pc) > size) {
@@ -787,6 +788,12 @@ loop:
 	}
 	/*qsort(pn - r, r / size, size, compar);*/
 }
+
+#undef SWAP
+#undef VECSWAP
+#undef MIN
+#undef SWAPCODE
+#undef SWAPINIT
 
 #pragma endregion
 

@@ -23,10 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#elif !defined(_HASH_H)
+#ifdef __CUDA_ARCH__
+#ifndef _HASH_H
 #define _HASH_H
 
 struct hashElem_t
@@ -55,3 +53,4 @@ extern __device__ void *hashFind(hash_t *p, const char *key, int keyLength);
 extern __device__ void hashClear(hash_t *p);
 
 #endif // _HASH_H
+#endif

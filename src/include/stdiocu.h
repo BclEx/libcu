@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
-
-#if !__CUDACC__
-#include <stdio.h>
-#elif !defined(_INC_STDIO)
+#ifdef __CUDA_ARCH__
+#ifndef _INC_STDIO
 #define _INC_STDIO
 #include <featurescu.h>
 #include <crtdefscu.h>
@@ -355,3 +352,6 @@ STDARG3(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const cha
 __END_NAMESPACE_STD;
 
 #endif  /* _INC_STDIO */
+#else
+#include <stdio.h>
+#endif

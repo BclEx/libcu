@@ -27,12 +27,19 @@ THE SOFTWARE.
 
 #ifndef __HOST_FUNCTIONS_H__
 #define __HOST_FUNCTIONS_H__
-
 #include <cuda_runtime_api.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern bool gpuAssert(cudaError_t code, const char *action, const char *file = nullptr, int line = 0, bool abort = true);
 extern int gpuGetMaxGflopsDevice();
 extern char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaError_t *error = nullptr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #define cudaErrorCheck(x) { gpuAssert((x), #x, __FILE__, __LINE__, true); }
 #define cudaErrorCheckA(x) { gpuAssert((x), #x, __FILE__, __LINE__, false); }

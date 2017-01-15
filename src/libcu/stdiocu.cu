@@ -723,4 +723,3 @@ __END_DECLS;
 //__device__ int vscanf(const char *__restrict format, va_list va) { return -1; }
 ///* Read formatted input from S into argument list ARG.  */
 //__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }
-
