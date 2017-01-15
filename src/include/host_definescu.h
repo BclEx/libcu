@@ -1,5 +1,5 @@
 /*
-host_functions.h - Host functions
+host_defines.h - Host defines
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,18 +25,21 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef __HOST_FUNCTIONS_H__
-#define __HOST_FUNCTIONS_H__
+#ifndef __HOST_DEFINESCU_H__
+#define __HOST_DEFINESCU_H__
 
-#include <cuda_runtime_api.h>
+#define MEMORY_ALIGNMENT 4096
+#define _ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
+#define _ROUND8(x)			(((x)+7)&~7)
+#define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
+#define _ROUNDDOWN8(x)		((x)&~7)
+#define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
+#ifdef BYTEALIGNED4
+#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
+#else
+#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
+#endif
+#define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+#include <host_defines.h>
 
-extern bool gpuAssert(cudaError_t code, const char *action, const char *file = nullptr, int line = 0, bool abort = true);
-extern int gpuGetMaxGflopsDevice();
-extern char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaError_t *error = nullptr);
-
-#define cudaErrorCheck(x) { gpuAssert((x), #x, __FILE__, __LINE__, true); }
-#define cudaErrorCheckA(x) { gpuAssert((x), #x, __FILE__, __LINE__, false); }
-#define cudaErrorCheckF(x, f) { if (!gpuAssert((x), #x, __FILE__, __LINE__, false)) f; }
-#define cudaErrorCheckLast() { gpuAssert(cudaPeekAtLastError(), __FILE__, __LINE__); }
-
-#endif /* __HOST_FUNCTIONS_H__ */
+#endif /* __HOST_DEFINESCU_H__ */

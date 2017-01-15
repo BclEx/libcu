@@ -79,12 +79,16 @@
     <ClInclude Include="..\include\host_functions.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\host_definescu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program-device.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="sentinel-gpu.cu" />
+    <CudaCompile Include="host_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">

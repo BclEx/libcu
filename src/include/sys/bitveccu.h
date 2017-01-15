@@ -25,7 +25,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _BITVEC_H
+#if !__CUDACC__
+#elif !defined(_BITVEC_H)
 #define _BITVEC_H
 
 #define BITVEC_SZ 512

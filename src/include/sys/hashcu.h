@@ -25,7 +25,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _HASH_H
+#if !__CUDACC__
+#elif !defined(_HASH_H)
 #define _HASH_H
 
 struct hashElem_t

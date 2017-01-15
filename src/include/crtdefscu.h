@@ -25,24 +25,7 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _INC_CRTDEFS_PRIMATIVES
-#define _INC_CRTDEFS_PRIMATIVES
-
-#define MEMORY_ALIGNMENT 4096
-#define _ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
-#define _ROUND8(x)			(((x)+7)&~7)
-#define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
-#define _ROUNDDOWN8(x)		((x)&~7)
-#define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
-#ifdef BYTEALIGNED4
-#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
-#else
-#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
-#endif
-#define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
-#include <host_defines.h>
-
-#endif /* _INC_CRTDEFS_PRIMATIVES */
+#include <host_definescu.h>
 
 #if !__CUDACC__
 #include <crtdefs.h>

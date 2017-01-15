@@ -119,8 +119,8 @@ __global__ void g_MainInit(int argc, char *const argv[]) {
 static int MainInit(int argc, char *const argv[]) {
 	memset(&h_dataP, 0, sizeof(h_dataP));
 	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
-	int deviceId = gpuGetMaxGflopsDeviceId();
-	cudaErrorCheck(cudaSetDevice(deviceId));
+	int device = gpuGetMaxGflopsDevice();
+	cudaErrorCheck(cudaSetDevice(device));
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 	//
 	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
