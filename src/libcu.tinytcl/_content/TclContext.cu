@@ -327,7 +327,7 @@ static __device__ void DbTraceHandler(void *cd, const char *sql)
 	TclContext *tctx = (TclContext *)cd;
 	char *cmd = _mprintf("%s%s", tctx->Trace, sql);
 	Tcl_Eval(tctx->Interp, cmd, 0, nullptr);
-	_free(cmd);
+	free(cmd);
 	Tcl_ResetResult(tctx->Interp);
 }
 
@@ -339,7 +339,7 @@ static __device__ void DbProfileHandler(void *cd, const char *sql, uint64 tm)
 	__snprintf(tmAsString, sizeof(tmAsString)-1, "%lld", tm);
 	char *cmd = _mprintf("%s%s%s", tctx->Profile, sql, tmAsString);
 	Tcl_Eval(tctx->Interp, cmd, 0, nullptr);
-	_free(cmd);
+	free(cmd);
 	Tcl_ResetResult(tctx->Interp);
 }
 #endif
@@ -610,7 +610,7 @@ static __device__ ARC AuthCallback(void *arg, int code, const char *arg1, const 
 	}
 	char *str = _mprintf("%s%s%s%s%s", tctx->Auth, codeName, (arg1?arg1:""), (arg2?arg2:""), (arg3?arg3:""), (arg4?arg4:""));
 	int rc2 = Tcl_GlobalEval(interp, str);
-	_free(str);
+	free(str);
 	ARC rc = ARC_OK;
 	const char *reply = (rc == RC_OK ? interp->result : "ARC_DENY");
 	if (!_strcmp(reply, "ARC_OK")) rc = ARC_OK;
@@ -644,7 +644,7 @@ static __device__ char *LocalGetLine(char *prompt, FILE *in)
 		{
 			if (n == 0)
 			{
-				_free(line);
+				free(line);
 				return 0;
 			}
 			line[n] = 0;
@@ -914,7 +914,7 @@ static __device__ void DbReleaseColumnNames(DbEvalContext *p)
 	{
 		for (int i = 0; i < p->Cols; i++)
 			Tcl_DecrRefCount(p->ColNames[i]);
-		_free(p->ColNames);
+		free(p->ColNames);
 		p->ColNames = nullptr;
 	}
 	p->Cols = 0;
@@ -1546,7 +1546,7 @@ static __device__ int DbObjCmd(void *cd, Tcl_Interp *interp, int argc, const cha
 		int bytes = strlen(sql); // Number of bytes in an SQL string
 		Vdbe *stmt; // A statement
 		rc2 = Prepare::Prepare_(p->Ctx, sql, -1, &stmt, 0);
-		_free(sql);
+		free(sql);
 		int cols;// Number of columns in the table
 		if (rc2)
 		{
@@ -1574,7 +1574,7 @@ static __device__ int DbObjCmd(void *cd, Tcl_Interp *interp, int argc, const cha
 		sql[j++] = ')';
 		sql[j] = 0;
 		rc2 = Prepare::Prepare_(p->Ctx, sql, -1, &stmt, 0);
-		_free(sql);
+		free(sql);
 		if (rc2)
 		{
 			Tcl_AppendResult(interp, "Error: ", DataEx::ErrMsg(p->Ctx), nullptr);
@@ -2448,7 +2448,7 @@ static __device__ int DbMain(void *cd, Tcl_Interp *interp, int argc, const char 
 	{
 		Tcl_SetResult(interp, errMsg, TCL_VOLATILE);
 		Tcl_Free(p);
-		_free(errMsg);
+		free(errMsg);
 		return TCL_ERROR;
 	}
 	p->MaxStmt = NUM_PREPARED_STMTS;

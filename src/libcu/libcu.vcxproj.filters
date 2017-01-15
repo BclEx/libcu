@@ -76,9 +76,15 @@
     <ClInclude Include="..\include\limitscu.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\host_functions.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
+    <CudaCompile Include="program-device.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="sentinel-gpu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">
@@ -114,10 +120,7 @@
     </None>
     <None Include="direntcu.cu" />
     <None Include="errnocu.cu" />
-    <None Include="program-device.cu" />
-    <None Include="program.cu" />
     <None Include="regexcu.cu" />
-    <None Include="sentinel-gpu.cu" />
     <None Include="setjmpcu.cu" />
     <None Include="stdiocu.cu" />
     <None Include="stdlibcu.cu" />

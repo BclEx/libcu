@@ -7,6 +7,9 @@
 #include <sentinel-stdlibmsg.h>
 #include <math.h>
 
+#define ISDEVICEFILE(stream) (((int)stream) & 0x80000000)
+#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
+
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 {
 	switch (data->OP) {
@@ -15,7 +18,7 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case STDIO_UNLINK: { stdio_unlink *msg = (stdio_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
 	case STDIO_FCLOSE: { stdio_fclose *msg = (stdio_fclose *)data; msg->RC = fclose(msg->File); return true; }
 	case STDIO_FFLUSH: { stdio_fflush *msg = (stdio_fflush *)data; msg->RC = fflush(msg->File); return true; }
-	case STDIO_FREOPEN: { stdio_freopen *msg = (stdio_freopen *)data; msg->RC = (!msg->Stream ? fopen(msg->Filename, msg->Mode) : freopen(msg->Filename, msg->Mode, msg->Stream)); return true; }
+	case STDIO_FREOPEN: { stdio_freopen *msg = (stdio_freopen *)data; FILE *f = (!msg->Stream ? fopen(msg->Filename, msg->Mode) : freopen(msg->Filename, msg->Mode, msg->Stream)); if (ISDEVICEFILE(f)) panic("hi-bit file allocated"); msg->RC = f; return true; }
 	case STDIO_SETVBUF: { stdio_setvbuf *msg = (stdio_setvbuf *)data; if (msg->Mode != -1) msg->RC = setvbuf(msg->File, msg->Buffer, msg->Mode, msg->Size); else setbuf(msg->File, msg->Buffer); return true; }
 	case STDIO_FGETC: { stdio_fgetc *msg = (stdio_fgetc *)data; msg->RC = fgetc(msg->File); return true; }
 	case STDIO_FGETS: { stdio_fgets *msg = (stdio_fgets *)data; msg->RC = fgets(msg->Str, msg->Num, msg->File); return true; }
@@ -35,6 +38,7 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case STDIO_FILENO: { stdio_fileno *msg = (stdio_fileno *)data; msg->RC = _fileno(msg->File); return true; }
 	case IO_CLOSE: { io_close *msg = (io_close *)data; msg->RC = _close(msg->Handle); return true; }
 	case STDLIB_SYSTEM: { stdlib_system *msg = (stdlib_system *)data; msg->RC = system(msg->Str); return true; }
+	case STDLIB_EXIT: { stdlib_exit *msg = (stdlib_exit *)data; if (msg->Std) exit(msg->Status); else _exit(msg->Status); return true; }
 	}
 	return false;
 }

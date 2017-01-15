@@ -681,7 +681,7 @@ __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *fr
 		int length = strlen(string);
 		if (length > TCL_RESULT_SIZE) {
 			iPtr->result = (char *)_allocFast((unsigned)length+1);
-			iPtr->freeProc = (Tcl_FreeProc *)_free;
+			iPtr->freeProc = (Tcl_FreeProc *)free;
 		} else {
 			iPtr->result = iPtr->resultSpace;
 			iPtr->freeProc = nullptr;
@@ -692,7 +692,7 @@ __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *fr
 	}
 	// If the old result was dynamically-allocated, free it up.  Do it here, rather than at the beginning, in case the new result value was part of the old result value.
 	if (oldFreeProc != 0) {
-		if (oldFreeProc == (Tcl_FreeProc *)_free) {
+		if (oldFreeProc == (Tcl_FreeProc *)free) {
 			_freeFast(oldResult);
 		} else {
 			(*oldFreeProc)(oldResult);
@@ -715,7 +715,7 @@ __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *fr
 *
 *----------------------------------------------------------------------
 */
-__device__ void _Tcl_AppendResult(Tcl_Interp *interp, va_list va)
+__device__ void Tcl_AppendResult_(Tcl_Interp *interp, va_list va)
 {
 	register Interp *iPtr = (Interp *)interp;
 	char *string;
@@ -871,7 +871,7 @@ __device__ void Tcl_ResetResult(Tcl_Interp *interp)
 *
 *----------------------------------------------------------------------
 */
-__device__ void _Tcl_SetErrorCode(Tcl_Interp *interp, va_list va)
+__device__ void Tcl_SetErrorCode_(Tcl_Interp *interp, va_list va)
 {
 	register Interp *iPtr = (Interp *)interp;
 	// Scan through the arguments one at a time, appending them to $errorCode as list elements.

@@ -344,7 +344,7 @@ levelError:
 				goto levelError;
 			}
 			iPtr->result = Tcl_Merge(framePtr->argc, framePtr->args);
-			iPtr->freeProc = (Tcl_FreeProc *)_free;
+			iPtr->freeProc = (Tcl_FreeProc *)free;
 			return TCL_OK;
 		}
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " level [number]\"", (char *)NULL);
@@ -547,7 +547,7 @@ __device__ int Tcl_LindexCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 	}
 	if (size >= TCL_RESULT_SIZE) {
 		interp->result = (char *) _allocFast((unsigned) size+1);
-		interp->freeProc = (Tcl_FreeProc *)_free;
+		interp->freeProc = (Tcl_FreeProc *)free;
 	}
 	if (parenthesized) {
 		memcpy(interp->result, element, size);
@@ -639,7 +639,7 @@ __device__ int Tcl_ListCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 {
 	if (argc >= 2) {
 		interp->result = Tcl_Merge(argc-1, args+1);
-		interp->freeProc = (Tcl_FreeProc *)_free;
+		interp->freeProc = (Tcl_FreeProc *)free;
 	}
 	return TCL_OK;
 }
@@ -966,7 +966,7 @@ __device__ int Tcl_LsortCmd(ClientData notUsed, Tcl_Interp *interp, int argc, co
 		return _sort_result;
 	}
 	interp->result = Tcl_Merge(listArgc, listArgs);
-	interp->freeProc = (Tcl_FreeProc *)_free;
+	interp->freeProc = (Tcl_FreeProc *)free;
 	_freeFast((char *)listArgs);
 	return TCL_OK;
 }

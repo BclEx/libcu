@@ -503,7 +503,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			}
 			else {
 				outLength = precision + 10;
-				out_ = extra = (char *)_malloc(outLength);
+				out_ = extra = (char *)malloc(outLength);
 				if (!out_) {
 					b->allocFailed = true;
 					return;
@@ -599,7 +599,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 				flag_rtz = flag_altform2;
 			e2 = (type == TYPE_EXP ? 0 : exp);
 			if (e2+precision+width > BUFSIZE - 15) {
-				bufpt = extra = (char *)_malloc(e2+precision+width+15);
+				bufpt = extra = (char *)malloc(e2+precision+width+15);
 				if (!bufpt) {
 					b->allocFailed = true;
 					return;
@@ -695,7 +695,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			bool needQuote = (!isnull && type == TYPE_SQLESCAPE2);
 			n += i + 1 + needQuote*2;
 			if (n > BUFSIZE) {
-				bufpt = extra = (char *)_malloc(n);
+				bufpt = extra = (char *)malloc(n);
 				if (!bufpt) {
 					b->allocFailed = true;
 					return;
@@ -774,7 +774,7 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 			}
 			else
 				b->size = (int)newSize;
-			newText = (char *)(b->allocType == 1 ? tagrealloc(b->tag, oldText, b->size) : _realloc(oldText, b->size));
+			newText = (char *)(b->allocType == 1 ? tagrealloc(b->tag, oldText, b->size) : realloc(oldText, b->size));
 			if (newText) {
 				if (!oldText && b->index > 0) memcpy(newText, b->text, b->index);
 				b->text = newText;
@@ -796,7 +796,7 @@ __device__ char *strbldToString(strbld_t *b)
 	if (b->text) {
 		b->text[b->index] = 0;
 		if (b->allocType && b->text == b->base) {
-			b->text = (char *)(b->allocType == 1 ? tagalloc(b->tag, b->index + 1) : _malloc(b->index + 1));
+			b->text = (char *)(b->allocType == 1 ? tagalloc(b->tag, b->index + 1) : malloc(b->index + 1));
 			if (b->text) memcpy(b->text, b->base, b->index + 1);
 			else b->allocFailed = true;
 		}
@@ -810,7 +810,7 @@ __device__ void strbldReset(strbld_t *b)
 		if (b->allocType == 1)
 			tagfree(b->tag, b->text);
 		else
-			_free(b->text);
+			free(b->text);
 	}
 	b->text = nullptr;
 }

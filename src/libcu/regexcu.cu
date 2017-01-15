@@ -134,7 +134,7 @@ __device__ int regcomp(regex_t *preg, const char *exp, int cflags)
 	preg->regparse = exp;
 	// Allocate space
 	preg->proglen = (strlen(exp) + 1) * 5;
-	preg->program = (int *)_alloc(preg->proglen * sizeof(int));
+	preg->program = (int *)malloc(preg->proglen * sizeof(int));
 	if (!preg->program)
 		FAIL(preg, REG_ERR_NOMEM);
 	// Note that since we store a magic value as the first item in the program, program offsets will never be 0
@@ -1352,5 +1352,5 @@ __device__ size_t regerror(int errcode, const regex_t *preg, char *errbuf, size_
 
 __device__ void regfree(regex_t *preg)
 {
-	_free(preg->program);
+	free(preg->program);
 }

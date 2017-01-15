@@ -463,7 +463,7 @@ errFileError:
 			//if ((inputId != -1 && dup2(inputId, 0) == -1) || (outputId != -1 && dup2(outputId, 1) == -1) || (errorId != -1 && dup2(errorId, 2) == -1)) {
 			//	char *err = "forked process couldn't set up input/output\n";
 			//	fwrite(err, strlen(err), 1, (!errorId ? 2 : errorId));
-			//	_exit(1);
+			//	exit_(1);
 			//}
 			//for (i = 3; i <= outputId || i <= inputId || i <= errorId; i++) {
 			//	fclose(i);

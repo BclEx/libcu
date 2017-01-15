@@ -5,6 +5,8 @@
 #include <bits/libcu_fpmax.h>
 #include <cuda_runtimecu.h>
 
+#define MALLOCSIZETYPE long long int
+
 __BEGIN_DECLS;
 
 #pragma region header
@@ -75,8 +77,6 @@ __BEGIN_DECLS;
 #define Wuchar unsigned char
 #define ISSPACE(C) isspace((C))
 #endif
-
-#pragma endregion
 
 #pragma region stdlib_strtod
 
@@ -594,6 +594,8 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 
 #pragma endregion
 
+#pragma endregion
+
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
 __device__ int rand(void)
 {
@@ -605,6 +607,47 @@ __device__ int rand(void)
 __device__ void srand(unsigned int seed)
 {
 	panic("Not Implemented");
+}
+
+__device__ void *malloc_(size_t size)
+{
+	assert(size > 0);
+	size = _ROUND8(size);
+	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
+	if (p)
+		p[0] = size;
+	else panic("failed to allocate %u bytes of memory", size);
+	return (void *)(p+1);
+}
+
+__device__ void *calloc_(size_t nmemb, size_t size)
+{
+	return malloc(size);
+}
+
+__device__ void free_(void *ptr)
+{
+	assert(ptr);
+	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)ptr;
+	free(p-1);
+}
+
+__device__ void *realloc_(void *ptr, size_t size)
+{
+	assert(size > 0);
+	size = _ROUND8(size);
+	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
+	if (p)
+		p[0] = size;
+	else panic("failed to allocate %u bytes of memory", size);
+	if (ptr)
+	{ 
+		MALLOCSIZETYPE *p2 = (MALLOCSIZETYPE *)ptr;
+		size_t ptrSize = (size_t)p2[0];
+		if (ptrSize) memcpy(p+1, p2+1, ptrSize);
+		free(p2-1);
+	}
+	return (void *)(p+1);
 }
 
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
@@ -818,24 +861,5 @@ __device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, s
 	panic("Not Implemented");
 	return 0;
 }
-
-#pragma region alloc
-
-__device__ void *_mallocg(size_t size)
-{
-	return malloc(size);
-}
-
-__device__ void _freeg(void *p)
-{
-	return free(p);
-}
-
-__device__ void *_reallocg(void *old, size_t newSize)
-{
-	return nullptr;
-}
-
-#pragma endregion
 
 __END_DECLS;

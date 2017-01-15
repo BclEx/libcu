@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include <sentinel.h>
 
 enum {
-	IO_CLOSE = 31,
+	IO_CLOSE = 35,
 };
 
 struct io_close

@@ -105,7 +105,7 @@ extern __device__ int Tcl_SetCommandInfo(Tcl_Interp *interp, const char *cmdName
 // Specil freeProc values that may be passed to Tcl_SetResult (see the man page for details):
 #define TCL_VOLATILE ((Tcl_FreeProc *)-1)
 #define TCL_STATIC	((Tcl_FreeProc *)0)
-#define TCL_DYNAMIC	((Tcl_FreeProc *)_free)
+#define TCL_DYNAMIC	((Tcl_FreeProc *)free)
 
 // Flag values passed to variable-related procedures.
 #define TCL_GLOBAL_ONLY		1
@@ -133,8 +133,8 @@ extern __device__ void Tcl_ValidateAllMemory(char *file, int line);
 #define _freeFast(x) Tcl_MemFree((x), __FILE__, __LINE__)
 #define _reallocFast(x,y) Tcl_MemRealloc((x), (y), __FILE__, __LINE__)
 #else
-#define _allocFast(x) _mallocg(x)
-#define _freeFast(x) _freeg(x)
+#define _allocFast(x) malloc(x)
+#define _freeFast(x) free(x)
 #define _reallocFast(x,y) realloc(x,y)
 #define Tcl_DumpActiveMemory(x)
 #define Tcl_ValidateAllMemory(x,y)
@@ -146,7 +146,7 @@ extern __device__ void Tcl_ValidateAllMemory(char *file, int line);
 // Macro to free up result of interpreter.
 #define Tcl_FreeResult(interp) \
 	if ((interp)->freeProc) { \
-	if ((interp)->freeProc == (Tcl_FreeProc *)_free) { _freeFast((interp)->result); } \
+	if ((interp)->freeProc == (Tcl_FreeProc *)free) { _freeFast((interp)->result); } \
 	else { (*(interp)->freeProc)((interp)->result); } \
 	(interp)->freeProc = nullptr; }
 

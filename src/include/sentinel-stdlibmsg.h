@@ -31,7 +31,17 @@ THE SOFTWARE.
 #include <stringcu.h>
 
 enum {
-	STDLIB_SYSTEM = 30,
+	STDLIB_EXIT = 30,
+	STDLIB_SYSTEM,
+};
+
+struct stdlib_exit
+{
+	sentinelMessage Base;
+	bool Std;
+	int Status;
+	__device__ stdlib_exit(bool std, int status)
+		: Base(false, STDLIB_EXIT, 0, nullptr), Std(std), Status(status) { sentinelSend(this, sizeof(stdlib_exit)); }
 };
 
 struct stdlib_system

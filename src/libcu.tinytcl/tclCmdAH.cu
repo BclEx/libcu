@@ -194,7 +194,7 @@ __device__ int Tcl_ConcatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 	}
 	if (argc >= 2) {
 		interp->result = Tcl_Concat(argc-1, args+1);
-		interp->freeProc = (Tcl_FreeProc *)_free;
+		interp->freeProc = (Tcl_FreeProc *)free;
 	}
 	return TCL_OK;
 }
@@ -700,7 +700,7 @@ doField:
 
 	interp->result = dst;
 	if (dstSpace != TCL_RESULT_SIZE) {
-		interp->freeProc = (Tcl_FreeProc *)_free;
+		interp->freeProc = (Tcl_FreeProc *)free;
 	} else {
 		interp->freeProc = 0;
 	}

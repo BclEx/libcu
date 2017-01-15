@@ -34,8 +34,7 @@ THE SOFTWARE.
 #include <stdargcu.h>
 
 typedef struct __STDIO_FILE_STRUCT FILE;
-typedef struct __STDIO_FILEREDIRECT_STRUCT FILEREDIRECT;
-#define ISDEVICEFILE(stream) 0
+#define ISDEVICEFILE(stream) (((long long int)stream) & 0x80000000)
 
 __BEGIN_DECLS;
 
@@ -93,14 +92,14 @@ __BEGIN_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Remove file FILENAME.  */
-extern __device__ int _removeg(const char *filename);
-__forceinline __device__ int remove(const char *filename) { return _removeg(filename); }
+extern __device__ int remove_(const char *filename);
+__forceinline __device__ int remove(const char *filename) { return remove_(filename); }
 /* Rename file OLD to NEW.  */
-extern  __device__ int _renameg(const char *old, const char *new_);
-__forceinline __device__ int rename(const char *old, const char *new_) { return _renameg(old, new_); }
+extern  __device__ int rename_(const char *old, const char *new_);
+__forceinline __device__ int rename(const char *old, const char *new_) { return rename_(old, new_); }
 /* Remove file FILENAME.  */
-extern __device__ int __unlinkg(const char *filename);
-__forceinline __device__ int _unlink(const char *filename) { return __unlinkg(filename); }
+extern __device__ int _unlink_(const char *filename);
+__forceinline __device__ int _unlink(const char *filename) { return _unlink_(filename); }
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
@@ -166,7 +165,7 @@ __BEGIN_NAMESPACE_STD;
 /* Write formatted output to S from argument list ARG. */
 extern __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 /* Write formatted output to stdout from argument list ARG. */
-//builtin: __forceinline __device__ int _vprintfg(const char *__restrict format, va_list va) { return vfprintf(stdout, format, va, true); };
+//builtin: __forceinline __device__ int _vprintf(const char *__restrict format, va_list va) { return vfprintf(stdout, format, va, true); };
 /* Write formatted output to S from argument list ARG.  */
 __forceinline __device__ int vsprintf(char *__restrict s, const char *__restrict format, va_list va) { return vsnprintf(s, 0xffffffff, format, va); }
 __END_NAMESPACE_STD;

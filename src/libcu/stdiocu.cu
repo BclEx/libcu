@@ -20,7 +20,7 @@ __constant__ FILE *__iob_file[3] = { (FILE *)1, (FILE *)2, (FILE *)3 };
 //__device__ FILE *stderr;
 
 /* Remove file FILENAME.  */
-__device__ int _removeg(const char *filename)
+__device__ int remove_(const char *filename)
 {
 	//if (filename[0] != ':') {
 	//	stdio_remove msg(filename); return msg.rc;
@@ -30,7 +30,7 @@ __device__ int _removeg(const char *filename)
 }
 
 /* Rename file OLD to NEW.  */
-__device__ int _renameg(const char *old, const char *new_)
+__device__ int rename_(const char *old, const char *new_)
 {
 	if (old[0] != ':') {
 		stdio_rename msg(old, new_); return msg.RC;
@@ -40,7 +40,7 @@ __device__ int _renameg(const char *old, const char *new_)
 }
 
 /* Remove file FILENAME.  */
-__device__ int _unlink_device(const char *filename)
+__device__ int _unlink_(const char *filename)
 {
 	if (filename[0] != ':') {
 		stdio_unlink msg(filename); return msg.RC;

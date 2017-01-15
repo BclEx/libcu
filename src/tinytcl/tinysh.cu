@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <RuntimeHost.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <cuda_runtimecu.h>
 #include <tcl.h>
 #include <tclExInt.h>
 #ifdef DEBUGGER
@@ -37,50 +37,24 @@ __device__ int SampleCommand(ClientData clientData, Tcl_Interp *interp, int argc
 }
 #endif
 
-#pragma region Startup + Shutdown
-
-struct PrimaryData {
+struct primaryData_t {
 	Tcl_Interp *interp;
 	Tcl_CmdBuf buffer;
 	int noninteractive;
 	bool gotPartial;
 	bool quitFlag;
 	int retcode;
-};
-struct PrimaryData h_dataP;
+} h_dataP;
 
 // MAIN-INIT
-#if __CUDACC__
-static cudaDeviceHeap _deviceHeap;
-
-__device__ struct PrimaryData d_dataP;
+__device__ struct primaryData_t d_dataP;
 void D_DATAP() { cudaErrorCheck(cudaMemcpyToSymbol(d_dataP, &h_dataP, sizeof(h_dataP))); }
 void H_DATAP() { cudaErrorCheck(cudaMemcpyFromSymbol(&h_dataP, d_dataP, sizeof(h_dataP))); }
-
-__global__ void g_MainInit(int argc, char *const argv[]);
-static int MainInit(int argc, char *const argv[]) {
-	memset(&h_dataP, 0, sizeof(h_dataP));
-	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
-	int deviceId = gpuGetMaxGflopsDeviceId();
-	cudaErrorCheck(cudaSetDevice(deviceId));
-	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
-	_deviceHeap = cudaDeviceHeapCreate(256, 100);
-	cudaErrorCheck(cudaDeviceHeapSelect(_deviceHeap));
-	//
-	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
-	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceHeapSynchronize(_deviceHeap)); H_DATAP();
-	cudaFree(d_argv);
-	return h_dataP.retcode;
-}
 
 //#define _exit(v) _dataP.quitFlag = true; _dataP.retcode = 1; return
 #define _dataP d_dataP
 __global__ void g_MainInit(int argc, char *const argv[]) {
-#else
-#define _dataP h_dataP
-static void MainInit(int argc, char *const argv[]) {
-	memset(&h_dataP, 0, sizeof(h_dataP));
-#endif
+
 	Tcl_Interp *interp = _dataP.interp = Tcl_CreateInterp();
 #ifdef TCL_MEM_DEBUG
 	Tcl_InitMemory(interp);
@@ -103,7 +77,7 @@ static void MainInit(int argc, char *const argv[]) {
 	_dataP.buffer = Tcl_CreateCmdBuf();
 
 	int result;
-	if (argc > 1 && _strcmp(argv[1], "-"))
+	if (argc > 1 && strcmp(argv[1], "-"))
 	{
 		char *filename = (char *)argv[1]+1;
 
@@ -118,9 +92,9 @@ static void MainInit(int argc, char *const argv[]) {
 			// And make sure we print an informative error if something goes wrong
 			Tcl_AddErrorInfo(interp, "");
 			printf("%s\n", Tcl_GetVar(interp, "errorInfo", TCL_LEAVE_ERR_MSG));
-			_exit(1);
+			exit_(1);
 		}
-		_exit(0);
+		exit_(0);
 	}
 	else
 	{
@@ -133,13 +107,26 @@ static void MainInit(int argc, char *const argv[]) {
 			if (result != TCL_OK)
 			{
 				printf("%s\n", interp->result);
-				_exit(1);
+				exit_(1);
 			}
 		}
 #endif
 		_dataP.retcode = -1;
 		return;
 	}
+}
+
+static int MainInit(int argc, char *const argv[]) {
+	memset(&h_dataP, 0, sizeof(h_dataP));
+	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
+	int deviceId = gpuGetMaxGflopsDeviceId();
+	cudaErrorCheck(cudaSetDevice(deviceId));
+	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
+	//
+	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
+	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
+	cudaFree(d_argv);
+	return h_dataP.retcode;
 }
 
 // INTERACTIVE-PROMPT
@@ -164,21 +151,7 @@ void InteractivePrompt() {
 }
 
 // INTERACTIVE-EXEC
-#if __CUDACC__
-__global__ void g_InteractiveExecute(char *line);
-static void InteractiveExecute(char *line) {
-	char *d_line;
-	int size = strlen(line) + 1;
-	cudaErrorCheck(cudaMalloc((void **)&d_line, size));
-	cudaErrorCheck(cudaMemcpy(d_line, line, size, cudaMemcpyHostToDevice));
-	D_DATAP(); g_InteractiveExecute<<<1,1>>>(d_line); cudaErrorCheck(cudaDeviceHeapSynchronize(_deviceHeap)); H_DATAP();
-	cudaFree(d_line);
-}
-
 __global__ void g_InteractiveExecute(char *line) {
-#else
-static void InteractiveExecute(char *line) {
-#endif
 	Tcl_Interp *interp = _dataP.interp;
 	Tcl_CmdBuf buffer = _dataP.buffer;
 	char *cmd = Tcl_AssembleCmd(buffer, line);
@@ -201,7 +174,7 @@ static void InteractiveExecute(char *line) {
 #ifdef TCL_MEM_DEBUG
 			Tcl_DumpActiveMemory(_dumpFile);
 #endif
-			_exit(0);
+			exit_(0);
 		}
 	}
 	else {
@@ -212,23 +185,23 @@ static void InteractiveExecute(char *line) {
 	}
 }
 
+static void InteractiveExecute(char *line) {
+	char *d_line;
+	int size = strlen(line) + 1;
+	cudaErrorCheck(cudaMalloc((void **)&d_line, size));
+	cudaErrorCheck(cudaMemcpy(d_line, line, size, cudaMemcpyHostToDevice));
+	D_DATAP(); g_InteractiveExecute<<<1,1>>>(d_line); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
+	cudaFree(d_line);
+}
+
 // MAIN-SHUTDOWN
-#if __CUDACC__
-__global__ void g_MainShutdown();
-static void MainShutdown() {
-	D_DATAP(); g_MainShutdown<<<1,1>>>(); cudaErrorCheck(cudaDeviceHeapSynchronize(_deviceHeap)); H_DATAP();
-	cudaDeviceHeapDestroy(_deviceHeap);
-	cudaDeviceReset();
-	//return h_dataP.retcode;
-}
-
 __global__ void g_MainShutdown() {
-#else
-static void MainShutdown() {
-#endif
 }
-
-#pragma endregion
+static int MainShutdown() {
+	D_DATAP(); g_MainShutdown<<<1,1>>>(); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
+	cudaDeviceReset();
+	return h_dataP.retcode;
+}
 
 int main(int argc, char *const argv[])
 {

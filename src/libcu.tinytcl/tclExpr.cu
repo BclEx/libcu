@@ -978,7 +978,7 @@ __device__ int Tcl_ExprString(Tcl_Interp *interp, char *string)
 		} else {
 			if (value.pv.buffer != value.staticSpace) {
 				interp->result = value.pv.buffer;
-				interp->freeProc = (Tcl_FreeProc *)_free;
+				interp->freeProc = (Tcl_FreeProc *)free;
 				value.pv.buffer = value.staticSpace;
 			} else {
 				Tcl_SetResult(interp, value.pv.buffer, TCL_VOLATILE);

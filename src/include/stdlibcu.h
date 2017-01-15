@@ -138,32 +138,39 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Allocate SIZE bytes of memory.  */
-extern __device__ void *_mallocg(size_t size);
+extern __device__ void *malloc_(size_t size);
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
-extern __device__ void *_callocg(size_t nmemb, size_t size);
+extern __device__ void *calloc_(size_t nmemb, size_t size);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
-extern __device__ void *_reallocg(void *ptr, size_t size);
+extern __device__ void *realloc_(void *ptr, size_t size);
 /* Free a block allocated by `malloc', `realloc' or `calloc'.  */
-extern __device__ void _freeg(void *ptr);
+extern __device__ void free_(void *ptr);
 __END_NAMESPACE_STD;
-#define _malloc _mallocg
-#define _realloc _reallocg
-#define _free _freeg
+#define malloc malloc_
+#define calloc calloc_
+#define realloc realloc_
+#define free free_
 
 __BEGIN_NAMESPACE_STD;
 /* Abort execution and generate a core-dump.  */
 __forceinline __device__ void abort(void) { asm("trap;"); }
 /* Register a function to be called when `exit' is called.  */
 extern __device__ int atexit(void(*func)(void));
+//__forceinline __device__ int atexit(void(*func)(void)) { panic("Not Implemented"); }
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Call all functions registered with `atexit' and `on_exit', in the reverse of the order in which they were registered, perform stdio cleanup, and terminate program execution with STATUS.  */
-extern __device__ void exit_(int status);
+__forceinline __device__ void exit_(int status) { stdlib_exit msg(true, status); }
 __END_NAMESPACE_STD;
+
+__BEGIN_NAMESPACE_C99;
+/* Terminate the program with STATUS without calling any of the functions registered with `atexit' or `on_exit'.  */
+__forceinline __device__ void _Exit(int status) { stdlib_exit msg(false, status); }
+__END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */

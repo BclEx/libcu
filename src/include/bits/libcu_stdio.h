@@ -104,11 +104,6 @@ typedef _off64_t __offmax_t;
 typedef _off_t __offmax_t;
 #endif
 
-struct __STDIO_FILEREDIRECT_STRUCT {
-	unsigned short __modeflags;
-	void *redirect;
-};
-
 struct __STDIO_FILE_STRUCT {
 	unsigned short __modeflags;
 #ifdef HAS_WCHAR__
