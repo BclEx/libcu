@@ -31,75 +31,81 @@ THE SOFTWARE.
 #ifndef _SENTINEL_H
 #define _SENTINEL_H
 #include <crtdefscu.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define SENTINEL_MAGIC (unsigned short)0xC811
 #define SENTINEL_MSGSIZE 4096
 #define SENTINEL_MSGCOUNT 1
-//#define SENTINEL_NAME "Global\\Sentinel"
+	//#define SENTINEL_NAME "Global\\Sentinel"
 #define SENTINEL_NAME "Sentinel"
 #define SENTINEL_DEVICEMAPS 1
 
-struct sentinelMessage
-{
-	bool Wait;
-	char OP;
-	int Size;
-	char *(*Prepare)(void*,char*,char*);
-	__device__ sentinelMessage(bool wait, char op, int size, char *(*prepare)(void*,char*,char*))
-		: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
-public:
-};
+	struct sentinelMessage
+	{
+		bool Wait;
+		char OP;
+		int Size;
+		char *(*Prepare)(void*,char*,char*);
+		__device__ sentinelMessage(bool wait, char op, int size, char *(*prepare)(void*,char*,char*))
+			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
+	public:
+	};
 #define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*))&P)
 
-typedef struct
-{
-	unsigned short Magic;
-	volatile long Status;
-	int Length;
-	char *Data;
-	void Dump();
-} sentinelCommand;
+	typedef struct
+	{
+		unsigned short Magic;
+		volatile long Status;
+		int Length;
+		char *Data;
+		void Dump();
+	} sentinelCommand;
 
-typedef struct
-{
-	long GetId;
-	volatile long SetId;
-	char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
-	void Dump();
-} sentinelMap;
+	typedef struct
+	{
+		long GetId;
+		volatile long SetId;
+		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
+		void Dump();
+	} sentinelMap;
 
-typedef struct sentinelExecutor
-{
-	sentinelExecutor *Next;
-	const char *Name;
-	bool (*Executor)(void*,sentinelMessage*,int);
-	void *Tag;
-} sentinelExecutor;
+	typedef struct sentinelExecutor
+	{
+		sentinelExecutor *Next;
+		const char *Name;
+		bool (*Executor)(void*,sentinelMessage*,int);
+		void *Tag;
+	} sentinelExecutor;
 
-typedef struct sentinelContext
-{
-	sentinelMap *DeviceMap[SENTINEL_DEVICEMAPS];
-	sentinelMap *HostMap;
-	sentinelExecutor *List;
-} sentinelContext;
+	typedef struct sentinelContext
+	{
+		sentinelMap *DeviceMap[SENTINEL_DEVICEMAPS];
+		sentinelMap *HostMap;
+		sentinelExecutor *List;
+	} sentinelContext;
 
 #if HAS_HOSTSENTINEL
-extern sentinelMap *_sentinelHostMap;
+	extern sentinelMap *_sentinelHostMap;
 #endif
-extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
+	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 
-extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length);
-extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME); 
-extern void sentinelServerShutdown();
+	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length);
+	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME); 
+	extern void sentinelServerShutdown();
 #if HAS_HOSTSENTINEL
-extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
-extern void sentinelClientShutdown();
+	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
+	extern void sentinelClientShutdown();
 #endif
-//
-extern sentinelExecutor *sentinelFindExecutor(const char *name);
-extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false);
-extern void sentinelUnregisterExecutor(sentinelExecutor *exec);
-//
-extern __device__ void sentinelSend(void *msg, int msgLength);
+	//
+	extern sentinelExecutor *sentinelFindExecutor(const char *name);
+	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false);
+	extern void sentinelUnregisterExecutor(sentinelExecutor *exec);
+	//
+	extern __device__ void sentinelSend(void *msg, int msgLength);
 
+#ifdef  __cplusplus
+}
+#endif
 #endif  /* _SENTINEL_H */

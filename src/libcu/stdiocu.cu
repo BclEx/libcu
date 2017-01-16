@@ -2,7 +2,7 @@
 #include <ctypecu.h>
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
-#ifdef __CUDA_ARCH
+//#ifdef __CUDA_ARCH
 
 #define CORE_MAX_LENGTH 1000000000
 
@@ -65,7 +65,7 @@ __device__ int fflush_device(FILE *stream)
 }
 
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *_freopeng(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
 	if (filename[0] != ':') {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
@@ -76,7 +76,7 @@ __device__ FILE *_freopeng(const char *__restrict filename, const char *__restri
 
 #ifdef __USE_LARGEFILE64
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *_freopen64g(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
 	if (filename[0] != ':') {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
@@ -720,4 +720,4 @@ __END_DECLS;
 ///* Read formatted input from S into argument list ARG.  */
 //__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }
 
-#endif
+//#endif

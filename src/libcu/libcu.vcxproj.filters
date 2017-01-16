@@ -94,6 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="sentinel-gpu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">
@@ -114,10 +116,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <ClCompile Include="sentinel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libcu.Native.nuspec" />
@@ -130,9 +132,7 @@
     </None>
     <None Include="direntcu.cu" />
     <None Include="errnocu.cu" />
-    <None Include="program.cu" />
     <None Include="regexcu.cu" />
-    <None Include="sentinel-gpu.cu" />
     <None Include="setjmpcu.cu" />
     <None Include="stdiocu.cu" />
     <None Include="stdlibcu.cu" />

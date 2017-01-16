@@ -51,7 +51,6 @@ extern "C" {
 #endif
 #endif
 
-
 #ifdef __cplusplus
 	namespace std { typedef decltype(__nullptr) nullptr_t; }
 	using ::std::nullptr_t;

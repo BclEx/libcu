@@ -60,15 +60,15 @@
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
+    <None Include="sentinel-gpu.cu" />
     <None Include="sys\bitveccu.cu" />
     <None Include="sys\hashcu.cu" />
     <None Include="sys\statcu.cu" />
     <None Include="direntcu.cu" />
     <None Include="errnocu.cu" />
-    <None Include="program.cu" />
     <None Include="regexcu.cu" />
-    <None Include="sentinel-gpu.cu" />
     <None Include="setjmpcu.cu" />
     <None Include="stdiocu.cu" />
     <None Include="stdlibcu.cu" />

@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <process.h>
-#include <assert.h>
 #include <stdio.h>
 #include <sentinel.h>
+#include <assert.h>
 #include <cuda_runtimecu.h>
 
 void sentinelCommand::Dump()

@@ -126,10 +126,10 @@ __END_NAMESPACE_STD;
 __BEGIN_NAMESPACE_STD;
 #ifndef __USE_FILE_OFFSET64
 /* Open a file, replacing an existing stream with it. */
-extern __device__ FILE *_freopeng(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
-__forceinline __device__ FILE *freopen(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { return _freopeng(filename, modes, stream); }
+extern __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
+__forceinline __device__ FILE *freopen(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { return freopen_(filename, modes, stream); }
 /* Open a file and create a new stream for it. */
-__forceinline __device__ FILE *fopen(const char *__restrict filename, const char *__restrict modes) { return _freopeng(filename, modes, nullptr); }
+__forceinline __device__ FILE *fopen(const char *__restrict filename, const char *__restrict modes) { return freopen_(filename, modes, nullptr); }
 #else
 #define fopen fopen64
 #define freopen freopen64
@@ -329,8 +329,8 @@ __END_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
-STDARG(int, _fprintfg, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
-#define _fprintf _fprintfg
+STDARG(int, fprintf_, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+//#define fprintf(stream, format, ...) fprintf_(stream, format, __VA_ARGS__)
 /* Write formatted output to stdout. */
 //builtin: STDARG(int, printf, _vprintfg(format, va), const char *__restrict format);
 /* Write formatted output to S.  */
@@ -341,8 +341,8 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Maximum chars of output to write in MAXLEN.  */
-STDARG(int, snprintf, vsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
-STDARG(int, snprintf, vsnprintf((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
+//STDARG(int, snprintf, vsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
+//STDARG(int, snprintf, vsnprintf((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;

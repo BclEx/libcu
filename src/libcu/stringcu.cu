@@ -2,9 +2,11 @@
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
-#ifdef __CUDA_ARCH
 
 __BEGIN_DECLS;
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 /* Copy N bytes of SRC to DEST.  */
 //builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
@@ -41,6 +43,7 @@ __device__ int memcmp(const void *s1, const void *s2, size_t n)
 }
 
 /* Search N bytes of S for C.  */
+#ifdef __CUDA_ARCH
 __device__ void *memchr(const void *s, int c, size_t n)
 {
 	if (!n)
@@ -52,6 +55,7 @@ __device__ void *memchr(const void *s, int c, size_t n)
 	} while (--n > 0);
 	return nullptr;
 }
+#endif
 
 /* Copy SRC to DEST.  */
 __device__ char *strcpy(char *__restrict dest, const char *__restrict src)
@@ -98,12 +102,28 @@ __device__ int strcmp(const char *s1, const char *s2)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
+	while (*a && *a == *b) { a++; b++; }
+	return *a - *b;
+}
+/* Compare S1 and S2. Case insensitive.  */
+__device__ int stricmp(const char *s1, const char *s2)
+{
+	register unsigned char *a = (unsigned char *)s1;
+	register unsigned char *b = (unsigned char *)s2;
 	while (*a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
 	return __curtUpperToLower[*a] - __curtUpperToLower[*b];
 }
 
 /* Compare N characters of S1 and S2.  */
 __device__ int strncmp(const char *s1, const char *s2, size_t n)
+{
+	register unsigned char *a = (unsigned char *)s1;
+	register unsigned char *b = (unsigned char *)s2;
+	while (n-- > 0 && *a && *a == *b) { a++; b++; }
+	return (!n ? 0 : *a - *b);
+}
+/* Compare N characters of S1 and S2. Case insensitive.  */
+__device__ int strnicmp(const char *s1, const char *s2, size_t n)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
@@ -126,6 +146,7 @@ __device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, siz
 }
 
 /* Find the first occurrence of C in S.  */
+#ifdef __CUDA_ARCH
 __device__ char *strchr(const char *s, int c)
 {
 	register unsigned char *s1 = (unsigned char *)s;
@@ -133,8 +154,10 @@ __device__ char *strchr(const char *s, int c)
 	while (*s1 && __curtUpperToLower[*s1] != l) s++;
 	return (char *)(*s1 ? s1 : nullptr);
 }
+#endif
 
 /* Find the last occurrence of C in S.  */
+#ifdef __CUDA_ARCH
 __device__ char *strrchr(const char *s, int c)
 {
 	char *save;
@@ -144,6 +167,7 @@ __device__ char *strrchr(const char *s, int c)
 			save = (char *)s;
 	return save;
 }
+#endif
 
 /* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
 __device__ size_t strcspn(const char *s, const char *reject)
@@ -160,6 +184,7 @@ __device__ size_t strspn(const char *s, const char *accept)
 }
 
 /* Find the first occurrence in S of any character in ACCEPT.  */
+#ifdef __CUDA_ARCH
 __device__ char *strpbrk(const char *s, const char *accept)
 {
 	register const char *scanp;
@@ -171,8 +196,10 @@ __device__ char *strpbrk(const char *s, const char *accept)
 	}
 	return nullptr;
 }
+#endif
 
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
+#ifdef __CUDA_ARCH
 __device__ char *strstr(const char *haystack, const char *needle)
 {
 	if (!*needle)
@@ -195,9 +222,10 @@ __device__ char *strstr(const char *haystack, const char *needle)
 	}
 	return nullptr;
 }
+#endif
 
 /* Divide S into tokens separated by characters in DELIM.  */
-extern __device__ char *strtok(char *__restrict s, const char *__restrict delim)
+__device__ char *strtok(char *__restrict s, const char *__restrict delim)
 {
 	panic("Not Implemented");
 	return nullptr;
@@ -213,7 +241,7 @@ extern __device__ char *strtok(char *__restrict s, const char *__restrict delim)
 //	return 0x3fffffff & (int)(s2 - s);
 //}
 
-extern __device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n)
+__device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n)
 {
 	panic("Not Implemented");
 	return nullptr;
@@ -224,7 +252,6 @@ __device__ char *strerror(int errnum)
 {
 	return "ERROR";
 }
-
 
 #pragma region strbld
 
@@ -818,5 +845,6 @@ __device__ void strbldReset(strbld_t *b)
 #pragma endregion
 
 __END_DECLS;
-
-#endif
+//#ifdef  __cplusplus
+//}
+//#endif

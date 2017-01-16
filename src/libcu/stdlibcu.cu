@@ -3,7 +3,7 @@
 #include <ctypecu.h>
 #include <errnocu.h>
 #include <assert.h>
-#ifdef __CUDA_ARCH
+//#ifdef __CUDA_ARCH
 
 __BEGIN_DECLS;
 
@@ -822,7 +822,6 @@ __device__ ldiv_t ldiv(long int numer, long int denom)
 }
 
 #if defined(ULLONG_MAX)
-
 __device__ lldiv_t lldiv(long long int numer, long long int denom)
 {
 	lldiv_t r;
@@ -834,7 +833,6 @@ __device__ lldiv_t lldiv(long long int numer, long long int denom)
 	}
 	return r;
 }
-
 #endif
 
 /* Return the length of the multibyte character in S, which is no longer than N.  */
@@ -871,4 +869,4 @@ __device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, s
 
 __END_DECLS;
 
-#endif
+//#endif
