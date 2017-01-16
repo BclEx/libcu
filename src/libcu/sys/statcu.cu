@@ -1,4 +1,6 @@
+#include <cuda_runtimecu.h>
 #include <sys/statcu.h>
+#ifdef __CUDA_ARCH
 
 /* Get file attributes for FILE and put them in BUF.  */
 __device__ int stat(const char *__restrict file, struct stat *__restrict buf)
@@ -46,3 +48,5 @@ __device__ int mkfifo(const char *path, mode_t mode)
 {
 	return 0;
 }
+
+#endif

@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef __CUDA_ARCH__
-#ifndef _BITVEC_H
-#define _BITVEC_H
+#ifdef x__CUDA_ARCH__
+#ifndef _SYS_BITVECCU_H
+#define _SYS_BITVECCU_H
 
 #define BITVEC_SZ 512
 #define BITVEC_USIZE (((BITVEC_SZ - (3 * sizeof(uint32))) / sizeof(bitvec_t *)) * sizeof(bitvec_t *))
@@ -68,5 +68,5 @@ __forceinline __device__ void bitvecDestroy(bitvec_t *p, )
 }
 //__forceinline __device__ uint32 bitvecGetLength() { return _size; }
 
-#endif // _BITVEC_H
+#endif // _SYS_BITVECCU_H
 #endif

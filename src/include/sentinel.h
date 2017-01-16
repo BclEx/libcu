@@ -28,8 +28,8 @@ THE SOFTWARE.
 #define HAS_GPU 1
 #define HAS_HOSTSENTINEL 0
 
-#ifndef _INC_SENTINEL
-#define _INC_SENTINEL
+#ifndef _SENTINEL_H
+#define _SENTINEL_H
 #include <crtdefscu.h>
 
 #define SENTINEL_MAGIC (unsigned short)0xC811
@@ -102,4 +102,4 @@ extern void sentinelUnregisterExecutor(sentinelExecutor *exec);
 //
 extern __device__ void sentinelSend(void *msg, int msgLength);
 
-#endif  /* _INC_SENTINEL */
+#endif  /* _SENTINEL_H */

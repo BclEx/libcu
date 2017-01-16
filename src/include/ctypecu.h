@@ -23,8 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
 #ifdef __CUDACC__
-#ifndef _INC_CTYPE
+#ifndef _CTYPECU_H
+#define _CTYPECU_H
+#define _CTYPE_H
 #define _INC_CTYPE
 #include <crtdefscu.h>
 
@@ -32,46 +36,46 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-// embed
-extern __constant__ unsigned char __curtUpperToLower[256];
-extern __constant__ unsigned char __curtCtypeMap[256]; 
+	// embed
+	extern __constant__ unsigned char __curtUpperToLower[256];
+	extern __constant__ unsigned char __curtCtypeMap[256]; 
 
-/* set bit masks for the possible character types */
+	/* set bit masks for the possible character types */
 #define _DIGIT          0x04     /* digit[0-9] */
 #define _HEX            0x08    /* hexadecimal digit */
 
-extern __forceinline __device__ int isctype(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
-extern __forceinline __device__ int isalnum(int c) { return (__curtCtypeMap[(unsigned char)c]&0x06)!=0; }
-extern __forceinline __device__ int isalpha(int c) { return (__curtCtypeMap[(unsigned char)c]&0x02)!=0; }
-extern __forceinline __device__ int iscntrl(int c) { return (unsigned char)c<=0x1f||(unsigned char)c==0x7f; }
-extern __forceinline __device__ int isdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x04)!=0; }
-extern __forceinline __device__ int islower(int c) { return __curtUpperToLower[(unsigned char)c]==c; }
-extern __forceinline __device__ int isgraph(int c) { return 0; }
-extern __forceinline __device__ int isprint(int c) { return (unsigned char)c>0x1f&&(unsigned char)c!=0x7f; }
-extern __forceinline __device__ int ispunct(int c) { return 0; }
-extern __forceinline __device__ int isspace(int c) { return (__curtCtypeMap[(unsigned char)c]&0x01)!=0; }
-extern __forceinline __device__ int isupper(int c) { return (c&~(__curtCtypeMap[(unsigned char)c]&0x20))==c; }
-extern __forceinline __device__ int isxdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x08)!=0; }
+	extern __forceinline __device__ int isctype(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
+	extern __forceinline __device__ int isalnum(int c) { return (__curtCtypeMap[(unsigned char)c]&0x06)!=0; }
+	extern __forceinline __device__ int isalpha(int c) { return (__curtCtypeMap[(unsigned char)c]&0x02)!=0; }
+	extern __forceinline __device__ int iscntrl(int c) { return (unsigned char)c<=0x1f||(unsigned char)c==0x7f; }
+	extern __forceinline __device__ int isdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x04)!=0; }
+	extern __forceinline __device__ int islower(int c) { return __curtUpperToLower[(unsigned char)c]==c; }
+	extern __forceinline __device__ int isgraph(int c) { return 0; }
+	extern __forceinline __device__ int isprint(int c) { return (unsigned char)c>0x1f&&(unsigned char)c!=0x7f; }
+	extern __forceinline __device__ int ispunct(int c) { return 0; }
+	extern __forceinline __device__ int isspace(int c) { return (__curtCtypeMap[(unsigned char)c]&0x01)!=0; }
+	extern __forceinline __device__ int isupper(int c) { return (c&~(__curtCtypeMap[(unsigned char)c]&0x20))==c; }
+	extern __forceinline __device__ int isxdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x08)!=0; }
 
-/* Return the lowercase version of C.  */
-extern __forceinline __device__ int tolower(int c) { return __curtUpperToLower[(unsigned char)c]; }
+	/* Return the lowercase version of C.  */
+	extern __forceinline __device__ int tolower(int c) { return __curtUpperToLower[(unsigned char)c]; }
 
-/* Return the uppercase version of C.  */
-extern __forceinline __device__ int toupper(int c) { return c&~(__curtCtypeMap[(unsigned char)c]&0x20); }
+	/* Return the uppercase version of C.  */
+	extern __forceinline __device__ int toupper(int c) { return c&~(__curtCtypeMap[(unsigned char)c]&0x20); }
 
 #define _tolower(c) (char)((c)-'A'+'a')
 #define _toupper(c) (char)((c)-'a'+'A')
 
-/*C99*/
-//extern __forceinline __device__ int isblank(int c);
+	/*C99*/
+	//extern __forceinline __device__ int isblank(int c);
 
-extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
+	extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  /* _INC_CTYPE */
+#endif  /* _CTYPECU_H */
 #else
 #include <ctype.h>
 #endif

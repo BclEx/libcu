@@ -25,7 +25,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _FEATURES_H
+#ifndef _FEATURESCU_H
+#define _FEATURESCU_H
 #define _FEATURES_H
 
 // sys/cdefs.h
@@ -92,4 +93,4 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define __USE_FILE_OFFSET64	1
 #endif
 
-#endif  /* _FEATURES_H */
+#endif  /* _FEATURESCU_H */

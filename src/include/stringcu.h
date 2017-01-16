@@ -23,8 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
 #ifdef __CUDA_ARCH__
-#ifndef _INC_STRING
+#ifndef _STRINGCU_H
+#define _STRING_H
 #define _INC_STRING
 #include <featurescu.h>
 #include <crtdefscu.h>
@@ -124,8 +127,6 @@ __BEGIN_NAMESPACE_STD;
 extern __device__ char *strerror(int errnum);
 __END_NAMESPACE_STD;
 
-#pragma region PRINT
-
 #ifndef PRINT_BUF_SIZE
 #define PRINT_BUF_SIZE 70
 #endif
@@ -153,7 +154,40 @@ __device__ void strbldReset(strbld_t *b);
 
 __END_DECLS;
 
-#endif  /* _INC_STRING */
+#endif  /* _STRINGCU_H */
 #else
 #include <string.h>
 #endif
+
+//#ifndef _STRINGCU_H
+//#include <crtdefscu.h>
+//__BEGIN_DECLS;
+//
+//#ifndef PRINT_BUF_SIZE
+//#define PRINT_BUF_SIZE 70
+//#endif
+//
+//typedef struct strbld_t
+//{
+//	void *tag;			// Optional database for lookaside.  Can be NULL
+//	char *base;			// A base allocation.  Not from malloc.
+//	char *text;			// The string collected so far
+//	int index;			// Length of the string so far
+//	size_t size;		// Amount of space allocated in zText
+//	int maxSize;		// Maximum allowed string length
+//	bool allocFailed;	// Becomes true if any memory allocation fails
+//	unsigned char allocType; // 0: none,  1: _tagalloc,  2: _alloc
+//	bool overflowed;    // Becomes true if string size exceeds limits
+//} strbld_t;
+//
+//__device__ void strbldInit(strbld_t *b, char *text = nullptr, int capacity = -1, int maxAlloc = -1);
+//__device__ void strbldAppendSpace(strbld_t *b, int length);
+//__device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list args);
+//__device__ void strbldAppend(strbld_t *b, const char *str, int length);
+//__device__ __forceinline void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, strlen(str)); }
+//__device__ char *strbldToString(strbld_t *b);
+//__device__ void strbldReset(strbld_t *b);
+//
+//__END_DECLS;
+//#endif
+//#define _STRINGCU_H

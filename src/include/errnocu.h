@@ -23,8 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
 #ifdef __CUDA_ARCH__
-#ifndef _INC_ERRNO
+#ifndef _ERRNOCU_H
+#define _ERRNOCU_H
 #include <crtdefscu.h>
 
 #define _CRT_ERRNO_DEFINED
@@ -34,8 +37,7 @@ extern __device__ errno_t _set_errno(int value);
 extern __device__ errno_t _get_errno(int *value);
 
 #include <errno.h>
-#define _INC_ERRNO
-#endif  /* _INC_ERRNO */
+#endif  /* _ERRNOCU_H */
 #else
 #include <errno.h>
 #endif

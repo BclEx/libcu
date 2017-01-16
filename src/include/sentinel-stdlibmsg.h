@@ -25,8 +25,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _INC_SENTINEL_STDLIBMSG
-#define _INC_SENTINEL_STDLIBMSG
+#ifndef _SENTINEL_STDLIBMSG_H
+#define _SENTINEL_STDLIBMSG_H
 #include <sentinel.h>
 #include <stringcu.h>
 
@@ -63,4 +63,4 @@ struct stdlib_system
 	int RC;
 };
 
-#endif  /* _INC_SENTINEL_STDLIBMSG */
+#endif  /* _SENTINEL_STDLIBMSG_H */

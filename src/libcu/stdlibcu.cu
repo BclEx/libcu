@@ -1,11 +1,9 @@
-#include <crtdefscu.h>
-#include <stdlibcu.h>
+#include <cuda_runtimecu.h>
+#include <bits/libcu_fpmax.h>
 #include <ctypecu.h>
 #include <errnocu.h>
-#include <bits/libcu_fpmax.h>
-#include <cuda_runtimecu.h>
-
-#define MALLOCSIZETYPE long long int
+#include <assert.h>
+#ifdef __CUDA_ARCH
 
 __BEGIN_DECLS;
 
@@ -596,6 +594,8 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 
 #pragma endregion
 
+#define MALLOCSIZETYPE long long int
+
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
 __device__ int rand(void)
 {
@@ -870,3 +870,5 @@ __device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, s
 }
 
 __END_DECLS;
+
+#endif

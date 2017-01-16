@@ -1,3 +1,6 @@
+#include <cuda_runtimecu.h>
+#ifdef __CUDA_ARCH
+
 //// setjmp/longjmp
 //// TODO: BUILD
 //__device__ int _setjmp(jmp_buf xxenv)
@@ -10,3 +13,5 @@
 //{
 //}
 //
+
+#endif

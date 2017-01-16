@@ -1,3 +1,6 @@
+#include <cuda_runtimecu.h>
+#ifdef __CUDA_ARCH
+
 //// time
 //// TODO: BUILD
 //__device__ time_t _time(time_t *timer)
@@ -20,3 +23,5 @@
 //	//tp->tv_usec = 0;
 //	//return (_time(&tp->tv_sec) == (time_t)-1 ? -1 : 0);
 //}
+
+#endif

@@ -1,8 +1,6 @@
-#include <sentinel.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
 #include <cuda_runtimecu.h>
-
+#include <sentinel.h>
+#ifdef __CUDA_ARCH
 #if HAS_GPU
 
 __device__ volatile unsigned int _sentinelMapId;
@@ -38,4 +36,5 @@ __device__ void sentinelSend(void *msg, int msgLength)
 	}
 }
 
+#endif
 #endif

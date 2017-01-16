@@ -25,8 +25,8 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _INC_SENTINEL_STDIOMSG
-#define _INC_SENTINEL_STDIOMSG
+#ifndef _SENTINEL_STDIOMSG_H
+#define _SENTINEL_STDIOMSG_H
 #include <sentinel.h>
 #include <stringcu.h>
 
@@ -358,4 +358,4 @@ struct stdio_fileno
 };
 
 
-#endif  /* _INC_SENTINEL_STDIOMSG */
+#endif  /* _SENTINEL_STDIOMSG_H */

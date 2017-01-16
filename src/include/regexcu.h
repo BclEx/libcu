@@ -23,8 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef __CUDA_ARCH__
-#ifndef _REGEX_H
+#pragma once
+
+#ifndef _REGEXCU_H
+#define _REGEXCU_H
 #define _REGEX_H
 #include <crtdefscu.h>
 
@@ -101,5 +103,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /* _REGEX_H */
-#endif
+#endif /* _REGEXCU_H */

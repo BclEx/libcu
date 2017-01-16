@@ -1,28 +1,18 @@
-#include <crtdefscu.h>
-#include <featurescu.h>
-#include <direntcu.h>
-#include <errnocu.h>
-//#include <setjmpcu.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
-#include <unistdcu.h>
-//#include <timecu.h>
-#include <sys/statcu.h>
 #include <cuda_runtimecu.h>
 
-//#include "sys/bitveccu.cu"
-//#include "sys/hashcu.cu"
-//#include "sys/statcu.cu"
-//#include "direntcu.cu"
-//#include "errnocu.cu"
-//#include "regexcu.cu"
-//#include "setjmpcu.cu"
+#include "sys/bitveccu.cu"
+#include "sys/hashcu.cu"
+#include "sys/statcu.cu"
+#include "direntcu.cu"
+#include "errnocu.cu"
+#include "regexcu.cu"
+#include "sentinel-gpu.cu"
+#include "setjmpcu.cu"
 #include "stdiocu.cu"
-//#include "stdlibcu.cu"
-//#include "stringcu.cu"
-//#include "timecu.cu"
-//#include "unistdcu.cu"
+#include "stdlibcu.cu"
+#include "stringcu.cu"
+#include "timecu.cu"
+#include "unistdcu.cu"
 
 //////////////////////
 // EMBED

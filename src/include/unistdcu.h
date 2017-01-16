@@ -23,10 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//#pragma once
+#pragma once
 
 #ifdef __CUDA_ARCH__
-#ifndef _UNISTD_H
+#ifndef _UNISTDCU_H
+#define _UNISTDCU_H
 #define _UNISTD_H
 #include <crtdefscu.h>
 #include <featurescu.h>
@@ -123,7 +124,9 @@ extern __device__ char **__environ;
 
 __END_DECLS;
 
-#endif  /* _UNISTD_H */
+#endif  /* _UNISTDCU_H */
 #else
+//#include <featurescu.h>
+//#include <sys/types.h>
 //#include <_unistd.h>
 #endif

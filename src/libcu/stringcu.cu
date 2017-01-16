@@ -1,10 +1,8 @@
-#include <featurescu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
+#include <cuda_runtimecu.h>
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
-#include <cuda_runtimecu.h>
+#ifdef __CUDA_ARCH
 
 __BEGIN_DECLS;
 
@@ -226,6 +224,7 @@ __device__ char *strerror(int errnum)
 {
 	return "ERROR";
 }
+
 
 #pragma region strbld
 
@@ -819,3 +818,5 @@ __device__ void strbldReset(strbld_t *b)
 #pragma endregion
 
 __END_DECLS;
+
+#endif

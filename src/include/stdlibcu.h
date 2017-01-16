@@ -23,8 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
+#ifndef _STDLIBCU_H
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+	/* Shorthand for type of comparison functions.  */
+#ifndef __COMPAR_FN_T
+#define __COMPAR_FN_T
+	typedef int (*__compar_fn_t)(const void *, const void *);
+#endif
+
+#ifdef  __cplusplus
+}
+#endif
+#endif
+
 #ifdef __CUDA_ARCH__
-#ifndef _INC_STDLIB
+#ifndef _STDLIBCU_H
+#define _STDLIB_H
 #define _INC_STDLIB
 #include <featurescu.h>
 #include <crtdefscu.h>
@@ -54,10 +73,6 @@ typedef struct
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
-/* Returned by `strtoq'.  */
-typedef long long int quad_t;
-/* Returned by `strtouq'.  */
-typedef unsigned long long int u_quad_t;
 __BEGIN_NAMESPACE_C99;
 /* Returned by `lldiv'.  */
 typedef struct
@@ -112,12 +127,7 @@ __forceinline __device__ long int strtol(const char *__restrict nptr, char **__r
 __forceinline __device__ unsigned long int strtoul(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
 __END_NAMESPACE_STD;
 
-
 #if defined(ULLONG_MAX)
-/* Convert a string to a quadword integer.  */
-__forceinline __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)_stdlib_strto_l(nptr, endptr, base, 1); }
-/* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)_stdlib_strto_l(nptr, endptr, base, 0); }
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a quadword integer.  */
 __forceinline __device__ long long int strtoll(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 1); }
@@ -200,12 +210,6 @@ __BEGIN_NAMESPACE_STD;
 __forceinline __device__ int system(const char *command) { stdlib_system msg(command); return msg.RC; }
 __END_NAMESPACE_STD;
 
-/* Shorthand for type of comparison functions.  */
-#ifndef __COMPAR_FN_T
-#define __COMPAR_FN_T
-typedef int (*__compar_fn_t)(const void *, const void *);
-#endif
-
 __BEGIN_NAMESPACE_STD;
 /* Do a binary search for KEY in BASE, which consists of NMEMB elements of SIZE bytes each, using COMPAR to perform the comparisons.  */
 extern __device__ void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar);
@@ -252,7 +256,25 @@ __END_NAMESPACE_STD;
 
 __END_DECLS;
 
-#endif  /* _INC_STDLIB */
+#endif  /* _STDLIBCU_H */
 #else
 #include <stdlib.h>
 #endif
+
+#ifndef _STDLIBCU_H
+__BEGIN_DECLS;
+
+#if defined(ULLONG_MAX)
+/* Returned by `strtoq'.  */
+typedef long long int quad_t;
+/* Returned by `strtouq'.  */
+typedef unsigned long long int u_quad_t;
+/* Convert a string to a quadword integer.  */
+__forceinline __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)strtol(nptr, endptr, base); }
+/* Convert a string to an unsigned quadword integer.  */
+__forceinline __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
+#endif
+
+__END_DECLS;
+#endif
+#define _STDLIBCU_H

@@ -1,5 +1,6 @@
-﻿//hash.c
-#include "Runtime.h"
+﻿#include <cuda_runtimecu.h>
+#include <sys/hashcu.h>
+#ifdef x__CUDA_ARCH
 
 __device__ Hash::Hash()
 {
@@ -194,3 +195,5 @@ __device__ void *Hash::Insert(const char *key, int keyLength, void *data)
 	InsertElement(this, (Table ? &Table[h] : nullptr), newElem);
 	return nullptr;
 }
+
+#endif

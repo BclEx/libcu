@@ -1,4 +1,6 @@
+#include <cuda_runtimecu.h>
 #include <direntcu.h>
+#ifdef __CUDA_ARCH
 
 /* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
 __device__ DIR *opendir(const char *name)
@@ -32,3 +34,5 @@ __device__ struct dirent64 *readdir64(DIR *dirp)
 __device__ void rewinddir(DIR *dirp)
 {
 }
+
+#endif

@@ -24,8 +24,10 @@ THE SOFTWARE.
 */
 
 #ifdef __CUDA_ARCH__
-#ifndef _SYS_STAT_H
+#ifndef _SYS_STATCU_H
+#define	_SYS_STATCU_H
 #define	_SYS_STAT_H
+#define	_INC_STAT
 #include <featurescu.h>
 #include <sys/types.h>
 
@@ -93,7 +95,7 @@ extern __device__ int mkfifo(const char *path, mode_t mode);
 
 __END_DECLS;
 
-#endif /* _SYS_STAT_H  */
+#endif /* _SYS_STATCU_H  */
 #else
 #include <sys/stat.h>
 #endif

@@ -1,4 +1,6 @@
-﻿#include <sys/bitveccu.h>
+﻿#include <cuda_runtimecu.h>
+#include <sys/bitveccu.h>
+#ifdef x__CUDA_ARCH
 
 __device__ bitvec_t *bitvecNew(uint32_t size)
 {
@@ -108,3 +110,5 @@ __device__ void bitvecClear(bitvec_t *p, uint32_t index, void *buffer)
 			}
 	}
 }
+
+#endif

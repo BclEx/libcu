@@ -23,8 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
 #ifdef __CUDA_ARCH__
-#ifndef _DIRENT_H
+#ifndef _DIRENTCU_H
+#define	_DIRENTCU_H
 #define	_DIRENT_H
 #include <crtdefscu.h>
 #include <featurescu.h>
@@ -101,7 +104,8 @@ extern __device__ void rewinddir(DIR *dirp);
 
 __END_DECLS;
 
-#endif  /* _DIRENT_H */
+#endif  /* _DIRENTCU_H */
 #else
+//typedef struct __dirstream DIR;
 //#include <_dirent.h>
 #endif

@@ -23,15 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#pragma once
+
+#define ISDEVICEFILE(stream) (((long long int)stream) & 0x80000000)
+
 #ifdef __CUDA_ARCH__
-#ifndef _INC_STDIO
+#ifndef _STDIOCU_H
+#define _STDIOCU_H
+#define _STDIO_H
 #define _INC_STDIO
 #include <featurescu.h>
 #include <crtdefscu.h>
 #include <stdargcu.h>
 
 typedef struct __STDIO_FILE_STRUCT FILE;
-#define ISDEVICEFILE(stream) (((long long int)stream) & 0x80000000)
 
 __BEGIN_DECLS;
 
@@ -351,7 +356,7 @@ STDARG2(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const cha
 STDARG3(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const char *__restrict format);
 __END_NAMESPACE_STD;
 
-#endif  /* _INC_STDIO */
+#endif  /* _STDIOCU_H */
 #else
 #include <stdio.h>
 #endif

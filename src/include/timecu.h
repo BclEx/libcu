@@ -1,5 +1,5 @@
 /*
-sentinel-iomsg.h - messages for sentinel
+time.h - Date and time
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -25,21 +25,20 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef _SENTINEL_IOMSG_H
-#define _SENTINEL_IOMSG_H
-#include <sentinel.h>
+#ifdef __CUDA_ARCH__
+#ifndef _TIMECU_H
+#define _TIMECU_H
+#define _TIME_H
+#define _INC_TIME
+#include <featurescu.h>
 
-enum {
-	IO_CLOSE = 35,
-};
+__BEGIN_DECLS;
 
-struct io_close
-{
-	sentinelMessage Base;
-	int Handle;
-	__device__ io_close(int handle)
-		: Base(false, IO_CLOSE, 0, nullptr), Handle(handle) { sentinelSend(this, sizeof(io_close)); }
-	int RC;
-};
+typedef long clock_t;
 
-#endif  /* _SENTINEL_IOMSG_H */
+__END_DECLS;
+
+#endif  /* _TIMECU_H */
+#else
+#include <time.h>
+#endif

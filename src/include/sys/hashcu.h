@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef __CUDA_ARCH__
-#ifndef _HASH_H
-#define _HASH_H
+#ifdef x__CUDA_ARCH__
+#ifndef _SYS_HASHCU_H
+#define _SYS_HASHCU_H
 
 struct hashElem_t
 {
@@ -52,5 +52,5 @@ extern __device__ void *hashInsert(hash_t *p, const char *key, int keyLength, vo
 extern __device__ void *hashFind(hash_t *p, const char *key, int keyLength);
 extern __device__ void hashClear(hash_t *p);
 
-#endif // _HASH_H
+#endif // _SYS_HASHCU_H
 #endif

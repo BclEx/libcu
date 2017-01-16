@@ -1,11 +1,8 @@
-#include <crtdefscu.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
-#include <ctypecu.h>
 #include <cuda_runtimecu.h>
+#include <ctypecu.h>
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
+#ifdef __CUDA_ARCH
 
 #define CORE_MAX_LENGTH 1000000000
 
@@ -15,9 +12,6 @@ __BEGIN_DECLS;
 
 __constant__ FILE *__iob_file[3] = { (FILE *)1, (FILE *)2, (FILE *)3 };
 //__constant__ FILE __iob_file[3] = { {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr}, {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr}, {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr} };
-//__device__ FILE *stdin;
-//__device__ FILE *stdout;
-//__device__ FILE *stderr;
 
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)
@@ -111,6 +105,7 @@ __device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restri
 }
 
 /* Write formatted output to S from argument list ARG. */
+#ifdef __CUDA_ARCH
 __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	char base[PRINT_BUF_SIZE];
@@ -122,6 +117,7 @@ __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_li
 	free((void *)v);
 	return msg.RC; 
 }
+#endif
 
 /* Read formatted input from S into argument list ARG.  */
 //__device__ int vfscanf(FILE *__restrict s, const char *__restrict format, va_list va)
@@ -723,3 +719,5 @@ __END_DECLS;
 //__device__ int vscanf(const char *__restrict format, va_list va) { return -1; }
 ///* Read formatted input from S into argument list ARG.  */
 //__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }
+
+#endif
