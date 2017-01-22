@@ -7,7 +7,7 @@
 #include <sentinel-stdlibmsg.h>
 #include <math.h>
 
-#define ISDEVICEFILE(stream) (((int)stream) & 0x80000000)
+#define ISDEVICEFILE(stream) 0 //(((int)stream) & 0x80000000)
 #define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)

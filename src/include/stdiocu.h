@@ -83,10 +83,10 @@ typedef __STDIO_fpos64_t fpos64_t;
 /* Default path prefix for `mkstemp'.  */
 #define P_tmpdir "/tmp"
 
-extern __constant__ FILE *__iob_file[3];
-#define stdin  (__iob_file[0]) /* Standard input stream.  */
-#define stdout (__iob_file[1]) /* Standard output stream.  */
-#define stderr (__iob_file[2]) /* Standard error output stream.  */
+extern __constant__ FILE __iob_file[10];
+#define stdin  (&__iob_file[0]) /* Standard input stream.  */
+#define stdout (&__iob_file[1]) /* Standard output stream.  */
+#define stderr (&__iob_file[2]) /* Standard error output stream.  */
 
 __END_DECLS;
 #include <sentinel-stdiomsg.h>

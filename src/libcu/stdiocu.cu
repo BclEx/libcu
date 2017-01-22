@@ -9,8 +9,11 @@
 
 __BEGIN_DECLS;
 
-__constant__ FILE *__iob_file[3] = { (FILE *)1, (FILE *)2, (FILE *)3 };
-//__constant__ FILE __iob_file[3] = { {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr}, {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr}, {nullptr, 0, nullptr, 0, 0, 0, 0, nullptr} };
+//__constant__ FILE file0 = {};
+//__constant__ FILE file1 = {};
+//__constant__ FILE file2 = {};
+//__constant__ FILE *__iob_file[3] = { &file0, &file1, &file2 };
+__constant__ FILE __iob_file[10];
 
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)

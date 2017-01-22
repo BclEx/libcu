@@ -1,5 +1,3 @@
-#include <stdiocu.h>
-#include <stdlibcu.h>
 #include <cuda_runtimecu.h>
 #include <tcl.h>
 #include <tclExInt.h>

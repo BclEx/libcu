@@ -25,8 +25,12 @@ THE SOFTWARE.
 
 #pragma once
 
+#ifndef HAS_GPU
 #define HAS_GPU 1
+#endif
+#ifndef HAS_HOSTSENTINEL
 #define HAS_HOSTSENTINEL 0
+#endif
 
 #ifndef _SENTINEL_H
 #define _SENTINEL_H
@@ -87,23 +91,24 @@ extern "C" {
 	} sentinelContext;
 
 #if HAS_HOSTSENTINEL
-	extern sentinelMap *_sentinelHostMap;
+	extern sentinelMap **_sentinelHostMap;
 #endif
 	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 
 	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length);
 	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME); 
 	extern void sentinelServerShutdown();
+	extern __device__ void sentinelSend(void *msg, int msgLength);
 #if HAS_HOSTSENTINEL
 	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
 	extern void sentinelClientShutdown();
+	extern void sentinelClientSend(void *msg, int msgLength);
 #endif
 	//
 	extern sentinelExecutor *sentinelFindExecutor(const char *name);
 	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false);
 	extern void sentinelUnregisterExecutor(sentinelExecutor *exec);
-	//
-	extern __device__ void sentinelSend(void *msg, int msgLength);
+	
 
 #ifdef  __cplusplus
 }
