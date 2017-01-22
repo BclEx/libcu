@@ -1,6 +1,3 @@
-#include <crtdefscu.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
 #include <cuda_runtimecu.h>
 #include <assert.h>
 
@@ -215,7 +212,7 @@ static __device__ void strtoq_test(int base)
 	long long n; //quad_t n;
 	char *endptr;
 	for (i = 0; i < _strtoq_ntests; i++) {
-		n = strtoll(_strtoq_strings[i], &endptr, base); //n = strtoq(_strtoq_strings[i], &endptr, base);
+		n = strtoq(_strtoq_strings[i], &endptr, base);
 		printf("strtoq(\"%s\",%d) len=%lu res=%qd\n", _strtoq_strings[i], base, (unsigned long)(endptr - _strtoq_strings[i]), n);
 	}
 }

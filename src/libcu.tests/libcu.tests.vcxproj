@@ -181,7 +181,9 @@
     </ClCompile>
     <ClCompile Include="ctypeTest.cpp" />
     <ClCompile Include="errnoTest.cpp" />
-    <ClCompile Include="stdargTest.cpp" />
+    <ClCompile Include="stdargTest.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="stdioTest.cpp" />
     <ClCompile Include="stdlibTest.cpp" />
     <ClCompile Include="stringTest.cpp" />
@@ -197,13 +199,25 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="allTest.cu" />
-    <CudaCompile Include="ctypeTest.cu" />
+    <CudaCompile Include="allTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="ctypeTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="errnoTest.cu" />
-    <CudaCompile Include="stdargTest.cu" />
-    <CudaCompile Include="stdioTest.cu" />
-    <CudaCompile Include="stdlibTest.cu" />
-    <CudaCompile Include="stringTest.cu" />
+    <CudaCompile Include="stdargTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="stdioTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="stdlibTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="stringTest.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </CudaCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

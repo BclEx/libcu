@@ -14,29 +14,19 @@
 // the three groups of #includes is important.  For example, stdio.h is needed by tcl.h, and the _ANSI_ARGS_ declaration in tcl.h is
 // needed by stdlib.h in some configurations.
 
-#include <stdiocu.h>
-
 #ifndef __TCL_H__
 #include "tcl.h"
 #endif
 #ifndef __TCLHASH_H__
 #include "tclHash.h"
 #endif
+#include <ctypecu.h>
+#include <errnocu.h>
 #ifndef __LIBCU__
 #include <regexcu.h>
 #else
 #include "regex_compat.h"
 #endif
-
-#include <ctypecu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
-
-#include <stddef.h>
-#include <errnocu.h>
-
-#include <cuda_runtimecu.h>
-
 
 /*
 *----------------------------------------------------------------

@@ -146,7 +146,6 @@ __device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, siz
 }
 
 /* Find the first occurrence of C in S.  */
-#ifdef __CUDA_ARCH
 __device__ char *strchr(const char *s, int c)
 {
 	register unsigned char *s1 = (unsigned char *)s;
@@ -154,10 +153,8 @@ __device__ char *strchr(const char *s, int c)
 	while (*s1 && __curtUpperToLower[*s1] != l) s++;
 	return (char *)(*s1 ? s1 : nullptr);
 }
-#endif
 
 /* Find the last occurrence of C in S.  */
-#ifdef __CUDA_ARCH
 __device__ char *strrchr(const char *s, int c)
 {
 	char *save;
@@ -167,7 +164,6 @@ __device__ char *strrchr(const char *s, int c)
 			save = (char *)s;
 	return save;
 }
-#endif
 
 /* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
 __device__ size_t strcspn(const char *s, const char *reject)
@@ -184,7 +180,6 @@ __device__ size_t strspn(const char *s, const char *accept)
 }
 
 /* Find the first occurrence in S of any character in ACCEPT.  */
-#ifdef __CUDA_ARCH
 __device__ char *strpbrk(const char *s, const char *accept)
 {
 	register const char *scanp;
@@ -196,10 +191,8 @@ __device__ char *strpbrk(const char *s, const char *accept)
 	}
 	return nullptr;
 }
-#endif
 
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
-#ifdef __CUDA_ARCH
 __device__ char *strstr(const char *haystack, const char *needle)
 {
 	if (!*needle)
@@ -222,7 +215,6 @@ __device__ char *strstr(const char *haystack, const char *needle)
 	}
 	return nullptr;
 }
-#endif
 
 /* Divide S into tokens separated by characters in DELIM.  */
 __device__ char *strtok(char *__restrict s, const char *__restrict delim)

@@ -3,7 +3,6 @@
 #include <ctypecu.h>
 #include <errnocu.h>
 #include <assert.h>
-//#ifdef __CUDA_ARCH
 
 __BEGIN_DECLS;
 
@@ -868,5 +867,3 @@ __device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, s
 }
 
 __END_DECLS;
-
-//#endif

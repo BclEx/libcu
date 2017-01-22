@@ -23,11 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
-#define ISDEVICEFILE(stream) (((long long int)stream) & 0x80000000)
+#define ISDEVICEFILE(stream) 0 //(((long long int)stream) & 0x80000000)
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _STDIOCU_H
 #define _STDIOCU_H
 #define _STDIO_H
@@ -330,7 +330,9 @@ __END_DECLS;
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
 STDARG(int, fprintf_, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+#if !defined(__CUDACC_RTC__)
 //#define fprintf(stream, format, ...) fprintf_(stream, format, __VA_ARGS__)
+#endif
 /* Write formatted output to stdout. */
 //builtin: STDARG(int, printf, _vprintfg(format, va), const char *__restrict format);
 /* Write formatted output to S.  */
@@ -341,8 +343,8 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Maximum chars of output to write in MAXLEN.  */
-//STDARG(int, snprintf, vsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
-//STDARG(int, snprintf, vsnprintf((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
+STDARG(int, snprintf, vsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
+STDARG(int, snprintf, vsnprintf((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;

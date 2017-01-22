@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
 #ifndef _STDLIBCU_H
 #ifdef  __cplusplus
@@ -41,7 +41,7 @@ extern "C" {
 #endif
 #endif
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _STDLIBCU_H
 #define _STDLIB_H
 #define _INC_STDLIB

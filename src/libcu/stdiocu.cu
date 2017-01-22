@@ -2,7 +2,6 @@
 #include <ctypecu.h>
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
-//#ifdef __CUDA_ARCH
 
 #define CORE_MAX_LENGTH 1000000000
 
@@ -105,7 +104,6 @@ __device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restri
 }
 
 /* Write formatted output to S from argument list ARG. */
-#ifdef __CUDA_ARCH
 __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	char base[PRINT_BUF_SIZE];
@@ -117,7 +115,6 @@ __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_li
 	free((void *)v);
 	return msg.RC; 
 }
-#endif
 
 /* Read formatted input from S into argument list ARG.  */
 //__device__ int vfscanf(FILE *__restrict s, const char *__restrict format, va_list va)
@@ -719,5 +716,3 @@ __END_DECLS;
 //__device__ int vscanf(const char *__restrict format, va_list va) { return -1; }
 ///* Read formatted input from S into argument list ARG.  */
 //__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }
-
-//#endif

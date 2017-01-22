@@ -1,5 +1,4 @@
 #include <cuda_runtimecu.h>
-#ifdef __CUDA_ARCH
 
 //// setjmp/longjmp
 //// TODO: BUILD
@@ -13,5 +12,3 @@
 //{
 //}
 //
-
-#endif

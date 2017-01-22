@@ -1,6 +1,5 @@
-#include <stdiocu.h>
-#include <ctypecu.h>
 #include <cuda_runtimecu.h>
+#include <ctypecu.h>
 #include <assert.h>
 
 static __global__ void ctype_test1()

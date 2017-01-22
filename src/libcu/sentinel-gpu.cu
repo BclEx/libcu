@@ -1,6 +1,6 @@
 #include <cuda_runtimecu.h>
 #include <sentinel.h>
-//#ifdef __CUDA_ARCH
+
 #if HAS_GPU
 __BEGIN_DECLS;
 
@@ -39,4 +39,3 @@ __device__ void sentinelSend(void *msg, int msgLength)
 
 __END_DECLS;
 #endif
-//#endif

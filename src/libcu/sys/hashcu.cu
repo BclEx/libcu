@@ -1,6 +1,6 @@
 ﻿#include <cuda_runtimecu.h>
 #include <sys/hashcu.h>
-#ifdef x__CUDA_ARCH
+#if 0
 
 __device__ Hash::Hash()
 {

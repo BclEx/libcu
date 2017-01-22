@@ -23,14 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
 #include <host_definescu.h>
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _CRTDEFSCU_H
-#define _CRTDEFS_H
 
+#define _CRTDEFS_H
 #define _INC_VADEFS
 #include <crtdefs.h>
 #define _INC_CRTDEFS
@@ -44,6 +44,7 @@ THE SOFTWARE.
 #endif
 
 #ifndef _CRTDEFSCU_H
+#define _CRTDEFSCU_H
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -52,7 +53,7 @@ extern "C" {
 	_CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
 	_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
 	_CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
-	//_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+	_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
 	//void __cdecl free(void *memory);
 	//void * __cdecl malloc(size_t size);
 	//__declspec(noreturn) void __cdecl exit(int code);
@@ -62,4 +63,3 @@ extern "C" {
 }
 #endif
 #endif
-#define _CRTDEFSCU_H

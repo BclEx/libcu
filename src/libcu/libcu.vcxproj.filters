@@ -95,7 +95,7 @@
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
-    <CudaCompile Include="sentinel-gpu.cu" />
+    <CudaCompile Include="ctypecu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">
@@ -148,5 +148,6 @@
     <None Include="sys\hashcu.cu">
       <Filter>sys</Filter>
     </None>
+    <None Include="sentinel-gpu.cu" />
   </ItemGroup>
 </Project>

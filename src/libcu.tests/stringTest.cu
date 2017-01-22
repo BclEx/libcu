@@ -1,5 +1,3 @@
-#include <stdiocu.h>
-#include <stringcu.h>
 #include <cuda_runtimecu.h>
 #include <assert.h>
 

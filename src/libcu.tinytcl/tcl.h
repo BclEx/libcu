@@ -12,8 +12,7 @@
 #define TCL_MAJOR_VERSION 6
 #define TCL_MINOR_VERSION 7
 #define TCL_LIBRARY "library"
-#include <crtdefscu.h>
-#include <stdargcu.h>
+#include <cuda_runtimecu.h>
 #include <stdint.h>
 
 #ifndef _CLIENTDATA

@@ -1,6 +1,5 @@
 #include <cuda_runtimecu.h>
 #include <unistdcu.h>
-#ifdef __CUDA_ARCH
 
 /* Test for access to NAME using the real UID and real GID.  */
 __device__ int access(const char *name, int type)
@@ -89,5 +88,3 @@ __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer
 __BEGIN_DECLS;
 extern __device__ char **__environ = (char **)__environ_device;
 __END_DECLS;
-
-#endif

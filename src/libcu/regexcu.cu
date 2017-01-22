@@ -1,7 +1,6 @@
 #include <cuda_runtimecu.h>
 #include <ctypecu.h>
 #include <regexcu.h>
-#ifdef __CUDA_ARCH
 
 // No utf-8 support. 1 byte = 1 char
 #define utf8_strlen(S, B) ((B) < 0 ? strlen(S) : (B))
@@ -1358,4 +1357,3 @@ __device__ void regfree(regex_t *preg)
 #undef OP
 #undef NEXT
 #undef OPERAND
-#endif

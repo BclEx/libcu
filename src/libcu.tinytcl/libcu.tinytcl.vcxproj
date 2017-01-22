@@ -35,7 +35,7 @@
     <ClInclude Include="TclMod.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="RTcl.cu" />
+    <CudaCompile Include="libcu.tinytcl.cu" />
     <None Include="dos.cu" />
     <None Include="regex_compat.cu" />
     <None Include="tclAlloc.cu" />
@@ -159,12 +159,12 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)RTcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
+      <Defines>LIBCUFORCE;__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
       <AdditionalOptions>-Xcudafe "--diag_suppress=branch_past_initialization" %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
@@ -183,13 +183,13 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)RTcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
+      <Defines>LIBCUFORCE;__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
       <AdditionalOptions>-Xcudafe "--diag_suppress=branch_past_initialization" %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
@@ -212,12 +212,12 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)RTcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
+      <Defines>LIBCUFORCE;__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
       <AdditionalOptions>-Xcudafe "--diag_suppress=branch_past_initialization" %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
@@ -240,12 +240,12 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)RTcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
+      <Defines>LIBCUFORCE;__CUDA_RUNTIME_H__</Defines>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
       <AdditionalOptions>-Xcudafe "--diag_suppress=branch_past_initialization" %(AdditionalOptions)</AdditionalOptions>

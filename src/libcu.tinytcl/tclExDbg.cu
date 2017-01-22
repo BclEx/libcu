@@ -52,7 +52,7 @@ static __device__ void PrintStr(FILE *filePtr, char *string, int numChars)
 			fputc(string[idx], filePtr);
 	}
 	if (numChars < strlen(string))
-		_fprintf(filePtr, "...");
+		fprintf(filePtr, "...");
 }
 
 /*
@@ -96,9 +96,9 @@ static __device__ void TraceCode(traceInfo_pt traceInfoPtr, int level, char *com
 	static struct timeval last_time;
 	struct timeval this_time;
 	gettimeofday(&this_time, 0);
-	_fprintf(traceInfoPtr->filePtr, "%2d:", level);
+	fprintf(traceInfoPtr->filePtr, "%2d:", level);
 	if (last_time.tv_sec != 0) {
-		_fprintf(traceInfoPtr->filePtr, " (%luus)", (this_time.tv_sec - last_time.tv_sec)*1000000 + (this_time.tv_usec - last_time.tv_usec));
+		fprintf(traceInfoPtr->filePtr, " (%luus)", (this_time.tv_sec - last_time.tv_sec)*1000000 + (this_time.tv_usec - last_time.tv_usec));
 	}
 	last_time = this_time;
 #endif
@@ -106,7 +106,7 @@ static __device__ void TraceCode(traceInfo_pt traceInfoPtr, int level, char *com
 		level = 20;
 	int idx;
 	for (idx = 0; idx < level; idx++) 
-		_fprintf(traceInfoPtr->filePtr, "  ");
+		fprintf(traceInfoPtr->filePtr, "  ");
 	if (traceInfoPtr->noEval) {
 		int printLen = strlen(command);
 		if (!traceInfoPtr->noTruncate && printLen > CMD_TRUNCATE_SIZE)

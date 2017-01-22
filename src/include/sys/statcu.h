@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifdef __CUDA_ARCH__
+//#pragma once
+
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _SYS_STATCU_H
 #define	_SYS_STATCU_H
 #define	_SYS_STAT_H

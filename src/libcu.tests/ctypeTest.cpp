@@ -46,7 +46,7 @@ namespace libcutests
 		#pragma endregion 
 
 		[TestMethod]
-		void TestMethod1()
+		void ctype_tests()
 		{
 			//
 			// TODO: Add test logic here

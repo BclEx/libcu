@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _TIMECU_H
 #define _TIMECU_H
 #define _TIME_H
@@ -35,6 +35,7 @@ THE SOFTWARE.
 __BEGIN_DECLS;
 
 typedef long clock_t;
+#define CLOCKS_PER_SEC  1000
 
 __END_DECLS;
 

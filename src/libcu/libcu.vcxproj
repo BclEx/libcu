@@ -62,6 +62,7 @@
     <ClCompile Include="host_functions.cpp" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
+    <None Include="ctypecu.cu" />
     <None Include="sentinel-gpu.cu" />
     <None Include="sys\bitveccu.cu" />
     <None Include="sys\hashcu.cu" />

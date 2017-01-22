@@ -1,6 +1,6 @@
 ﻿#include <cuda_runtimecu.h>
 #include <sys/bitveccu.h>
-#ifdef x__CUDA_ARCH
+#if 0
 
 __device__ bitvec_t *bitvecNew(uint32_t size)
 {

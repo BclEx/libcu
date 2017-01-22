@@ -23,14 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
+
+#ifndef _STDDEFCU_H
 
 /* CUDA double64 is double */
 #ifndef double64
 #define double64 double
 #endif
 
-#ifdef __CUDA_ARCH__
+/* Define assert helpers */
+#ifndef NDEBUG
+#define ASSERTONLY(X) X
+#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
+#else
+#define ASSERTONLY(X)
+#define ASSERTCOVERAGE(X)
+#endif
+#define _ALWAYS(X) (X)
+#define _NEVER(X) (X)
+
+#endif
+
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _STDDEFCU_H
 #define _STDDEFCU_H
 #define _STDDEF_H
@@ -40,7 +55,12 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
+__forceinline __device__ void Coverage(int line) { }
 #define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
+/* Define tag allocs */
+__forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
+__forceinline __device__ void tagfree(void *tag, void *p) { }
+__forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
 
 	/* Define NULL pointer value */
 #ifndef NULL
@@ -84,23 +104,11 @@ extern "C" {
 #endif
 #endif  /* _STDDEFCU_H */
 #else
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 #include <stddef.h>
-#endif
-
+__forceinline void Coverage(int line) { }
+#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 /* Define tag allocs */
-__forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
-__forceinline __device__ void tagfree(void *tag, void *p) { }
-__forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
-
-/* Define assert helpers */
-//#ifndef NDEBUG
-//#define ASSERTONLY(X) X
-//__device__ __forceinline void Coverage(int line) { }
-//#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
-//#else
-#define ASSERTONLY(X)
-#define ASSERTCOVERAGE(X)
-//#endif
-#define _ALWAYS(X) (X)
-#define _NEVER(X) (X)
+__forceinline void *tagalloc(void *tag, size_t size) { return nullptr; }
+__forceinline void tagfree(void *tag, void *p) { }
+__forceinline void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
+#endif

@@ -23,9 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+//#pragma once
 
-#ifdef __CUDACC__
+#ifndef _CTYPECU_H
+	extern __constant__ unsigned char __curtUpperToLower[256];
+	extern __constant__ unsigned char __curtCtypeMap[256]; 
+	extern __forceinline __device__ int isctype(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
+#endif
+
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _CTYPECU_H
 #define _CTYPECU_H
 #define _CTYPE_H
@@ -36,15 +42,11 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-	// embed
-	extern __constant__ unsigned char __curtUpperToLower[256];
-	extern __constant__ unsigned char __curtCtypeMap[256]; 
-
 	/* set bit masks for the possible character types */
 #define _DIGIT          0x04     /* digit[0-9] */
 #define _HEX            0x08    /* hexadecimal digit */
 
-	extern __forceinline __device__ int isctype(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
+	
 	extern __forceinline __device__ int isalnum(int c) { return (__curtCtypeMap[(unsigned char)c]&0x06)!=0; }
 	extern __forceinline __device__ int isalpha(int c) { return (__curtCtypeMap[(unsigned char)c]&0x02)!=0; }
 	extern __forceinline __device__ int iscntrl(int c) { return (unsigned char)c<=0x1f||(unsigned char)c==0x7f; }
