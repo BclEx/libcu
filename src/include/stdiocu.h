@@ -330,9 +330,9 @@ __END_DECLS;
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
 STDARG(int, fprintf_, vfprintf(stream, format, va), FILE *__restrict stream, const char *__restrict format);
-#if !defined(__CUDACC_RTC__)
+//#if !defined(__CUDACC_RTC__)
 //#define fprintf(stream, format, ...) fprintf_(stream, format, __VA_ARGS__)
-#endif
+//#endif
 /* Write formatted output to stdout. */
 //builtin: STDARG(int, printf, _vprintfg(format, va), const char *__restrict format);
 /* Write formatted output to S.  */
