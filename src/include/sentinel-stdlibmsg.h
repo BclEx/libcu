@@ -41,7 +41,7 @@ struct stdlib_exit
 	bool Std;
 	int Status;
 	__device__ stdlib_exit(bool std, int status)
-		: Base(false, STDLIB_EXIT, 0, nullptr), Std(std), Status(status) { sentinelSend(this, sizeof(stdlib_exit)); }
+		: Base(false, STDLIB_EXIT, 0, nullptr), Std(std), Status(status) { sentinelDeviceSend(this, sizeof(stdlib_exit)); }
 };
 
 struct stdlib_system
@@ -59,7 +59,7 @@ struct stdlib_system
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_system(const char *str)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelSend(this, sizeof(stdlib_system)); }
+		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(this, sizeof(stdlib_system)); }
 	int RC;
 };
 

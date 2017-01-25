@@ -25,11 +25,11 @@ THE SOFTWARE.
 
 #pragma once
 
-#ifndef HAS_GPU
-#define HAS_GPU 1
+#ifndef HAS_DEVICESENTINEL
+#define HAS_DEVICESENTINEL 1
 #endif
 #ifndef HAS_HOSTSENTINEL
-#define HAS_HOSTSENTINEL 0
+#define HAS_HOSTSENTINEL 1
 #endif
 
 #ifndef _SENTINEL_H
@@ -42,8 +42,7 @@ extern "C" {
 #define SENTINEL_MAGIC (unsigned short)0xC811
 #define SENTINEL_MSGSIZE 4096
 #define SENTINEL_MSGCOUNT 1
-	//#define SENTINEL_NAME "Global\\Sentinel"
-#define SENTINEL_NAME "Sentinel"
+#define SENTINEL_NAME "Sentinel" //"Global\\Sentinel"
 #define SENTINEL_DEVICEMAPS 1
 
 	struct sentinelMessage
@@ -91,24 +90,27 @@ extern "C" {
 	} sentinelContext;
 
 #if HAS_HOSTSENTINEL
-	extern sentinelMap **_sentinelHostMap;
+	extern sentinelMap *_sentinelHostMap;
 #endif
+#if HAS_DEVICESENTINEL
 	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
+#endif
 
 	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length);
-	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME); 
+	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
 	extern void sentinelServerShutdown();
-	extern __device__ void sentinelSend(void *msg, int msgLength);
+#if HAS_DEVICESENTINEL
+	extern __device__ void sentinelDeviceSend(void *msg, int msgLength);
+#endif
 #if HAS_HOSTSENTINEL
 	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
 	extern void sentinelClientShutdown();
 	extern void sentinelClientSend(void *msg, int msgLength);
 #endif
-	//
-	extern sentinelExecutor *sentinelFindExecutor(const char *name);
-	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false);
-	extern void sentinelUnregisterExecutor(sentinelExecutor *exec);
-	
+	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
+	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
+	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
+
 
 #ifdef  __cplusplus
 }

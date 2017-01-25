@@ -1,12 +1,12 @@
 #include <cuda_runtimecu.h>
 #include <sentinel.h>
 
-#if HAS_GPU
+#if HAS_DEVICESENTINEL
 __BEGIN_DECLS;
 
 __device__ volatile unsigned int _sentinelMapId;
 __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
-__device__ void sentinelSend(void *msg, int msgLength)
+__device__ void sentinelDeviceSend(void *msg, int msgLength)
 {
 #ifndef _WIN64
 	printf("Sentinel currently only works in x64.\n");
