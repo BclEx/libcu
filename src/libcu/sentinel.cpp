@@ -203,19 +203,21 @@ void sentinelClientShutdown()
 
 sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice)
 {
+	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
 	sentinelExecutor *exec = nullptr;
-	for (exec = (deviceList ? _ctx.DeviceList : _ctx.HostList); exec && name && strcmp(name, exec->Name); exec = exec->Next) { }
+	for (exec = list; exec && name && strcmp(name, exec->Name); exec = exec->Next) { }
 	return exec;
 }
 
-static void sentinelUnlinkExecutor(sentinelExecutor *exec)
+static void sentinelUnlinkExecutor(sentinelExecutor *exec, bool forDevice)
 {
 	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
 	if (!exec) { }
-	else if (_ctx.List == exec)
-		_ctx.List = exec->Next;
-	else if (_ctx.List) {
-		sentinelExecutor *p = _ctx.List;
+	else if (list == exec)
+		if (forDevice) _ctx.DeviceList = exec->Next;
+		else _ctx.HostList = exec->Next;
+	else if (list) {
+		sentinelExecutor *p = list;
 		while (p->Next && p->Next != exec)
 			p = p->Next;
 		if (p->Next == exec)
@@ -223,21 +225,23 @@ static void sentinelUnlinkExecutor(sentinelExecutor *exec)
 	}
 }
 
-void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault)
+void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault, bool forDevice)
 {
-	sentinelUnlinkExecutor(exec);
-	if (makeDefault || !_ctx.List) {
-		exec->Next = _ctx.List;
-		_ctx.List = exec;
+	sentinelUnlinkExecutor(exec, forDevice);
+	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
+	if (makeDefault || !list) {
+		exec->Next = list;
+		if (forDevice) _ctx.DeviceList = exec;
+		else _ctx.HostList = exec;
 	}
 	else {
-		exec->Next = _ctx.List->Next;
-		_ctx.List->Next = exec;
+		exec->Next = list->Next;
+		list->Next = exec;
 	}
-	assert(_ctx.List != nullptr);
+	assert(list != nullptr);
 }
 
-void sentinelUnregisterExecutor(sentinelExecutor *exec)
+void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice)
 {
-	sentinelUnlinkExecutor(exec);
+	sentinelUnlinkExecutor(exec, forDevice);
 }

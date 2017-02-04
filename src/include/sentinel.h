@@ -86,7 +86,8 @@ extern "C" {
 	{
 		sentinelMap *DeviceMap[SENTINEL_DEVICEMAPS];
 		sentinelMap *HostMap;
-		sentinelExecutor *List;
+		sentinelExecutor *HostList;
+		sentinelExecutor *DeviceList;
 	} sentinelContext;
 
 #if HAS_HOSTSENTINEL
