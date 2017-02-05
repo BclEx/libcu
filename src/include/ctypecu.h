@@ -46,7 +46,6 @@ extern "C" {
 #define _DIGIT          0x04     /* digit[0-9] */
 #define _HEX            0x08    /* hexadecimal digit */
 
-	
 	extern __forceinline __device__ int isalnum(int c) { return (__curtCtypeMap[(unsigned char)c]&0x06)!=0; }
 	extern __forceinline __device__ int isalpha(int c) { return (__curtCtypeMap[(unsigned char)c]&0x02)!=0; }
 	extern __forceinline __device__ int iscntrl(int c) { return (unsigned char)c<=0x1f||(unsigned char)c==0x7f; }
@@ -80,4 +79,5 @@ extern "C" {
 #endif  /* _CTYPECU_H */
 #else
 #include <ctype.h>
+#define isidchar 0
 #endif

@@ -1,10 +1,11 @@
 #include <cuda_runtimecu.h>
 #include <assert.h>
 
-static __global__ void stdlib_test1()
+static __global__ void g_stdlib_test1()
 {
 	printf("stdlib_test1\n");
 }
+cudaError_t stdlib_test1() { g_stdlib_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
 #pragma region qsort
 
@@ -135,7 +136,7 @@ static __device__ void strtol_utest(int base)
 	}
 }
 
-__global__ void stdlib_strtol()
+__global__ void g_stdlib_strtol()
 {
 	strtol_test(0); strtol_utest(0);
 	strtol_test(8); strtol_utest(8);
@@ -143,6 +144,7 @@ __global__ void stdlib_strtol()
 	strtol_test(16); strtol_utest(16);
 	strtol_test(36); strtol_utest(36);
 }
+cudaError_t stdlib_strtol() { g_stdlib_strtol<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
 #pragma endregion
 
@@ -217,7 +219,7 @@ static __device__ void strtoq_test(int base)
 	}
 }
 
-__global__ void stdlib_strtoq()
+__global__ void g_stdlib_strtoq()
 {
 	strtoq_test(0);
 	strtoq_test(8);
@@ -225,12 +227,7 @@ __global__ void stdlib_strtoq()
 	strtoq_test(16);
 	strtoq_test(36);
 }
+cudaError_t stdlib_strtoq() { g_stdlib_strtoq<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
 #pragma endregion
 
-void stdlib_()
-{
-	stdlib_test1<<<1, 1>>>();
-	stdlib_strtol<<<1, 1>>>();
-	stdlib_strtoq<<<1, 1>>>();
-}

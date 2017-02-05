@@ -1,27 +1,30 @@
 #include <cuda_runtimecu.h>
 #include <assert.h>
 
-static __global__ void stdio_test1()
+static __global__ void g_stdio_test1()
 {
 	printf("stdio_test1\n");
 }
+cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
-/*
-static __global__ void stdio_64bit()
+static __global__ void g_stdio_64bit()
 {
 	printf("stdio_64bit\n");
+	/*
 	unsigned long long val = -1;
 	void *ptr = (void *)-1;
 	printf("%p\n", ptr);
 
 	sscanf("123456789", "%Lx", &val);
 	printf("val = %Lx\n", val);
-	return 0;
+	*/
 }
+cudaError_t stdio_64bit() { g_stdio_64bit<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
-static __global__ void stdio_scanf()
+static __global__ void g_stdio_scanf()
 {
 	printf("stdio_scanf\n");
+	/*
 	const char *buf = "hello world";
 	char *ps = NULL, *pc = NULL;
 	char s[6], c;
@@ -32,16 +35,12 @@ static __global__ void stdio_scanf()
 	sscanf(buf, "%m[a-z] %mc", &ps, &pc);
 
 	if (strcmp(ps, "hello") != 0 || *pc != 'w' || strcmp(s, "hello") != 0 || c != 'w')
-		return 1;
+	return 1;
 
 	free(ps);
 	free(pc);
 
 	return 0;
+	*/
 }
-*/
-
-void stdio_()
-{
-	stdio_test1<<<1, 1>>>();
-}
+cudaError_t stdio_scanf() { g_stdio_scanf<<<1, 1>>>(); return cudaDeviceSynchronize(); }

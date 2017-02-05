@@ -4,4 +4,10 @@
 
 #pragma once
 
+#include <cuda_runtimecu.h>
+#include <sentinel.h>
 
+void allClassInitialize(bool sentinel = false);
+void allClassCleanup(bool sentinel = false);
+void allTestInitialize();
+void allTestCleanup();

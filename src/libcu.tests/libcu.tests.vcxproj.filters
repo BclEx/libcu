@@ -1,24 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="StdioTest.cpp" />
     <ClCompile Include="StdlibTest.cpp" />
     <ClCompile Include="ctypeTest.cpp" />
     <ClCompile Include="errnoTest.cpp" />
     <ClCompile Include="stdargTest.cpp" />
     <ClCompile Include="stringTest.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Properties</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="app.rc" />
+    <ClInclude Include="resource.h">
+      <Filter>Properties</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Properties</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="StdioTest.cu" />
@@ -27,6 +29,20 @@
     <CudaCompile Include="errnoTest.cu" />
     <CudaCompile Include="stdargTest.cu" />
     <CudaCompile Include="stringTest.cu" />
-    <CudaCompile Include="allTest.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Properties">
+      <UniqueIdentifier>{0dfe3beb-5391-4684-93d2-77f059909555}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Properties</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Properties</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -5,6 +5,9 @@ using namespace System::Text;
 using namespace System::Collections::Generic;
 using namespace Microsoft::VisualStudio::TestTools::UnitTesting;
 
+cudaError_t stdio_test1();
+cudaError_t stdio_64bit();
+cudaError_t stdio_scanf();
 namespace libcutests
 {
 	[TestClass]
@@ -21,36 +24,17 @@ namespace libcutests
 		{
 			Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ get() { return _testCtx; }
 			System::Void set(Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ value) { _testCtx = value; }
-		};
+		}
 
-		#pragma region Additional test attributes
-		//
-		//You can use the following additional attributes as you write your tests:
-		//
-		//Use ClassInitialize to run code before running the first test in the class
-		//[ClassInitialize()]
-		//static void MyClassInitialize(TestContext^ testContext) {};
-		//
-		//Use ClassCleanup to run code after all tests in a class have run
-		//[ClassCleanup()]
-		//static void MyClassCleanup() {};
-		//
-		//Use TestInitialize to run code before running each test
-		//[TestInitialize()]
-		//void MyTestInitialize() {};
-		//
-		//Use TestCleanup to run code after each test has run
-		//[TestCleanup()]
-		//void MyTestCleanup() {};
-		//
-		#pragma endregion 
+#pragma region Initialize/Cleanup
+		[ClassInitialize()] static void ClassInitialize(Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ testContext) { allClassInitialize(); }
+		[ClassCleanup()] static void ClassCleanup() { allClassCleanup(); }
+		[TestInitialize()]void TestInitialize() { allTestInitialize(); }
+		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
+#pragma endregion 
 
-		[TestMethod]
-		void TestMethod1()
-		{
-			//
-			// TODO: Add test logic here
-			//
-		};
+		[TestMethod] void stdio_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_test1()))); }
+		[TestMethod] void stdio_64bit() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_64bit()))); }
+		[TestMethod] void stdio_scanf() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_scanf()))); }
 	};
 }

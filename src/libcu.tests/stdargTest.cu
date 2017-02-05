@@ -1,7 +1,7 @@
 #include <cuda_runtimecu.h>
 #include <assert.h>
 
-static __global__ void stdarg_test1()
+static __global__ void g_stdarg_test1()
 {
 #ifdef __CUDA_ARCH__
 	printf("stdargs_test1\n");
@@ -12,8 +12,4 @@ static __global__ void stdarg_test1()
 	va_end(va);
 #endif
 }
-
-void stdarg_()
-{
-	stdarg_test1<<<1, 1>>>();
-}
+cudaError_t stdarg_test1() { g_stdarg_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
