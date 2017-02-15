@@ -9,8 +9,7 @@ void sentinelCommand::Dump()
 {
 	register char *b = Data;
 	register int l = Length;
-	//printf("Command: 0x%x[%d]'", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
-	printf("Command: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
+	printf("Cmd: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
 
 void sentinelMap::Dump()
@@ -67,7 +66,7 @@ static HANDLE _threadDeviceHandle[SENTINEL_DEVICEMAPS];
 static unsigned int __stdcall sentinelDeviceThread(void *data) 
 {
 	int threadId = (int)data;
-	sentinelContext *ctx = &_ctx; 
+	sentinelContext *ctx = &_ctx;
 	sentinelMap *map = ctx->DeviceMap[threadId];
 	while (map) {
 		long id = map->GetId;
@@ -80,11 +79,14 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("Bad Sentinel Magic");
 			exit(1);
 		}
+//#ifndef _WIN64
+//		cmd->Data = (char *)&cmd->Data + 4; // x86: must reset Data member after device transfer
+//#endif
 		//map->Dump();
-		//cmd->Dump();
+		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
-		//printf(".");
+		/*printf(".");*/
 		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}

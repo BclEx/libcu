@@ -41,7 +41,7 @@ struct stdlib_exit
 	bool Std;
 	int Status;
 	__device__ stdlib_exit(bool std, int status)
-		: Base(false, STDLIB_EXIT, 0, nullptr), Std(std), Status(status) { sentinelDeviceSend(this, sizeof(stdlib_exit)); }
+		: Base(false, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(this, sizeof(stdlib_exit)); }
 };
 
 struct stdlib_system

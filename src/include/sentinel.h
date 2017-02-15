@@ -51,7 +51,7 @@ extern "C" {
 		char OP;
 		int Size;
 		char *(*Prepare)(void*,char*,char*);
-		__device__ sentinelMessage(bool wait, char op, int size, char *(*prepare)(void*,char*,char*))
+		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*) = nullptr)
 			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
 	public:
 	};

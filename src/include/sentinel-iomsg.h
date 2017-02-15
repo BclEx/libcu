@@ -38,7 +38,7 @@ struct io_close
 	sentinelMessage Base;
 	int Handle;
 	__device__ io_close(int handle)
-		: Base(false, IO_CLOSE, 0, nullptr), Handle(handle) { sentinelDeviceSend(this, sizeof(io_close)); }
+		: Base(false, IO_CLOSE), Handle(handle) { sentinelDeviceSend(this, sizeof(io_close)); }
 	int RC;
 };
 
