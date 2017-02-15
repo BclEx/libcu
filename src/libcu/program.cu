@@ -72,7 +72,7 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
 	cudaError_t cudaStatus;
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
-	cudaStatus = cudaSetDevice(0);
+	cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
 		goto Error;

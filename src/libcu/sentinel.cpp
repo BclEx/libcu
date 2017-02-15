@@ -60,6 +60,8 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 // DEVICESENTINEL
 #if HAS_DEVICESENTINEL
 
+#include <sentinel-stdiomsg.h>
+
 static bool _sentinelDevice = false;
 static int *_deviceMap[SENTINEL_DEVICEMAPS];
 static HANDLE _threadDeviceHandle[SENTINEL_DEVICEMAPS];
@@ -80,13 +82,21 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 #ifndef _WIN64
-		// x86: must reset Data member after device transfer //cmd->Data = (char *)&cmd->Data + 4; 
-		int offset32 = ((char *)&cmd->Data + 4) - cmd->Data;
-		cmd->Data += offset32;
+		// x86: must reset Data member after device transfer
+		int offset = ((char *)&cmd->Data + 4) - cmd->Data;
+		cmd->Data += offset;
 #endif
+		printf("hst: %x %x %x\n", (char *)&cmd->Data + 4, cmd->Data, ((char *)&cmd->Data + 4) - cmd->Data);
 		//map->Dump();
 		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
+#ifndef _WIN64
+		// x86: must reset Data member after device transfer
+		if (msg->Offset) {
+			printf("off: %x %x\n", msg->Offset, &stdio_freopen::Offset);
+			//msg->Offset(msg, offset);
+		}
+#endif
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		/*printf(".");*/
 		*status = (msg->Wait ? 4 : 0);

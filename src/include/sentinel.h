@@ -50,12 +50,19 @@ extern "C" {
 		bool Wait;
 		char OP;
 		int Size;
-		char *(*Prepare)(void*,char*,char*,int);
-		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,int) = nullptr)
-			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
+		char *(*Prepare)(void*,char*,char*);
+		void (*Offset)(void*,int);
+		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*) = nullptr, void (*offset)(void*,int) = nullptr)
+			: Wait(wait), OP(op), Size(size), Prepare(prepare), Offset(offset) { }
 	public:
 	};
-#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,int))&P)
+#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*))&P)
+#ifndef _WIN64
+#define SENTINELOFFSET(O) ((void (*)(void*,int))&O)
+	//typedef void (*__sentinelOffset_t)(void*, int);
+#else
+#define SENTINELOFFSET(O) nullptr
+#endif
 
 	typedef struct
 	{

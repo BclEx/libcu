@@ -46,20 +46,26 @@ struct stdlib_exit
 
 struct stdlib_system
 {
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, int offset32)
+	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str + offset32;
+		t->Str = str;
 		return end;
 	}
+#ifndef _WIN64
+	static __forceinline __host__ void Offset(stdlib_system *t, int offset)
+	{
+		t->Str += offset;
+	}
+#endif
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_system(const char *str)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(this, sizeof(stdlib_system)); }
+		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), Str(str) { sentinelDeviceSend(this, sizeof(stdlib_system)); }
 	int RC;
 };
 

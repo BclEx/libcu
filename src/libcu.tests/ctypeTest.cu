@@ -4,7 +4,7 @@
 
 static __global__ void g_ctype_test1()
 {
-	fprintf_(stdout, "ctype_test1\n");
+	//fprintf_(stdout, "ctype_test1\n");
 	bool a0 = isalnum('a'); bool a0n = isalnum('1'); assert(a0 && a0n);
 	bool a1 = isalpha('a'); bool a1n = isalpha('A'); assert(a1 && a1n);
 	bool a2 = iscntrl('a'); bool a2n = iscntrl('A'); assert(!a2 && !a2n);
