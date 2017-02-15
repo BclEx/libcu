@@ -50,12 +50,12 @@ extern "C" {
 		bool Wait;
 		char OP;
 		int Size;
-		char *(*Prepare)(void*,char*,char*);
-		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*) = nullptr)
+		char *(*Prepare)(void*,char*,char*,int);
+		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,int) = nullptr)
 			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
 	public:
 	};
-#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*))&P)
+#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,int))&P)
 
 	typedef struct
 	{
@@ -111,7 +111,6 @@ extern "C" {
 	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
 	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
 	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
-
 
 #ifdef  __cplusplus
 }

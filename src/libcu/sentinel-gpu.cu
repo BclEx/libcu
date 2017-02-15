@@ -19,14 +19,9 @@ __device__ void sentinelDeviceSend(void *msg, int msgLength)
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
 	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
-#ifndef _WIN64
-	//int offset = (char *)&cmd->Data - 4 - cmd->Data;
-	//cmd->Data += offset;
-	//cmd->Data = (char *)&cmd->Data - 4; // x86: must reset Data member after device transfer
-#endif
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length)) {
+	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length, 5636096)) {
 		printf("msg too long");
 		abort();
 	}

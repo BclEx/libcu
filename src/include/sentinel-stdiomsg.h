@@ -58,14 +58,14 @@ enum {
 
 struct stdio_remove
 {
-	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, int offset32)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset32;
 		return end;
 	}
 	sentinelMessage Base;
@@ -77,7 +77,7 @@ struct stdio_remove
 
 struct stdio_rename
 {
-	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, int offset32)
 	{
 		int oldnameLength = (t->Oldname ? (int)strlen(t->Oldname) + 1 : 0);
 		int newnameLength = (t->Newname ? (int)strlen(t->Newname) + 1 : 0);
@@ -87,8 +87,8 @@ struct stdio_rename
 		if (end > dataEnd) return nullptr;
 		memcpy(oldname, t->Oldname, oldnameLength);
 		memcpy(newname, t->Newname, newnameLength);
-		t->Oldname = oldname;
-		t->Newname = newname;
+		t->Oldname = oldname + offset32;
+		t->Newname = newname + offset32;
 		return end;
 	}
 	sentinelMessage Base;
@@ -100,14 +100,14 @@ struct stdio_rename
 
 struct stdio_unlink
 {
-	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd, int offset32)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset32;
 		return end;
 	}
 	sentinelMessage Base;
@@ -137,7 +137,7 @@ struct stdio_fflush
 
 struct stdio_freopen
 {
-	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, int offset32)
 	{
 		int filenameLength = (t->Filename ? (int)strlen(t->Filename) + 1 : 0);
 		int modeLength = (t->Mode ? (int)strlen(t->Mode) + 1 : 0);
@@ -147,17 +147,10 @@ struct stdio_freopen
 		if (end > dataEnd) return nullptr;
 		memcpy(filename, t->Filename, filenameLength);
 		memcpy(mode, t->Mode, modeLength);
-		t->Filename = filename;
-		t->Mode = mode;
+		t->Filename = filename + offset32;
+		t->Mode = mode + offset32;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline void Offset(stdio_freopen *t, int offset)
-	{
-		t->Filename += offset;
-		t->Mode += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Filename; const char *Mode; FILE *Stream;
 	__device__ stdio_freopen(const char *filename, const char *mode, FILE *stream)
@@ -167,14 +160,14 @@ struct stdio_freopen
 
 struct stdio_setvbuf
 {
-	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, int offset32)
 	{
 		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
 		char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += bufferLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(buffer, t->Buffer, bufferLength);
-		t->Buffer = buffer;
+		t->Buffer = buffer + offset32;
 		return end;
 	}
 	sentinelMessage Base;
@@ -204,7 +197,7 @@ struct stdio_fputc
 
 struct stdio_fgets
 {
-	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd, int offset32)
 	{
 		t->Str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -221,14 +214,14 @@ struct stdio_fgets
 
 struct stdio_fputs
 {
-	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, int offset32)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset32;
 		return end;
 	}
 	sentinelMessage Base;
@@ -249,7 +242,7 @@ struct stdio_ungetc
 
 struct stdio_fread
 {
-	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, int offset32)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -266,14 +259,14 @@ struct stdio_fread
 
 struct stdio_fwrite
 {
-	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd, int offset32)
 	{
 		size_t size = t->Size * t->Num;
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += size);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->Ptr, size);
-		t->Ptr = ptr;
+		t->Ptr = ptr + offset32;
 		return end;
 	}
 	sentinelMessage Base;

@@ -79,9 +79,11 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("Bad Sentinel Magic");
 			exit(1);
 		}
-//#ifndef _WIN64
-//		cmd->Data = (char *)&cmd->Data + 4; // x86: must reset Data member after device transfer
-//#endif
+#ifndef _WIN64
+		// x86: must reset Data member after device transfer //cmd->Data = (char *)&cmd->Data + 4; 
+		int offset32 = ((char *)&cmd->Data + 4) - cmd->Data;
+		cmd->Data += offset32;
+#endif
 		//map->Dump();
 		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;

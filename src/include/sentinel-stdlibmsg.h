@@ -46,14 +46,14 @@ struct stdlib_exit
 
 struct stdlib_system
 {
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, int offset32)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset32;
 		return end;
 	}
 	sentinelMessage Base;
