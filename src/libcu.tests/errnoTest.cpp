@@ -27,7 +27,7 @@ namespace libcutests
 #pragma region Initialize/Cleanup
 		[ClassInitialize()] static void ClassInitialize(Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ testContext) { allClassInitialize(); }
 		[ClassCleanup()] static void ClassCleanup() { allClassCleanup(); }
-		[TestInitialize()]void TestInitialize() { allTestInitialize(); }
+		[TestInitialize()] void TestInitialize() { allTestInitialize(); }
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
 #pragma endregion 
 

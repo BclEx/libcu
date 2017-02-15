@@ -6,7 +6,6 @@
 
 void allClassInitialize(bool sentinel)
 {
-	return;
 	if (sentinel)
 		sentinelServerInitialize();
 
@@ -18,7 +17,6 @@ void allClassInitialize(bool sentinel)
 
 void allClassCleanup(bool sentinel)
 {
-	return;
 	if (sentinel)
 		sentinelServerShutdown();
 
@@ -37,7 +35,6 @@ void allTestInitialize()
 
 void allTestCleanup()
 {
-	return;
 	// Check for any errors launching the kernel
 	cudaError_t cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess)

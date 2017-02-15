@@ -130,7 +130,7 @@ static __device__ void strtol_utest(int base)
 	int i;
 	unsigned long n;
 	char *endptr;
-	for (i = 0;i < _strtol_ntests; i++) {
+	for (i = 0; i < _strtol_ntests; i++) {
 		n = strtoul(_strtol_strings[i], &endptr, base);
 		printf("strtoul(\"%s\",%d) len=%lu res=%lu\n", _strtol_strings[i], base, (unsigned long)(endptr - _strtol_strings[i]), n);
 	}
