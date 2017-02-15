@@ -7,7 +7,7 @@
 #include <cuda_runtimecu.h>
 #include <sentinel.h>
 
-void allClassInitialize(bool sentinel = false);
-void allClassCleanup(bool sentinel = false);
+void allClassInitialize(bool sentinel = true);
+void allClassCleanup(bool sentinel = true);
 void allTestInitialize();
 void allTestCleanup();

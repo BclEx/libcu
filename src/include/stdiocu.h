@@ -361,4 +361,5 @@ __END_NAMESPACE_STD;
 #endif  /* _STDIOCU_H */
 #else
 #include <stdio.h>
+#define fprintf_ fprintf
 #endif

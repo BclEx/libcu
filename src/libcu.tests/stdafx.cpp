@@ -4,10 +4,12 @@
 
 #include "stdafx.h"
 
+using namespace System;
+
 void allClassInitialize(bool sentinel)
 {
 	if (sentinel)
-		sentinelServerInitialize();
+		sentinelServerInitialize(nullptr, nullptr, false, true);
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
 	cudaError_t cudaStatus = cudaSetDevice(0);
@@ -26,8 +28,14 @@ void allClassCleanup(bool sentinel)
 		throw gcnew System::InvalidOperationException("cudaDeviceReset failed!");
 }
 
+char _buf[BUFSIZ*10];
+
 void allTestInitialize()
 {
+	memset(_buf, 0, sizeof(_buf));
+	freopen("NUL", "a", stdout); freopen("NUL", "a", stderr);
+	setbuf(stdout, _buf); setbuf(stderr, _buf);
+
 	cudaError_t cudaStatus = cudaDeviceReset();
 	if (cudaStatus != cudaSuccess)
 		throw gcnew System::InvalidOperationException("cudaDeviceReset failed!");
@@ -44,5 +52,7 @@ void allTestCleanup()
 	cudaStatus = cudaDeviceSynchronize();
 	if (cudaStatus != cudaSuccess)
 		throw gcnew System::InvalidOperationException(System::String::Format("cudaDeviceSynchronize returned error code {0} after launching Kernel!\n", (int)cudaStatus));
-}
 
+	fflush(stdout); fflush(stderr);
+	Console::Write(gcnew String(_buf));
+}

@@ -68,7 +68,7 @@ extern "C" {
 #define _toupper(c) (char)((c)-'a'+'A')
 
 	/*C99*/
-	//extern __forceinline __device__ int isblank(int c);
+	extern __forceinline __device__ int isblank(int c) { return c == '\t' || c == ' '; }
 
 	extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
 
@@ -80,4 +80,5 @@ extern "C" {
 #else
 #include <ctype.h>
 #define isidchar 0
+#define isblank(c) ((c) == '\t' || (c) == ' ')
 #endif

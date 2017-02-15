@@ -238,7 +238,6 @@ void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault, bool for
 		exec->Next = list->Next;
 		list->Next = exec;
 	}
-	assert(list != nullptr);
 }
 
 void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice)

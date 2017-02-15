@@ -4,7 +4,7 @@
 
 static __global__ void g_ctype_test1()
 {
-	printf("ctype_test1\n");
+	fprintf_(stdout, "ctype_test1\n");
 	bool a0 = isalnum('a'); bool a0n = isalnum('1'); assert(a0 && a0n);
 	bool a1 = isalpha('a'); bool a1n = isalpha('A'); assert(a1 && a1n);
 	bool a2 = iscntrl('a'); bool a2n = iscntrl('A'); assert(!a2 && !a2n);
@@ -19,11 +19,10 @@ static __global__ void g_ctype_test1()
 
 	char b0 = tolower('a'); char b0n = tolower('A'); assert(b0 == 'a' && b0n == 'a');
 	char b1 = toupper('a'); char b1n = toupper('A'); assert(b1 == 'A' && b1n == 'A');
-	printf("%c %c", _toupper('a'), _toupper('A'));
-	//char b2 = _toupper('a'); char b2n = _toupper('A'); assert(b2 == 'A' && b2n == 'A');
-	//char b3 = _tolower('a'); char b3n = _tolower('A'); assert(b3 == 'a' && b3n == 'a');
+	char b2 = _toupper('a'); char b2n = _toupper('A'); assert(b2 == 'A' && b2n != 'A');
+	char b3 = _tolower('a'); char b3n = _tolower('A'); assert(b3 != 'a' && b3n == 'a');
 
-	//bool c0 = isblank('a'); bool c0n = isblank('A'); assert(!c0 && c0n);
+	bool c0 = isblank(' '); bool c0n = isblank('A'); assert(c0 && !c0n);
 	bool c1 = isidchar('a'); bool c1n = isidchar('A'); assert(c1 && c1n);
 
 	//bool d0 = ispoweroftwo(2); bool d0n = ispoweroftwo(3); assert(d0 && !d0n);
