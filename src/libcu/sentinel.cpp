@@ -126,8 +126,8 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			cudaErrorCheckF(cudaHostAlloc(&_deviceMap[i], sizeof(sentinelMap), cudaHostAllocPortable | cudaHostAllocMapped), goto initialize_error);
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer(&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
-			 _ctx.DeviceMap[i]->Offset = ((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
-			printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
+			_ctx.DeviceMap[i]->Offset = ((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
+			//printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
 		}
 		cudaErrorCheckF(cudaMemcpyToSymbol(_sentinelDeviceMap, &d_deviceMap, sizeof(d_deviceMap)), goto initialize_error);
 	}
