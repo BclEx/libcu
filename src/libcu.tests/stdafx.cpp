@@ -12,7 +12,7 @@ void allClassInitialize(bool sentinel)
 		sentinelServerInitialize(nullptr, nullptr, false, true);
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
-	cudaError_t cudaStatus = cudaSetDevice(0);
+	cudaError_t cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());
 	if (cudaStatus != cudaSuccess)
 		throw gcnew System::InvalidOperationException("cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
 }

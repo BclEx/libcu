@@ -21,8 +21,7 @@ __device__ void sentinelDeviceSend(void *msg, int msgLength)
 	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	//printf("dev: %x %x %x\n", (char *)&cmd->Data + 4, cmd->Data, ((char *)&cmd->Data + 4) - cmd->Data);
-	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length)) {
+	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length, map->Offset)) {
 		printf("msg too long");
 		abort();
 	}

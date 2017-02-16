@@ -81,22 +81,10 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("Bad Sentinel Magic");
 			exit(1);
 		}
-#ifndef _WIN64
-		// x86: must reset Data member after device transfer
-		int offset = ((char *)&cmd->Data + 4) - cmd->Data;
-		cmd->Data += offset;
-#endif
-		printf("hst: %x %x %x\n", (char *)&cmd->Data + 4, cmd->Data, ((char *)&cmd->Data + 4) - cmd->Data);
+		cmd->Data += map->Offset;
 		//map->Dump();
 		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
-#ifndef _WIN64
-		// x86: must reset Data member after device transfer
-		if (msg->Offset) {
-			printf("off: %x %x\n", msg->Offset, &stdio_freopen::Offset);
-			//msg->Offset(msg, offset);
-		}
-#endif
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		/*printf(".");*/
 		*status = (msg->Wait ? 4 : 0);
@@ -138,6 +126,8 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			cudaErrorCheckF(cudaHostAlloc(&_deviceMap[i], sizeof(sentinelMap), cudaHostAllocPortable | cudaHostAllocMapped), goto initialize_error);
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer(&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
+			 _ctx.DeviceMap[i]->Offset = ((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
+			printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
 		}
 		cudaErrorCheckF(cudaMemcpyToSymbol(_sentinelDeviceMap, &d_deviceMap, sizeof(d_deviceMap)), goto initialize_error);
 	}

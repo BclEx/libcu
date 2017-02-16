@@ -58,32 +58,26 @@ enum {
 
 struct stdio_remove
 {
-	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, int offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline __host__ void Offset(stdio_remove *t, int offset)
-	{
-		t->Str += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdio_remove(const char *str)
-		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), Str(str) { sentinelDeviceSend(this, sizeof(stdio_remove)); }
+		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(this, sizeof(stdio_remove)); }
 	int RC;
 };
 
 struct stdio_rename
 {
-	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, int offset)
 	{
 		int oldnameLength = (t->Oldname ? (int)strlen(t->Oldname) + 1 : 0);
 		int newnameLength = (t->Newname ? (int)strlen(t->Newname) + 1 : 0);
@@ -93,46 +87,33 @@ struct stdio_rename
 		if (end > dataEnd) return nullptr;
 		memcpy(oldname, t->Oldname, oldnameLength);
 		memcpy(newname, t->Newname, newnameLength);
-		t->Oldname = oldname;
-		t->Newname = newname;
+		t->Oldname = oldname + offset;
+		t->Newname = newname + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __host__ void Offset(stdio_rename *t, int offset)
-	{
-		t->Oldname += offset;
-		t->Newname += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Oldname; const char *Newname;
 	__device__ stdio_rename(const char *oldname, const char *newname)
-		: Base(true, STDIO_RENAME, 1024, SENTINELPREPARE(Prepare), nullptr), Oldname(oldname), Newname(newname) { sentinelDeviceSend(this, sizeof(stdio_rename)); }
+		: Base(true, STDIO_RENAME, 1024, SENTINELPREPARE(Prepare)), Oldname(oldname), Newname(newname) { sentinelDeviceSend(this, sizeof(stdio_rename)); }
 	int RC;
 };
 
 struct stdio_unlink
 {
-	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd, int offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __host__ void Offset(stdio_unlink *t, int offset)
-	{
-		t->Str += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdio_unlink(const char *str)
-		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare), nullptr), Str(str) { sentinelDeviceSend(this, sizeof(stdio_unlink)); }
+		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(this, sizeof(stdio_unlink)); }
 	int RC;
 };
 
@@ -156,7 +137,7 @@ struct stdio_fflush
 
 struct stdio_freopen
 {
-	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, int offset)
 	{
 		int filenameLength = (t->Filename ? (int)strlen(t->Filename) + 1 : 0);
 		int modeLength = (t->Mode ? (int)strlen(t->Mode) + 1 : 0);
@@ -166,46 +147,33 @@ struct stdio_freopen
 		if (end > dataEnd) return nullptr;
 		memcpy(filename, t->Filename, filenameLength);
 		memcpy(mode, t->Mode, modeLength);
-		t->Filename = filename;
-		t->Mode = mode;
+		t->Filename = filename + offset;
+		t->Mode = mode + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __host__ void Offset(stdio_freopen *t, int offset)
-	{
-		t->Filename += offset;
-		t->Mode += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Filename; const char *Mode; FILE *Stream;
 	__device__ stdio_freopen(const char *filename, const char *mode, FILE *stream)
-		: Base(true, STDIO_FREOPEN, 1024, SENTINELPREPARE(Prepare), nullptr), Filename(filename), Mode(mode), Stream(stream) { sentinelDeviceSend(this, sizeof(stdio_freopen)); }
+		: Base(true, STDIO_FREOPEN, 1024, SENTINELPREPARE(Prepare)), Filename(filename), Mode(mode), Stream(stream) { sentinelDeviceSend(this, sizeof(stdio_freopen)); }
 	FILE *RC;
 };
 
 struct stdio_setvbuf
 {
-	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, int offset)
 	{
 		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
 		char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += bufferLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(buffer, t->Buffer, bufferLength);
-		t->Buffer = buffer;
+		t->Buffer = buffer + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline __host__ void Offset(stdio_setvbuf *t, int offset)
-	{
-		t->Buffer += offset;
-	}
-#endif
 	sentinelMessage Base;
 	FILE *File; char *Buffer; int Mode; size_t Size;
 	__device__ stdio_setvbuf(FILE *file, char *buffer, int mode, size_t size)
-		: Base(true, STDIO_SETVBUF, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), File(file), Buffer(buffer), Mode(mode), Size(size) { sentinelDeviceSend(this, sizeof(stdio_setvbuf)); }
+		: Base(true, STDIO_SETVBUF, 1024, SENTINELPREPARE(Prepare)), File(file), Buffer(buffer), Mode(mode), Size(size) { sentinelDeviceSend(this, sizeof(stdio_setvbuf)); }
 	int RC;
 };
 
@@ -229,48 +197,37 @@ struct stdio_fputc
 
 struct stdio_fgets
 {
-	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd, int offset)
 	{
 		t->Str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline __host__ void Offset(stdio_fgets *t, int offset)
-	{
-	}
-#endif
 	sentinelMessage Base;
 	int Num; FILE *File;
 	__device__ stdio_fgets(char *str, int num, FILE *file)
-		: Base(true, STDIO_FGETS, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), Str(str), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fgets)); }
+		: Base(true, STDIO_FGETS, 1024, SENTINELPREPARE(Prepare)), Str(str), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fgets)); }
 	char *Str; 
 	char *RC;
 };
 
 struct stdio_fputs
 {
-	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, int offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
-		t->Str = str;
+		t->Str = str + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __host__ void Offset(stdio_fputs *t, int offset)
-	{
-		t->Str += offset;
-	}
-#endif
 	sentinelMessage Base;
 	const char *Str; FILE *File;
 	__device__ stdio_fputs(bool wait, const char *str, FILE *file)
-		: Base(wait, STDIO_FPUTS, 1024, SENTINELPREPARE(Prepare), nullptr), Str(str), File(file) { sentinelDeviceSend(this, sizeof(stdio_fputs)); }
+		: Base(wait, STDIO_FPUTS, 1024, SENTINELPREPARE(Prepare)), Str(str), File(file) { sentinelDeviceSend(this, sizeof(stdio_fputs)); }
 	int RC;
 };
 
@@ -286,48 +243,37 @@ struct stdio_ungetc
 
 struct stdio_fread
 {
-	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, int offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline __host__ void Offset(stdio_fread *t, int offset)
-	{
-	}
-#endif
 	sentinelMessage Base;
 	size_t Size; size_t Num; FILE *File;
 	__device__ stdio_fread(bool wait, size_t size, size_t num, FILE *file)
-		: Base(wait, STDIO_FREAD, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), Size(size), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fread)); }
+		: Base(wait, STDIO_FREAD, 1024, SENTINELPREPARE(Prepare)), Size(size), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fread)); }
 	size_t RC;
 	void *Ptr;
 };
 
 struct stdio_fwrite
 {
-	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd)
+	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd, int offset)
 	{
 		size_t size = t->Size * t->Num;
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += size);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->Ptr, size);
-		t->Ptr = ptr;
+		t->Ptr = (char *)ptr + offset;
 		return end;
 	}
-#ifndef _WIN64
-	static __forceinline void Offset(stdio_fwrite *t, int offset)
-	{
-		t->Ptr = (char *)t->Ptr + offset;
-	}
-#endif
 	sentinelMessage Base;
 	const void *Ptr; size_t Size; size_t Num; FILE *File;
 	__device__ stdio_fwrite(bool wait, const void *ptr, size_t size, size_t num, FILE *file)
-		: Base(wait, STDIO_FWRITE, 1024, SENTINELPREPARE(Prepare), SENTINELOFFSET(Offset)), Ptr(ptr), Size(size), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fwrite)); }
+		: Base(wait, STDIO_FWRITE, 1024, SENTINELPREPARE(Prepare)), Ptr(ptr), Size(size), Num(num), File(file) { sentinelDeviceSend(this, sizeof(stdio_fwrite)); }
 	size_t RC;
 };
 

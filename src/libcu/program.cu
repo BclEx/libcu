@@ -15,10 +15,10 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//printf("%d %s\n", 2, "sky morey");
 
 	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
-	////fprintf(f, "The quick brown fox jumps over the lazy dog");
-	//fwrite("test", 4, 1, f);
-	//fflush(f);
-	//fclose(f);
+	//fprintf(f, "The quick brown fox jumps over the lazy dog");
+	fwrite("test", 4, 1, f);
+	fflush(f);
+	fclose(f);
 
 	//const char buf[100] = {0};
 	//snprintf(buf, 100, "test");
