@@ -70,7 +70,7 @@ extern "C" {
 	{
 		long GetId;
 		volatile long SetId;
-		int Offset;
+		long Offset;
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
 	} sentinelMap;

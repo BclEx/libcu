@@ -14,8 +14,8 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//strchr("Me", 'Me');
 	//printf("%d %s\n", 2, "sky morey");
 
-	//FILE *f = fopen("C:\\T_\\fopen.txt", "w");
-	////fprintf(f, "The quick brown fox jumps over the lazy dog");
+	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
+	//fprintf(f, "The quick brown fox jumps over the lazy dog");
 	//fwrite("test", 4, 1, f);
 	//fflush(f);
 	//fclose(f);
@@ -23,7 +23,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//const char buf[100] = {0};
 	//snprintf(buf, 100, "test");
 	//printf("%s\n", buf);
-	//printf("%d\n", atoi("51236"));
+	printf("%d\n", atoi("51236"));
 	//printf("%f\n", atof("1.2"));
 }
 

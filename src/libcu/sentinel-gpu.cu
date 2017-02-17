@@ -18,9 +18,9 @@ __device__ void sentinelDeviceSend(void *msg, int msgLength)
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
-	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
+	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length, map->Offset)) {
 		printf("msg too long");
 		abort();
