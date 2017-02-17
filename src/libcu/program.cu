@@ -11,7 +11,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	if (i != 1)
 		return;
 
-	//strchr("Me", 'c');
+	//strchr("Me", 'Me');
 	//printf("%d %s\n", 2, "sky morey");
 
 	//FILE *f = fopen("C:\\T_\\fopen.txt", "w");
