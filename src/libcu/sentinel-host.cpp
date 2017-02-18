@@ -5,15 +5,14 @@
 #if HAS_HOSTSENTINEL
 
 sentinelMap *_sentinelHostMap;
-void sentinelClientSend(void *msg, int msgLength)
+void sentinelClientSend(sentinelMessage *msg, int msgLength)
 {
 #ifndef _WIN64
 	printf("Sentinel currently only works in x64.\n");
 	abort();
 #else
 	sentinelMap *map = _sentinelHostMap;
-	sentinelMessage *msg2 = (sentinelMessage *)msg;
-	int length = msgLength + msg2->Size;
+	int length = msgLength + msg->Size;
 	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
@@ -21,13 +20,13 @@ void sentinelClientSend(void *msg, int msgLength)
 	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg2->Prepare && !msg2->Prepare(msg, cmd->Data, cmd->Data+length, 0)) {
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, 0)) {
 		printf("msg too long");
 		exit(0);
 	}
 	memcpy(cmd->Data, msg, msgLength);
 	*status = 2;
-	if (msg2->Wait) {
+	if (msg->Wait) {
 		while (InterlockedCompareExchange((long *)status, 5, 4) != 4) { }
 		memcpy(msg, cmd->Data, msgLength);
 		*status = 0;

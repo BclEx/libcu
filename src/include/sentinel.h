@@ -45,19 +45,19 @@ extern "C" {
 #define SENTINEL_NAME "Sentinel" //"Global\\Sentinel"
 #define SENTINEL_DEVICEMAPS 1
 
-	struct sentinelMessage
+	struct __align__(8) sentinelMessage
 	{
 		bool Wait;
 		char OP;
 		int Size;
-		char *(*Prepare)(void*,char*,char*,int);
-		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,int) = nullptr)
+		char *(*Prepare)(void*,char*,char*,long);
+		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,long) = nullptr)
 			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
 	public:
 	};
-#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,int))&P)
+#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,long))&P)
 
-	typedef struct
+	typedef struct __align__(8)
 	{
 		unsigned short Magic;
 		volatile long Status;
@@ -66,11 +66,11 @@ extern "C" {
 		void Dump();
 	} sentinelCommand;
 
-	typedef struct
+	typedef struct __align__(8)
 	{
 		long GetId;
 		volatile long SetId;
-		int Offset;
+		long Offset;
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
 	} sentinelMap;
@@ -102,12 +102,12 @@ extern "C" {
 	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
 	extern void sentinelServerShutdown();
 #if HAS_DEVICESENTINEL
-	extern __device__ void sentinelDeviceSend(void *msg, int msgLength);
+	extern __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength);
 #endif
 #if HAS_HOSTSENTINEL
 	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
 	extern void sentinelClientShutdown();
-	extern void sentinelClientSend(void *msg, int msgLength);
+	extern void sentinelClientSend(sentinelMessage *msg, int msgLength);
 #endif
 	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
 	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);

@@ -60,8 +60,6 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 // DEVICESENTINEL
 #if HAS_DEVICESENTINEL
 
-#include <sentinel-stdiomsg.h>
-
 static bool _sentinelDevice = false;
 static int *_deviceMap[SENTINEL_DEVICEMAPS];
 static HANDLE _threadDeviceHandle[SENTINEL_DEVICEMAPS];
@@ -83,7 +81,7 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 		}
 		cmd->Data += map->Offset;
 		//map->Dump();
-		//cmd->Dump();
+		cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		/*printf(".");*/
@@ -127,7 +125,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer(&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
 			_ctx.DeviceMap[i]->Offset = (int)((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
-			printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
+			//printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
 		}
 		cudaErrorCheckF(cudaMemcpyToSymbol(_sentinelDeviceMap, &d_deviceMap, sizeof(d_deviceMap)), goto initialize_error);
 	}

@@ -41,12 +41,12 @@ struct stdlib_exit
 	bool Std;
 	int Status;
 	__device__ stdlib_exit(bool std, int status)
-		: Base(false, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(this, sizeof(stdlib_exit)); }
+		: Base(false, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(&Base, sizeof(stdlib_exit)); }
 };
 
 struct stdlib_system
 {
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, int offset)
+	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, long offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -59,7 +59,7 @@ struct stdlib_system
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_system(const char *str)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(this, sizeof(stdlib_system)); }
+		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_system)); }
 	int RC;
 };
 
