@@ -5,9 +5,9 @@
 #include <assert.h>
 #include <cuda_runtimecu.h>
 
-void sentinelCommand::Dump()
+void sentinelCommand::Dump(long offset)
 {
-	register char *b = Data;
+	register char *b = Data + offset;
 	register int l = Length;
 	printf("Cmd: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
@@ -45,7 +45,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		//cmd->Dump();
+		//cmd->Dump(0);
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
@@ -79,12 +79,11 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("Bad Sentinel Magic");
 			exit(1);
 		}
-		cmd->Data += map->Offset;
 		//map->Dump();
-		cmd->Dump();
-		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
+		//cmd->Dump(SENTINELOFFSET(map->Offset));
+		sentinelMessage *msg = (sentinelMessage *)(cmd->Data + SENTINELOFFSET(map->Offset));
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
-		/*printf(".");*/
+		//printf(".");
 		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
@@ -124,8 +123,10 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			cudaErrorCheckF(cudaHostAlloc(&_deviceMap[i], sizeof(sentinelMap), cudaHostAllocPortable | cudaHostAllocMapped), goto initialize_error);
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer(&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
+#ifndef _WIN64
 			_ctx.DeviceMap[i]->Offset = (int)((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
 			//printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
+#endif
 		}
 		cudaErrorCheckF(cudaMemcpyToSymbol(_sentinelDeviceMap, &d_deviceMap, sizeof(d_deviceMap)), goto initialize_error);
 	}
