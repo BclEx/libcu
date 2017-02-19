@@ -47,7 +47,7 @@
 //#include <stdlibcu.h>
 //#include <stringcu.h>
 //#include <stdiocu.h>
-//#include <errnocu.h>
+#include <errnocu.h>
 #include <sys/statcu.h>
 #include "jimautoconf.h"
 #include "jim-subcmd.h"
@@ -361,7 +361,7 @@ first:
 		// Maybe it already exists as a directory
 		if (errno == EEXIST) {
 			struct stat sb;
-			if (_stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+			if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
 				return 0;
 			// Restore errno
 			errno = EEXIST;
@@ -392,7 +392,7 @@ static __device__ int file_cmd_tempfile(Jim_Interp *interp, int argc, Jim_Obj *c
 	int fd = Jim_MakeTempFile(interp, (argc >= 1) ? Jim_String(argv[0]) : NULL);
 	if (fd < 0)
 		return JIM_ERROR;
-	__close(fd);
+	_close(fd);
 	return JIM_OK;
 }
 
@@ -445,7 +445,7 @@ static __device__ int file_cmd_link(Jim_Interp *interp, int argc, Jim_Obj *const
 static __device__ int file_stat(Jim_Interp *interp, Jim_Obj *filename, struct stat *sb)
 {
 	const char *path = Jim_String(filename);
-	if (_stat(path, sb) == -1) {
+	if (stat(path, sb) == -1) {
 		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
 		return JIM_ERROR;
 	}

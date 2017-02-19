@@ -37,6 +37,11 @@ THE SOFTWARE.
 #include <stdiocu.h>
 #include <stdlibcu.h>
 
+//#if defined(__cplusplus) && defined(_GLIBCPP_USE_NAMESPACES)
+//using namespace __c99;
+//#else
+//#endif
+
 #undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>
 #include <host_functions.h>

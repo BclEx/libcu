@@ -259,6 +259,8 @@ __END_DECLS;
 #endif  /* _STDLIBCU_H */
 #else
 #include <stdlib.h>
+#define strtoll
+#define strtoull
 #define exit_ exit
 #endif
 

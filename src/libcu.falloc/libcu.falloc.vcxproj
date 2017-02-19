@@ -24,71 +24,21 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\bits\libcu_dirent.h" />
-    <ClInclude Include="..\include\bits\libcu_fpmax.h" />
-    <ClInclude Include="..\include\bits\libcu_stat.h" />
-    <ClInclude Include="..\include\bits\libcu_stdio.h" />
-    <ClInclude Include="..\include\crtdefscu.h" />
-    <ClInclude Include="..\include\ctypecu.h" />
-    <ClInclude Include="..\include\cuda_runtimecu.h" />
-    <ClInclude Include="..\include\setjmpcu.h" />
-    <ClInclude Include="..\include\timecu.h" />
-    <ClInclude Include="..\include\_dirent.h" />
-    <ClInclude Include="..\include\direntcu.h" />
-    <ClInclude Include="..\include\errnocu.h" />
-    <ClInclude Include="..\include\featurescu.h" />
-    <ClInclude Include="..\include\host_definescu.h" />
-    <ClInclude Include="..\include\host_functions.h" />
-    <ClInclude Include="..\include\limitscu.h" />
-    <ClInclude Include="..\include\regexcu.h" />
-    <ClInclude Include="..\include\sentinel-iomsg.h" />
-    <ClInclude Include="..\include\sentinel-stdiomsg.h" />
-    <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
-    <ClInclude Include="..\include\sentinel.h" />
-    <ClInclude Include="..\include\stdargcu.h" />
-    <ClInclude Include="..\include\stddefcu.h" />
-    <ClInclude Include="..\include\stdiocu.h" />
-    <ClInclude Include="..\include\stdlibcu.h" />
-    <ClInclude Include="..\include\stringcu.h" />
-    <ClInclude Include="..\include\sys\bitveccu.h" />
-    <ClInclude Include="..\include\sys\hashcu.h" />
-    <ClInclude Include="..\include\sys\statcu.h" />
-    <ClInclude Include="..\include\_unistd.h" />
-    <ClInclude Include="..\include\unistdcu.h" />
+    <ClInclude Include="..\include\falloc.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sentinel-msg.cpp" />
-    <ClCompile Include="sentinel.cpp" />
-    <ClCompile Include="sentinel-host.cpp" />
-    <ClCompile Include="host_functions.cpp" />
     <CudaCompile Include="program.cu" />
-    <CudaCompile Include="libcu.cu" />
-    <CudaCompile Include="libcu.stdlib.cu" />
-    <None Include="ctypecu.cu" />
-    <None Include="sentinel-gpu.cu" />
-    <None Include="sys\bitveccu.cu" />
-    <None Include="sys\hashcu.cu" />
-    <None Include="sys\statcu.cu" />
-    <None Include="direntcu.cu" />
-    <None Include="errnocu.cu" />
-    <None Include="regexcu.cu" />
-    <None Include="setjmpcu.cu" />
-    <None Include="stdiocu.cu" />
-    <None Include="stdlibcu.cu" />
-    <None Include="stringcu.cu" />
-    <None Include="timecu.cu" />
-    <None Include="unistdcu.cu" />
+    <CudaCompile Include="libcu.falloc.cu" />
+    <None Include="falloc.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="libcu.native.nuspec" />
-    <None Include="libcu.native.targets" />
-    <None Include="_content\sample.libcu.cu" />
-    <None Include="_content\sample.libcu.ganging.cu" />
+    <None Include="libcu.falloc.native.nuspec" />
+    <None Include="libcu.falloc.native.targets" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{ABDDD338-DC1C-475E-9903-0FC99E18726E}</ProjectGuid>
+    <ProjectGuid>{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}</ProjectGuid>
     <RootNamespace>libcu</RootNamespace>
-    <ProjectName>libcu</ProjectName>
+    <ProjectName>libcu.falloc</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -161,7 +111,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -183,7 +133,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -210,7 +160,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -236,7 +186,7 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

@@ -1,8 +1,9 @@
 #include <cuda_runtimecu.h>
 #include <timecu.h>
 
+__BEGIN_DECLS;
+
 // time
-// TODO: BUILD
 __device__ time_t time(time_t *timer)
 {
 	//clock_t start = clock();
@@ -11,7 +12,6 @@ __device__ time_t time(time_t *timer)
 }
 
 // gettimeofday
-// TODO: BUILD
 __device__ int gettimeofday(struct timeval *tp, void *tz)
 {
 	time_t seconds = time(nullptr);
@@ -23,3 +23,6 @@ __device__ int gettimeofday(struct timeval *tp, void *tz)
 	//tp->tv_usec = 0;
 	//return (_time(&tp->tv_sec) == (time_t)-1 ? -1 : 0);
 }
+
+__END_DECLS;
+

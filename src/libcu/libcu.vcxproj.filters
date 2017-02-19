@@ -91,6 +91,9 @@
     <ClInclude Include="..\include\timecu.h">
       <Filter>includes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\setjmpcu.h">
+      <Filter>includes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />

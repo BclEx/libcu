@@ -46,14 +46,14 @@
 #define JIM_OPTIMIZATION // comment to avoid optimizations and reduce size
 
 //#include <stdiocu.h>
-//#include <stdlibcu.h>
-//
 //#include <stringcu.h>
 //#include <stdargcu.h>
 //#include <ctypecu.h>
 //#include <limitscu.h>
 //#include <errnocu.h>
 #include <cuda_runtimecu.h>
+#include <stdlibcu.h>
+#include <setjmpcu.h>
 #include <assert.h>
 #include <time.h>
 #include "jim.h"
@@ -5427,7 +5427,7 @@ static __device__ int ListSortCommand(Jim_Obj **lhsObj, Jim_Obj **rhsObj)
 	int rc = Jim_EvalObj(sort_info->interp, compare_script);
 	jim_wide ret = 0;
 	if (rc != JIM_OK || Jim_GetWide(sort_info->interp, Jim_GetResult(sort_info->interp), &ret) != JIM_OK)
-		_longjmp(sort_info->jmpbuf, rc);
+		longjmp(sort_info->jmpbuf, rc);
 	return JimSign(ret) * sort_info->order;
 }
 
@@ -12506,7 +12506,7 @@ __device__ void Jim_SetResultFormatted_(Jim_Interp *interp, const char *format, 
 	}
 	len += extra;
 	char *buf = (char *)Jim_Alloc(len + 1);
-	len = snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
+	len = _snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
 	Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, len));
 }
 

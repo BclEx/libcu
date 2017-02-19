@@ -73,7 +73,6 @@
 extern "C" {
 #endif
 
-
 	// -----------------------------------------------------------------------------
 	// System configuration autoconf (configure) will set these
 	// -----------------------------------------------------------------------------
@@ -737,13 +736,11 @@ extern "C" {
 	JIM_EXPORT __device__ int Jim_IsDict(Jim_Obj *objPtr);
 	JIM_EXPORT __device__ int Jim_IsList(Jim_Obj *objPtr);
 
-	STDARGvoid(Jim_AppendStrings, Jim_AppendStrings_(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
-	STDARGvoid(Jim_SetResultFormatted, Jim_SetResultFormatted_(interp, format, va), Jim_Interp *interp, const char *format);
-
-
 #ifdef __cplusplus
 }
 #endif
 
+STDARGvoid(Jim_AppendStrings, Jim_AppendStrings_(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
+STDARGvoid(Jim_SetResultFormatted, Jim_SetResultFormatted_(interp, format, va), Jim_Interp *interp, const char *format);
 
 #endif // __JIM__H

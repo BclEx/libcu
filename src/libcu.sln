@@ -22,6 +22,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinytcl", "tinytcl\tinytcl.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jimtcl", "jimtcl\jimtcl.vcxproj", "{2FEB679D-8B0A-4F09-8459-ECA1D429DA1C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.falloc", "libcu.falloc\libcu.falloc.vcxproj", "{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -78,6 +80,14 @@ Global
 		{2FEB679D-8B0A-4F09-8459-ECA1D429DA1C}.Release|Win32.Build.0 = Release|Win32
 		{2FEB679D-8B0A-4F09-8459-ECA1D429DA1C}.Release|x64.ActiveCfg = Release|x64
 		{2FEB679D-8B0A-4F09-8459-ECA1D429DA1C}.Release|x64.Build.0 = Release|x64
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Debug|Win32.Build.0 = Debug|Win32
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Debug|x64.ActiveCfg = Debug|x64
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Debug|x64.Build.0 = Debug|x64
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Release|Win32.ActiveCfg = Release|Win32
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Release|Win32.Build.0 = Release|Win32
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Release|x64.ActiveCfg = Release|x64
+		{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

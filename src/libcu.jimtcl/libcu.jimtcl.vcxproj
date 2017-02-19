@@ -36,80 +36,47 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="RTcl.cu" />
-    <ClCompile Include="jim.cu" />
-    <ClCompile Include="jim-aio.cu" />
-    <ClCompile Include="jim-array.cu" />
-    <ClCompile Include="jim-clock.cu" />
-    <ClCompile Include="jim-eventloop.cu" />
-    <ClCompile Include="jim-exec.cu" />
-    <ClCompile Include="jim-file.cu" />
-    <ClCompile Include="jim-format.cu" />
-    <ClCompile Include="jim-gpu.cu" />
-    <ClCompile Include="jim-history.cu" />
-    <ClCompile Include="jim-interactive.cu" />
-    <ClCompile Include="jim-load.cu" />
-    <ClCompile Include="jim-namespace.cu" />
-    <ClCompile Include="jim-pack.cu" />
-    <ClCompile Include="jim-package.cu" />
-    <ClCompile Include="Jim+Posix.cu">
+    <CudaCompile Include="jim.cu" />
+    <CudaCompile Include="jim-aio.cu" />
+    <CudaCompile Include="jim-array.cu" />
+    <CudaCompile Include="jim-clock.cu" />
+    <CudaCompile Include="jim-eventloop.cu" />
+    <CudaCompile Include="jim-exec.cu" />
+    <CudaCompile Include="jim-file.cu" />
+    <CudaCompile Include="jim-format.cu" />
+    <CudaCompile Include="jim-gpu.cu" />
+    <CudaCompile Include="jim-history.cu" />
+    <CudaCompile Include="jim-interactive.cu" />
+    <CudaCompile Include="jim-load.cu" />
+    <CudaCompile Include="jim-namespace.cu" />
+    <CudaCompile Include="jim-pack.cu" />
+    <CudaCompile Include="jim-package.cu" />
+    <CudaCompile Include="Jim+Posix.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="jim-readdir.cu" />
-    <ClCompile Include="Jim+Readline.cu">
+    </CudaCompile>
+    <CudaCompile Include="jim-readdir.cu" />
+    <CudaCompile Include="Jim+Readline.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="jim-regexp.cu" />
-    <ClCompile Include="Jim+Sdl.cu">
+    </CudaCompile>
+    <CudaCompile Include="jim-regexp.cu" />
+    <CudaCompile Include="Jim+Sdl.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Jim+Signal.cu">
+    </CudaCompile>
+    <CudaCompile Include="Jim+Signal.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Jim+Sqlite3.cu">
+    </CudaCompile>
+    <CudaCompile Include="Jim+Sqlite3.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="jim-subcmd.cu" />
-    <ClCompile Include="Jim+Syslog.cu">
+    </CudaCompile>
+      <CudaCompile Include="jim-subcmd.cu" />
+    <CudaCompile Include="Jim+Syslog.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="jim-tclprefix.cu" />
-    <ClCompile Include="jim-win32compat.cu" />
-    <ClCompile Include="jimex.cu" />
-    <ClCompile Include="init.cu" />
-    <ClCompile Include="utf8.cu" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(Configuration)'=='Debug.cu' Or '$(Configuration)'=='Release.cu'">
-    <CudaCompile Include="RTcl.cu" />
-    <None Include="Jim.cu" />
-    <None Include="Jim+Aio.cu" />
-    <None Include="Jim+Array.cu" />
-    <None Include="Jim+Clock.cu" />
-    <None Include="Jim+EventLoop.cu" />
-    <None Include="Jim+Exec.cu" />
-    <None Include="Jim+File.cu" />
-    <None Include="Jim+Format.cu" />
-    <None Include="Jim+Gpu.cu" />
-    <None Include="Jim+History.cu" />
-    <None Include="Jim+Interactive.cu" />
-    <None Include="Jim+Load.cu" />
-    <None Include="Jim+Namespace.cu" />
-    <None Include="Jim+Pack.cu" />
-    <None Include="Jim+Package.cu" />
-    <None Include="Jim+Posix.cu" />
-    <None Include="Jim+Readdir.cu" />
-    <None Include="Jim+Readline.cu" />
-    <None Include="Jim+Regexp.cu" />
-    <None Include="Jim+Sdl.cu" />
-    <None Include="Jim+Signal.cu" />
-    <None Include="Jim+Sqlite3.cu" />
-    <None Include="Jim+Subcmd.cu" />
-    <None Include="Jim+Syslog.cu" />
-    <None Include="Jim+TclPrefix.cu" />
-    <None Include="Jim+Win32.cu" />
-    <None Include="Jim+Win32Compat.cu" />
-    <None Include="JimEx.cu" />
-    <None Include="Init.cu" />
-    <None Include="Utf8.cu" />
+    </CudaCompile>
+    <CudaCompile Include="jim-tclprefix.cu" />
+    <CudaCompile Include="jim-win32compat.cu" />
+    <CudaCompile Include="jimex.cu" />
+    <CudaCompile Include="init.cu" />
+    <CudaCompile Include="utf8.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.jimtcl.native.nuspec" />
