@@ -201,10 +201,10 @@ extern __device__ void Tcl_ResetResult(Tcl_Interp *interp);
 #define Tcl_Return Tcl_SetResult
 extern __device__ int Tcl_ScanElement(const char *string, int *flagPtr);
 extern __device__ void Tcl_SetErrorCode_(Tcl_Interp *interp, va_list va); STDARGvoid(Tcl_SetErrorCode, Tcl_SetErrorCode_(interp, va), Tcl_Interp *interp);
-__device__ inline void Tcl_SetObjResult(Tcl_Interp *interp, char *obj) { }
-__device__ inline void Tcl_SetObjResult(Tcl_Interp *interp, int obj) { }
-__device__ inline void Tcl_SetObjResult(Tcl_Interp *interp, int64_t obj) { }
-__device__ inline void Tcl_SetObjResult(Tcl_Interp *interp, double obj) { }
+__device__ __forceinline void Tcl_SetObjResult(Tcl_Interp *interp, char *obj) { }
+__device__ __forceinline void Tcl_SetObjResult(Tcl_Interp *interp, int obj) { }
+__device__ __forceinline void Tcl_SetObjResult(Tcl_Interp *interp, int64_t obj) { }
+__device__ __forceinline void Tcl_SetObjResult(Tcl_Interp *interp, double obj) { }
 extern __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *freeProc);
 extern __device__ char *Tcl_SetVar(Tcl_Interp *interp, char *varName, char *newValue, int flags);
 extern __device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char *newValue, int flags);
@@ -226,10 +226,10 @@ extern __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, 
 extern __device__ int Tcl_WaitPids(int numPids, int *pidPtr, int *statusPtr);
 
 // LIST (Added_)
-__device__ inline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, char *obj) { }
-__device__ inline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, int obj) { }
-__device__ inline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, int64_t obj) { }
-__device__ inline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, double obj) { }
+__device__ __forceinline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, char *obj) { }
+__device__ __forceinline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, int obj) { }
+__device__ __forceinline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, int64_t obj) { }
+__device__ __forceinline void Tcl_ListObjAppendElement(Tcl_Interp *interp, void *base, double obj) { }
 extern __device__ int Tcl_ListObjGetElements(Tcl_Interp *interp, char *list, int *argc, const char ***args);
 
 // LINK (Added_)
@@ -243,8 +243,8 @@ __device__ void Tcl_UnlinkVar(Tcl_Interp *interp, const char *varName);
 __device__ void Tcl_UpdateLinkedVar(Tcl_Interp *interp, const char *varName);
 
 // EXTRA
-inline __device__ char *Tcl_GetString(Tcl_Interp *interp, Tcl_Obj *arg, int *length) { *length = arg->Bytes; return (char *)arg; }
-inline __device__ char *Tcl_GetString(Tcl_Interp *interp, const char *arg, int *length) { *length = strlen(arg); return (char *)arg; }
+__device__ __forceinline char *Tcl_GetString(Tcl_Interp *interp, Tcl_Obj *arg, int *length) { *length = arg->Bytes; return (char *)arg; }
+__device__ __forceinline char *Tcl_GetString(Tcl_Interp *interp, const char *arg, int *length) { *length = strlen(arg); return (char *)arg; }
 extern __device__ char *Tcl_DuplicateObj(char *obj);
 extern __device__ void Tcl_WrongNumArgs(Tcl_Interp *interp, int argc, const char *args[], const char *message);
 extern __device__ Tcl_Obj *Tcl_NewObj(const char *value, int length, char *typeName = nullptr);

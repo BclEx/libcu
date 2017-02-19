@@ -37,9 +37,9 @@ void allTestInitialize()
 	freopen("NUL", "a", stdout); freopen("NUL", "a", stderr);
 	setbuf(stdout, _buf); setbuf(stderr, _buf);
 
-	cudaError_t cudaStatus = cudaDeviceReset();
-	if (cudaStatus != cudaSuccess)
-		throw gcnew System::InvalidOperationException("cudaDeviceReset failed!");
+	//cudaError_t cudaStatus = cudaDeviceReset();
+	//if (cudaStatus != cudaSuccess)
+	//	throw gcnew System::InvalidOperationException("cudaDeviceReset failed!");
 }
 
 void allTestCleanup()

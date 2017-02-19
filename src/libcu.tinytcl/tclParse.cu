@@ -454,15 +454,11 @@ __device__ int TclParseWords(Tcl_Interp *interp, char *string, int flags, int ma
 skipSpace:
 		register int c = *src;
 		int type = CHAR_TYPE(c);
-		while (type == TCL_SPACE) {
-			src++;
-			c = *src;
-			type = CHAR_TYPE(c);
-		}
+		while (type == TCL_SPACE) { src++; c = *src; type = CHAR_TYPE(c); }
 		// Handle the normal case (i.e. no leading double-quote or brace).
 		if (type == TCL_NORMAL) {
 normalArg:
-			while (true) {
+			do {
 				if (dst == pvPtr->end) {
 					// Target buffer space is about to run out.  Make more space.
 					pvPtr->next = dst;
@@ -471,9 +467,7 @@ normalArg:
 				}
 				if (type == TCL_NORMAL) {
 copy:
-					*dst = c;
-					dst++;
-					src++;
+					*dst = c; dst++; src++;
 				} else if (type == TCL_SPACE) {
 					goto wordEnd;
 				} else if (type == TCL_DOLLAR) {
@@ -514,9 +508,8 @@ copy:
 				} else {
 					goto copy;
 				}
-				c = *src;
-				type = CHAR_TYPE(c);
-			}
+				c = *src; type = CHAR_TYPE(c);
+			} while (true);
 		} else {
 			// Check for the end of the command.
 			if (type == TCL_COMMAND_END) {
@@ -611,7 +604,7 @@ __device__ void TclExpandParseValue(register ParseValue *pvPtr, int needed)
 	char *new_ = (char *)_allocFast((unsigned)newSpace);
 
 	// Copy from old buffer to new, free old buffer if needed, and mark new buffer as malloc-ed.
-	_memcpy(new_, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
+	memcpy_(new_, pvPtr->buffer, pvPtr->next - pvPtr->buffer);
 	pvPtr->next = new_ + (pvPtr->next - pvPtr->buffer);
 	if (pvPtr->clientData != 0) {
 		_freeFast(pvPtr->buffer);

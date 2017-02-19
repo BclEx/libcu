@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
 
-#define CORE_MAX_LENGTH 1000000000
+#define CORE_MAXLENGTH 1000000000
 
 //__device__ int _close(int a) { io_close msg(a); return msg.RC; }
 
@@ -13,7 +13,7 @@ __BEGIN_DECLS;
 //__constant__ FILE file1 = {};
 //__constant__ FILE file2 = {};
 //__constant__ FILE *__iob_file[3] = { &file0, &file1, &file2 };
-__constant__ FILE __iob_file[10];
+__constant__ FILE __iob_file[CORE_MAXFILESTREAM];
 
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)
@@ -111,7 +111,7 @@ __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_li
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
+	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
 	strbldAppendFormat(&b, false, format, va);
 	const char *v = strbldToString(&b);
 	stdio_fputs msg(wait, format, s);
@@ -686,7 +686,7 @@ __device__ char *vmtagprintf(void *tag, const char *format, va_list va)
 	assert(tag != nullptr);
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
+	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
 	b.tag = tag;
 	strbldAppendFormat(&b, true, format, va);
 	char *str = strbldToString(&b);
@@ -698,7 +698,7 @@ __device__ char *vmprintf(const char *format, va_list va)
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAX_LENGTH);
+	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
 	b.allocType = 2;
 	strbldAppendFormat(&b, false, format, va);
 	return strbldToString(&b);

@@ -409,7 +409,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 		iPtr->flags &= ~(ERR_IN_PROGRESS | ERROR_CODE_SET);
 
 		// Skim off leading white space and semi-colons, and skip comments.
-		while (1) {
+		while (true) {
 			register int c = *src;
 			if (CHAR_TYPE(c) != TCL_SPACE && c != ';' && c != '\n') {
 				break;
@@ -733,7 +733,7 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, va_list va)
 			spaceAvl = spaceUsed + length;
 			spaceAvl += spaceAvl/2;
 			char *new_ = (char *)_allocFast((unsigned)spaceAvl);
-			_memcpy(new_, cmd, spaceUsed);
+			memcpy_(new_, cmd, spaceUsed);
 			if (cmd != fixedSpace) {
 				_freeFast(cmd);
 			}

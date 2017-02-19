@@ -95,6 +95,7 @@
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.stdlib.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="includes">

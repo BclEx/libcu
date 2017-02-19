@@ -17,9 +17,6 @@ namespace libcutests
 		TestContext^ _testCtx;
 
 	public: 
-		///<summary>
-		///Gets or sets the test context which provides information about and functionality for the current test run.
-		///</summary>
 		property Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ TestContext
 		{
 			Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ get() { return _testCtx; }

@@ -1,4 +1,5 @@
 #include <cuda_runtimecu.h>
+#include <sentinel.h>
 #include <tcl.h>
 #include <tclExInt.h>
 #ifdef DEBUGGER
@@ -117,9 +118,9 @@ __global__ void g_MainInit(int argc, char *const argv[]) {
 static int MainInit(int argc, char *const argv[]) {
 	memset(&h_dataP, 0, sizeof(h_dataP));
 	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
-	int device = gpuGetMaxGflopsDevice();
-	cudaErrorCheck(cudaSetDevice(device));
+	cudaErrorCheck(cudaSetDevice(gpuGetMaxGflopsDevice()));
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
+	sentinelServerInitialize();
 	//
 	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
 	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
@@ -141,7 +142,8 @@ void InteractivePrompt() {
 		}
 		char line[1000];
 		if (fgets(line, 1000, in) == NULL) {
-			if (!h_dataP.gotPartial) exit(0);
+			if (!h_dataP.gotPartial)
+				exit(0);
 			line[0] = 0;
 		}
 		InteractiveExecute(line);
@@ -197,6 +199,7 @@ __global__ void g_MainShutdown() {
 }
 static int MainShutdown() {
 	D_DATAP(); g_MainShutdown<<<1,1>>>(); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
+	sentinelServerShutdown();
 	cudaDeviceReset();
 	return h_dataP.retcode;
 }

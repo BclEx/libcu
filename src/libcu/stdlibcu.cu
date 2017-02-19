@@ -75,6 +75,8 @@ __BEGIN_DECLS;
 #define ISSPACE(C) isspace((C))
 #endif
 
+#pragma endregion
+
 #pragma region stdlib_strtod
 
 #undef _STRTOD_FPMAX
@@ -591,10 +593,6 @@ __device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict
 
 #pragma endregion
 
-#pragma endregion
-
-#define MALLOCSIZETYPE long long int
-
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
 __device__ int rand(void)
 {
@@ -608,6 +606,14 @@ __device__ void srand(unsigned int seed)
 	panic("Not Implemented");
 }
 
+/*
+#undef malloc
+#undef free
+#ifndef _WIN64
+#define MALLOCSIZETYPE long int
+#else
+#define MALLOCSIZETYPE long long int
+#endif
 __device__ void *malloc_(size_t size)
 {
 	assert(size > 0);
@@ -648,6 +654,9 @@ __device__ void *realloc_(void *ptr, size_t size)
 	}
 	return (void *)(p+1);
 }
+#define malloc malloc_
+#define free free_
+*/
 
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
 __device__ char *getenv(const char *name)

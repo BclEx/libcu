@@ -259,6 +259,7 @@ __END_DECLS;
 #endif  /* _STDLIBCU_H */
 #else
 #include <stdlib.h>
+#define exit_ exit
 #endif
 
 #ifndef _STDLIBCU_H

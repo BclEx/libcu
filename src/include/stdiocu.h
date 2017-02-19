@@ -25,8 +25,6 @@ THE SOFTWARE.
 
 //#pragma once
 
-#define ISDEVICEFILE(stream) 0 //(((long long int)stream) & 0x80000000)
-
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _STDIOCU_H
 #define _STDIOCU_H
@@ -83,7 +81,9 @@ typedef __STDIO_fpos64_t fpos64_t;
 /* Default path prefix for `mkstemp'.  */
 #define P_tmpdir "/tmp"
 
-extern __constant__ FILE __iob_file[10];
+#define CORE_MAXFILESTREAM 10
+#define ISDEVICEFILE(stream) (stream >= __iob_file && stream <= __iob_file + CORE_MAXFILESTREAM)
+extern __constant__ FILE __iob_file[CORE_MAXFILESTREAM];
 #define stdin  (&__iob_file[0]) /* Standard input stream.  */
 #define stdout (&__iob_file[1]) /* Standard output stream.  */
 #define stderr (&__iob_file[2]) /* Standard error output stream.  */

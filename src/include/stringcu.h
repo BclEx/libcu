@@ -158,9 +158,12 @@ __END_NAMESPACE_STD;
 
 __END_DECLS;
 
+#define memcpy_(dest, src, length) if (length) memcpy(dest, src, length)
+
 #endif  /* _STRINGCU_H */
 #else
 #include <string.h>
+#define memcpy_ memcpy
 #endif
 
 #ifndef _STRINGCU_H

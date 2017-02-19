@@ -9,6 +9,10 @@ __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 {
 	sentinelMap *map = _sentinelDeviceMap[_sentinelMapId++ % SENTINEL_DEVICEMAPS];
+	if (!map) {
+		printf("sentinel: device map not defined. did you start sentinel?\n");
+		abort();
+	}
 	int length = msgLength + msg->Size;
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
