@@ -221,10 +221,10 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #endif  /* _STDARGCU_H */
 #else
 #include <stdarg.h>
-#define STDARGvoid(name, body, ...)
+#define STDARGvoid(name, body, ...) __forceinline void name(...) { }
 #define STDARG2void(name, body, ...)
 #define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...)
+#define STDARG(ret, name, body, ...) __forceinline ret name(...) { }
 #define STDARG2(ret, name, body, ...)
 #define STDARG3(ret, name, body, ...)
 #endif

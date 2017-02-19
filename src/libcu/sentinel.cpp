@@ -80,7 +80,7 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		cmd->Dump(SENTINELOFFSET(map->Offset));
+		//cmd->Dump(SENTINELOFFSET(map->Offset));
 		sentinelMessage *msg = (sentinelMessage *)(cmd->Data + SENTINELOFFSET(map->Offset));
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");

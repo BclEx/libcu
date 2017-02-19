@@ -25,7 +25,7 @@ __device__ int cmdCheckmem(ClientData clientData, Tcl_Interp *interp, int argc, 
 #endif
 
 // SAMPLE COMMAND
-#if 0
+#if 1
 __device__ int SampleCommand(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[]) {
 	if (argc != 2) {
 		Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " Msg\"", (char *)NULL);
@@ -70,7 +70,7 @@ __global__ void g_MainInit(int argc, char *const argv[]) {
 	Tcl_CreateCommand(interp, "checkmem", cmdCheckmem, (ClientData)0, (Tcl_CmdDeleteProc *)NULL);
 #endif
 	// SAMPLE COMMAND
-#if 0
+#if 1
 	Tcl_CreateCommand(interp, "sample", SampleCommand, nullptr, nullptr);
 #endif
 	_dataP.buffer = Tcl_CreateCmdBuf();
