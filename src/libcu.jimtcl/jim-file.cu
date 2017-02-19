@@ -43,11 +43,11 @@
 * express or implied warranty.
 */
 
-#include <limitscu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
-#include <stdiocu.h>
-#include <errnocu.h>
+//#include <limitscu.h>
+//#include <stdlibcu.h>
+//#include <stringcu.h>
+//#include <stdiocu.h>
+//#include <errnocu.h>
 #include <sys/statcu.h>
 #include "jimautoconf.h"
 #include "jim-subcmd.h"
@@ -273,7 +273,7 @@ static __device__ int file_cmd_join(Jim_Interp *interp, int argc, Jim_Obj *const
 
 static __device__ int file_access(Jim_Interp *interp, Jim_Obj *filename, int mode)
 {
-	Jim_SetResultBool(interp, __access(Jim_String(filename), mode) != -1);
+	Jim_SetResultBool(interp, access(Jim_String(filename), mode) != -1);
 	return JIM_OK;
 }
 
@@ -312,8 +312,8 @@ static __device__ int file_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *con
 	}
 	while (argc--) {
 		const char *path = Jim_String(argv[0]);
-		if (__unlink(path) == -1 && errno != ENOENT) {
-			if (__rmdir(path) == -1)
+		if (_unlink(path) == -1 && errno != ENOENT) {
+			if (_rmdir(path) == -1)
 				if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) { // Maybe try using the script helper
 					Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path, strerror(errno));
 					return JIM_ERROR;
@@ -361,7 +361,7 @@ first:
 		// Maybe it already exists as a directory
 		if (errno == EEXIST) {
 			struct stat sb;
-			if (__stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+			if (_stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
 				return 0;
 			// Restore errno
 			errno = EEXIST;
@@ -408,11 +408,11 @@ static __device__ int file_cmd_rename(Jim_Interp *interp, int argc, Jim_Obj *con
 	}
 	const char *source = Jim_String(argv[0]);
 	const char *dest = Jim_String(argv[1]);
-	if (!force && __access(dest, F_OK) == 0) {
+	if (!force && access(dest, F_OK) == 0) {
 		Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": target exists", argv[0], argv[1]);
 		return JIM_ERROR;
 	}
-	if (_rename(source, dest) != 0) {
+	if (rename(source, dest) != 0) {
 		Jim_SetResultFormatted(interp, "error renaming \"%#s\" to \"%#s\": %s", argv[0], argv[1], strerror(errno));
 		return JIM_ERROR;
 	}
@@ -445,7 +445,7 @@ static __device__ int file_cmd_link(Jim_Interp *interp, int argc, Jim_Obj *const
 static __device__ int file_stat(Jim_Interp *interp, Jim_Obj *filename, struct stat *sb)
 {
 	const char *path = Jim_String(filename);
-	if (__stat(path, sb) == -1) {
+	if (_stat(path, sb) == -1) {
 		Jim_SetResultFormatted(interp, "could not read \"%#s\": %s", filename, strerror(errno));
 		return JIM_ERROR;
 	}
@@ -636,7 +636,7 @@ static __device__ int Jim_CdCmd(ClientData dummy, Jim_Interp *interp, int argc, 
 		return JIM_ERROR;
 	}
 	const char *path = Jim_String(argv[1]);
-	if (__chdir(path) != 0) {
+	if (chdir(path) != 0) {
 		Jim_SetResultFormatted(interp, "couldn't change working directory to \"%s\": %s", path, strerror(errno));
 		return JIM_ERROR;
 	}
@@ -646,7 +646,7 @@ static __device__ int Jim_CdCmd(ClientData dummy, Jim_Interp *interp, int argc, 
 static __device__ int Jim_PwdCmd(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	char *cwd = (char *)Jim_Alloc(MAXPATHLEN);
-	if (__getcwd(cwd, MAXPATHLEN) == NULL) {
+	if (getcwd(cwd, MAXPATHLEN) == NULL) {
 		Jim_SetResultString(interp, "Failed to get pwd", -1);
 		Jim_Free(cwd);
 		return JIM_ERROR;

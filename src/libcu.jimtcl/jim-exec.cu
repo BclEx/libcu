@@ -22,11 +22,10 @@
 */
 #pragma endregion
 
-#include <string.h>
-#include <ctype.h>
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim.h"
+//#include <string.h>
+//#include <ctype.h>
+#include "jimautoconf.h"
+#include "jim.h"
 
 #if (!defined(HAVE_VFORK) || !defined(HAVE_WAITPID)) && !defined(__MINGW32__)
 // Poor man's implementation of exec with system() The system() call *may* do command line redirection, etc. The standard output is not available. Can't redirect filehandles.
@@ -41,7 +40,7 @@ static __device__ int Jim_ExecCmd(ClientData dummy, Jim_Interp *interp, int argc
 		const char *arg = Jim_GetString(argv[i], &len);
 		if (i > 1)
 			Jim_AppendString(interp, cmdlineObj, " ", 1);
-		if (_strpbrk(arg, "\\\" ") == NULL) {
+		if (strpbrk(arg, "\\\" ") == NULL) {
 			// No quoting required
 			Jim_AppendString(interp, cmdlineObj, arg, len);
 			continue;
@@ -54,7 +53,7 @@ static __device__ int Jim_ExecCmd(ClientData dummy, Jim_Interp *interp, int argc
 		}
 		Jim_AppendString(interp, cmdlineObj, "\"", 1);
 	}
-	rc = _system(Jim_String(cmdlineObj));
+	rc = system(Jim_String(cmdlineObj));
 	Jim_FreeNewObj(interp, cmdlineObj);
 	if (rc) {
 		Jim_Obj *errorCode = Jim_NewListObj(interp, NULL, 0);

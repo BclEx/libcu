@@ -11,13 +11,12 @@
 #define _XOPEN_SOURCE 500
 #endif
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim+Subcmd.h"
+//#include <stdlib.h>
+//#include <string.h>
+//#include <stdio.h>
+#include <timecu.h>
+#include "jimautoconf.h"
+#include "jim-subcmd.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -74,7 +73,7 @@ static __device__ int clock_cmd_seconds(Jim_Interp *interp, int argc, Jim_Obj *c
 static __device__ int clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	struct timeval tv;
-	_gettimeofday(&tv, NULL);
+	gettimeofday(&tv, NULL);
 	Jim_SetResultInt(interp, (jim_wide)tv.tv_sec * 1000000 + tv.tv_usec);
 	return JIM_OK;
 }
@@ -82,7 +81,7 @@ static __device__ int clock_cmd_micros(Jim_Interp *interp, int argc, Jim_Obj *co
 static __device__ int clock_cmd_millis(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	struct timeval tv;
-	_gettimeofday(&tv, NULL);
+	gettimeofday(&tv, NULL);
 	Jim_SetResultInt(interp, (jim_wide)tv.tv_sec * 1000 + tv.tv_usec / 1000);
 	return JIM_OK;
 }

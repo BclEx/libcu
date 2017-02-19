@@ -44,10 +44,10 @@
 */
 
 //#include <limitscu.h>
-#include <stdlibcu.h>
-#include <stringcu.h>
-#include <stdiocu.h>
-#include <errnocu.h>
+//#include <stdlibcu.h>
+//#include <stringcu.h>
+//#include <stdiocu.h>
+//#include <errnocu.h>
 #include <cuda_runtimecu.h>
 
 #include "jim-subcmd.h"

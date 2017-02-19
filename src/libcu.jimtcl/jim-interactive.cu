@@ -1,9 +1,7 @@
-#include <errno.h>
-#include <string.h>
-#include <RuntimeHost.h>
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim.h"
+//#include <errno.h>
+//#include <string.h>
+#include "jimautoconf.h"
+#include "jim.h"
 #ifdef USE_LINENOISE
 #include <unistd.h>
 #include "linenoise.h"

@@ -35,11 +35,20 @@ THE SOFTWARE.
 __BEGIN_DECLS;
 
 typedef long clock_t;
-#define CLOCKS_PER_SEC  1000
+#define CLOCKS_PER_SEC 1000
+struct timeval {
+	long tv_sec;
+	long tv_usec;
+};
+
+__device__ time_t time(time_t *timer);
+__device__ int gettimeofday(struct timeval *tp, void *tz);
 
 __END_DECLS;
 
 #endif  /* _TIMECU_H */
 #else
 #include <time.h>
+#include <winsock.h>
+int gettimeofday(struct timeval *tp, void *tz);
 #endif

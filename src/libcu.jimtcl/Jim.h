@@ -65,11 +65,8 @@
 #ifndef __JIM__H
 #define __JIM__H
 
-#include <limitscu.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
-#include <stdargcu.h>
 #include <cuda_runtimecu.h>
+//#include <limitscu.h>
 //#include <time.h>
 
 #ifdef __cplusplus

@@ -45,14 +45,14 @@
 
 #define JIM_OPTIMIZATION // comment to avoid optimizations and reduce size
 
-#include <stdiocu.h>
-#include <stdlibcu.h>
-
-#include <stringcu.h>
-#include <stdargcu.h>
-#include <ctypecu.h>
-#include <limitscu.h>
-#include <errnocu.h>
+//#include <stdiocu.h>
+//#include <stdlibcu.h>
+//
+//#include <stringcu.h>
+//#include <stdargcu.h>
+//#include <ctypecu.h>
+//#include <limitscu.h>
+//#include <errnocu.h>
 #include <cuda_runtimecu.h>
 #include <assert.h>
 #include <time.h>
@@ -497,12 +497,12 @@ STDARGvoid(JimPanicDump, JimPanicDump_(condition, fmt, va), int condition, const
 
 __device__ void *Jim_Alloc(int size)
 {
-	return (size ? _alloc(size) : nullptr);
+	return (size ? malloc(size) : nullptr);
 }
 
 __device__ void Jim_Free(void *ptr)
 {
-	_free(ptr);
+	free(ptr);
 }
 
 __device__ void *Jim_Realloc(void *ptr, int size)
@@ -12506,7 +12506,7 @@ __device__ void Jim_SetResultFormatted_(Jim_Interp *interp, const char *format, 
 	}
 	len += extra;
 	char *buf = (char *)Jim_Alloc(len + 1);
-	len = __snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
+	len = snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
 	Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, len));
 }
 

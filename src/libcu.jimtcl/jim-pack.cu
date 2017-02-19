@@ -1,6 +1,5 @@
-#include <string.h>
-#include <RuntimeEx.h>
-#include "Jim.h"
+//#include <string.h>
+#include "jim.h"
 
 // Provides the [pack] and [unpack] commands to pack and unpack a binary string to/from arbitrary width integers and strings.
 // This may be used to implement the [binary] command.
@@ -9,7 +8,7 @@
 // Considers 'bitvect' as a big endian bit stream and returns bit 'b' as zero or non-zero.
 static __device__ int JimTestBitBigEndian(const unsigned char *bitvec, int b)
 {
-	div_t pos = _div(b, 8);
+	div_t pos = div(b, 8);
 	return bitvec[pos.quot] & (1 << (7 - pos.rem));
 }
 
@@ -17,7 +16,7 @@ static __device__ int JimTestBitBigEndian(const unsigned char *bitvec, int b)
 // Considers 'bitvect' as a little endian bit stream and returns bit 'b' as zero or non-zero.
 static __device__ int JimTestBitLittleEndian(const unsigned char *bitvec, int b)
 {
-	div_t pos = _div(b, 8);
+	div_t pos = div(b, 8);
 	return bitvec[pos.quot] & (1 << pos.rem);
 }
 
@@ -77,7 +76,7 @@ static __device__ jim_wide JimBitIntLittleEndian(const unsigned char *bitvec, in
 // Considers 'bitvect' as a big endian bit stream and sets bit 'b' to 'bit'
 static __device__ void JimSetBitBigEndian(unsigned char *bitvec, int b, int bit)
 {
-	div_t pos = _div(b, 8);
+	div_t pos = div(b, 8);
 	if (bit)
 		bitvec[pos.quot] |= (1 << (7 - pos.rem));
 	else
@@ -88,7 +87,7 @@ static __device__ void JimSetBitBigEndian(unsigned char *bitvec, int b, int bit)
 // Considers 'bitvect' as a little endian bit stream and sets bit 'b' to 'bit'
 static __device__ void JimSetBitLittleEndian(unsigned char *bitvec, int b, int bit)
 {
-	div_t pos = _div(b, 8);
+	div_t pos = div(b, 8);
 	if (bit)
 		bitvec[pos.quot] |= (1 << pos.rem);
 	else

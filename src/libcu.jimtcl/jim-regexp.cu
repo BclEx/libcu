@@ -47,11 +47,11 @@
 */
 #pragma endregion
 
-#include <stdlib.h>
-#include <string.h>
-#include "Jim+Autoconf.h"
-#include "Regex.h"
-#include "Jim.h"
+//#include <stdlib.h>
+//#include <string.h>
+#include "jimautoconf.h"
+#include "regex.h"
+#include "jim.h"
 
 static __device__ void FreeRegexpInternalRep(Jim_Interp *interp, Jim_Obj *objPtr)
 {

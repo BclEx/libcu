@@ -1,9 +1,9 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "Jim.h"
-#include "Jim+Autoconf.h"
-#include "Jim+Subcmd.h"
+//#include <stdlib.h>
+//#include <string.h>
+//#include <stdio.h>
+#include "jim.h"
+#include "jimautoconf.h"
+#include "jim-subcmd.h"
 
 static __device__ int history_cmd_getline(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {

@@ -1,5 +1,5 @@
-#include "Jim.h"
-#include "Jim+Autoconf.h"
+#include "jim.h"
+#include "jimautoconf.h"
 #define HAVE_DLOPEN_COMPAT
 #include <errno.h>
 

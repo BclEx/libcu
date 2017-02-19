@@ -1,9 +1,8 @@
 #ifdef jim_ext_package
 
-#include <string.h>
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim+Subcmd.h"
+//#include <string.h>
+#include "jimautoconf.h"
+#include "jim-subcmd.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #else
@@ -44,14 +43,14 @@ static __device__ char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListOb
 		// Loadable modules are tried first
 #ifdef jim_ext_load
 		snprintf(buf, JIM_PATH_LEN, "%s/%s.so", prefix, pkgName);
-		if (__access(buf, R_OK) == 0)
+		if (access(buf, R_OK) == 0)
 			return buf;
 #endif
 		if (strcmp(prefix, ".") == 0)
-			__snprintf(buf, JIM_PATH_LEN, "%s.tcl", pkgName);
+			_snprintf(buf, JIM_PATH_LEN, "%s.tcl", pkgName);
 		else
-			__snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
-		if (__access(buf, R_OK) == 0)
+			_snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
+		if (access(buf, R_OK) == 0)
 			return buf;
 	}
 	Jim_Free(buf);

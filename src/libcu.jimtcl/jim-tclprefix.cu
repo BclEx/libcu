@@ -8,8 +8,8 @@
 */
 #pragma endregion
 
-#include "Jim.h"
-#include "Utf8.h"
+#include "jim.h"
+#include "utf8.h"
 
 // Returns the common initial length of the two strings.
 static __device__ int JimStringCommonLength(const char *str1, int charlen1, const char *str2, int charlen2)

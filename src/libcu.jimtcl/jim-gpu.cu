@@ -1,5 +1,4 @@
 #include "jim.h"
-#include <cuda_runtimecu.h>
 
 __device__ int Jim_gpuInit(Jim_Interp *interp)
 {

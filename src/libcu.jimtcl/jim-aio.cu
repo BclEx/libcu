@@ -40,10 +40,10 @@
 #ifdef jim_ext_aio
 
 #include "jimautoconf.h"
-#include <stdiocu.h>
-#include <stringcu.h>
-#include <errnocu.h>
+//#include <stdiocu.h>
+//#include <stringcu.h>
 #include <cuda_runtimecu.h>
+#include <errnocu.h>
 #include <fcntl.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -71,10 +71,10 @@
 #define AIO_BUF_LEN 256     /* Can keep this small and rely on stdio buffering */
 
 #ifndef HAVE_FTELLO
-#define ftello _ftell
+#define ftello ftell
 #endif
 #ifndef HAVE_FSEEKO
-#define fseeko _fseek
+#define fseeko fseek
 #endif
 
 #define AIO_KEEPOPEN 1
@@ -324,12 +324,12 @@ static __device__ void JimAioDelProc(ClientData privData, Jim_Interp *interp)
 
 static __device__ int JimCheckStreamError(Jim_Interp *interp, AioFile *af)
 {
-	if (!_ferror(af->fp)) {
+	if (!ferror(af->fp)) {
 		return JIM_OK;
 	}
-	_clearerr(af->fp);
+	clearerr(af->fp);
 	/* EAGAIN and similar are not error conditions. Just treat them like eof */
-	if (_feof(af->fp) || errno == EAGAIN || errno == EINTR) {
+	if (feof(af->fp) || errno == EAGAIN || errno == EINTR) {
 		return JIM_OK;
 	}
 #ifdef ECONNRESET
@@ -526,8 +526,8 @@ static __device__ int aio_cmd_puts(Jim_Interp *interp, int argc, Jim_Obj *const 
 	}
 
 	wdata = Jim_GetString(strObj, &wlen);
-	if (_fwrite((void *)wdata, 1, wlen, af->fp) == (unsigned)wlen) {
-		if (argc == 2 || _fputcR('\n', af->fp) != EOF) {
+	if (fwrite((void *)wdata, 1, wlen, af->fp) == (unsigned)wlen) {
+		if (argc == 2 || fputc('\n', af->fp) != EOF) {
 			return JIM_OK;
 		}
 	}
@@ -655,7 +655,7 @@ static __device__ int aio_cmd_flush(Jim_Interp *interp, int argc, Jim_Obj *const
 {
 	AioFile *af = (AioFile *)Jim_CmdPrivData(interp);
 
-	if (_fflushR(af->fp) == EOF) {
+	if (fflush(af->fp) == EOF) {
 		JimAioSetError(interp, af->filename);
 		return JIM_ERROR;
 	}
@@ -666,7 +666,7 @@ static __device__ int aio_cmd_eof(Jim_Interp *interp, int argc, Jim_Obj *const *
 {
 	AioFile *af = (AioFile *)Jim_CmdPrivData(interp);
 
-	Jim_SetResultInt(interp, _feof(af->fp));
+	Jim_SetResultInt(interp, feof(af->fp));
 	return JIM_OK;
 }
 
@@ -799,13 +799,13 @@ static __device__ int aio_cmd_buffering(Jim_Interp *interp, int argc, Jim_Obj *c
 	}
 	switch (option) {
 	case OPT_NONE:
-		_setvbuf(af->fp, NULL, _IONBF, 0);
+		setvbuf(af->fp, NULL, _IONBF, 0);
 		break;
 	case OPT_LINE:
-		_setvbuf(af->fp, NULL, _IOLBF, BUFSIZ);
+		setvbuf(af->fp, NULL, _IOLBF, BUFSIZ);
 		break;
 	case OPT_FULL:
-		_setvbuf(af->fp, NULL, _IOFBF, BUFSIZ);
+		setvbuf(af->fp, NULL, _IOFBF, BUFSIZ);
 		break;
 	}
 	return JIM_OK;
@@ -966,7 +966,7 @@ static __device__ int JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_O
 	char buf[AIO_CMD_LEN];
 	int openFlags = 0;
 
-	__snprintf(buf, sizeof(buf), hdlfmt, Jim_GetId(interp));
+	_snprintf(buf, sizeof(buf), hdlfmt, Jim_GetId(interp));
 
 	if (fh) {
 		filename = Jim_NewStringObj(interp, hdlfmt, -1);
@@ -982,7 +982,7 @@ static __device__ int JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_O
 		}
 		else
 #endif
-			fh = _fopen(Jim_String(filename), mode);
+			fh = fopen(Jim_String(filename), mode);
 
 		if (fh == NULL) {
 			JimAioSetError(interp, filename);
@@ -1000,7 +1000,7 @@ static __device__ int JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_O
 	af = (AioFile *)Jim_Alloc(sizeof(*af));
 	memset(af, 0, sizeof(*af));
 	af->fp = fh;
-	af->fd = __fileno(fh);
+	af->fd = fileno(fh);
 	af->filename = filename;
 #ifdef FD_CLOEXEC
 	if ((openFlags & AIO_KEEPOPEN) == 0) {
@@ -1358,7 +1358,7 @@ __device__ int Jim_aioInit(Jim_Interp *interp)
 	Jim_CreateCommand(interp, "socket", JimAioSockCommand, NULL, NULL);
 #endif
 	// Create filehandles for stdin, stdout and stderr
-	JimMakeChannel(interp, _stdin, -1, NULL, "stdin", 0, "r");
+	JimMakeChannel(interp, stdin, -1, NULL, "stdin", 0, "r");
 	JimMakeChannel(interp, stdout, -1, NULL, "stdout", 0, "w");
 	JimMakeChannel(interp, stderr, -1, NULL, "stderr", 0, "w");
 	return JIM_OK;

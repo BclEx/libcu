@@ -46,12 +46,11 @@
 */
 #pragma endregion
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <RuntimeEx.h>
-#include "Jim.h"
-#include "Jim+Autoconf.h"
+//#include <errno.h>
+//#include <stdio.h>
+//#include <string.h>
+#include "jim.h"
+#include "jimautoconf.h"
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
@@ -70,7 +69,7 @@ __device__ int Jim_ReaddirCmd(ClientData dummy, Jim_Interp *interp, int argc, Ji
 		return JIM_ERROR;
 	}
 	const char *dirPath = Jim_String(argv[1 + nocomplain]);
-	DIR *dirPtr = _opendir(dirPath);
+	DIR *dirPtr = opendir(dirPath);
 	if (dirPtr == NULL) {
 		if (nocomplain)
 			return JIM_OK;
@@ -79,8 +78,8 @@ __device__ int Jim_ReaddirCmd(ClientData dummy, Jim_Interp *interp, int argc, Ji
 	}
 	else {
 		Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
-		struct _dirent *entryPtr;
-		while ((entryPtr = _readdir(dirPtr)) != NULL) {
+		struct dirent *entryPtr;
+		while ((entryPtr = readdir(dirPtr)) != NULL) {
 			if (entryPtr->d_name[0] == '.') {
 				if (entryPtr->d_name[1] == '\0')
 					continue;
@@ -89,7 +88,7 @@ __device__ int Jim_ReaddirCmd(ClientData dummy, Jim_Interp *interp, int argc, Ji
 			}
 			Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, entryPtr->d_name, -1));
 		}
-		_closedir(dirPtr);
+		closedir(dirPtr);
 		Jim_SetResult(interp, listObj);
 		return JIM_OK;
 	}

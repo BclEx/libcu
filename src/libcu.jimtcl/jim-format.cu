@@ -40,12 +40,10 @@
 * this file, and for a DISCLAIMER OF ALL WARRANTIES.
 */
 
-#include <ctype.h>
-#include <string.h>
-
-#include <RuntimeEx.h>
-#include "Jim.h"
-#include "Utf8.h"
+//#include <ctype.h>
+//#include <string.h>
+#include "jim.h"
+#include "utf8.h"
 
 #define JIM_INTEGER_SPACE 24
 #define MAX_FLOAT_WIDTH 320
@@ -353,9 +351,9 @@ __device__ Jim_Obj *Jim_FormatString(Jim_Interp *interp, Jim_Obj *fmtObjPtr, int
 			}
 
 			if (doubleType)
-				__snprintf(num_buffer, length + 1, spec, d);
+				_snprintf(num_buffer, length + 1, spec, d);
 			else
-				formatted_bytes = __snprintf(num_buffer, length + 1, spec, w);
+				formatted_bytes = _snprintf(num_buffer, length + 1, spec, w);
 			formatted_chars = formatted_bytes = strlen(num_buffer);
 			formatted_buf = num_buffer;
 			break; }

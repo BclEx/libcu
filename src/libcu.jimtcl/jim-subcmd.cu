@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "Jim+Subcmd.h"
+#include "jim-subcmd.h"
 
 // Implements the common 'commands' subcommand
 static __device__ int subcmd_null(Jim_Interp *interp, int argc, Jim_Obj *const *argv)

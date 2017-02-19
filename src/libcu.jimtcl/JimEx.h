@@ -1,6 +1,6 @@
 #ifndef __JIMEX__H
 #define __JIMEX__H
-#include "Jim.h"
+#include "jim.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -39,16 +39,16 @@
 **/
 #pragma endregion
 
-#include <RuntimeEx.h>
-#include "Jim+Autoconf.h"
-#include "Jim.h"
-#include "Jim+EventLoop.h"
+#include "jimautoconf.h"
+#include "jim.h"
+#include "jim-eventloop.h"
+#include <timecu.h>
 // POSIX includes
 //#include <sys/time.h>
-#include <sys/types.h>
-#include <string.h>
+//#include <sys/types.h>
+//#include <string.h>
 //#include <unistd.h>
-#include <errno.h>
+//#include <errno.h>
 #if defined(__MINGW32__)
 #include <windows.h>
 #include <winsock.h>
@@ -60,7 +60,7 @@
 
 #ifndef HAVE_USLEEP
 // XXX: Implement this in terms of select() or nanosleep()
-#define msleep(MS) __sleep((MS) / 1000)
+#define msleep(MS) _sleep((MS) / 1000)
 //#warning "sub-second sleep not supported"
 #else
 #define msleep(MS) sleep((MS) / 1000); usleep(((MS) % 1000) * 1000);
@@ -136,7 +136,7 @@ __device__ void Jim_BackgroundError(Jim_Interp *interp)
 			else {
 				// Report the error to stderr
 				Jim_MakeErrorMessage(interp);
-				_fprintf(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
+				fprintf_(stderr, "%s\n", Jim_String(Jim_GetResult(interp)));
 				// And reset the result
 				Jim_SetResultString(interp, "", -1);
 			}
@@ -185,7 +185,7 @@ __device__ void Jim_DeleteFileHandler(Jim_Interp *interp, FILE *handle, int mask
 static __device__ jim_wide JimGetTime(Jim_EventLoop *eventLoop)
 {
 	struct timeval tv;
-	_gettimeofday(&tv, NULL);
+	gettimeofday(&tv, NULL);
 	return (jim_wide)(tv.tv_sec - eventLoop->timeBase) * 1000 + tv.tv_usec / 1000;
 }
 
@@ -558,7 +558,7 @@ static __device__ int JimELAfterCommand(ClientData dummy, Jim_Interp *interp, in
 			char buf[30];
 			const char *fmt = "after#%" JIM_WIDE_MODIFIER;
 			while (te) {
-				__snprintf(buf, sizeof(buf), fmt, te->id);
+				_snprintf(buf, sizeof(buf), fmt, te->id);
 				Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, buf, -1));
 				te = te->next;
 			}

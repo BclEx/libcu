@@ -47,15 +47,14 @@
 
 #ifdef jim_ext_namespace
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+//#include <limits.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include <stdio.h>
 #include <assert.h>
-#include <RuntimeEx.h>
-#include "Jim.h"
-#include "Jim+Autoconf.h"
-#include "Jim+Subcmd.h"
+#include "jim.h"
+#include "jimautoconf.h"
+#include "jim-subcmd.h"
 
 // -----------------------------------------------------------------------------
 // Namespace support
@@ -71,8 +70,8 @@
 //      "abc" "::def"    => def
 __device__ Jim_Obj *JimCanonicalNamespace(Jim_Interp *interp, Jim_Obj *nsObj, Jim_Obj *nameObj)
 {
-	_assert(nameObj->refCount != 0);
-	_assert(nsObj->refCount != 0);
+	assert(nameObj->refCount != 0);
+	assert(nsObj->refCount != 0);
 	const char *name = Jim_String(nameObj);
 	if (name[0] == ':' && name[1] == ':') {
 		// Absolute namespace
