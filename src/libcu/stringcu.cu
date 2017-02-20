@@ -235,7 +235,7 @@ __device__ char *strtok(char *__restrict s, const char *__restrict delim)
 }
 
 /* inline: Return the length of S.  */
-__device__ size_t strlen(const char *s)
+__host__ __device__ size_t strlen(const char *s)
 {
 	if (!s) return 0;
 	register const char *s2 = s;
