@@ -28,7 +28,7 @@ __device__ void *memmove(void *dest, const void *src, size_t n)
 //builtin: extern __device__ void *memset(void *s, int c, size_t n);
 
 /* Compare N bytes of S1 and S2.  */
-__device__ int memcmp(const void *s1, const void *s2, size_t n)
+__device__ int memcmp_(const void *s1, const void *s2, size_t n)
 {
 	if (!n) return 0;
 	register unsigned char *a = (unsigned char *)s1;
@@ -52,7 +52,7 @@ __device__ void *memchr(const void *s, int c, size_t n)
 #endif
 
 /* Copy SRC to DEST.  */
-__device__ char *strcpy(char *__restrict dest, const char *__restrict src)
+__device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 {
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
@@ -72,7 +72,7 @@ __device__ char *strncpy(char *__restrict dest, const char *__restrict src, size
 }
 
 /* Append SRC onto DEST.  */
-__device__ char *strcat(char *__restrict dest, const char *__restrict src)
+__device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 {
 	register unsigned char *d = (unsigned char *)dest;
 	while (*d) d++;
@@ -92,7 +92,7 @@ __device__ char *strncat(char *__restrict dest, const char *__restrict src, size
 }
 
 /* Compare S1 and S2.  */
-__device__ int strcmp(const char *s1, const char *s2)
+__device__ int strcmp_(const char *s1, const char *s2)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
@@ -235,7 +235,7 @@ __device__ char *strtok(char *__restrict s, const char *__restrict delim)
 }
 
 /* inline: Return the length of S.  */
-__host__ __device__ size_t strlen(const char *s)
+__host__ __device__ size_t strlen_(const char *s)
 {
 	if (!s) return 0;
 	register const char *s2 = s;

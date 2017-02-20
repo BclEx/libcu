@@ -217,12 +217,15 @@ extern __device__ void *bsearch(const void *key, const void *base, size_t nmemb,
 extern __device__ void qsort(void *base, size_t nmemb, size_t size, __compar_fn_t compar);
 
 /* Return the absolute value of X.  */
-__forceinline __device__ int abs(int x) { return x >= 0 ? x : -x; }
-__forceinline __device__ long int labs(long int x) { return x >= 0 ? x : -x; }
+__forceinline __device__ int abs_(int x) { return x >= 0 ? x : -x; }
+#define abs abs_
+__forceinline __device__ long int labs_(long int x) { return x >= 0 ? x : -x; }
+#define labs labs_
 __END_NAMESPACE_STD;
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
-__forceinline __device__ long long int llabs(long long int x) { return x >= 0 ? x : -x; }
+__forceinline __device__ long long int llabs_(long long int x) { return x >= 0 ? x : -x; }
+#define llabs llabs_
 __END_NAMESPACE_C99;
 #endif
 

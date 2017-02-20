@@ -53,19 +53,22 @@ __BEGIN_NAMESPACE_STD;
 //builtin: extern __device__ void *memset(void *s, int c, size_t n);
 #define _memset(dest, value, length) if (length) memset(dest, value, length)
 /* Compare N bytes of S1 and S2.  */
-extern __device__ int memcmp(const void *s1, const void *s2, size_t n);
+extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);
+#define memcmp memcmp_
 /* Search N bytes of S for C.  */
 extern __device__ void *memchr(const void *s, int c, size_t n);
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Copy SRC to DEST.  */
-extern __device__ char *strcpy(char *__restrict dest, const char *__restrict src);
+extern __device__ char *strcpy_(char *__restrict dest, const char *__restrict src);
+#define strcpy strcpy_
 /* Copy no more than N characters of SRC to DEST.  */
 extern __device__ char *strncpy(char *__restrict dest, const char *__restrict src, size_t n);
 
 /* Append SRC onto DEST.  */
-extern __device__ char *strcat(char *__restrict dest, const char *__restrict src);
+extern __device__ char *strcat_(char *__restrict dest, const char *__restrict src);
+#define strcat strcat_
 /* Append no more than N characters from SRC onto DEST.  */
 extern __device__ char *strncat(char *__restrict dest, const char *__restrict src, size_t n);
 
@@ -114,7 +117,8 @@ extern __device__ void *mempcpy(void *__restrict dest, const void *__restrict sr
 
 __BEGIN_NAMESPACE_STD;
 /* Return the length of S.  */
-extern __device__ size_t strlen(const char *s);
+extern __device__ size_t strlen_(const char *s);
+#define strlen strlen_
 //__forceinline __device__ size_t strlen(const char *s)
 //{
 //	if (!s) return 0;
