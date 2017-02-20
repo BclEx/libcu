@@ -50,8 +50,8 @@
 //#include <stdargcu.h>
 //#include <ctypecu.h>
 //#include <limitscu.h>
-//#include <errnocu.h>
 #include <cuda_runtimecu.h>
+#include <errnocu.h>
 #include <stdlibcu.h>
 #include <setjmpcu.h>
 #include <assert.h>
@@ -483,7 +483,7 @@ static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va)
 		fprintf(stderr, "[backtrace] of 'nm <executable>' in the bug report.\n");
 	}
 #endif
-	_exit(1);
+	exit_(1);
 }
 STDARGvoid(JimPanicDump, JimPanicDump_(condition, fmt, va), int condition, const char *fmt);
 #endif
@@ -512,7 +512,7 @@ __device__ void *Jim_Realloc(void *ptr, int size)
 
 __device__ char *Jim_StrDup(const char *s)
 {
-	return _strdup(s);
+	return strdup(s);
 }
 
 __device__ char *Jim_StrDupLen(const char *s, int l)
@@ -2716,7 +2716,7 @@ static __device__ Jim_Obj *JimNewScriptLineObj(Jim_Interp *interp, int argc, int
 	Jim_Obj *objPtr;
 #ifdef DEBUG_SHOW_SCRIPT
 	char buf[100];
-	__snprintf(buf, sizeof(buf), "line=%d, argc=%d", line, argc);
+	snprintf(buf, sizeof(buf), "line=%d, argc=%d", line, argc);
 	objPtr = Jim_NewStringObj(interp, buf, -1);
 #else
 	objPtr = Jim_NewEmptyStringObj(interp);
@@ -5481,7 +5481,7 @@ static __device__ int ListSortElements(Jim_Interp *interp, Jim_Obj *listObjPtr, 
 		fn = ListSortIndexHelper;
 	}
 	int rc;
-	if ((rc = _setjmp(info->jmpbuf)) == 0) {
+	if ((rc = setjmp(info->jmpbuf)) == 0) {
 		qsort(vector, len, sizeof(Jim_Obj *), (qsort_comparator *)fn);
 		if (info->unique && len > 1)
 			ListRemoveDuplicates(listObjPtr, fn);
@@ -12506,7 +12506,7 @@ __device__ void Jim_SetResultFormatted_(Jim_Interp *interp, const char *format, 
 	}
 	len += extra;
 	char *buf = (char *)Jim_Alloc(len + 1);
-	len = _snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
+	len = snprintf(buf, len + 1, format, params[0], params[1], params[2], params[3], params[4]);
 	Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, len));
 }
 

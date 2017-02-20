@@ -13,6 +13,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Properties</Filter>
     </ClCompile>
+    <ClCompile Include="fallocTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -29,6 +30,7 @@
     <CudaCompile Include="errnoTest.cu" />
     <CudaCompile Include="stdargTest.cu" />
     <CudaCompile Include="stringTest.cu" />
+    <CudaCompile Include="fallocTest.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Properties">

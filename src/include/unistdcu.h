@@ -35,6 +35,9 @@ THE SOFTWARE.
 
 __BEGIN_DECLS;
 
+typedef short gid_t;
+typedef short uid_t;
+
 /* Values for the second argument to access. These may be OR'd together.  */
 #define	R_OK	4		/* Test for read permission.  */
 #define	W_OK	2		/* Test for write permission.  */
@@ -87,13 +90,13 @@ than SECONDS which it actually slept (thus zero if it slept the full time). If a
 SIGALRM signal while inside `sleep' call, the handling of the SIGALRM signal afterwards is undefined.  There is no return value to indicate
 error, but if `sleep' returns SECONDS, it probably didn't work.  */
 extern __device__ void usleep(unsigned long milliseconds);
-__forceinline __device__ void sleep(unsigned int seconds) { usleep(seconds * 1000); }
+__device__ __forceinline void sleep(unsigned int seconds) { usleep(seconds * 1000); }
 
 /* Suspend the process until a signal arrives. This always returns -1 and sets `errno' to EINTR.  */
 //nosupport: extern int pause(void);
 
 /* Change the owner and group of FILE.  */
-//extern __device__ int chown(const char *file, uid_t owner, gid_t group);
+extern __device__ int chown(const char *file, uid_t owner, gid_t group);
 
 /* Change the process's working directory to PATH.  */
 extern __device__ int chdir(const char *path);
@@ -122,11 +125,17 @@ extern __device__ char **__environ;
 /* Get file-specific configuration about descriptor FD.  */
 //nosupport: extern __device__ long int fpathconf(int fd, int name);
 
+/* Remove the link NAME.  */
+extern __device__ int unlink(const char *name);
+
+/* Remove the directory PATH.  */
+extern __device__ int rmdir(const char *path);
+
 __END_DECLS;
 
 #endif  /* _UNISTDCU_H */
 #else
 //#include <featurescu.h>
 //#include <sys/types.h>
-//#include <_unistd.h>
+#include <_unistd.h>
 #endif

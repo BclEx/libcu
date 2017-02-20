@@ -42,14 +42,16 @@
 #include "jimautoconf.h"
 #include "jim.h"
 #include "jim-eventloop.h"
-#include <timecu.h>
 // POSIX includes
+#include <timecu.h>
 //#include <sys/time.h>
 //#include <sys/types.h>
 //#include <string.h>
-//#include <unistd.h>
+#include <unistdcu.h>
 //#include <errno.h>
-#if defined(__MINGW32__)
+#ifdef __CUDA_ARCH__
+#define msleep(MS) sleep((MS) / 1000)
+#elif defined(__MINGW32__)
 #include <windows.h>
 #include <winsock.h>
 #define msleep Sleep
@@ -60,7 +62,7 @@
 
 #ifndef HAVE_USLEEP
 // XXX: Implement this in terms of select() or nanosleep()
-#define msleep(MS) _sleep((MS) / 1000)
+#define msleep(MS) sleep((MS) / 1000)
 //#warning "sub-second sleep not supported"
 #else
 #define msleep(MS) sleep((MS) / 1000); usleep(((MS) % 1000) * 1000);
@@ -558,7 +560,7 @@ static __device__ int JimELAfterCommand(ClientData dummy, Jim_Interp *interp, in
 			char buf[30];
 			const char *fmt = "after#%" JIM_WIDE_MODIFIER;
 			while (te) {
-				_snprintf(buf, sizeof(buf), fmt, te->id);
+				snprintf(buf, sizeof(buf), fmt, te->id);
 				Jim_ListAppendElement(interp, listObj, Jim_NewStringObj(interp, buf, -1));
 				te = te->next;
 			}

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.extra.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="extra.cu" />
+    <None Include="libcu.extra.native.nuspec" />
+    <None Include="libcu.extra.native.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{9e718d9c-89da-48f2-8f75-7b741a5a061d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\extra.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

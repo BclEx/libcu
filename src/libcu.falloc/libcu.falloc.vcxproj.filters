@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.falloc.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="falloc.cu" />
+    <None Include="libcu.falloc.native.nuspec" />
+    <None Include="libcu.falloc.native.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{749b7c30-cf01-49cf-95b8-242b4cc520cc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\falloc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

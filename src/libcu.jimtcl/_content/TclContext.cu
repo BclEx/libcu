@@ -151,7 +151,7 @@ static __device__ int CreateIncrblobChannel(Jim_Interp *interp, TclContext *pDb,
 
 	static int count = 0; // This variable is used to name the channels: "incrblob_[incr count]"
 	char channelName[64];
-	__snprintf(channelName, sizeof(channelName), "incrblob_%d", ++count);
+	snprintf(channelName, sizeof(channelName), "incrblob_%d", ++count);
 	p->Channel = Jim_CreateChannel(&IncrblobChannelType, channelName, p, flags);
 	Jim_RegisterChannel(interp, p->Channel);
 
@@ -293,7 +293,7 @@ static __device__ int DbBusyHandler(void *cd, int tries)
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
 	char b[30];
-	__snprintf(b, sizeof(b), "%d", tries);
+	snprintf(b, sizeof(b), "%d", tries);
 	Jim_Obj *objPtr = Jim_NewStringObj(interp, tctx->Busy, -1);
 	Jim_AppendStrings(interp, objPtr, " ", b, NULL);
 	int rc = Jim_EvalObj(interp, objPtr);
@@ -334,7 +334,7 @@ static __device__ void DbProfileHandler(void *cd, const char *sql, uint64 tm)
 	TclContext *tctx = (TclContext *)cd;
 	Jim_Interp *interp = tctx->Interp;
 	char tmAsString[100];
-	__snprintf(tmAsString, sizeof(tmAsString)-1, "%lld", tm);
+	snprintf(tmAsString, sizeof(tmAsString)-1, "%lld", tm);
 	Jim_Obj *str = Jim_NewStringObj(interp, tctx->Profile, -1);
 	Jim_ListAppendElement(interp, str, Jim_NewStringObj(interp, sql, -1));
 	Jim_ListAppendElement(interp, str, Jim_NewStringObj(interp, tmAsString, -1));
@@ -382,9 +382,9 @@ static __device__ int DbWalHandler(void *clientData, Context *ctx, const char *d
 static __device__ void SetTestUnlockNotifyVars(Jim_Interp *interp, int argId, int argsLength)
 {
 	char b[64];
-	__snprintf(b, sizeof(b), "%d", argId);
+	snprintf(b, sizeof(b), "%d", argId);
 	Jim_SetVar(interp, "sqlite_unlock_notify_arg", b, JIM_GLOBAL_ONLY);
-	__snprintf(b, sizeof(b), "%d", argsLength);
+	snprintf(b, sizeof(b), "%d", argsLength);
 	Jim_SetVar(interp, "sqlite_unlock_notify_argcount", b, JIM_GLOBAL_ONLY);
 }
 #else
@@ -1577,7 +1577,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 			Jim_SetResultString(interp, "Error: can't malloc()", -1);
 			return JIM_ERROR;
 		}
-		__snprintf(sql, bytes+50, "INSERT OR %q INTO '%q' VALUES(?", conflict, table);
+		snprintf(sql, bytes+50, "INSERT OR %q INTO '%q' VALUES(?", conflict, table);
 		int j = strlen(sql);
 		for (i = 1; i < cols; i++)
 		{
@@ -1638,7 +1638,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 				char *err = (char *)malloc(errLength);
 				if (err)
 				{
-					__snprintf(err, errLength, "Error: %s line %d: expected %d columns of data but found %d", file, lineno, cols, i+1);
+					snprintf(err, errLength, "Error: %s line %d: expected %d columns of data but found %d", file, lineno, cols, i+1);
 					Jim_SetResultString(interp, err, -1);
 					free(err);
 				}
@@ -1677,7 +1677,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		else
 		{
 			// failure, append lineno where failed
-			__snprintf(lineNum, sizeof(lineNum), "%d", lineno);
+			snprintf(lineNum, sizeof(lineNum), "%d", lineno);
 			Jim_AppendStrings(interp, Jim_GetResult(interp), ", failed while processing line: ", lineNum, nullptr);
 			rc = JIM_ERROR;
 		}

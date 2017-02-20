@@ -100,4 +100,6 @@ __END_DECLS;
 #endif /* _SYS_STATCU_H  */
 #else
 #include <sys/stat.h>
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 #endif

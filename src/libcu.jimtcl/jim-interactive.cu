@@ -62,6 +62,7 @@ void Jim_HistoryShow()
 }
 
 #pragma region Jim_InteractivePrompt
+#if __CUDACC__
 
 struct InteractiveData
 {
@@ -109,9 +110,9 @@ __global__ void g_InteractivePromptBodyBegin()
 	if (retcode != 0) {
 		const char *retcodestr = Jim_ReturnCode(retcode);
 		if (*retcodestr == '?')
-			_snprintf(prompt, sizeof(d_dataI.prompt) - 3, "[%d] ", retcode);
+			snprintf(prompt, sizeof(d_dataI.prompt) - 3, "[%d] ", retcode);
 		else
-			_snprintf(prompt, sizeof(d_dataI.prompt) - 3, "[%s] ", retcodestr);
+			snprintf(prompt, sizeof(d_dataI.prompt) - 3, "[%s] ", retcodestr);
 	}
 	else
 		prompt[0] = '\0';
@@ -149,7 +150,7 @@ __global__ void g_InteractivePromptBodyMiddle(char *line)
 		return;
 	}
 	char *prompt = d_dataI.prompt;
-	_snprintf(prompt, sizeof(d_dataI.prompt), "%c> ", state);
+	snprintf(prompt, sizeof(d_dataI.prompt), "%c> ", state);
 	d_dataI.OP = 0; //: continue;
 }
 int Jim_InteractivePromptBodyMiddle(char *line)
@@ -230,5 +231,87 @@ out:
 	return Jim_InteractivePromptEnd();
 }
 
+#else
+
+int Jim_InteractivePrompt(Jim_Interp *interp)
+{
+	int retcode = JIM_OK;
+	char *history_file = NULL;
+#ifdef USE_LINENOISE
+	const char *home;
+	home = getenv("HOME");
+	if (home && isatty(STDIN_FILENO)) {
+		int history_len = strlen(home) + sizeof("/.jim_history");
+		history_file = Jim_Alloc(history_len);
+		snprintf(history_file, history_len, "%s/.jim_history", home);
+		Jim_HistoryLoad(history_file);
+	}
+#endif
+	printf("Welcome to Jim version %d.%d\n", JIM_VERSION / 100, JIM_VERSION % 100);
+	Jim_SetVariableStrWithStr(interp, JIM_INTERACTIVE, "1");
+	while (1) {
+		char prompt[20];
+		if (retcode != 0) {
+			const char *retcodestr = Jim_ReturnCode(retcode);
+			if (*retcodestr == '?')
+				snprintf(prompt, sizeof(prompt) - 3, "[%d] ", retcode);
+			else
+				snprintf(prompt, sizeof(prompt) - 3, "[%s] ", retcodestr);
+		}
+		else
+			prompt[0] = '\0';
+		strcat(prompt, ". ");
+		Jim_Obj *scriptObjPtr = Jim_NewStringObj(interp, "", 0);
+		Jim_IncrRefCount(scriptObjPtr);
+		while (1) {
+			char *line = Jim_HistoryGetline(prompt);
+			if (line == NULL) {
+				if (_errno == EINTR)
+					continue;
+				Jim_DecrRefCount(interp, scriptObjPtr);
+				retcode = JIM_OK;
+				goto out;
+			}
+			if (Jim_Length(scriptObjPtr) != 0)
+				Jim_AppendString(interp, scriptObjPtr, "\n", 1);
+			Jim_AppendString(interp, scriptObjPtr, line, -1);
+			free(line);
+			int len;
+			const char *str = Jim_GetString(scriptObjPtr, &len);
+			if (len == 0)
+				continue;
+			char state;
+			if (Jim_ScriptIsComplete(str, len, &state))
+				break;
+			snprintf(prompt, sizeof(prompt), "%c> ", state);
+		}
+#ifdef USE_LINENOISE
+		if (!strcmp(str, "h")) {
+			// built-in history command
+			Jim_HistoryShow();
+			Jim_DecrRefCount(interp, scriptObjPtr);
+			continue;
+		}
+		Jim_HistoryAdd(Jim_String(scriptObjPtr));
+		if (history_file)
+			Jim_HistorySave(history_file);
+#endif
+		retcode = Jim_EvalObj(interp, scriptObjPtr);
+		Jim_DecrRefCount(interp, scriptObjPtr);
+		if (retcode == JIM_EXIT)
+			break;
+		if (retcode == JIM_ERROR)
+			Jim_MakeErrorMessage(interp);
+		int reslen;
+		const char *result = Jim_GetString(Jim_GetResult(interp), &reslen);
+		if (reslen)
+			printf("%s\n", result);
+	}
+out:
+	Jim_Free(history_file);
+	return retcode;
+}
+
+#endif
 #pragma endregion
 

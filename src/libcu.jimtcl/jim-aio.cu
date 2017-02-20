@@ -46,8 +46,8 @@
 #include <errnocu.h>
 #include <fcntl.h>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#include <sys/stat.h>
+#include <unistdcu.h>
+#include <sys/statcu.h>
 #endif
 
 #include "jim.h"
@@ -102,7 +102,7 @@ __device__ const char *inet_ntop(int af, const void *src, char *dst, int size)
 {
 	if (af != PF_INET)
 		return NULL;
-	__snprintf(dst, size, "%s", inet_ntoa(((struct sockaddr_in *)src)->sin_addr));
+	snprintf(dst, size, "%s", inet_ntoa(((struct sockaddr_in *)src)->sin_addr));
 	return dst;
 }
 #endif
@@ -966,7 +966,7 @@ static __device__ int JimMakeChannel(Jim_Interp *interp, FILE *fh, int fd, Jim_O
 	char buf[AIO_CMD_LEN];
 	int openFlags = 0;
 
-	_snprintf(buf, sizeof(buf), hdlfmt, Jim_GetId(interp));
+	snprintf(buf, sizeof(buf), hdlfmt, Jim_GetId(interp));
 
 	if (fh) {
 		filename = Jim_NewStringObj(interp, hdlfmt, -1);

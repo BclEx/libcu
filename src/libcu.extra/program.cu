@@ -1,6 +1,6 @@
-#include <cuda_runtime.h>
-#include <falloc.h>
-#include <stdio.h>
+#include <cuda_runtimecu.h>
+#include <ctypecu.h>
+#include <sentinel.h>
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
@@ -8,20 +8,29 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 {
 	int i = threadIdx.x;
 	c[i] = a[i] + b[i];
+	if (i != 1)
+		return;
 
-	// create/free chunk
-	void *obj = fallocGetChunk();
-	fallocFreeChunk(obj);
+	//strchr("Me", 'Me');
+	//printf("%d %s\n", 2, "sky morey");
 
-	// create/free alloc
-	fallocCtx *ctx = fallocCreateCtx();
-	char *testString = (char *)falloc(ctx, 10);
-	int *testInteger = falloc<int>(ctx);
-	fallocDisposeCtx(ctx);
+	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
+	//fprintf(f, "The quick brown fox jumps over the lazy dog");
+	fwrite("test", 4, 1, f);
+	fflush(f);
+	fclose(f);
+
+	//const char buf[100] = {0};
+	//snprintf(buf, 100, "test");
+	//printf("%s\n", buf);
+	printf("%d\n", atoi("51236"));
+	//printf("%f\n", atof("1.2"));
 }
 
 int main()
 {
+	sentinelServerInitialize();
+
 	const int arraySize = 5;
 	const int a[arraySize] = { 1, 2, 3, 4, 5 };
 	const int b[arraySize] = { 10, 20, 30, 40, 50 };
@@ -41,6 +50,8 @@ int main()
 	//printf("\nPress any key to continue.\n");
 	//scanf("%c");
 
+	sentinelServerShutdown();
+
 	// cudaDeviceReset must be called before exiting in order for profiling and
 	// tracing tools such as Nsight and Visual Profiler to show complete traces.
 	cudaStatus = cudaDeviceReset();
@@ -59,10 +70,9 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
 	int *dev_b = 0;
 	int *dev_c = 0;
 	cudaError_t cudaStatus;
-	cudaDeviceFallocHeap heap;
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
-	cudaStatus = cudaSetDevice(0);
+	cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
 		goto Error;
@@ -100,29 +110,8 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
 		goto Error;
 	}
 
-	// Create falloc heap
-	heap = cudaDeviceFallocHeapCreate(2046U, 1048576U, &cudaStatus);
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaDeviceFallocHeapCreate failed!");
-		goto Error;
-	}
-
-	// Set default heap
-	cudaStatus = cudaFallocSetDefaultHeap(heap);
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaFallocSetDefaultHeap failed!");
-		goto Error;
-	}
-
 	// Launch a kernel on the GPU with one thread for each element.
 	addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
-
-	// Destroy falloc heap
-	cudaStatus = cudaDeviceFallocHeapDestroy(heap);
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaDeviceFallocHeapDestroy failed!");
-		goto Error;
-	}
 
 	// Check for any errors launching the kernel
 	cudaStatus = cudaGetLastError();

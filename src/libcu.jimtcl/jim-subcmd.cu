@@ -8,8 +8,8 @@
 */
 #pragma endregion
 
-#include <stdio.h>
-#include <string.h>
+//#include <stdio.h>
+//#include <string.h>
 #include "jim-subcmd.h"
 
 // Implements the common 'commands' subcommand

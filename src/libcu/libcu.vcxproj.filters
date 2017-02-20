@@ -2,97 +2,97 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="..\include\bits\libcu_fpmax.h">
-      <Filter>includes\bits</Filter>
+      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\crtdefscu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\ctypecu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\cuda_runtimecu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\errnocu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sentinel.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stdargcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stddefcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stringcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stdlibcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\stdiocu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\bits\libcu_stdio.h">
-      <Filter>includes\bits</Filter>
+      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sentinel-iomsg.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sentinel-stdiomsg.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sentinel-stdlibmsg.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\regexcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\direntcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sys\bitveccu.h">
-      <Filter>includes\sys</Filter>
+      <Filter>include\sys</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sys\hashcu.h">
-      <Filter>includes\sys</Filter>
+      <Filter>include\sys</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sys\statcu.h">
-      <Filter>includes\sys</Filter>
+      <Filter>include\sys</Filter>
     </ClInclude>
     <ClInclude Include="..\include\bits\libcu_dirent.h">
-      <Filter>includes\bits</Filter>
+      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\bits\libcu_stat.h">
-      <Filter>includes\bits</Filter>
+      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\limitscu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\host_functions.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\host_definescu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\featurescu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\unistdcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\_unistd.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\_dirent.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\timecu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\setjmpcu.h">
-      <Filter>includes</Filter>
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -101,21 +101,21 @@
     <CudaCompile Include="libcu.stdlib.cu" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="includes">
-      <UniqueIdentifier>{6b88e2f9-9a89-4cd7-ad56-2d313e018545}</UniqueIdentifier>
-      <Extensions>*.h</Extensions>
-    </Filter>
-    <Filter Include="includes\bits">
-      <UniqueIdentifier>{e7438e7e-21c1-414f-82e8-26ff1e32b228}</UniqueIdentifier>
-    </Filter>
     <Filter Include="_content">
       <UniqueIdentifier>{36a9b491-aa04-47a7-80e6-b4500b4b4454}</UniqueIdentifier>
     </Filter>
-    <Filter Include="includes\sys">
-      <UniqueIdentifier>{3b8669b4-7b70-4086-928c-adaec2f08228}</UniqueIdentifier>
-    </Filter>
     <Filter Include="sys">
       <UniqueIdentifier>{4f137845-9d32-4ce7-b3a2-38806776a209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{6b88e2f9-9a89-4cd7-ad56-2d313e018545}</UniqueIdentifier>
+      <Extensions>*.h</Extensions>
+    </Filter>
+    <Filter Include="include\bits">
+      <UniqueIdentifier>{e7438e7e-21c1-414f-82e8-26ff1e32b228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\sys">
+      <UniqueIdentifier>{3b8669b4-7b70-4086-928c-adaec2f08228}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

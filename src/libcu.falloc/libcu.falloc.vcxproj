@@ -111,12 +111,11 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.falloc.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -133,13 +132,12 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.falloc.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -160,12 +158,11 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.falloc.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -186,13 +183,12 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.falloc.cu.obj" -o "$(OutDir)libcu.falloc.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>

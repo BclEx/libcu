@@ -84,6 +84,11 @@ extern __device__ int strcoll(const char *s1, const char *s2);
 extern __device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, size_t n);
 __END_NAMESPACE_STD;
 
+/* Duplicate S, returning an identical malloc'd string.  */
+extern __device__ char *strdup(const char *s);
+/* Return a malloc'd copy of at most N bytes of STRING.  The resultant string is terminated even if no null terminator appears before STRING[N].  */
+extern __device__ char *strndup(const char *s, size_t n);
+
 __BEGIN_NAMESPACE_STD;
 /* Find the first occurrence of C in S.  */
 extern __device__ char *strchr(const char *s, int c);
@@ -109,14 +114,17 @@ extern __device__ void *mempcpy(void *__restrict dest, const void *__restrict sr
 
 __BEGIN_NAMESPACE_STD;
 /* Return the length of S.  */
-//extern __device__ size_t strlen(const char *s);
-__forceinline __device__ size_t strlen(const char *s)
-{
-	if (!s) return 0;
-	register const char *s2 = s;
-	while (*s2) { s2++; }
-	return 0x3fffffff & (int)(s2 - s);
-}
+extern __device__ size_t strlen(const char *s);
+//__forceinline __device__ size_t strlen(const char *s)
+//{
+//	if (!s) return 0;
+//	register const char *s2 = s;
+//	while (*s2) { s2++; }
+//	return 0x3fffffff & (int)(s2 - s);
+//}
+
+/* Return the length of S.  */
+//extern __device__ size_t strlen16(const char *s);
 __forceinline __device__ size_t strlen16(const void *s)
 {
 	if (!s) return 0;
@@ -125,6 +133,9 @@ __forceinline __device__ size_t strlen16(const void *s)
 	return n;
 }
 __END_NAMESPACE_STD;
+
+/* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
+extern __device__ size_t strnlen(const char *s, size_t maxlen);
 
 __BEGIN_NAMESPACE_STD;
 /* Return a string describing the meaning of the `errno' code in ERRNUM.  */

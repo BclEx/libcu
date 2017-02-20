@@ -3,7 +3,8 @@
 #define HAVE_DLOPEN_COMPAT
 #include <errno.h>
 
-#if defined(_WIN32) || defined(WIN32)
+#if __CUDACC__
+#elif defined(_WIN32) || defined(WIN32)
 #ifndef STRICT
 #define STRICT
 #endif

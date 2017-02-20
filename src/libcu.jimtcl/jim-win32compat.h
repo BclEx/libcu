@@ -8,7 +8,8 @@ extern "C" {
 #endif
 
 	/* Note that at this point we don't yet have access to jimautoconf.h */
-#if defined(_WIN32) || defined(WIN32)
+#if __CUDACC__
+#elif defined(_WIN32) || defined(WIN32)
 
 #define HAVE_DLOPEN
 	void *dlopen(const char *path, int mode);
@@ -39,7 +40,7 @@ extern "C" {
 #define JIM_WIDE_MODIFIER "I64d"
 #define strcasecmp _stricmp
 //#define strtoull strtoull
-//#define snprintf __snprintf
+//#define snprintf _snprintf
 
 #include <io.h>
 

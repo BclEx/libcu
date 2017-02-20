@@ -1,12 +1,11 @@
 #include <cuda_runtimecu.h>
-#include <timecu.h>
 
 __BEGIN_DECLS;
 
 // time
 __device__ time_t time(time_t *timer)
 {
-	//clock_t start = clock();
+	clock_t start = clock();
 	time_t epoch = 0;
 	return epoch;
 }
@@ -25,4 +24,3 @@ __device__ int gettimeofday(struct timeval *tp, void *tz)
 }
 
 __END_DECLS;
-

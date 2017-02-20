@@ -325,6 +325,10 @@ several optimizing inline functions and macros.  */
 #define ferror(fp)                  __FERROR(fp)
 #endif
 
+__device__ char *vmtagprintf(void *tag, const char *format, va_list va);
+__device__ char *vmprintf(const char *format, va_list va);
+__device__ char *vmnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
+
 __END_DECLS;
 
 __BEGIN_NAMESPACE_STD;
@@ -358,16 +362,13 @@ STDARG2(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const cha
 STDARG3(int, sscanf, vsscanf(s, format, va), const char *__restrict s, const char *__restrict format);
 __END_NAMESPACE_STD;
 
-__device__ char *vmtagprintf(void *tag, const char *format, va_list va);
-__device__ char *vmprintf(const char *format, va_list va);
-__device__ char *vmnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
-
 #endif  /* _STDIOCU_H */
 #else
 #include <stdio.h>
+#define snprintf _snprintf
 #define fprintf_ fprintf
-#define vmtagprintf nullptr
-#define vmprintf nullptr
-#define vmnprintf nullptr
+#define vmtagprintf(tag, format, va) format
+#define vmprintf(format, va) format
+#define vmnprintf(s, maxlen, format, va) nullptr
 #endif
 

@@ -5,7 +5,8 @@ using namespace System::Text;
 using namespace System::Collections::Generic;
 using namespace Microsoft::VisualStudio::TestTools::UnitTesting;
 
-cudaError_t stdarg_test1();
+cudaError_t stdarg_parse();
+cudaError_t stdarg_call();
 namespace libcutests
 {
 	[TestClass]
@@ -28,6 +29,7 @@ namespace libcutests
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
 #pragma endregion 
 
-		[TestMethod] void stdarg_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_test1()))); }
+		[TestMethod] void stdarg_parse() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_parse()))); }
+		[TestMethod] void stdarg_call() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_call()))); }
 	};
 }

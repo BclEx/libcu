@@ -34,7 +34,7 @@
     <ClInclude Include="tclExInt.h" />
     <ClInclude Include="TclMod.h" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(CUARCH)'!='cpu'">
     <CudaCompile Include="libcu.tinytcl.cu" />
     <None Include="dos.cu" />
     <None Include="regex_compat.cu" />
@@ -64,6 +64,37 @@
     <None Include="tclExtensions.cu" />
     <None Include="tclExGen.cu" />
     <None Include="TclMod.cu" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CUARCH)'=='cpu'">
+    <None Include="libcu.tinytcl.cu" />
+    <ClCompile Include="dos.cu" />
+    <ClCompile Include="regex_compat.cu" />
+    <ClCompile Include="tclAlloc.cu" />
+    <ClCompile Include="tclAssem.cu" />
+    <ClCompile Include="tclBasic.cu" />
+    <ClCompile Include="tclCmdAH.cu" />
+    <ClCompile Include="tclCmdIL.cu" />
+    <ClCompile Include="tclCmdMZ.cu" />
+    <ClCompile Include="tclExpr.cu" />
+    <ClCompile Include="tclGet.cu" />
+    <ClCompile Include="tclGlob.cu" />
+    <ClCompile Include="tclGpuAZ.cu" />
+    <ClCompile Include="tclGpuEnv.cu" />
+    <ClCompile Include="tclGpuStr.cu" />
+    <ClCompile Include="tclGpuUtil.cu" />
+    <ClCompile Include="tclHash.cu" />
+    <ClCompile Include="tclHistory.cu" />
+    <ClCompile Include="tclLoad.cu" />
+    <ClCompile Include="tclLoad-noop.cu" />
+    <ClCompile Include="tclObj.cu" />
+    <ClCompile Include="tclParse.cu" />
+    <ClCompile Include="tclProc.cu" />
+    <ClCompile Include="tclUtil.cu" />
+    <ClCompile Include="tclVar.cu" />
+    <ClCompile Include="tclExDbg.cu" />
+    <ClCompile Include="tclExtensions.cu" />
+    <ClCompile Include="tclExGen.cu" />
+    <ClCompile Include="TclMod.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="library\init.tcl" />
@@ -159,7 +190,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -183,7 +214,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -212,7 +243,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -240,7 +271,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

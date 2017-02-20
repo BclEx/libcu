@@ -106,6 +106,5 @@ __END_DECLS;
 
 #endif  /* _DIRENTCU_H */
 #else
-//typedef struct __dirstream DIR;
-//#include <_dirent.h>
+#include <_dirent.h>
 #endif

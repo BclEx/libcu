@@ -47,6 +47,7 @@
 //#include <stdlibcu.h>
 //#include <stringcu.h>
 //#include <stdiocu.h>
+#include <cuda_runtimecu.h>
 #include <errnocu.h>
 #include <sys/statcu.h>
 #include "jimautoconf.h"
@@ -124,10 +125,14 @@ static __device__ int StoreStatData(Jim_Interp *interp, Jim_Obj *varName, const 
 {
 	// Just use a list to store the data
 	Jim_Obj *listObj = Jim_NewListObj(interp, NULL, 0);
+#if !__CUDACC__
 	AppendStatElement(interp, listObj, "dev", sb->st_dev);
 	AppendStatElement(interp, listObj, "ino", sb->st_ino);
+#endif
 	AppendStatElement(interp, listObj, "mode", sb->st_mode);
+#if !__CUDACC__
 	AppendStatElement(interp, listObj, "nlink", sb->st_nlink);
+#endif
 	AppendStatElement(interp, listObj, "uid", sb->st_uid);
 	AppendStatElement(interp, listObj, "gid", sb->st_gid);
 	AppendStatElement(interp, listObj, "size", sb->st_size);
@@ -312,8 +317,8 @@ static __device__ int file_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *con
 	}
 	while (argc--) {
 		const char *path = Jim_String(argv[0]);
-		if (_unlink(path) == -1 && errno != ENOENT) {
-			if (_rmdir(path) == -1)
+		if (unlink(path) == -1 && errno != ENOENT) {
+			if (rmdir(path) == -1)
 				if (!force || Jim_EvalPrefix(interp, "file delete force", 1, argv) != JIM_OK) { // Maybe try using the script helper
 					Jim_SetResultFormatted(interp, "couldn't delete file \"%s\": %s", path, strerror(errno));
 					return JIM_ERROR;
@@ -324,14 +329,10 @@ static __device__ int file_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *con
 	return JIM_OK;
 }
 
-#if __CUDACC__
-#define MKDIR_DEFAULT(PATHNAME) __mkdir(PATHNAME)
-#else
-#ifdef HAVE_MKDIR_ONE_ARG
+#if defined(HAVE_MKDIR_ONE_ARG) && !defined(__CUDA_ARCH__)
 #define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME)
 #else
 #define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME, 0755)
-#endif
 #endif
 
 // Create directory, creating all intermediate paths if necessary.
@@ -392,7 +393,7 @@ static __device__ int file_cmd_tempfile(Jim_Interp *interp, int argc, Jim_Obj *c
 	int fd = Jim_MakeTempFile(interp, (argc >= 1) ? Jim_String(argv[0]) : NULL);
 	if (fd < 0)
 		return JIM_ERROR;
-	_close(fd);
+	close(fd);
 	return JIM_OK;
 }
 

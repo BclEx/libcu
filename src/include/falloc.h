@@ -1,8 +1,8 @@
 /*
-ctype.h - Character handling
+falloc.h - Forward-only memory allocator
 The MIT License
 
-Copyright (c) 2016 Sky Morey
+Copyright (c) 2010 Sky Morey
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,62 +23,82 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//#pragma once
+#pragma once
 
-#ifndef _CTYPECU_H
-	extern __constant__ unsigned char __curtUpperToLower[256];
-	extern __constant__ unsigned char __curtCtypeMap[256]; 
-	extern __forceinline __device__ int isctype(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
+///////////////////////////////////////////////////////////////////////////////
+// HOST SIDE
+// External function definitions for host-side code
+#pragma region HOST SIDE
+
+typedef struct
+{
+	void *reserved;
+	void *deviceHeap;
+	size_t chunkSize;
+	size_t chunksLength;
+	size_t length;
+} cudaDeviceFallocHeap;
+
+//	cudaFallocSetDefaultHeap
+extern "C" cudaError_t cudaFallocSetDefaultHeap(cudaDeviceFallocHeap &heap);
+
+//	cudaDeviceFallocCreate
+//
+//	Call this to initialize a falloc heap. If the buffer size needs to be changed, call cudaDeviceFallocDestroy()
+//	before re-calling cudaDeviceFallocCreate().
+//
+//	The default size for the buffer is 1 megabyte. The buffer is filled linearly and
+//	is completely used.
+//
+//	Arguments:
+//		length - Length, in bytes, of total space to reserve (in device global memory) for output.
+//
+//	Returns:
+//		cudaDeviceFalloc if all is well.
+//
+// default 2k chunks, 1-meg heap
+extern "C" cudaDeviceFallocHeap cudaDeviceFallocHeapCreate(size_t chunkSize = 2046, size_t length = 1048576, cudaError_t *error = nullptr, void *reserved = nullptr);
+
+//	cudaDeviceFallocDestroy
+//
+//	Cleans up all memories allocated by cudaDeviceFallocCreate() for a heap.
+//	Call this at exit, or before calling cudaDeviceFallocCreate() again.
+//
+//	Arguments:
+//		heap - device heap as valuetype
+//
+//	Returns:
+//		cudaSuccess if all is well.
+extern "C" cudaError_t cudaDeviceFallocHeapDestroy(cudaDeviceFallocHeap &heap);
+
+#pragma endregion
+
+///////////////////////////////////////////////////////////////////////////////
+// DEVICE SIDE
+// External function definitions for device-side code
+#pragma region DEVICE SIDE
+#if __CUDACC__
+
+typedef struct cuFallocDeviceHeap fallocDeviceHeap;
+extern __constant__ fallocDeviceHeap *_defaultDeviceHeap;
+extern "C" __device__ void *fallocGetChunk(fallocDeviceHeap *heap = nullptr);
+extern "C" __device__ void fallocFreeChunk(void *obj, fallocDeviceHeap *heap = nullptr);
+#if MULTIBLOCK
+extern "C" __device__ void *fallocGetChunks(size_t length, size_t *allocLength = nullptr, fallocDeviceHeap *heap = nullptr);
+extern "C" __device__ void fallocFreeChunks(void *obj, fallocDeviceHeap *heap = nullptr);
 #endif
 
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-#ifndef _CTYPECU_H
-#define _CTYPECU_H
-#define _CTYPE_H
-#define _INC_CTYPE
-#include <crtdefscu.h>
+// CONTEXT
+typedef struct cuFallocCtx fallocCtx;
+extern "C" __device__ fallocCtx *fallocCreateCtx(fallocDeviceHeap *heap = nullptr);
+extern "C" __device__ void fallocDisposeCtx(fallocCtx *ctx);
+extern "C" __device__ void *falloc(fallocCtx *ctx, unsigned short bytes, bool alloc = true);
+extern "C" __device__ void *fallocRetract(fallocCtx *ctx, unsigned short bytes);
+extern "C" __device__ void fallocMark(fallocCtx *ctx, void *&mark, unsigned short &mark2);
+extern "C" __device__ bool fallocAtMark(fallocCtx *ctx, void *mark, unsigned short mark2);
+template <typename T> __device__ __forceinline T *falloc(fallocCtx *ctx) { return (T *)falloc(ctx, sizeof(T), true); }
+template <typename T> __device__ __forceinline void fallocPush(fallocCtx *ctx, T t) { *((T *)falloc(ctx, sizeof(T), false)) = t; }
+template <typename T> __device__ __forceinline T fallocPop(fallocCtx *ctx) { return *((T *)fallocRetract(ctx, sizeof(T))); }
 
-#ifdef  __cplusplus
-extern "C" {
 #endif
-
-	/* set bit masks for the possible character types */
-#define _DIGIT          0x04     /* digit[0-9] */
-#define _HEX            0x08    /* hexadecimal digit */
-
-	extern __forceinline __device__ int isalnum(int c) { return (__curtCtypeMap[(unsigned char)c]&0x06)!=0; }
-	extern __forceinline __device__ int isalpha(int c) { return (__curtCtypeMap[(unsigned char)c]&0x02)!=0; }
-	extern __forceinline __device__ int iscntrl(int c) { return (unsigned char)c<=0x1f||(unsigned char)c==0x7f; }
-	extern __forceinline __device__ int isdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x04)!=0; }
-	extern __forceinline __device__ int islower(int c) { return __curtUpperToLower[(unsigned char)c]==c; }
-	extern __forceinline __device__ int isgraph(int c) { return 0; }
-	extern __forceinline __device__ int isprint(int c) { return (unsigned char)c>0x1f&&(unsigned char)c!=0x7f; }
-	extern __forceinline __device__ int ispunct(int c) { return 0; }
-	extern __forceinline __device__ int isspace(int c) { return (__curtCtypeMap[(unsigned char)c]&0x01)!=0; }
-	extern __forceinline __device__ int isupper(int c) { return (c&~(__curtCtypeMap[(unsigned char)c]&0x20))==c; }
-	extern __forceinline __device__ int isxdigit(int c) { return (__curtCtypeMap[(unsigned char)c]&0x08)!=0; }
-
-	/* Return the lowercase version of C.  */
-	extern __forceinline __device__ int tolower(int c) { return __curtUpperToLower[(unsigned char)c]; }
-
-	/* Return the uppercase version of C.  */
-	extern __forceinline __device__ int toupper(int c) { return c&~(__curtCtypeMap[(unsigned char)c]&0x20); }
-
-#define _tolower(c) (char)((c)-'A'+'a')
-#define _toupper(c) (char)((c)-'a'+'A')
-
-	/*C99*/
-	extern __forceinline __device__ int isblank(int c) { return c == '\t' || c == ' '; }
-
-	extern __forceinline __device__ int isidchar(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
-
-#ifdef  __cplusplus
-}
-#endif
-
-#endif  /* _CTYPECU_H */
-#else
-#include <ctype.h>
-#define isidchar 0
-#define isblank(c) ((c) == '\t' || (c) == ' ')
-#endif
+#pragma endregion

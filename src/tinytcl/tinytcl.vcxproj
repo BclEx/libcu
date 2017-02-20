@@ -23,8 +23,11 @@
     <ShortPlatform Condition="'$(Platform)'=='Win32'">x86</ShortPlatform>
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(CUARCH)'!='cpu'">
     <CudaCompile Include="tinySh.cu" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CUARCH)'=='cpu'">
+    <ClCompile Include="tinySh.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu-tinytcl.native.nuspec" />

@@ -87,17 +87,16 @@ int gpuGetMaxGflopsDevice()
 
 char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaError_t *error)
 {
-	int i;
-	int vectorSize;
-	int size = vectorSize = (int)(sizeof(char *) * length);
+	size_t i;
+	size_t vectorSize;
+	size_t size = vectorSize = (size_t)(sizeof(char *) * length);
 	for (i = 0; i < length; i++)
-		size += (value[i] ? (int)strlen(value[i]) + 1 : 0);
+		size += (value[i] ? strlen(value[i]) + 1 : 0);
 	char *ptr = (char *)malloc(size);
 	if (!ptr)
 	{
 		printf("cudaDeviceTransferStringArray: RC_NOMEM");
-		if (error)
-			*error = cudaErrorMemoryAllocation;
+		if (error) *error = cudaErrorMemoryAllocation;
 		return nullptr;
 	}
 	memset(ptr, 0, size);
@@ -106,7 +105,7 @@ char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaErr
 	ptr += vectorSize;
 	for (i = 0; i < length; i++) {
 		if (value[i]) {
-			int valueLength = (int)strlen(value[i]) + 1;
+			size_t valueLength = strlen(value[i]) + 1;
 			memcpy((void *)ptr, value[i], valueLength);
 			ptr += valueLength;
 		}
@@ -115,7 +114,7 @@ char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaErr
 	char *d = ptr;
 	ptr += vectorSize;
 	for (i = 0; i < length; i++) {
-		int valueLength = (int)strlen(value[i]) + 1;
+		size_t valueLength = strlen(value[i]) + 1;
 		vector[i] = (value[i] ? ptr : nullptr);
 		ptr += valueLength;
 	}

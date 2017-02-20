@@ -38,7 +38,7 @@ int Jim_LoadLibrary(Jim_Interp *interp, const char *pathName)
 		pt = strchr(pkgname, '.');
 		int pkgnamelen = (int)(pt ? pt - pkgname : strlen(pkgname));
 		char initsym[40];
-		_snprintf(initsym, sizeof(initsym), "Jim_%.*sInit", pkgnamelen, pkgname);
+		snprintf(initsym, sizeof(initsym), "Jim_%.*sInit", pkgnamelen, pkgname);
 		jim_module_init_func_type *onload;
 		if ((onload = (jim_module_init_func_type *)dlsym(handle, initsym)) == NULL)
 			Jim_SetResultFormatted(interp, "No %s symbol found in extension %s", initsym, pathName);

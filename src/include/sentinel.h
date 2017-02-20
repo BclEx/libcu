@@ -62,7 +62,7 @@ extern "C" {
 #define SENTINELOFFSET(O) 0
 #endif
 
-	typedef struct //__align__(16)
+	typedef struct __align__(8)
 	{
 		unsigned short Magic;
 		volatile long Status;
@@ -74,7 +74,7 @@ extern "C" {
 		void Dump(long offset);
 	} sentinelCommand;
 
-	typedef struct //__align__(16)
+	typedef struct __align__(8)
 	{
 		long GetId;
 		volatile long SetId;

@@ -46,13 +46,13 @@
 */
 #pragma endregion
 
-//#include <errno.h>
 //#include <stdio.h>
 //#include <string.h>
 #include "jim.h"
 #include "jimautoconf.h"
+#include <errnocu.h>
 #ifdef HAVE_DIRENT_H
-#include <dirent.h>
+#include <direntcu.h>
 #endif
 
 // Jim_ReaddirCmd --

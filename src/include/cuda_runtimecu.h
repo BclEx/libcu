@@ -31,16 +31,11 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #include <stringcu.h>
-#include <timecu.h>
 #include <stddefcu.h>
 #include <stdargcu.h>
 #include <stdiocu.h>
 #include <stdlibcu.h>
-
-//#if defined(__cplusplus) && defined(_GLIBCPP_USE_NAMESPACES)
-//using namespace __c99;
-//#else
-//#endif
+#include <timecu.h>
 
 #undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>

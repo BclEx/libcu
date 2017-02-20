@@ -46,6 +46,7 @@ struct primaryData_t {
 } h_dataP;
 
 // MAIN-INIT
+#if __CUDACC__
 __device__ struct primaryData_t d_dataP;
 void D_DATAP() { cudaErrorCheck(cudaMemcpyToSymbol(d_dataP, &h_dataP, sizeof(h_dataP))); }
 void H_DATAP() { cudaErrorCheck(cudaMemcpyFromSymbol(&h_dataP, d_dataP, sizeof(h_dataP))); }
@@ -53,7 +54,11 @@ void H_DATAP() { cudaErrorCheck(cudaMemcpyFromSymbol(&h_dataP, d_dataP, sizeof(h
 //#define _exit(v) _dataP.quitFlag = true; _dataP.retcode = 1; return
 #define _dataP d_dataP
 __global__ void g_MainInit(int argc, char *const argv[]) {
-
+#else
+#define _dataP h_dataP
+static void MainInit(int argc, char *const argv[]) {
+	memset(&h_dataP, 0, sizeof(h_dataP));
+#endif
 	Tcl_Interp *interp = _dataP.interp = Tcl_CreateInterp();
 #ifdef TCL_MEM_DEBUG
 	Tcl_InitMemory(interp);
@@ -151,7 +156,21 @@ void InteractivePrompt() {
 }
 
 // INTERACTIVE-EXEC
+#if __CUDACC__
+__global__ void g_InteractiveExecute(char *line);
+static void InteractiveExecute(char *line) {
+	char *d_line;
+	int size = strlen(line) + 1;
+	cudaErrorCheck(cudaMalloc((void **)&d_line, size));
+	cudaErrorCheck(cudaMemcpy(d_line, line, size, cudaMemcpyHostToDevice));
+	D_DATAP(); g_InteractiveExecute<<<1,1>>>(d_line); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
+	cudaFree(d_line);
+}
+
 __global__ void g_InteractiveExecute(char *line) {
+#else
+static void InteractiveExecute(char *line) {
+#endif
 	Tcl_Interp *interp = _dataP.interp;
 	Tcl_CmdBuf buffer = _dataP.buffer;
 	char *cmd = Tcl_AssembleCmd(buffer, line);
@@ -185,23 +204,19 @@ __global__ void g_InteractiveExecute(char *line) {
 	}
 }
 
-static void InteractiveExecute(char *line) {
-	char *d_line;
-	int size = strlen(line) + 1;
-	cudaErrorCheck(cudaMalloc((void **)&d_line, size));
-	cudaErrorCheck(cudaMemcpy(d_line, line, size, cudaMemcpyHostToDevice));
-	D_DATAP(); g_InteractiveExecute<<<1,1>>>(d_line); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
-	cudaFree(d_line);
-}
-
 // MAIN-SHUTDOWN
-__global__ void g_MainShutdown() {
-}
+#if __CUDACC__
+__global__ void g_MainShutdown();
 static int MainShutdown() {
 	D_DATAP(); g_MainShutdown<<<1,1>>>(); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
 	sentinelServerShutdown();
 	cudaDeviceReset();
 	return h_dataP.retcode;
+}
+__global__ void g_MainShutdown() {
+#else
+static void MainShutdown() {
+#endif
 }
 
 int main(int argc, char *const argv[])

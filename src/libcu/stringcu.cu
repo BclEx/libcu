@@ -4,9 +4,6 @@
 #include <assert.h>
 
 __BEGIN_DECLS;
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
 
 /* Copy N bytes of SRC to DEST.  */
 //builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
@@ -14,8 +11,7 @@ __BEGIN_DECLS;
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
 __device__ void *memmove(void *dest, const void *src, size_t n)
 {
-	if (!n)
-		return dest;
+	if (!n) return dest;
 	register unsigned char *a = (unsigned char *)dest;
 	register unsigned char *b = (unsigned char *)src;
 	if (a == b) return a; // No need to do that thing.
@@ -34,8 +30,7 @@ __device__ void *memmove(void *dest, const void *src, size_t n)
 /* Compare N bytes of S1 and S2.  */
 __device__ int memcmp(const void *s1, const void *s2, size_t n)
 {
-	if (!n)
-		return 0;
+	if (!n) return 0;
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (--n > 0 && *a == *b) { a++; b++; }
@@ -46,8 +41,7 @@ __device__ int memcmp(const void *s1, const void *s2, size_t n)
 #ifdef __CUDA_ARCH
 __device__ void *memchr(const void *s, int c, size_t n)
 {
-	if (!n)
-		return nullptr;
+	if (!n) return nullptr;
 	register const char *p = (const char *)s;
 	do {
 		if (*p++ == c)
@@ -145,6 +139,25 @@ __device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, siz
 	return 0;
 }
 
+/* Duplicate S, returning an identical malloc'd string.  */
+__device__ char *strdup(const char *s)
+{
+	const char *old = s;
+	size_t len = strlen(old) + 1;
+	char *new_ = (char *)malloc(len);
+	(char *)memcpy(new_, old, len);	
+}
+
+/* Return a malloc'd copy of at most N bytes of STRING.  The resultant string is terminated even if no null terminator appears before STRING[N].  */
+__device__ char *strndup(const char *s, size_t n)
+{
+	const char *old = s;
+	size_t len = strnlen(old, n);
+	char *new_ = (char *)malloc(len + 1);
+	new_[len] = '\0';
+	(char *)memcpy(new_, old, len);	
+}
+
 /* Find the first occurrence of C in S.  */
 __device__ char *strchr(const char *s, int c)
 {
@@ -157,8 +170,7 @@ __device__ char *strchr(const char *s, int c)
 /* Find the last occurrence of C in S.  */
 __device__ char *strrchr(const char *s, int c)
 {
-	char *save;
-	char c1;
+	char *save; char c1;
 	for (save = (char *)0; c1 = *s; s++)
 		if (c1 == c)
 			save = (char *)s;
@@ -195,8 +207,7 @@ __device__ char *strpbrk(const char *s, const char *accept)
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
 __device__ char *strstr(const char *haystack, const char *needle)
 {
-	if (!*needle)
-		return (char *)haystack;
+	if (!*needle) return (char *)haystack;
 	char *p1 = (char *)haystack, *p2 = (char *)needle;
 	char *p1Adv = (char *)haystack;
 	while (*++p2)
@@ -224,14 +235,32 @@ __device__ char *strtok(char *__restrict s, const char *__restrict delim)
 }
 
 /* inline: Return the length of S.  */
-//__device__ size_t strlen(const char *s)
+__device__ size_t strlen(const char *s)
+{
+	if (!s) return 0;
+	register const char *s2 = s;
+	while (*s2) { s2++; }
+	return 0x3fffffff & (int)(s2 - s);
+}
+
+/* inline: Return the length of S.  */
+//__device__ size_t strlen16(const void *s)
 //{
-//	if (!s)
-//		return 0;
-//	register const char *s2 = s;
-//	while (*s2) { s2++; }
-//	return 0x3fffffff & (int)(s2 - s);
+//	if (!s) return 0;
+//	register const char *s2 = (const char *)s;
+//	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
+//	return n;
 //}
+
+/* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
+__device__ size_t strnlen(const char *s, size_t maxlen)
+{
+	if (!s) return 0;
+	register const char *s2 = s;
+	register const char *s2m = s + maxlen;
+	while (*s2 && s2 <= s2m) { s2++; }
+	return 0x3fffffff & (int)(s2 - s);
+}
 
 __device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n)
 {
@@ -837,6 +866,3 @@ __device__ void strbldReset(strbld_t *b)
 #pragma endregion
 
 __END_DECLS;
-//#ifdef  __cplusplus
-//}
-//#endif

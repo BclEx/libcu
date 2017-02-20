@@ -4,7 +4,7 @@
 #include "jimautoconf.h"
 #include "jim-subcmd.h"
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#include <unistdcu.h>
 #else
 #define R_OK 4
 #endif
@@ -47,9 +47,9 @@ static __device__ char *JimFindPackage(Jim_Interp *interp, Jim_Obj *prefixListOb
 			return buf;
 #endif
 		if (strcmp(prefix, ".") == 0)
-			_snprintf(buf, JIM_PATH_LEN, "%s.tcl", pkgName);
+			snprintf(buf, JIM_PATH_LEN, "%s.tcl", pkgName);
 		else
-			_snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
+			snprintf(buf, JIM_PATH_LEN, "%s/%s.tcl", prefix, pkgName);
 		if (access(buf, R_OK) == 0)
 			return buf;
 	}

@@ -1,6 +1,8 @@
 #include <cuda_runtimecu.h>
 #include <unistdcu.h>
 
+__BEGIN_DECLS;
+
 /* Test for access to NAME using the real UID and real GID.  */
 __device__ int access(const char *name, int type)
 {
@@ -55,9 +57,17 @@ __device__ void usleep(unsigned long milliseconds)
 	}
 }
 
+/* Change the owner and group of FILE.  */
+__device__ int chown(const char *file, uid_t owner, gid_t group)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
 /* Change the process's working directory to PATH.  */
 __device__ int chdir(const char *path)
 {
+	panic("Not Implemented");
 	return 0;
 }
 
@@ -85,6 +95,20 @@ __device__ int dup2(int fd, int fd2)
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
 __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
 
-__BEGIN_DECLS;
 extern __device__ char **__environ = (char **)__environ_device;
+
+/* Remove the link NAME.  */
+__device__ int unlink(const char *name)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Remove the directory PATH.  */
+__device__ int rmdir(const char *path)
+{
+	panic("Not Implemented");
+	return 0;
+}
+
 __END_DECLS;
