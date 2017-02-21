@@ -29,7 +29,7 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #include <setjmp.h>
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
 //struct __jmp_buf_tag {

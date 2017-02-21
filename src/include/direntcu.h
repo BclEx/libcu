@@ -29,8 +29,7 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #include <_dirent.h>
-#ifdef __CUDA_ARCH__
-//#include <crtdefscu.h>
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 //#include <sys/types.h>
 __BEGIN_DECLS;
 

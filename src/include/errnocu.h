@@ -28,7 +28,7 @@ THE SOFTWARE.
 #define _ERRNOCU_H
 
 #include <errno.h>
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 
 extern __device__ int *_errno_(void);
 #define _errno _errno_

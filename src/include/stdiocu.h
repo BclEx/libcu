@@ -33,8 +33,7 @@ THE SOFTWARE.
 #endif
 
 #include <stdio.h>
-#ifdef __CUDA_ARCH__
-//#include <crtdefscu.h>
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #include <stdargcu.h>
 
 //typedef struct __STDIO_FILE_STRUCT FILE;

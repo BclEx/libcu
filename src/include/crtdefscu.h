@@ -28,8 +28,7 @@ THE SOFTWARE.
 #define _CRTDEFSCU_H
 
 #include <crtdefs.h>
-//#ifdef __CUDA_ARCH__
-////#include <stddefcu.h>
+//#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 //#endif  /* __CUDA_ARCH__ */
 
 //#ifdef  __cplusplus

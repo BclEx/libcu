@@ -28,8 +28,7 @@ THE SOFTWARE.
 #define _STDARGCU_H
 
 #include <stdarg.h>
-#ifdef __CUDA_ARCH__
-//#include <crtdefscu.h>
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 
 #define STDARGvoid(name, body, ...) \
 	__forceinline __device__ void name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); (body); _crt_va_end(va); } \
@@ -216,12 +215,10 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_list15 _crt_va_list15
 
 #else
-#define STDARGvoid(name, body, ...)
-//__forceinline void name(...) { }
+#define STDARGvoid(name, body, ...) __forceinline void name(...) { }
 #define STDARG2void(name, body, ...)
 #define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...)
-//__forceinline ret name(...) { }
+#define STDARG(ret, name, body, ...) __forceinline ret name(...) { }
 #define STDARG2(ret, name, body, ...)
 #define STDARG3(ret, name, body, ...)
 

@@ -29,13 +29,5 @@ THE SOFTWARE.
 
 #include <cuda_runtime.h>
 #include <host_functions.h>
-//
-//#undef va_start
-//#undef va_arg
-//#undef va_end
-//#define va_start _crt_va_start
-//#define va_restart _crt_va_restart
-//#define va_arg _crt_va_arg
-//#define va_end _crt_va_end
 
 #endif /* __CUDA_RUNTIMECU_H__ */

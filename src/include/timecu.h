@@ -29,7 +29,7 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #include <time.h>
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
 typedef long clock_t;

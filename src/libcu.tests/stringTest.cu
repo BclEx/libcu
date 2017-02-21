@@ -1,4 +1,6 @@
 #include <cuda_runtimecu.h>
+#include <stdiocu.h>
+#include <stringcu.h>
 #include <assert.h>
 
 static __global__ void g_string_test1()

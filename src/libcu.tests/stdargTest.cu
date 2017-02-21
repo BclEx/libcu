@@ -1,4 +1,6 @@
-#include <cuda_runtimecu.h>
+#include <cuda_runtime.h>
+#include <stdiocu.h>
+#include <stdargcu.h>
 #include <assert.h>
 
 static __global__ void g_stdarg_parse()

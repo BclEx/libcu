@@ -33,7 +33,7 @@ THE SOFTWARE.
 typedef short gid_t;
 typedef short uid_t;
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
 #undef access

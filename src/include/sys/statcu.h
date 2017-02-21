@@ -65,7 +65,7 @@ typedef int mode_t;
 ///* Read, write, and execute by others.  */
 //#define	S_IRWXO	(S_IRWXG >> 3)
 
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
 #ifndef __USE_FILE_OFFSET64

@@ -1,7 +1,7 @@
 #include <timecu.h>
 
 __BEGIN_DECLS;
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 
 // time
 __device__ time_t time_(time_t *timer)

@@ -36,8 +36,7 @@ extern __forceinline __device__ int isctype_(int c, int type) { return (__curtCt
 __END_DECLS;
 
 #include <ctype.h>
-#ifdef __CUDA_ARCH__
-//#include <crtdefscu.h>
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
 ///* set bit masks for the possible character types */

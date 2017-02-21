@@ -1,9 +1,11 @@
-#include <cuda_runtimecu.h>
+#include <cuda_runtime.h>
+#include <stdiocu.h>
 #include <ctypecu.h>
 #include <assert.h>
 
 static __global__ void g_ctype_test1()
 {
+	printf("ctype_test1\n");
 	//fprintf_(stdout, "ctype_test1\n");
 	bool a0 = isalnum('a'); bool a0n = isalnum('1'); assert(a0 && a0n);
 	bool a1 = isalpha('a'); bool a1n = isalpha('A'); assert(a1 && a1n);

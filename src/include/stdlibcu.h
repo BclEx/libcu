@@ -35,7 +35,7 @@ typedef int (*__compar_fn_t)(const void *, const void *);
 #endif
 
 #include <stdlib.h>
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #include <stddefcu.h>
 #include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;

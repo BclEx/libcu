@@ -1,4 +1,5 @@
-#include <cuda_runtimecu.h>
+#include <cuda_runtime.h>
+#include <stdiocu.h>
 #include <assert.h>
 
 static __global__ void g_stdio_test1()

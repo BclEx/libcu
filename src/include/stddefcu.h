@@ -31,7 +31,7 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 
 _Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
-#ifdef __CUDA_ARCH__
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __forceinline __device__ void Coverage(int line) { }
 #define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
 /* Define tag allocs */

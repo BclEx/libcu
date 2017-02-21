@@ -1,5 +1,5 @@
-#define LIBCUFORCE
-#include <cuda_runtimecu.h>
+#include <cuda_runtime.h>
+#include <stdiocu.h>
 #include <errnocu.h>
 #include <assert.h>
 

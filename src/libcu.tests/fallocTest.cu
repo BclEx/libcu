@@ -1,4 +1,3 @@
-#undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>
 #include <falloc.h>
 #include <assert.h>

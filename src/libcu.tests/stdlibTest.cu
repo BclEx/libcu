@@ -1,4 +1,7 @@
 #include <cuda_runtimecu.h>
+#include <stddefcu.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
 #include <assert.h>
 
 static __global__ void g_stdlib_test1()

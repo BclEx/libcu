@@ -4,6 +4,9 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #include "stdafx.h"
+#include <stdiocu.h>
+#include <stringcu.h>
+#include <sentinel.h>
 
 using namespace System;
 
