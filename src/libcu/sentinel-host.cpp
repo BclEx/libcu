@@ -12,6 +12,10 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	abort();
 #else
 	sentinelMap *map = _sentinelHostMap;
+	if (!map) {
+		printf("sentinel: device map not defined. did you start sentinel?\n");
+		exit(0);
+	}
 	int length = msgLength + msg->Size;
 	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];

@@ -1,9 +1,10 @@
-#include <cuda_runtimecu.h>
+#include <timecu.h>
 
 __BEGIN_DECLS;
+#ifdef __CUDA_ARCH__
 
 // time
-__device__ time_t time(time_t *timer)
+__device__ time_t time_(time_t *timer)
 {
 	clock_t start = clock();
 	time_t epoch = 0;
@@ -11,7 +12,7 @@ __device__ time_t time(time_t *timer)
 }
 
 // gettimeofday
-__device__ int gettimeofday(struct timeval *tp, void *tz)
+__device__ int gettimeofday_(struct timeval *tp, void *tz)
 {
 	time_t seconds = time(nullptr);
 	tp->tv_usec = 0;
@@ -23,4 +24,5 @@ __device__ int gettimeofday(struct timeval *tp, void *tz)
 	//return (_time(&tp->tv_sec) == (time_t)-1 ? -1 : 0);
 }
 
+#endif
 __END_DECLS;

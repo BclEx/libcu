@@ -24,9 +24,9 @@ THE SOFTWARE.
 */
 
 #pragma once
-
 #ifndef _SENTINEL_STDLIBMSG_H
 #define _SENTINEL_STDLIBMSG_H
+
 #include <sentinel.h>
 #include <stringcu.h>
 

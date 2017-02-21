@@ -24,10 +24,8 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef _FEATURESCU_H
 #define _FEATURESCU_H
-#define _FEATURES_H
 
 // sys/cdefs.h
 /* For these things, GCC behaves the ANSI way normally,

@@ -24,42 +24,44 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
-#include <host_definescu.h>
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-#ifndef _CRTDEFSCU_H
-
-#define _CRTDEFS_H
-#define _INC_VADEFS
-#include <crtdefs.h>
-#define _INC_CRTDEFS
-
-#define _INC_SWPRINTF_INL_
-#include <stddefcu.h>
-
-#endif  /* _CRTDEFSCU_H */
-#else
-#include <crtdefs.h>
-#endif
-
 #ifndef _CRTDEFSCU_H
 #define _CRTDEFSCU_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
 
-	/* Built In */
-	_CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
-	_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
-	_CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
-	_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
-	//void __cdecl free(void *memory);
-	//void * __cdecl malloc(size_t size);
-	//__declspec(noreturn) void __cdecl exit(int code);
-	//int __cdecl printf(const char *format, ...);
+#include <crtdefs.h>
+//#ifdef __CUDA_ARCH__
+////#include <stddefcu.h>
+//#endif  /* __CUDA_ARCH__ */
 
-#ifdef  __cplusplus
-}
+//#ifdef  __cplusplus
+//extern "C" {
+//#endif
+//
+//	/* Built In */
+//	_CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
+//	_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
+//	_CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
+//	_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+//	//void __cdecl free(void *memory);
+//	//void * __cdecl malloc(size_t size);
+//	//__declspec(noreturn) void __cdecl exit(int code);
+//	//int __cdecl printf(const char *format, ...);
+//
+//#ifdef  __cplusplus
+//}
+//#endif
+
+#define MEMORY_ALIGNMENT 4096
+#define _ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
+#define _ROUND8(x)			(((x)+7)&~7)
+#define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
+#define _ROUNDDOWN8(x)		((x)&~7)
+#define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
+#ifdef BYTEALIGNED4
+#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
+#else
+#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
-#endif
+#define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+
+#endif  /* _CRTDEFSCU_H */
+

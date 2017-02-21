@@ -24,20 +24,20 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _ERRNOCU_H
 #define _ERRNOCU_H
-#include <crtdefscu.h>
 
-#define _CRT_ERRNO_DEFINED
-extern __device__ int *_errno(void);
+#include <errno.h>
+#ifdef __CUDA_ARCH__
+
+extern __device__ int *_errno_(void);
+#define _errno _errno_
 #define errno (*_errno())
-extern __device__ errno_t _set_errno(int value);
-extern __device__ errno_t _get_errno(int *value);
+extern __device__ errno_t _set_errno_(int value);
+#define _set_errno _set_errno_
+extern __device__ errno_t _get_errno_(int *value);
+#define _get_errno _get_errno_
 
-#include <errno.h>
+#endif  /* __CUDA_ARCH__ */
+
 #endif  /* _ERRNOCU_H */
-#else
-#include <errno.h>
-#endif

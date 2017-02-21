@@ -1,10 +1,10 @@
-#include <cuda_runtimecu.h>
 #include <unistdcu.h>
+#include <stddefcu.h>
 
 __BEGIN_DECLS;
 
 /* Test for access to NAME using the real UID and real GID.  */
-__device__ int access(const char *name, int type)
+__device__ int access_(const char *name, int type)
 {
 	return 0;
 }
@@ -12,32 +12,32 @@ __device__ int access(const char *name, int type)
 /* Move FD's file position to OFFSET bytes from the beginning of the file (if WHENCE is SEEK_SET),
 the current position (if WHENCE is SEEK_CUR), or the end of the file (if WHENCE is SEEK_END).
 Return the new file position.  */
-__device__ off_t lseek(int fd, off_t offset, int whence)
+__device__ off_t lseek_(int fd, off_t offset, int whence)
 {
 	return 0;
 }
 
 #ifdef __USE_LARGEFILE64
-__device__ off64_t lseek64(int fd, off64_t offset, int whence)
+__device__ off64_t lseek64_(int fd, off64_t offset, int whence)
 {
 	return 0;
 }
 #endif
 
 /* Close the file descriptor FD.  */
-__device__ int close(int fd)
+__device__ int close_(int fd)
 {
 	return 0;
 }
 
 /* Read NBYTES into BUF from FD.  Return the number read, -1 for errors or 0 for EOF.  */
-__device__ size_t read(int fd, void *buf, size_t nbytes)
+__device__ size_t read_(int fd, void *buf, size_t nbytes)
 {
 	return 0;
 }
 
 /* Write N bytes of BUF to FD.  Return the number written, or -1.  */
-__device__ size_t write(int fd, const void *buf, size_t n)
+__device__ size_t write_(int fd, const void *buf, size_t n)
 {
 	return 0;
 }
@@ -46,7 +46,7 @@ __device__ size_t write(int fd, const void *buf, size_t n)
 than SECONDS which it actually slept (thus zero if it slept the full time). If a signal handler does a `longjmp' or modifies the handling of the
 SIGALRM signal while inside `sleep' call, the handling of the SIGALRM signal afterwards is undefined.  There is no return value to indicate
 error, but if `sleep' returns SECONDS, it probably didn't work.  */
-__device__ void usleep(unsigned long milliseconds)
+__device__ void usleep_(unsigned long milliseconds)
 {
 	clock_t start = clock();
 	clock_t end = milliseconds * 10;
@@ -58,14 +58,14 @@ __device__ void usleep(unsigned long milliseconds)
 }
 
 /* Change the owner and group of FILE.  */
-__device__ int chown(const char *file, uid_t owner, gid_t group)
+__device__ int chown_(const char *file, uid_t owner, gid_t group)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Change the process's working directory to PATH.  */
-__device__ int chdir(const char *path)
+__device__ int chdir_(const char *path)
 {
 	panic("Not Implemented");
 	return 0;
@@ -75,19 +75,19 @@ __device__ int chdir(const char *path)
 directory couldn't be determined or SIZE was too small. If successful, returns BUF.  In GNU, if BUF is NULL,
 an array is allocated with `malloc'; the array is SIZE bytes long, unless SIZE == 0, in which case it is as
 big as necessary.  */
-__device__ char *getcwd(char *buf, size_t size)
+__device__ char *getcwd_(char *buf, size_t size)
 {
 	return "GPU";
 }
 
 /* Duplicate FD, returning a new file descriptor on the same file.  */
-__device__ int dup(int fd)
+__device__ int dup_(int fd)
 {
 	return 0;
 }
 
 /* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-__device__ int dup2(int fd, int fd2)
+__device__ int dup2_(int fd, int fd2)
 {
 	return 0;
 }
@@ -95,17 +95,17 @@ __device__ int dup2(int fd, int fd2)
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
 __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
 
-extern __device__ char **__environ = (char **)__environ_device;
+extern __device__ char **_environ_ = (char **)__environ_device;
 
 /* Remove the link NAME.  */
-__device__ int unlink(const char *name)
+__device__ int unlink_(const char *name)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Remove the directory PATH.  */
-__device__ int rmdir(const char *path)
+__device__ int rmdir_(const char *path)
 {
 	panic("Not Implemented");
 	return 0;

@@ -24,8 +24,28 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef _STDDEFCU_H
+#define _STDDEFCU_H
+
+#include <stddef.h>
+#include <crtdefscu.h>
+
+_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+#ifdef __CUDA_ARCH__
+__forceinline __device__ void Coverage(int line) { }
+#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
+/* Define tag allocs */
+__forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
+__forceinline __device__ void tagfree(void *tag, void *p) { }
+__forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
+#else
+__forceinline void Coverage(int line) { }
+#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
+/* Define tag allocs */
+__forceinline void *tagalloc(void *tag, size_t size) { return nullptr; }
+__forceinline void tagfree(void *tag, void *p) { }
+__forceinline void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
+#endif  /* __CUDA_ARCH__ */
 
 /* CUDA double64 is double */
 #ifndef double64
@@ -43,72 +63,4 @@ THE SOFTWARE.
 #define _ALWAYS(X) (X)
 #define _NEVER(X) (X)
 
-#endif
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-#ifndef _STDDEFCU_H
-#define _STDDEFCU_H
-#define _STDDEF_H
-#define _INC_STDDEF
-#include <crtdefscu.h>
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-__forceinline __device__ void Coverage(int line) { }
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
-/* Define tag allocs */
-__forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
-__forceinline __device__ void tagfree(void *tag, void *p) { }
-__forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
-
-	/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL 0
-#else
-#define NULL ((void *)0)
-#endif
-#endif
-
-#ifdef __cplusplus
-	namespace std { typedef decltype(__nullptr) nullptr_t; }
-	using ::std::nullptr_t;
-#endif
-
-	/* Define offsetof macro */
-#ifdef __cplusplus
-
-#ifdef  _WIN64
-#define offsetof(s,m) (size_t)((ptrdiff_t)&reinterpret_cast<const volatile char&>((((s *)0)->m)))
-#else
-#define offsetof(s,m) (size_t)&reinterpret_cast<const volatile char&>((((s *)0)->m))
-#endif
-
-#else
-
-#ifdef  _WIN64
-#define offsetof(s,m) (size_t)( (ptrdiff_t)&(((s *)0)->m) )
-#else
-#define offsetof(s,m) (size_t)&(((s *)0)->m)
-#endif
-
-#endif	/* __cplusplus */
-
-	//	_CRTIMP extern unsigned long  __cdecl __threadid(void);
-	//#define _threadid (__threadid())
-	//	_CRTIMP extern uintptr_t __cdecl __threadhandle(void);
-
-#ifdef  __cplusplus
-}
-#endif
 #endif  /* _STDDEFCU_H */
-#else
-#include <stddef.h>
-__forceinline void Coverage(int line) { }
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
-/* Define tag allocs */
-__forceinline void *tagalloc(void *tag, size_t size) { return nullptr; }
-__forceinline void tagfree(void *tag, void *p) { }
-__forceinline void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
-#endif

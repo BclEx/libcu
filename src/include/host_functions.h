@@ -24,11 +24,10 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef __HOST_FUNCTIONS_H__
 #define __HOST_FUNCTIONS_H__
-#include <cuda_runtime_api.h>
 
+#include <cuda_runtime_api.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

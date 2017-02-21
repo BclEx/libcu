@@ -1,18 +1,20 @@
 #include <cuda_runtimecu.h>
+#include <featurescu.h>
+#include <stddefcu.h>
+#include <stdlibcu.h>
 #include <sentinel.h>
 
-#if HAS_DEVICESENTINEL
 __BEGIN_DECLS;
+
+#if HAS_DEVICESENTINEL
 
 __device__ volatile unsigned int _sentinelMapId;
 __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 {
 	sentinelMap *map = _sentinelDeviceMap[_sentinelMapId++ % SENTINEL_DEVICEMAPS];
-	if (!map) {
-		printf("sentinel: device map not defined. did you start sentinel?\n");
-		abort();
-	}
+	if (!map)
+		panic("sentinel: device map not defined. did you start sentinel?\n");
 	int length = msgLength + msg->Size;
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
@@ -20,10 +22,8 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, SENTINELOFFSET(map->Offset))) {
-		printf("msg too long");
-		abort();
-	}
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, SENTINELOFFSET(map->Offset)))
+		panic("msg too long");
 	memcpy(cmd->Data, msg, msgLength);
 	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
 
@@ -35,5 +35,6 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 	}
 }
 
-__END_DECLS;
 #endif
+
+__END_DECLS;

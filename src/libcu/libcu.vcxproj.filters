@@ -67,15 +67,6 @@
     <ClInclude Include="..\include\bits\libcu_stat.h">
       <Filter>include\bits</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\limitscu.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\host_functions.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\host_definescu.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\featurescu.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -92,6 +83,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\setjmpcu.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\host_functions.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -121,8 +115,8 @@
   <ItemGroup>
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
-    <ClCompile Include="host_functions.cpp" />
     <ClCompile Include="sentinel.cpp" />
+    <ClCompile Include="host_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libcu.Native.nuspec" />
@@ -133,25 +127,25 @@
     <None Include="_content\sample.libcu.ganging.cu">
       <Filter>_content</Filter>
     </None>
+    <None Include="ctypecu.cu" />
+    <None Include="sentinel-gpu.cu" />
     <None Include="direntcu.cu" />
     <None Include="errnocu.cu" />
     <None Include="regexcu.cu" />
     <None Include="setjmpcu.cu" />
     <None Include="stdiocu.cu" />
     <None Include="stdlibcu.cu" />
-    <None Include="stringcu.cu" />
     <None Include="timecu.cu" />
     <None Include="unistdcu.cu" />
-    <None Include="sys\statcu.cu">
+    <None Include="sys\bitveccu.cu">
       <Filter>sys</Filter>
     </None>
-    <None Include="sys\bitveccu.cu">
+    <None Include="sys\statcu.cu">
       <Filter>sys</Filter>
     </None>
     <None Include="sys\hashcu.cu">
       <Filter>sys</Filter>
     </None>
-    <None Include="sentinel-gpu.cu" />
-    <None Include="ctypecu.cu" />
+    <None Include="stringcu.cu" />
   </ItemGroup>
 </Project>

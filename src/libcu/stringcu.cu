@@ -1,4 +1,7 @@
-#include <cuda_runtimecu.h>
+#include <stringcu.h>
+#include <stdlibcu.h>
+#include <stdargcu.h>
+#include <stddefcu.h>
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
@@ -9,7 +12,7 @@ __BEGIN_DECLS;
 //builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
 
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
-__device__ void *memmove(void *dest, const void *src, size_t n)
+__device__ void *memmove_(void *dest, const void *src, size_t n)
 {
 	if (!n) return dest;
 	register unsigned char *a = (unsigned char *)dest;
@@ -38,8 +41,7 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 }
 
 /* Search N bytes of S for C.  */
-#ifdef __CUDA_ARCH
-__device__ void *memchr(const void *s, int c, size_t n)
+__device__ void *memchr_(const void *s, int c, size_t n)
 {
 	if (!n) return nullptr;
 	register const char *p = (const char *)s;
@@ -49,7 +51,6 @@ __device__ void *memchr(const void *s, int c, size_t n)
 	} while (--n > 0);
 	return nullptr;
 }
-#endif
 
 /* Copy SRC to DEST.  */
 __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
@@ -61,7 +62,7 @@ __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 }
 
 /* Copy no more than N characters of SRC to DEST.  */
-__device__ char *strncpy(char *__restrict dest, const char *__restrict src, size_t n)
+__device__ char *strncpy_(char *__restrict dest, const char *__restrict src, size_t n)
 {
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
@@ -82,7 +83,7 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 }
 
 /* Append no more than N characters from SRC onto DEST.  */
-__device__ char *strncat(char *__restrict dest, const char *__restrict src, size_t n)
+__device__ char *strncat_(char *__restrict dest, const char *__restrict src, size_t n)
 {
 	register unsigned char *d = (unsigned char *)dest;
 	while (*d) d++;
@@ -100,7 +101,7 @@ __device__ int strcmp_(const char *s1, const char *s2)
 	return *a - *b;
 }
 /* Compare S1 and S2. Case insensitive.  */
-__device__ int stricmp(const char *s1, const char *s2)
+__device__ int stricmp_(const char *s1, const char *s2)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
@@ -109,7 +110,7 @@ __device__ int stricmp(const char *s1, const char *s2)
 }
 
 /* Compare N characters of S1 and S2.  */
-__device__ int strncmp(const char *s1, const char *s2, size_t n)
+__device__ int strncmp_(const char *s1, const char *s2, size_t n)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
@@ -117,7 +118,7 @@ __device__ int strncmp(const char *s1, const char *s2, size_t n)
 	return (!n ? 0 : *a - *b);
 }
 /* Compare N characters of S1 and S2. Case insensitive.  */
-__device__ int strnicmp(const char *s1, const char *s2, size_t n)
+__device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 {
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
@@ -126,40 +127,42 @@ __device__ int strnicmp(const char *s1, const char *s2, size_t n)
 }
 
 /* Compare the collated forms of S1 and S2.  */
-__device__ int strcoll(const char *s1, const char *s2)
+__device__ int strcoll_(const char *s1, const char *s2)
 {
 	panic("Not Implemented");
 	return -1;
 }
 
 /* Put a transformation of SRC into no more than N bytes of DEST.  */
-__device__ size_t strxfrm(char *__restrict dest, const char *__restrict src, size_t n)
+__device__ size_t strxfrm_(char *__restrict dest, const char *__restrict src, size_t n)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Duplicate S, returning an identical malloc'd string.  */
-__device__ char *strdup(const char *s)
+__device__ char *strdup_(const char *s)
 {
 	const char *old = s;
 	size_t len = strlen(old) + 1;
 	char *new_ = (char *)malloc(len);
 	(char *)memcpy(new_, old, len);	
+	return new_;
 }
 
 /* Return a malloc'd copy of at most N bytes of STRING.  The resultant string is terminated even if no null terminator appears before STRING[N].  */
-__device__ char *strndup(const char *s, size_t n)
+__device__ char *strndup_(const char *s, size_t n)
 {
 	const char *old = s;
 	size_t len = strnlen(old, n);
 	char *new_ = (char *)malloc(len + 1);
 	new_[len] = '\0';
 	(char *)memcpy(new_, old, len);	
+	return new_;
 }
 
 /* Find the first occurrence of C in S.  */
-__device__ char *strchr(const char *s, int c)
+__device__ char *strchr_(const char *s, int c)
 {
 	register unsigned char *s1 = (unsigned char *)s;
 	register unsigned char l = (unsigned char)__curtUpperToLower[c];
@@ -168,7 +171,7 @@ __device__ char *strchr(const char *s, int c)
 }
 
 /* Find the last occurrence of C in S.  */
-__device__ char *strrchr(const char *s, int c)
+__device__ char *strrchr_(const char *s, int c)
 {
 	char *save; char c1;
 	for (save = (char *)0; c1 = *s; s++)
@@ -178,21 +181,21 @@ __device__ char *strrchr(const char *s, int c)
 }
 
 /* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
-__device__ size_t strcspn(const char *s, const char *reject)
+__device__ size_t strcspn_(const char *s, const char *reject)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Return the length of the initial segment of S which consists entirely of characters in ACCEPT.  */
-__device__ size_t strspn(const char *s, const char *accept)
+__device__ size_t strspn_(const char *s, const char *accept)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Find the first occurrence in S of any character in ACCEPT.  */
-__device__ char *strpbrk(const char *s, const char *accept)
+__device__ char *strpbrk_(const char *s, const char *accept)
 {
 	register const char *scanp;
 	register int c, sc;
@@ -205,7 +208,7 @@ __device__ char *strpbrk(const char *s, const char *accept)
 }
 
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
-__device__ char *strstr(const char *haystack, const char *needle)
+__device__ char *strstr_(const char *haystack, const char *needle)
 {
 	if (!*needle) return (char *)haystack;
 	char *p1 = (char *)haystack, *p2 = (char *)needle;
@@ -228,14 +231,14 @@ __device__ char *strstr(const char *haystack, const char *needle)
 }
 
 /* Divide S into tokens separated by characters in DELIM.  */
-__device__ char *strtok(char *__restrict s, const char *__restrict delim)
+__device__ char *strtok_(char *__restrict s, const char *__restrict delim)
 {
 	panic("Not Implemented");
 	return nullptr;
 }
 
 /* inline: Return the length of S.  */
-__host__ __device__ size_t strlen_(const char *s)
+__device__ size_t strlen_(const char *s)
 {
 	if (!s) return 0;
 	register const char *s2 = s;
@@ -253,7 +256,7 @@ __host__ __device__ size_t strlen_(const char *s)
 //}
 
 /* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
-__device__ size_t strnlen(const char *s, size_t maxlen)
+__device__ size_t strnlen_(const char *s, size_t maxlen)
 {
 	if (!s) return 0;
 	register const char *s2 = s;
@@ -262,14 +265,14 @@ __device__ size_t strnlen(const char *s, size_t maxlen)
 	return 0x3fffffff & (int)(s2 - s);
 }
 
-__device__ void *mempcpy(void *__restrict dest, const void *__restrict src, size_t n)
+__device__ void *mempcpy_(void *__restrict dest, const void *__restrict src, size_t n)
 {
 	panic("Not Implemented");
 	return nullptr;
 }
 
 /* Return a string describing the meaning of the `errno' code in ERRNUM.  */
-__device__ char *strerror(int errnum)
+__device__ char *strerror_(int errnum)
 {
 	return "ERROR";
 }
@@ -388,7 +391,7 @@ __device__ void strbldAppendSpace(strbld_t *b, int length)
 }
 
 static __constant__ const char _ord[] = "thstndrd";
-__device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list args)
+__device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list va)
 {
 	char buf[BUFSIZE]; // Conversion buffer
 	char *bufpt = nullptr; // Pointer to the conversion buffer
@@ -430,7 +433,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		// Get the field width
 		width = 0; // Width of the current field
 		if (c == '*') {
-			width = va_arg(args, int);
+			width = va_arg(va, int);
 			if (width < 0) {
 				flag_leftjustify = true;
 				width = -width;
@@ -447,7 +450,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			precision = 0;
 			c = *++fmt;
 			if (c == '*') {
-				precision = va_arg(args, int);
+				precision = va_arg(va, int);
 				if (precision < 0) precision = -precision;
 				c = *++fmt;
 			}
@@ -522,9 +525,9 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		case TYPE_RADIX:
 			if (info->flags & FLAG_SIGNED) {
 				long long v;
-				if (flag_longlong) v = va_arg(args, long long);
-				else if (flag_long) v = va_arg(args, long int);
-				else v = va_arg(args, int);
+				if (flag_longlong) v = va_arg(va, long long);
+				else if (flag_long) v = va_arg(va, long int);
+				else v = va_arg(va, int);
 				if (v < 0) {
 					longvalue = (v == LLONG_MIN ? ((unsigned long long)1)<<63 : -v);
 					prefix = '-';
@@ -537,9 +540,9 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 				}
 			}
 			else {
-				if (flag_longlong) longvalue = va_arg(args, unsigned long long);
-				else if (flag_long) longvalue = va_arg(args, unsigned long int);
-				else longvalue = va_arg(args, unsigned int);
+				if (flag_longlong) longvalue = va_arg(va, unsigned long long);
+				else if (flag_long) longvalue = va_arg(va, unsigned long int);
+				else longvalue = va_arg(va, unsigned int);
 				prefix = 0;
 			}
 			if (longvalue == 0) flag_alternateform = false;
@@ -585,7 +588,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		case TYPE_FLOAT:
 		case TYPE_EXP:
 		case TYPE_GENERIC:
-			realvalue = va_arg(args, double);
+			realvalue = va_arg(va, double);
 #ifdef OMIT_FLOATING_POINT
 			length = 0;
 #else
@@ -702,7 +705,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 #endif
 			break;
 		case TYPE_SIZE:
-			*(va_arg(args, int*)) = (int)b->size;
+			*(va_arg(va, int*)) = (int)b->size;
 			length = width = 0;
 			break;
 		case TYPE_PERCENT:
@@ -711,7 +714,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			length = 1;
 			break;
 		case TYPE_CHARX:
-			c = va_arg(args, int);
+			c = va_arg(va, int);
 			buf[0] = (char)c;
 			if (precision >= 0) {
 				for (i = 1; i < precision; i++) buf[i] = (char)c;
@@ -722,7 +725,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			break;
 		case TYPE_STRING:
 		case TYPE_DYNSTRING:
-			bufpt = va_arg(args, char*);
+			bufpt = va_arg(va, char*);
 			if (!bufpt) bufpt = "";
 			else if (type == TYPE_DYNSTRING) extra = bufpt;
 			if (precision >= 0) for (length = 0; length < precision && bufpt[length]; length++) { }
@@ -732,7 +735,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 		case TYPE_SQLESCAPE2:
 		case TYPE_SQLESCAPE3: {
 			char q = (type == TYPE_SQLESCAPE3 ? '"' : '\''); // Quote character
-			char *escarg = va_arg(args, char*);
+			char *escarg = va_arg(va, char*);
 			bool isnull = (!escarg);
 			if (isnull) escarg = (type == TYPE_SQLESCAPE2 ? "NULL" : "(NULL)");
 			int k = precision;
@@ -765,11 +768,11 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			// if (precision>=0 && precision<length) length = precision;
 			break; }
 		case TYPE_TOKEN: {
-			//TagBase_RuntimeStatics.AppendFormat[0](this, args);
+			//TagBase_RuntimeStatics.AppendFormat[0](this, va);
 			length = width = 0;
 			break; }
 		case TYPE_SRCLIST: {
-			//TagBase_RuntimeStatics.AppendFormat[1](this, args);
+			//TagBase_RuntimeStatics.AppendFormat[1](this, va);
 			length = width = 0;
 			break; }
 		default: {

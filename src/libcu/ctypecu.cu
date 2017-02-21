@@ -1,4 +1,5 @@
-#include <cuda_runtimecu.h>
+#include <ctypecu.h>
+
 __BEGIN_DECLS;
 
 extern __constant__ unsigned char __curtUpperToLower[256] = {

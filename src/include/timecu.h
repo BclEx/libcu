@@ -24,30 +24,29 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _TIMECU_H
 #define _TIMECU_H
-#define _TIME_H
-#define _INC_TIME
 #include <featurescu.h>
 
+#include <time.h>
+#ifdef __CUDA_ARCH__
 __BEGIN_DECLS;
 
 typedef long clock_t;
 #define CLOCKS_PER_SEC 1000
 struct timeval { long tv_sec; long tv_usec; };
 
-__device__ time_t time(time_t *timer);
-__device__ int gettimeofday(struct timeval *tp, void *tz);
+__device__ time_t time_(time_t *timer);
+#define time time_
+__device__ int gettimeofday_(struct timeval *tp, void *tz);
+#define gettimeofday gettimeofday_
 
 __END_DECLS;
+#else
+//#ifndef _WINSOCKAPI_
+//struct timeval { long tv_sec; long tv_usec; };
+//#endif
+#define gettimeofday(tp, tz) 0
+#endif  /* __CUDA_ARCH__ */
 
 #endif  /* _TIMECU_H */
-#else
-#include <time.h>
-#ifndef _WINSOCKAPI_
-struct timeval { long tv_sec; long tv_usec; };
-#endif
-#define gettimeofday(tp, tz) 0
-#endif

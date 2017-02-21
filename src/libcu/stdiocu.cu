@@ -1,4 +1,7 @@
-#include <cuda_runtimecu.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <stddefcu.h>
+#include <stdargcu.h>
 #include <ctypecu.h>
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
@@ -47,7 +50,7 @@ __device__ int _unlink_(const char *filename)
 
 /* Create a temporary file and open it read/write. */
 #ifndef __USE_FILE_OFFSET64
-__device__ FILE *tmpfile(void)
+__device__ FILE *tmpfile_(void)
 {
 	panic("Not Implemented");
 	return nullptr;
@@ -96,7 +99,8 @@ __device__ int setvbuf_device(FILE *__restrict stream, char *__restrict buf, int
 }
 
 /* Write formatted output to S from argument list ARG.  */
-__device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restrict format, va_list va)
+#ifdef __CUDA_ARCH__
+__device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, va_list va)
 {
 	if (maxlen <= 0) return -1;
 	strbld_t b;
@@ -105,9 +109,11 @@ __device__ int vsnprintf(char *__restrict s, size_t maxlen, const char *__restri
 	strbldToString(&b);
 	return b.index;
 }
+#endif
 
 /* Write formatted output to S from argument list ARG. */
-__device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
+#ifdef __CUDA_ARCH__
+__device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
@@ -118,16 +124,17 @@ __device__ int vfprintf(FILE *__restrict s, const char *__restrict format, va_li
 	free((void *)v);
 	return msg.RC; 
 }
+#endif
 
 /* Read formatted input from S into argument list ARG.  */
-//__device__ int vfscanf(FILE *__restrict s, const char *__restrict format, va_list va)
+//__device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va)
 //{
 //	panic("Not Implemented");
 //	return 0;
 //}
 
 /* Read formatted input from S into argument list ARG.  */
-__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va)
+__device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va)
 {
 	panic("Not Implemented");
 	return 0;
@@ -681,7 +688,8 @@ match_failure:
 
 #pragma endregion
 
-__device__ char *vmtagprintf(void *tag, const char *format, va_list va)
+#ifdef __CUDA_ARCH__
+__device__ char *vmtagprintf_(void *tag, const char *format, va_list va)
 {
 	assert(tag != nullptr);
 	char base[PRINT_BUF_SIZE];
@@ -693,8 +701,10 @@ __device__ char *vmtagprintf(void *tag, const char *format, va_list va)
 	// if (b.allocFailed) tagallocfailed(tag);
 	return str;
 }
+#endif
 
-__device__ char *vmprintf(const char *format, va_list va)
+#ifdef __CUDA_ARCH__
+__device__ char *vmprintf_(const char *format, va_list va)
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
@@ -703,8 +713,10 @@ __device__ char *vmprintf(const char *format, va_list va)
 	strbldAppendFormat(&b, false, format, va);
 	return strbldToString(&b);
 }
+#endif
 
-__device__ char *vmnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va)
+#ifdef __CUDA_ARCH__
+__device__ char *vmnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va)
 {
 	if (maxlen <= 0) return (char *)s;
 	strbld_t b;
@@ -712,10 +724,11 @@ __device__ char *vmnprintf(char *__restrict s, size_t maxlen, const char *format
 	strbldAppendFormat(&b, false, format, va);
 	return strbldToString(&b);
 }
+#endif
 
 __END_DECLS;
 
 ///* Read formatted input from stdin into argument list ARG. */
-//__device__ int vscanf(const char *__restrict format, va_list va) { return -1; }
+//__device__ int vscanf_(const char *__restrict format, va_list va) { return -1; }
 ///* Read formatted input from S into argument list ARG.  */
-//__device__ int vsscanf(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }
+//__device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }

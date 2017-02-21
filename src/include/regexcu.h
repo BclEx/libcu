@@ -24,10 +24,10 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef _REGEXCU_H
 #define _REGEXCU_H
 #define _REGEX_H
+
 #include <crtdefscu.h>
 
 #ifdef __cplusplus
@@ -95,12 +95,17 @@ extern "C" {
 		REG_ERR_NUM
 	};
 
-	__device__ int regcomp(regex_t *preg, const char *regex, int cflags);
-	__device__ int regexec(regex_t *preg,  const  char *string, size_t nmatch, regmatch_t pmatch[], int eflags);
-	__device__ size_t regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size);
-	__device__ void regfree(regex_t *preg);
+	extern __device__ int regcomp_(regex_t *preg, const char *regex, int cflags);
+#define regcomp regcomp_
+	extern __device__ int regexec_(regex_t *preg,  const  char *string, size_t nmatch, regmatch_t pmatch[], int eflags);
+#define regexec regexec_
+	extern __device__ size_t regerror_(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size);
+#define regerror regerror_
+	extern __device__ void regfree_(regex_t *preg);
+#define regfree regfree_
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _REGEXCU_H */

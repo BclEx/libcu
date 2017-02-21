@@ -1,6 +1,3 @@
-#define LIBCUFORCE
-#include <cuda_runtimecu.h>
-
 #include "sys/bitveccu.cu"
 #include "sys/hashcu.cu"
 #include "sys/statcu.cu"

@@ -37,9 +37,7 @@
     <ClInclude Include="..\include\direntcu.h" />
     <ClInclude Include="..\include\errnocu.h" />
     <ClInclude Include="..\include\featurescu.h" />
-    <ClInclude Include="..\include\host_definescu.h" />
     <ClInclude Include="..\include\host_functions.h" />
-    <ClInclude Include="..\include\limitscu.h" />
     <ClInclude Include="..\include\regexcu.h" />
     <ClInclude Include="..\include\sentinel-iomsg.h" />
     <ClInclude Include="..\include\sentinel-stdiomsg.h" />
@@ -113,9 +111,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -166,7 +164,6 @@
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -183,13 +180,12 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" --verbose -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -215,7 +211,6 @@
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -236,13 +231,12 @@
       <AdditionalDependencies>cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" --verbose -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.cu.obj" "$(IntDir)libcu.stdlib.cu.obj" "$(IntDir)host_functions.obj" "$(IntDir)sentinel.obj" "$(IntDir)sentinel-host.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>

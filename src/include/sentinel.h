@@ -24,6 +24,8 @@ THE SOFTWARE.
 */
 
 #pragma once
+#ifndef _SENTINEL_H
+#define _SENTINEL_H
 
 #ifndef HAS_DEVICESENTINEL
 #define HAS_DEVICESENTINEL 1
@@ -32,9 +34,8 @@ THE SOFTWARE.
 #define HAS_HOSTSENTINEL 1
 #endif
 
-#ifndef _SENTINEL_H
-#define _SENTINEL_H
 #include <crtdefscu.h>
+#include <host_defines.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -126,4 +127,5 @@ extern "C" {
 #ifdef  __cplusplus
 }
 #endif
+
 #endif  /* _SENTINEL_H */

@@ -24,13 +24,12 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #ifndef _STDARGCU_H
 #define _STDARGCU_H
-#define _STDARG_H
-#define _INC_STDARG
-#include <crtdefscu.h>
+
+#include <stdarg.h>
+#ifdef __CUDA_ARCH__
+//#include <crtdefscu.h>
 
 #define STDARGvoid(name, body, ...) \
 	__forceinline __device__ void name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); (body); _crt_va_end(va); } \
@@ -216,15 +215,24 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_list14 _crt_va_list14
 #define va_list15 _crt_va_list15
 
-#define _INC_SWPRINTF_INL_
-
-#endif  /* _STDARGCU_H */
 #else
-#include <stdarg.h>
-#define STDARGvoid(name, body, ...) __forceinline void name(...) { }
+#define STDARGvoid(name, body, ...)
+//__forceinline void name(...) { }
 #define STDARG2void(name, body, ...)
 #define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...) __forceinline ret name(...) { }
+#define STDARG(ret, name, body, ...)
+//__forceinline ret name(...) { }
 #define STDARG2(ret, name, body, ...)
 #define STDARG3(ret, name, body, ...)
-#endif
+
+#endif  /* __CUDA_ARCH__ */
+
+#undef va_start
+#undef va_arg
+#undef va_end
+#define va_start _crt_va_start
+#define va_restart _crt_va_restart
+#define va_arg _crt_va_arg
+#define va_end _crt_va_end
+
+#endif  /* _STDARGCU_H */

@@ -24,10 +24,11 @@ THE SOFTWARE.
 */
 
 #pragma once
-
 #ifndef _SENTINEL_STDIOMSG_H
 #define _SENTINEL_STDIOMSG_H
+
 #include <sentinel.h>
+#include <crtdefscu.h>
 #include <stringcu.h>
 
 enum {

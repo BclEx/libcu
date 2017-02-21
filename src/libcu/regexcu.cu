@@ -1,4 +1,6 @@
-#include <cuda_runtimecu.h>
+#include <cuda_runtime.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
 #include <ctypecu.h>
 #include <regexcu.h>
 
@@ -120,7 +122,7 @@ static __forceinline __device__ int _strlenint(const int *seq)
 // code and thus invalidate pointers into it.  (Note that it has to be in one piece because free() must be able to free it all.)
 //
 // Beware that the optimization-preparation code in here knows about some of the structure of the compiled regexp.
-__device__ int regcomp(regex_t *preg, const char *exp, int cflags)
+__device__ int regcomp_(regex_t *preg, const char *exp, int cflags)
 {
 #ifdef _DEBUG
 	printf("Compiling: '%s'\n", exp);
@@ -713,7 +715,7 @@ static __device__ int regmatch(regex_t *preg, int prog);
 static __device__ int regrepeat(regex_t *preg, int p, int max);
 
 // regexec - match a regexp against a string
-__device__ int regexec(regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags)
+__device__ int regexec_(regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags)
 {
 	// Be paranoid...
 	if (preg == NULL || preg->program == NULL || string == NULL)
@@ -1341,7 +1343,7 @@ __constant__ static const char *error_strings[] = {
 	"corrupted program",
 	"contains null char",
 };
-__device__ size_t regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+__device__ size_t regerror_(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 	const char *err;
 	if (errcode < 0 || errcode >= REG_ERR_NUM) err = "Bad error code";
@@ -1349,7 +1351,7 @@ __device__ size_t regerror(int errcode, const regex_t *preg, char *errbuf, size_
 	return snprintf(errbuf, errbuf_size, "%s", err);
 }
 
-__device__ void regfree(regex_t *preg)
+__device__ void regfree_(regex_t *preg)
 {
 	free(preg->program);
 }

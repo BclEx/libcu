@@ -24,9 +24,9 @@ THE SOFTWARE.
 */
 
 #pragma once
-
 #ifndef _SENTINEL_IOMSG_H
 #define _SENTINEL_IOMSG_H
+
 #include <sentinel.h>
 
 enum {

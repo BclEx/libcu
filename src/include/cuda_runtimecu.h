@@ -24,29 +24,18 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef __CUDA_RUNTIMECU_H__
 #define __CUDA_RUNTIMECU_H__
-#include <crtdefscu.h>
-#include <featurescu.h>
 
-#include <stringcu.h>
-#include <stddefcu.h>
-#include <stdargcu.h>
-#include <stdiocu.h>
-#include <stdlibcu.h>
-#include <timecu.h>
-
-#undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>
 #include <host_functions.h>
-
-#undef va_start
-#undef va_arg
-#undef va_end
-#define va_start _crt_va_start
-#define va_restart _crt_va_restart
-#define va_arg _crt_va_arg
-#define va_end _crt_va_end
+//
+//#undef va_start
+//#undef va_arg
+//#undef va_end
+//#define va_start _crt_va_start
+//#define va_restart _crt_va_restart
+//#define va_arg _crt_va_arg
+//#define va_end _crt_va_end
 
 #endif /* __CUDA_RUNTIMECU_H__ */

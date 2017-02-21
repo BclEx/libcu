@@ -24,31 +24,19 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
 #ifndef _STDLIBCU_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
+#define _STDLIBCU_H
+#include <featurescu.h>
 
-	/* Shorthand for type of comparison functions.  */
+//* Shorthand for type of comparison functions.  */
 #ifndef __COMPAR_FN_T
 #define __COMPAR_FN_T
-	typedef int (*__compar_fn_t)(const void *, const void *);
+typedef int (*__compar_fn_t)(const void *, const void *);
 #endif
 
-#ifdef  __cplusplus
-}
-#endif
-#endif
-
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-#ifndef _STDLIBCU_H
-#define _STDLIB_H
-#define _INC_STDLIB
-#include <featurescu.h>
-#include <crtdefscu.h>
-#include <limits.h>
-
+#include <stdlib.h>
+#ifdef __CUDA_ARCH__
+#include <stddefcu.h>
 #include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;
 
@@ -57,164 +45,191 @@ extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict 
 extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
 #endif
 
-__BEGIN_NAMESPACE_STD;
-/* Returned by `div'.  */
-typedef struct
-{
-	int quot;			/* Quotient.  */
-	int rem;			/* Remainder.  */
-} div_t;
-/* Returned by `ldiv'.  */
-typedef struct
-{
-	long int quot;		/* Quotient.  */
-	long int rem;		/* Remainder.  */
-} ldiv_t;
-__END_NAMESPACE_STD;
-
-#if defined(ULLONG_MAX)
-__BEGIN_NAMESPACE_C99;
-/* Returned by `lldiv'.  */
-typedef struct
-{
-	long long int quot;		/* Quotient.  */
-	long long int rem;		/* Remainder.  */
-} lldiv_t;
-__END_NAMESPACE_C99;
-#endif
-
-/* The largest number rand will return (same as INT_MAX).  */
-#define	RAND_MAX	2147483647
-
-/* We define these the same for all machines. Changes from this to the outside world should be done in `_exit'.  */
-#define	EXIT_FAILURE	1	/* Failing exit status.  */
-#define	EXIT_SUCCESS	0	/* Successful exit status.  */
+//__BEGIN_NAMESPACE_STD;
+///* Returned by `div'.  */
+//typedef struct
+//{
+//	int quot;			/* Quotient.  */
+//	int rem;			/* Remainder.  */
+//} div_t;
+///* Returned by `ldiv'.  */
+//typedef struct
+//{
+//	long int quot;		/* Quotient.  */
+//	long int rem;		/* Remainder.  */
+//} ldiv_t;
+//__END_NAMESPACE_STD;
+//
+//#if defined(ULLONG_MAX)
+//__BEGIN_NAMESPACE_C99;
+///* Returned by `lldiv'.  */
+//typedef struct
+//{
+//	long long int quot;		/* Quotient.  */
+//	long long int rem;		/* Remainder.  */
+//} lldiv_t;
+//__END_NAMESPACE_C99;
+//#endif
+//
+///* The largest number rand will return (same as INT_MAX).  */
+//#define	RAND_MAX	2147483647
+//
+///* We define these the same for all machines. Changes from this to the outside world should be done in `_exit'.  */
+//#define	EXIT_FAILURE	1	/* Failing exit status.  */
+//#define	EXIT_SUCCESS	0	/* Successful exit status.  */
 
 __BEGIN_NAMESPACE_STD;
 /* prototype */
-extern __device__ double strtod(const char *__restrict nptr, char **__restrict endptr);
+extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
+#define strtod strtod_
 
 /* Convert a string to a floating-point number.  */
-__forceinline __device__ double atof(const char *nptr) { return strtod(nptr, NULL); }
+__forceinline __device__ double atof_(const char *nptr) { return strtod(nptr, NULL); }
+#define atof atof_
 /* Convert a string to an integer.  */
-__forceinline __device__ int atoi(const char *nptr) { return (int)_stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ int atoi_(const char *nptr) { return (int)_stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+#define atoi atoi_
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int atol(const char *nptr) { return _stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ long int atol_(const char *nptr) { return _stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+#define atol atol_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a long long integer.  */
-__forceinline __device__ long long int atoll(const char *nptr) { return _stdlib_strto_ll(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ long long int atoll_(const char *nptr) { return _stdlib_strto_ll(nptr, (char **)NULL, 10, 1); }
+#define atoll atoll_
 __END_NAMESPACE_C99;
 #endif
 
 __BEGIN_NAMESPACE_STD;
 /* Convert a string to a floating-point number.  */
-extern __device__ double strtod(const char *__restrict nptr, char **__restrict endptr);
+extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
+#define strtod strtod_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Likewise for `float' and `long double' sizes of floating-point numbers.  */
-extern __device__ float strtof(const char *__restrict nptr, char **__restrict endptr);
-extern __device__ long double strtold(const char *__restrict nptr, char **__restrict endptr);
+extern __device__ float strtof_(const char *__restrict nptr, char **__restrict endptr);
+#define strtof strtof_
+extern __device__ long double strtold_(const char *__restrict nptr, char **__restrict endptr);
+#define strtold strtold_
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int strtol(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 1); }
+__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 1); }
+#define strtol strtol_
 /* Convert a string to an unsigned long integer.  */
-__forceinline __device__ unsigned long int strtoul(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
+__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
+#define strtoul strtoul_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a quadword integer.  */
-__forceinline __device__ long long int strtoll(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 1); }
+__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 1); }
+#define strtoll strtoll_
 /* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ unsigned long long int strtoull(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 0); }
+__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 0); }
+#define strtoull strtoull_
 __END_NAMESPACE_C99;
 #endif
 
 __BEGIN_NAMESPACE_STD;
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
-extern __device__ int rand(void);
+extern __device__ int rand_(void);
+#define rand rand_
 /* Seed the random number generator with the given number.  */
-extern __device__ void srand(unsigned int seed);
+extern __device__ void srand_(unsigned int seed);
+#define srand srand_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Allocate SIZE bytes of memory.  */
 extern __device__ void *malloc_(size_t size);
+#define malloc malloc_
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
 extern __device__ void *calloc_(size_t nmemb, size_t size);
+#define calloc calloc_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
 extern __device__ void *realloc_(void *ptr, size_t size);
+#define realloc realloc_
 /* Free a block allocated by `malloc', `realloc' or `calloc'.  */
 extern __device__ void free_(void *ptr);
-__END_NAMESPACE_STD;
-#define malloc malloc_
-#define calloc calloc_
-#define realloc realloc_
 #define free free_
+__END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Abort execution and generate a core-dump.  */
-__forceinline __device__ void abort(void) { asm("trap;"); }
+__forceinline __device__ void abort_(void) { asm("trap;"); }
+#define abort abort_
 /* Register a function to be called when `exit' is called.  */
-extern __device__ int atexit(void(*func)(void));
-//__forceinline __device__ int atexit(void(*func)(void)) { panic("Not Implemented"); }
+__forceinline __device__ int atexit_(void(*func)(void)) { panic("Not Supported"); return -1; }
+#define atexit atexit_
+//extern __device__ int atexit_(void(*func)(void)); #define atexit atexit_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Call all functions registered with `atexit' and `on_exit', in the reverse of the order in which they were registered, perform stdio cleanup, and terminate program execution with STATUS.  */
 __forceinline __device__ void exit_(int status) { stdlib_exit msg(true, status); }
+#define exit exit_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Terminate the program with STATUS without calling any of the functions registered with `atexit' or `on_exit'.  */
-__forceinline __device__ void _Exit(int status) { stdlib_exit msg(false, status); }
+__forceinline __device__ void _Exit_(int status) { stdlib_exit msg(false, status); }
+#define _Exit _Exit_
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
-extern __device__ char *getenv(const char *name);
+extern __device__ char *getenv_(const char *name);
+#define getenv getenv_
 __END_NAMESPACE_STD;
 
 /* Set NAME to VALUE in the environment. If REPLACE is nonzero, overwrite an existing value.  */
-extern __device__ int setenv(const char *name, const char *value, int replace);
+extern __device__ int setenv_(const char *name, const char *value, int replace);
+#define setenv setenv_
 /* Remove the variable NAME from the environment.  */
-extern __device__ int unsetenv(const char *name);
+extern __device__ int unsetenv_(const char *name);
+#define unsetenv unsetenv_
 
 /* Generate a unique temporary file name from TEMPLATE.
 The last six characters of TEMPLATE must be "XXXXXX"; they are replaced with a string that makes the file name unique.
 Returns TEMPLATE, or a null pointer if it cannot get a unique file name.  */
-extern __device__ char *mktemp(char *template_);
+extern __device__ char *mktemp_(char *template_);
+#define mktemp mktemp_
 /* Generate a unique temporary file name from TEMPLATE.
 The last six characters of TEMPLATE must be "XXXXXX"; they are replaced with a string that makes the filename unique.
 Returns a file descriptor open on the file for reading and writing, or -1 if it cannot create a uniquely-named file. */
 #ifndef __USE_FILE_OFFSET64
-extern __device__ int mkstemp(char *template_);
+extern __device__ int mkstemp_(char *template_);
+#define mkstemp mkstemp_
 #else
 #define mkstemp mkstemp64
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int mkstemp64(char *template_);
+extern __device__ int mkstemp64_(char *template_);
+#define mkstemp64 mkstemp64_
 #endif
 
 __BEGIN_NAMESPACE_STD;
 /* Execute the given line as a shell command.  */
-__forceinline __device__ int system(const char *command) { stdlib_system msg(command); return msg.RC; }
+__forceinline __device__ int system_(const char *command) { stdlib_system msg(command); return msg.RC; }
+#define system system_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Do a binary search for KEY in BASE, which consists of NMEMB elements of SIZE bytes each, using COMPAR to perform the comparisons.  */
-extern __device__ void *bsearch(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+extern __device__ void *bsearch_(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+#define bsearch bsearch_
 /* Sort NMEMB elements of BASE, of SIZE bytes each, using COMPAR to perform the comparisons.  */
-extern __device__ void qsort(void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+extern __device__ void qsort_(void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+#define qsort qsort_
 
 /* Return the absolute value of X.  */
 __forceinline __device__ int abs_(int x) { return x >= 0 ? x : -x; }
@@ -231,43 +246,42 @@ __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Return the `div_t', `ldiv_t' or `lldiv_t' representation of the value of NUMER over DENOM. */
-extern __device__ div_t div(int numer, int denom);
-extern __device__ ldiv_t ldiv(long int numer, long int denom);
+extern __device__ div_t div_(int numer, int denom);
+#define div div_
+extern __device__ ldiv_t ldiv_(long int numer, long int denom);
+#define ldiv ldiv_
 __END_NAMESPACE_STD;
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
-extern __device__ lldiv_t lldiv(long long int numer, long long int denom);
+extern __device__ lldiv_t lldiv_(long long int numer, long long int denom);
+#define lldiv lldiv_
 __END_NAMESPACE_C99;
 #endif
 
 __BEGIN_NAMESPACE_STD;
 /* Return the length of the multibyte character in S, which is no longer than N.  */
-extern __device__ int mblen(const char *s, size_t n);
+extern __device__ int mblen_(const char *s, size_t n);
+#define mblen mblen_
 /* Return the length of the given multibyte character, putting its `wchar_t' representation in *PWC.  */
-extern __device__ int mbtowc(wchar_t *__restrict __pwc, const char *__restrict s, size_t n);
+extern __device__ int mbtowc_(wchar_t *__restrict __pwc, const char *__restrict s, size_t n);
+#define mbtowc mbtowc_
 /* Put the multibyte character represented by WCHAR in S, returning its length.  */
-extern __device__ int wctomb(char *s, wchar_t wchar);
+extern __device__ int wctomb_(char *s, wchar_t wchar);
+#define wctomb wctomb_
 
 /* Convert a multibyte string to a wide char string.  */
-extern __device__ size_t mbstowcs(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n);
+extern __device__ size_t mbstowcs_(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n);
+#define mbstowcs mbstowcs_
 /* Convert a wide char string to multibyte string.  */
-extern __device__ size_t wcstombs(char *__restrict s, const wchar_t *__restrict pwcs, size_t n);
+extern __device__ size_t wcstombs_(char *__restrict s, const wchar_t *__restrict pwcs, size_t n);
+#define wcstombs wcstombs_
 __END_NAMESPACE_STD;
 
-// override
-#define _CRT_ATOF_DEFINED
-
 __END_DECLS;
-
-#endif  /* _STDLIBCU_H */
 #else
-#include <stdlib.h>
 #define strtoll
 #define strtoull
-#define exit_ exit
-#endif
-
-#ifndef _STDLIBCU_H
+#endif  /* _STDLIBCU_H */
 __BEGIN_DECLS;
 
 #if defined(ULLONG_MAX)
@@ -276,11 +290,12 @@ typedef long long int quad_t;
 /* Returned by `strtouq'.  */
 typedef unsigned long long int u_quad_t;
 /* Convert a string to a quadword integer.  */
-__forceinline __device__ quad_t strtoq(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)strtol(nptr, endptr, base); }
+__forceinline __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)strtol(nptr, endptr, base); }
+#define strtoq strtoq_
 /* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ u_quad_t strtouq(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
+__forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
+#define strtouq strtouq_
 #endif
 
 __END_DECLS;
-#endif
-#define _STDLIBCU_H
+#endif  /* _STDLIBCU_H */

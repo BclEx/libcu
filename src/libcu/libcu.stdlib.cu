@@ -1,4 +1,3 @@
-#undef __CUDA_RUNTIME_H__
 #include <cuda_runtime.h>
 #include <stdio.h>
 #include <assert.h>
@@ -6,7 +5,6 @@
 #define _ROUND8(x) (((x)+7)&~7)
 #define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
 
-/* C++ needs to know that types and declarations are C, not C++.  */
 #ifdef	__cplusplus
 #define __BEGIN_DECLS extern "C" {
 #define __END_DECLS }
