@@ -42,7 +42,6 @@
 #include "jimautoconf.h"
 //#include <stdiocu.h>
 //#include <stringcu.h>
-#include <cuda_runtimecu.h>
 #include <errnocu.h>
 #include <fcntl.h>
 #ifdef HAVE_UNISTD_H

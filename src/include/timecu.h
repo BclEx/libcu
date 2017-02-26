@@ -43,10 +43,13 @@ __device__ int gettimeofday_(struct timeval *tp, void *tz);
 
 __END_DECLS;
 #else
-//#ifndef _WINSOCKAPI_
-//struct timeval { long tv_sec; long tv_usec; };
-//#endif
-#define gettimeofday(tp, tz) 0
+#ifndef _WINSOCKAPI_
+struct timeval { long tv_sec; long tv_usec; };
+#endif
+__BEGIN_DECLS;
+int gettimeofday(struct timeval *tv, void *unused);
+__END_DECLS;
+//#define gettimeofday(tp, tz) 0
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _TIMECU_H */

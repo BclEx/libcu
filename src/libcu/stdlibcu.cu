@@ -414,7 +414,7 @@ __device__ long double strtold_(const Wchar *__restrict str, Wchar **__restrict 
 
 #pragma region stdlib_strto
 
-__device__ unsigned long _stdlib_strto_l(register const Wchar *__restrict str, Wchar **__restrict endptr, int base, int sflag)
+__device__ unsigned long __strtol(register const Wchar *__restrict str, Wchar **__restrict endptr, int base, int sflag)
 {
 	unsigned long number, cutoff;
 #if _STRTO_ENDPTR
@@ -498,7 +498,7 @@ __device__ unsigned long _stdlib_strto_l(register const Wchar *__restrict str, W
 	return negative ? (unsigned long)(-((long)number)) : number;
 }
 
-__device__ unsigned long long _stdlib_strto_ll(register const Wchar * __restrict str, Wchar ** __restrict endptr, int base, int sflag)
+__device__ unsigned long long __strtoll(register const Wchar * __restrict str, Wchar ** __restrict endptr, int base, int sflag)
 {
 	unsigned long long number;
 #if _STRTO_ENDPTR

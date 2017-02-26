@@ -10,7 +10,7 @@
 #include <syslog.h>
 #include <string.h>
 
-#include "Jim.h"
+#include "jim.h"
 
 typedef struct
 {

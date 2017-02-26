@@ -26,9 +26,11 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _ERRNOCU_H
 #define _ERRNOCU_H
+#include <featurescu.h>
 
 #include <errno.h>
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+__BEGIN_DECLS;
 
 extern __device__ int *_errno_(void);
 #define _errno _errno_
@@ -38,6 +40,7 @@ extern __device__ errno_t _set_errno_(int value);
 extern __device__ errno_t _get_errno_(int *value);
 #define _get_errno _get_errno_
 
+__END_DECLS;
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _ERRNOCU_H */

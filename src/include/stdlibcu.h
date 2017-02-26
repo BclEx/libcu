@@ -40,9 +40,9 @@ typedef int (*__compar_fn_t)(const void *, const void *);
 #include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;
 
-extern __device__ unsigned long _stdlib_strto_l(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
+extern __device__ unsigned long __strtol(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
 #if defined(ULLONG_MAX)
-extern __device__ unsigned long long _stdlib_strto_ll(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
+extern __device__ unsigned long long __strtoll(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
 #endif
 
 //__BEGIN_NAMESPACE_STD;
@@ -87,17 +87,17 @@ extern __device__ double strtod_(const char *__restrict nptr, char **__restrict 
 __forceinline __device__ double atof_(const char *nptr) { return strtod(nptr, NULL); }
 #define atof atof_
 /* Convert a string to an integer.  */
-__forceinline __device__ int atoi_(const char *nptr) { return (int)_stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ int atoi_(const char *nptr) { return (int)__strtol(nptr, (char **)NULL, 10, 1); }
 #define atoi atoi_
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int atol_(const char *nptr) { return _stdlib_strto_l(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ long int atol_(const char *nptr) { return __strtol(nptr, (char **)NULL, 10, 1); }
 #define atol atol_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a long long integer.  */
-__forceinline __device__ long long int atoll_(const char *nptr) { return _stdlib_strto_ll(nptr, (char **)NULL, 10, 1); }
+__forceinline __device__ long long int atoll_(const char *nptr) { return __strtoll(nptr, (char **)NULL, 10, 1); }
 #define atoll atoll_
 __END_NAMESPACE_C99;
 #endif
@@ -118,20 +118,20 @@ __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 1); }
+__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 1); }
 #define strtol strtol_
 /* Convert a string to an unsigned long integer.  */
-__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_l(nptr, endptr, base, 0); }
+__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 0); }
 #define strtoul strtoul_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a quadword integer.  */
-__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 1); }
+__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 1); }
 #define strtoll strtoll_
 /* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return _stdlib_strto_ll(nptr, endptr, base, 0); }
+__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 0); }
 #define strtoull strtoull_
 __END_NAMESPACE_C99;
 #endif

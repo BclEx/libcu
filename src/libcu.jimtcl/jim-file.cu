@@ -43,11 +43,11 @@
 * express or implied warranty.
 */
 
-//#include <limitscu.h>
-//#include <stdlibcu.h>
-//#include <stringcu.h>
-//#include <stdiocu.h>
-#include <cuda_runtimecu.h>
+#include <limits.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
+#include <stdiocu.h>
+
 #include <errnocu.h>
 #include <sys/statcu.h>
 #include "jimautoconf.h"

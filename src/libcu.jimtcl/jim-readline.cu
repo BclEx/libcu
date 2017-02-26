@@ -34,7 +34,7 @@
 */
 #pragma endregion
 
-#include "Jim.h"
+#include "jim.h"
 
 #include <readline/readline.h>
 #include <readline/history.h>

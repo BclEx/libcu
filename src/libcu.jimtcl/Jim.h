@@ -66,8 +66,12 @@
 #define __JIM__H
 
 #include <cuda_runtimecu.h>
-//#include <limitscu.h>
-//#include <time.h>
+#include <time.h>
+#include <limits.h>
+#include <stdiocu.h> /* for the FILE typedef definition */
+#include <stdlibcu.h> /* In order to export the Jim_Free() macro */
+#include <stdargcu.h> /* In order to get type va_list */
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -111,7 +115,9 @@ extern "C" {
 #    define JIM_WIDE_MODIFIER "lld"
 #  else
 #    define JIM_WIDE_MODIFIER "ld"
+#ifndef strtoull
 #    define strtoull strtoul
+#endif
 #  endif
 #endif
 
@@ -390,7 +396,7 @@ extern "C" {
 
 	// Jim interpreter structure.
 	// Fields similar to the real Tcl interpreter structure have the same names.
-	typedef struct Jim_Interp
+	typedef struct __align__(8) Jim_Interp
 	{
 		Jim_Obj *result;			// object returned by the last command called
 		int errorLine;				// Error line where an error occurred
@@ -422,6 +428,8 @@ extern "C" {
 		unsigned long referenceNextId; // Next id for reference
 		struct Jim_HashTable references; // References hash table
 		unsigned long lastCollectId;	// reference max Id of the last GC execution. It's set to -1 while the collection is running as sentinel to avoid to recursive calls via the [collect] command inside finalizers
+		unsigned char padding0;
+		unsigned char padding1;
 		time_t lastCollectTime;			// unix time of the last GC execution
 		Jim_Obj *stackTrace;		// Stack trace object
 		Jim_Obj *errorProc;			// Name of last procedure which returned an error
@@ -676,7 +684,7 @@ extern "C" {
 	JIM_EXPORT __device__ void Jim_MakeErrorMessage(Jim_Interp *interp);
 
 	// interactive mode
-	JIM_EXPORT int Jim_InteractivePrompt(void *heap, Jim_Interp *interp);
+	JIM_EXPORT int Jim_InteractivePrompt(Jim_Interp *interp);
 	JIM_EXPORT void Jim_HistoryLoad(const char *filename);
 	JIM_EXPORT void Jim_HistorySave(const char *filename);
 	JIM_EXPORT char *Jim_HistoryGetline(const char *prompt);

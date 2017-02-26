@@ -166,7 +166,7 @@ __device__ char *strchr_(const char *s, int c)
 {
 	register unsigned char *s1 = (unsigned char *)s;
 	register unsigned char l = (unsigned char)__curtUpperToLower[c];
-	while (*s1 && __curtUpperToLower[*s1] != l) s++;
+	while (*s1 && __curtUpperToLower[*s1] != l) s1++;
 	return (char *)(*s1 ? s1 : nullptr);
 }
 

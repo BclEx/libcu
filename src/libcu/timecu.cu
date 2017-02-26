@@ -24,5 +24,17 @@ __device__ int gettimeofday_(struct timeval *tp, void *tz)
 	//return (_time(&tp->tv_sec) == (time_t)-1 ? -1 : 0);
 }
 
+#else
+#ifdef _MSC_VER
+#include <sys/timeb.h>
+int gettimeofday(struct timeval *tv, void *unused)
+{
+	struct _timeb tb;
+	_ftime(&tb);
+	tv->tv_sec = tb.time;
+	tv->tv_usec = tb.millitm * 1000;
+	return 0;
+}
+#endif
 #endif
 __END_DECLS;

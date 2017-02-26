@@ -28,6 +28,7 @@ THE SOFTWARE.
 #define _UNISTDCU_H
 #include <featurescu.h>
 
+#include <_dirent.h>
 #include <_unistd.h>
 #include <sys/types.h>
 typedef short gid_t;

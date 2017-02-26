@@ -2,6 +2,7 @@
 #define TCL_PLATFORM_OS "unknown"
 #define TCL_PLATFORM_PLATFORM "gpu"
 #define TCL_PLATFORM_PATH_SEPARATOR ":"
+//#define HAVE_LONG_LONG
 #define HAVE_DIRENT_H
 #define HAVE_UNISTD_H
 #elif defined(_MSC_VER)

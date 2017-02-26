@@ -1,4 +1,3 @@
-//#include <cuda_runtimecu.h>
 #include <errnocu.h>
 #include "jimautoconf.h"
 #include "jim.h"

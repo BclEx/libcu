@@ -35,12 +35,12 @@
 */
 #pragma endregion
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <RuntimeHost.h>
-#include <Jim.h>
-#include <Jim+Autoconf.h>
+#include <cuda_runtimecu.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+#include <jim.h>
+#include <jimautoconf.h>
 
 #pragma region Name
 
@@ -84,7 +84,6 @@ struct PrimaryData h_dataP;
 
 // MAIN-INIT
 #if __CUDACC__
-static cudaDeviceHeap _deviceHeap;
 
 __device__ struct PrimaryData d_dataP;
 void D_DATAP() { cudaErrorCheck(cudaMemcpyToSymbol(d_dataP, &h_dataP, sizeof(h_dataP))); }
@@ -94,14 +93,11 @@ __global__ void g_MainInit(int argc, char *const argv[]);
 static int MainInit(int argc, char *const argv[]) {
 	memset(&h_dataP, 0, sizeof(h_dataP));
 	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
-	int deviceId = gpuGetMaxGflopsDeviceId();
-	cudaErrorCheck(cudaSetDevice(deviceId));
+	cudaErrorCheck(cudaSetDevice(gpuGetMaxGflopsDevice()));
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
-	_deviceHeap = cudaDeviceHeapCreate(256, 100);
-	cudaErrorCheck(cudaDeviceHeapSelect(_deviceHeap));
 	//
 	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
-	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceHeapSynchronize(_deviceHeap)); H_DATAP();
+	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
 	cudaFree(d_argv);
 	return h_dataP.retcode;
 }
@@ -135,7 +131,7 @@ static int MainInit(int argc, char *const argv[]) {
 			JimSetArgv(interp, 0, NULL);
 	}
 	else {
-		if (argc > 2 && !_strcmp(argv[1], "-e")) {
+		if (argc > 2 && !strcmp(argv[1], "-e")) {
 			JimSetArgv(interp, argc - 3, argv + 3);
 			retcode = Jim_Eval(interp, argv[2]);
 			if (retcode != JIM_ERROR)
@@ -160,8 +156,7 @@ static int MainInit(int argc, char *const argv[]) {
 #if __CUDACC__
 __global__ void g_MainShutdown(int retcode);
 static int MainShutdown(int retcode) {
-	D_DATAP(); g_MainShutdown<<<1,1>>>(retcode); cudaErrorCheck(cudaDeviceHeapSynchronize(_deviceHeap)); H_DATAP();
-	cudaDeviceHeapDestroy(_deviceHeap);
+	D_DATAP(); g_MainShutdown<<<1,1>>>(retcode); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
 	cudaDeviceReset();
 	return h_dataP.retcode;
 }
@@ -191,11 +186,7 @@ int main(int argc, char *const argv[])
 	}
 	int retcode = MainInit(argc, argv);
 	if (argc == 1 && retcode != JIM_EXIT)
-#if __CUDACC__
-		retcode = Jim_InteractivePrompt(&_deviceHeap, h_dataP.interp);
-#else
-		retcode = Jim_InteractivePrompt(nullptr, h_dataP.interp);
-#endif
+		retcode = Jim_InteractivePrompt(h_dataP.interp);
 	retcode = MainShutdown(retcode);
 	if (retcode == JIM_ERROR)
 		retcode = 1;

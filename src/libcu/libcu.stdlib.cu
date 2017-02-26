@@ -38,7 +38,7 @@ __device__ void *calloc_(size_t nmemb, size_t size)
 
 __device__ void free_(void *ptr)
 {
-	assert(ptr);
+	if (!ptr) return;
 	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)ptr;
 	free(p-1);
 }
@@ -54,8 +54,8 @@ __device__ void *realloc_(void *ptr, size_t size)
 	if (ptr)
 	{ 
 		MALLOCSIZETYPE *p2 = (MALLOCSIZETYPE *)ptr;
-		size_t ptrSize = (size_t)p2[0];
-		if (ptrSize) memcpy(p+1, p2+1, ptrSize);
+		size_t ptrSize = (size_t)*(p2-1);
+		if (ptrSize) memcpy(p+1, p2, ptrSize);
 		free(p2-1);
 	}
 	return (void *)(p+1);

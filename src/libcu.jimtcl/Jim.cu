@@ -50,12 +50,11 @@
 //#include <stdargcu.h>
 //#include <ctypecu.h>
 //#include <limitscu.h>
-#include <cuda_runtimecu.h>
 #include <errnocu.h>
 #include <stdlibcu.h>
 #include <setjmpcu.h>
 #include <assert.h>
-#include <time.h>
+#include <timecu.h>
 #include "jim.h"
 #include "jimautoconf.h"
 #include "utf8.h"
@@ -483,7 +482,7 @@ static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va)
 		fprintf(stderr, "[backtrace] of 'nm <executable>' in the bug report.\n");
 	}
 #endif
-	exit_(1);
+	exit(1);
 }
 STDARGvoid(JimPanicDump, JimPanicDump_(condition, fmt, va), int condition, const char *fmt);
 #endif
@@ -1109,7 +1108,7 @@ static __device__ int JimParseScript(struct JimParserCtx *pc)
 			pc->comment = 0;
 			return JimParseStr(pc);
 		}
-		return JIM_OK;
+		return JIM_OK; // unreached
 	}
 }
 
@@ -2558,22 +2557,22 @@ static __device__ int JimStringIs(Jim_Interp *interp, Jim_Obj *strObjPtr, Jim_Ob
 		Jim_SetResultBool(interp, Jim_GetDouble(interp, strObjPtr, &d) == JIM_OK && errno != ERANGE);
 		return JIM_OK; }
 
-//	case STR_IS_ALPHA: for (i = 0; i < len; i++) if (!_isalpha(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_ALNUM: for (i = 0; i < len; i++) if (!isalnum(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_ASCII: for (i = 0; i < len; i++) if (!jim_isascii(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_DIGIT: for (i = 0; i < len; i++) if (!isdigit(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_LOWER: for (i = 0; i < len; i++) if (!_islower(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_UPPER: for (i = 0; i < len; i++) if (!_isupper(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_SPACE: for (i = 0; i < len; i++) if (!isspace(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_XDIGIT: for (i = 0; i < len; i++) if (!_isxdigit(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_CONTROL: for (i = 0; i < len; i++) if (!_iscntrl(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	case STR_IS_PRINT: for (i = 0; i < len; i++) if (!_isprint(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//		//case STR_IS_GRAPH: for (i = 0; i < len; i++) if (!_isgraph(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//		//case STR_IS_PUNCT: for (i = 0; i < len; i++) if (!_ispunct(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
-//	default:
-//		return JIM_ERROR;
-//	}
-//#else
+						//	case STR_IS_ALPHA: for (i = 0; i < len; i++) if (!_isalpha(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_ALNUM: for (i = 0; i < len; i++) if (!isalnum(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_ASCII: for (i = 0; i < len; i++) if (!jim_isascii(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_DIGIT: for (i = 0; i < len; i++) if (!isdigit(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_LOWER: for (i = 0; i < len; i++) if (!_islower(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_UPPER: for (i = 0; i < len; i++) if (!_isupper(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_SPACE: for (i = 0; i < len; i++) if (!isspace(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_XDIGIT: for (i = 0; i < len; i++) if (!_isxdigit(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_CONTROL: for (i = 0; i < len; i++) if (!_iscntrl(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	case STR_IS_PRINT: for (i = 0; i < len; i++) if (!_isprint(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//		//case STR_IS_GRAPH: for (i = 0; i < len; i++) if (!_isgraph(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//		//case STR_IS_PUNCT: for (i = 0; i < len; i++) if (!_ispunct(str[i])) { Jim_SetResultBool(interp, 0); return JIM_OK; } break;
+						//	default:
+						//		return JIM_ERROR;
+						//	}
+						//#else
 	case STR_IS_ALPHA: isclassfunc = isalpha; break;
 	case STR_IS_ALNUM: isclassfunc = isalnum; break;
 	case STR_IS_ASCII: isclassfunc = jim_isascii; break;
@@ -5135,7 +5134,6 @@ testbrace:
 			case '\f':
 			case '\v':
 				return JIM_ELESTR_BRACE;
-				break;
 		}
 		return JIM_ELESTR_SIMPLE;
 	}
@@ -6843,7 +6841,6 @@ singlechar:
 		break;
 	default:
 		return JimParseExprOperator(pc);
-		break;
 	}
 	return JIM_OK;
 }
@@ -6927,19 +6924,21 @@ static __device__ const struct Jim_ExprOperator *JimExprOperatorInfoByOpcode(int
 __constant__ static const char * const _tt_names[JIM_TT_EXPR_OP] =
 { "NIL", "STR", "ESC", "VAR", "ARY", "CMD", "SEP", "EOL", "EOF", "LIN", "WRD", "(((", ")))", ",,,", "INT",
 "DBL", "$()" };
+#ifdef __CUDACC__
+__device__ char _jim_tt_name_buf[20];
+#endif
 __device__ const char *jim_tt_name(int type)
 {
 	if (type < JIM_TT_EXPR_OP)
 		return _tt_names[type];
 	const struct Jim_ExprOperator *op = JimExprOperatorInfoByOpcode(type);
 #ifndef __CUDACC__
-	static
+	static char _jim_tt_name_buf[20];
 #endif
-		char buf[20];
 	if (op->name)
 		return op->name;
-	sprintf(buf, "(%d)", type);
-	return buf;
+	sprintf(_jim_tt_name_buf, "(%d)", type);
+	return _jim_tt_name_buf;
 }
 
 #pragma endregion
@@ -9673,7 +9672,7 @@ static __device__ int Jim_IfCoreCommand(ClientData dummy, Jim_Interp *interp, in
 				goto err;
 			return Jim_EvalObj(interp, argv[falsebody]);
 		}
-		return JIM_OK;
+		return JIM_OK; // unreached
 	}
 err:
 	Jim_WrongNumArgs(interp, 1, argv, "condition ?then? trueBody ?elseif ...? ?else? falseBody");

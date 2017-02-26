@@ -21,6 +21,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinytcl", "tinytcl\tinytcl.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jimtcl", "jimtcl\jimtcl.vcxproj", "{2FEB679D-8B0A-4F09-8459-ECA1D429DA1C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{602F49D0-3A63-459E-AD6D-81CF59C44A3A} = {602F49D0-3A63-459E-AD6D-81CF59C44A3A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.falloc", "libcu.falloc\libcu.falloc.vcxproj", "{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}"
 EndProject
