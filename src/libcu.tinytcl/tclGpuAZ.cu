@@ -5,7 +5,7 @@
 static __device__ char *currentDir = NULL;
 
 // Prototypes for local procedures defined in this file:
-static __device__ int CleanupChildren(Tcl_Interp *interp, int numPids, HANDLE *pidPtr, HANDLE errorId);
+static __device__ int CleanupChildren(Tcl_Interp *interp, int numPids, int *pidPtr, int errorId);
 static __device__ char *GetFileType(int mode);
 static __device__ int StoreStatData(Tcl_Interp *interp, char *varName, struct stat *statPtr);
 
@@ -221,13 +221,13 @@ __device__ int Tcl_ExitCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 		return TCL_ERROR;
 	}
 	if (argc == 1) {
-		exit_(0);
+		exit(0);
 	}
 	int value;
 	if (Tcl_GetInt(interp, args[1], &value) != TCL_OK) {
 		return TCL_ERROR;
 	}
-	exit_(value);
+	exit(value);
 	return TCL_OK; // Better not ever reach this!
 }
 
@@ -434,23 +434,23 @@ checkAccess:
 			goto not3Args;
 		}
 		statOp = 0;
-#ifdef S_IFLNK
-		// This option is only included if symbolic links exist on this system (in which case S_IFLNK should be defined).
-	} else if (c == 'r' && !strncmp(args[1], "readlink", length) && length >= 5) {
-		if (argc != 3) {
-			args[1] = "readlink";
-			goto not3Args;
-		}
-		char linkValue[MAXPATHLEN+1];
-		int linkLength = readlink(fileName, linkValue, sizeof(linkValue) - 1);
-		if (linkLength == -1) {
-			Tcl_AppendResult(interp, "couldn't readlink \"", args[2], "\": ", Tcl_OSError(interp), (char *)NULL);
-			return TCL_ERROR;
-		}
-		linkValue[linkLength] = 0;
-		Tcl_SetResult(interp, linkValue, TCL_VOLATILE);
-		return TCL_OK;
-#endif
+//#ifdef S_IFLNK
+//		// This option is only included if symbolic links exist on this system (in which case S_IFLNK should be defined).
+//	} else if (c == 'r' && !strncmp(args[1], "readlink", length) && length >= 5) {
+//		if (argc != 3) {
+//			args[1] = "readlink";
+//			goto not3Args;
+//		}
+//		char linkValue[MAXPATHLEN+1];
+//		int linkLength = readlink(fileName, linkValue, sizeof(linkValue) - 1);
+//		if (linkLength == -1) {
+//			Tcl_AppendResult(interp, "couldn't readlink \"", args[2], "\": ", Tcl_OSError(interp), (char *)NULL);
+//			return TCL_ERROR;
+//		}
+//		linkValue[linkLength] = 0;
+//		Tcl_SetResult(interp, linkValue, TCL_VOLATILE);
+//		return TCL_OK;
+//#endif
 	} else if (c == 's' && !strncmp(args[1], "size", length) && length >= 2) {
 		if (argc != 3) {
 			args[1] = "size";
@@ -817,9 +817,9 @@ badAccess:
 		if (Tcl_SplitList(interp, (char *)args[1]+1, &cmdArgc, &cmdArgs) != TCL_OK) {
 			goto error;
 		}
-		HANDLE inPipe = NULL, outPipe = NULL;
-		HANDLE *inPipePtr = (filePtr->writable ? &inPipe : NULL);
-		HANDLE *outPipePtr = (filePtr->readable ? &outPipe : NULL);
+		int inPipe = NULL, outPipe = NULL;
+		int *inPipePtr = (filePtr->writable ? &inPipe : NULL);
+		int *outPipePtr = (filePtr->readable ? &outPipe : NULL);
 		filePtr->numPids = Tcl_CreatePipeline(interp, cmdArgc, cmdArgs, &filePtr->pidPtr, inPipePtr, outPipePtr, &filePtr->errorId);
 		_freeFast((char *)cmdArgs);
 		if (filePtr->numPids < 0) {
@@ -1232,7 +1232,7 @@ __device__ int Tcl_TimeCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 *
 *----------------------------------------------------------------------
 */
-static __device__ int CleanupChildren(Tcl_Interp *interp, int numPids, HANDLE *pidPtr, HANDLE errorId)
+static __device__ int CleanupChildren(Tcl_Interp *interp, int numPids, int *pidPtr, int errorId)
 {
 	//	int result = TCL_OK;
 	//	int i, pid;

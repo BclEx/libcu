@@ -142,6 +142,8 @@ __device__ int Tcl_LoopCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 	return result;
 }
 
+#if NOTSUP
+
 #define MAX_SIGNALS 32
 static __device__ int *sigloc;
 static __device__ unsigned long sigsblocked; 
@@ -179,6 +181,8 @@ static __device__ int find_signal_by_name(const char *name)
 	}
 	return -1;
 }
+
+#endif
 
 /*
 *-----------------------------------------------------------------------------

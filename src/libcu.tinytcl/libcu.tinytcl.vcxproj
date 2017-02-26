@@ -36,34 +36,34 @@
   </ItemGroup>
   <ItemGroup Condition="'$(CUARCH)'!='cpu'">
     <CudaCompile Include="libcu.tinytcl.cu" />
-    <CudaCompile Include="dos.cu" />
-    <CudaCompile Include="regex_compat.cu" />
-    <CudaCompile Include="tclAlloc.cu" />
-    <CudaCompile Include="tclAssem.cu" />
-    <CudaCompile Include="tclBasic.cu" />
-    <CudaCompile Include="tclCmdAH.cu" />
-    <CudaCompile Include="tclCmdIL.cu" />
-    <CudaCompile Include="tclCmdMZ.cu" />
-    <CudaCompile Include="tclExpr.cu" />
-    <CudaCompile Include="tclGet.cu" />
-    <CudaCompile Include="tclGlob.cu" />
-    <CudaCompile Include="tclGpuAZ.cu" />
-    <CudaCompile Include="tclGpuEnv.cu" />
-    <CudaCompile Include="tclGpuStr.cu" />
-    <CudaCompile Include="tclGpuUtil.cu" />
-    <CudaCompile Include="tclHash.cu" />
-    <CudaCompile Include="tclHistory.cu" />
-    <CudaCompile Include="tclLoad.cu" />
-    <CudaCompile Include="tclLoad-noop.cu" />
-    <CudaCompile Include="tclObj.cu" />
-    <CudaCompile Include="tclParse.cu" />
-    <CudaCompile Include="tclProc.cu" />
-    <CudaCompile Include="tclUtil.cu" />
-    <CudaCompile Include="tclVar.cu" />
-    <CudaCompile Include="tclExDbg.cu" />
-    <CudaCompile Include="tclExtensions.cu" />
-    <CudaCompile Include="tclExGen.cu" />
-    <CudaCompile Include="TclMod.cu" />
+    <None Include="dos.cu" />
+    <None Include="regex_compat.cu" />
+    <None Include="tclAlloc.cu" />
+    <None Include="tclAssem.cu" />
+    <None Include="tclBasic.cu" />
+    <None Include="tclCmdAH.cu" />
+    <None Include="tclCmdIL.cu" />
+    <None Include="tclCmdMZ.cu" />
+    <None Include="tclExpr.cu" />
+    <None Include="tclGet.cu" />
+    <None Include="tclGlob.cu" />
+    <None Include="tclGpuAZ.cu" />
+    <None Include="tclGpuEnv.cu" />
+    <None Include="tclGpuStr.cu" />
+    <None Include="tclGpuUtil.cu" />
+    <None Include="tclHash.cu" />
+    <None Include="tclHistory.cu" />
+    <None Include="tclLoad.cu" />
+    <None Include="tclLoad-noop.cu" />
+    <None Include="tclObj.cu" />
+    <None Include="tclParse.cu" />
+    <None Include="tclProc.cu" />
+    <None Include="tclUtil.cu" />
+    <None Include="tclVar.cu" />
+    <None Include="tclExDbg.cu" />
+    <None Include="tclNoExtensions.cu" />
+    <None Include="tclExGen.cu" />
+    <None Include="TclMod.cu" />
   </ItemGroup>
   <ItemGroup Condition="'$(CUARCH)'=='cpu'">
     <None Include="libcu.tinytcl.cu" />
@@ -190,12 +190,12 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>LIBCUFORCE</Defines>
+      <Defines>LIBCUFORCEx</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
       <AdditionalOptions>-Xcudafe "--diag_suppress=branch_past_initialization" %(AdditionalOptions)</AdditionalOptions>
     </CudaCompile>
@@ -214,7 +214,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -243,7 +243,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -271,7 +271,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.tinytcl.cu.obj" -o "$(OutDir)libcu.tinytcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

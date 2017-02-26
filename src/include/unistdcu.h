@@ -127,8 +127,8 @@ extern __device__ int dup2_(int fd, int fd2);
 #define dup2 dup2_
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
-extern __device__ char **_environ_;
-#define _environ __environ_
+extern __device__ char **__environ_;
+#define __environ __environ_
 
 /* Terminate program execution with the low-order 8 bits of STATUS.  */
 //nosupport: extern __device__ void exit_(int status);
@@ -151,6 +151,8 @@ extern __device__ int rmdir_(const char *path);
 #define rmdir rmdir_
 
 __END_DECLS;
+#else
+#define __environ ((char **)nullptr)
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _UNISTDCU_H */

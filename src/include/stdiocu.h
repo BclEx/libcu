@@ -32,6 +32,7 @@ THE SOFTWARE.
 #define CORE_MAXFILESTREAM 10
 #endif
 
+//#define _INC_SWPRINTF_INL_
 #include <stdio.h>
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #include <stdargcu.h>
@@ -380,7 +381,8 @@ __END_DECLS;
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
 STDARG(int, fprintf_, vfprintf_(stream, format, va), FILE *__restrict stream, const char *__restrict format);
-#define fprintf_ fprintf
+//#define fprintf_ fprintf
+
 //#if !defined(__CUDACC_RTC__)
 //#define fprintf(stream, format, ...) fprintf_(stream, format, __VA_ARGS__)
 //#endif

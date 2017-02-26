@@ -5,8 +5,8 @@
 //
 // See the file "license.terms" for information on usage and redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
-#include "tclEx.h"
+#include "tcl.h"
 
-__device__ void TclEx_InitExtensions(Tcl_Interp *interp)
+__device__ void Tcl_InitExtensions(Tcl_Interp *interp)
 {
 }

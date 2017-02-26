@@ -20,13 +20,18 @@
 #ifndef __TCLHASH_H__
 #include "tclHash.h"
 #endif
-#include <ctypecu.h>
-#include <errnocu.h>
 #ifndef __LIBCU__
 #include <regexcu.h>
 #else
 #include "regex_compat.h"
 #endif
+
+#include <stddefcu.h>
+#include <ctypecu.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
+#include <errnocu.h>
 
 /*
 *----------------------------------------------------------------
@@ -159,8 +164,8 @@ typedef struct OpenFile_ {
 	int readable;		// Non-zero means file may be read.
 	int writable;		// Non-zero means file may be written.
 	int numPids;		// If this is a connection to a process pipeline, gives number of processes in pidPtr array below;  otherwise it is 0.
-	HANDLE *pidPtr;		// Pointer to malloc-ed array of child process ids (numPids of them), or NULL if this isn't a connection to a process pipeline.
-	HANDLE errorId;		// File id of file that receives error output from pipeline.  -1 means not used (i.e. this is a normal file).
+	int *pidPtr;		// Pointer to malloc-ed array of child process ids (numPids of them), or NULL if this isn't a connection to a process pipeline.
+	int errorId;		// File id of file that receives error output from pipeline.  -1 means not used (i.e. this is a normal file).
 } OpenFile_;
 
 /*

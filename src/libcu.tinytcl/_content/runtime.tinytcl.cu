@@ -19,7 +19,7 @@
 #if 1
 
 // From generated load_extensions.c
-__device__ void TclEx_InitExtensions(Tcl_Interp *interp);
+__device__ void Tcl_InitExtensions(Tcl_Interp *interp);
 
 Tcl_Interp *_interp;
 Tcl_CmdBuf _buffer;

@@ -6,7 +6,7 @@
 #include <tclExDbg.h>
 #endif
 
-__device__ void TclEx_InitExtensions(Tcl_Interp *interp);
+__device__ void Tcl_InitExtensions(Tcl_Interp *interp);
 
 __device__ bool _quitFlag = false;
 __constant__ char _initCmd[] = "puts stdout \"Tiny Tcl 6.8.0\n\"";
@@ -70,7 +70,7 @@ static void MainInit(int argc, char *const argv[]) {
 #endif
 
 	// Init any static extensions
-	TclEx_InitExtensions(interp);
+	Tcl_InitExtensions(interp);
 #ifdef TCL_MEM_DEBUG
 	Tcl_CreateCommand(interp, "checkmem", cmdCheckmem, (ClientData)0, (Tcl_CmdDeleteProc *)NULL);
 #endif
@@ -96,9 +96,9 @@ static void MainInit(int argc, char *const argv[]) {
 			// And make sure we print an informative error if something goes wrong
 			Tcl_AddErrorInfo(interp, "");
 			printf("%s\n", Tcl_GetVar(interp, "errorInfo", TCL_LEAVE_ERR_MSG));
-			exit_(1);
+			exit(1);
 		}
-		exit_(0);
+		exit(0);
 	}
 	else
 	{
@@ -111,7 +111,7 @@ static void MainInit(int argc, char *const argv[]) {
 			if (result != TCL_OK)
 			{
 				printf("%s\n", interp->result);
-				exit_(1);
+				exit(1);
 			}
 		}
 #endif
@@ -193,7 +193,7 @@ static void InteractiveExecute(char *line) {
 #ifdef TCL_MEM_DEBUG
 			Tcl_DumpActiveMemory(_dumpFile);
 #endif
-			exit_(0);
+			exit(0);
 		}
 	}
 	else {

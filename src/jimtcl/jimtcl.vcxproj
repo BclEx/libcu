@@ -183,7 +183,6 @@
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -204,7 +203,6 @@
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -228,7 +226,6 @@
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
@@ -253,7 +250,6 @@
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
-      <Defines>__CUDA_RUNTIME_H__</Defines>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>

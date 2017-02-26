@@ -29,8 +29,8 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #include <sys/stat.h>
-#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
-#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
+//#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
+//#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 
 //#include <bits/libcu_stat.h>
 typedef int mode_t;
@@ -71,7 +71,7 @@ __BEGIN_DECLS;
 #ifndef __USE_FILE_OFFSET64
 /* Get file attributes for FILE and put them in BUF.  */
 extern __device__ int stat_(const char *__restrict file, struct stat *__restrict buf);
-//#define stat stat_
+#define stat(file, buf) stat_(file, buf)
 
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
 extern __device__ int fstat_(int fd, struct stat *buf);
@@ -82,7 +82,7 @@ extern __device__ int fstat_(int fd, struct stat *buf);
 #endif
 #ifdef __USE_LARGEFILE64
 extern __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf);
-//#define stat64 stat64_
+#define stat64(file, buf) stat64_(file, buf)
 extern __device__ int fstat64_(int fd, struct stat64 *buf);
 #define fstat64 fstat64_
 #endif

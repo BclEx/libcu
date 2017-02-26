@@ -734,7 +734,7 @@ __device__ void Tcl_AppendResult_(Tcl_Interp *interp, va_list va)
 		SetupAppendBuffer(iPtr, newSpace);
 	}
 
-	va_restart(va);
+	va_restart(va, interp);
 
 	// Final step:  go through all the argument strings again, copying them into the buffer.
 	while (true) {

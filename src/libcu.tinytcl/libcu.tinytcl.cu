@@ -28,6 +28,6 @@
 #include "tclUtil.cu"
 #include "tclVar.cu"
 #include "tclExDbg.cu"
-#include "tclExtensions.cu"
+#include "tclNoExtensions.cu"
 #include "tclExGen.cu"
 #include "tclMod.cu"

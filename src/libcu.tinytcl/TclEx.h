@@ -11,6 +11,7 @@
 #ifndef __TCLEX_H__
 #define __TCLEX_H__
 
+#include <stdiocu.h>
 #ifndef __TCL_H__
 #include "tcl.h"
 #endif

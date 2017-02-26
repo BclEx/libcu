@@ -8,13 +8,12 @@
 // that the above copyright notice appear in all copies.  Karl Lehenbauer and Mark Diekhans make no representations about the suitability of this
 // software for any purpose.  It is provided "as is" without express or implied warranty.
 
-
 #ifndef __TCLEXINT_H__
 #define __TCLEXINT_H__
 
-#include <time.h>
-#include "tclInt.h"
+#include <timecu.h>
 #include "tclEx.h"
+#include "tclInt.h"
 
 #ifdef TCL_NEED_SYS_SELECT_H
 #include "sys/select.h"
@@ -54,8 +53,10 @@
 struct tm *gmtime();
 struct tm *localtime();
 
+#ifndef MAXINT
 #ifdef INT_MAX
 #define MAXINT INT_MAX
+#endif
 #endif
 
 #ifndef MAXINT

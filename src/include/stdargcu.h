@@ -117,12 +117,14 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define _INTSIZEOF(n) ((sizeof(n) + sizeof(int) - 1) & ~(sizeof(int) - 1))
 #endif
 #define _crt_va_list _crt_va_list0 
+#define _crt_va_restart(ap, ...) (ap.i = ap.b);
+#ifndef _WIN64
+#define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)_ROUNDT(t, (unsigned long)(ap.i + _INTSIZEOF(t)))) - _INTSIZEOF(t)))
+#else
 #define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)_ROUNDT(t, (unsigned long long)(ap.i + _INTSIZEOF(t)))) - _INTSIZEOF(t)))
+#endif
 #define _crt_va_end(ap) (ap.i = nullptr);
 
-__forceinline __device__ void _crt_va_restart(_crt_va_list &va) {
-	va.i = va.b;
-}
 static __forceinline __device__ void _crt_va_start(_crt_va_list &va) {
 	va.b = va.i = nullptr;
 }
@@ -218,10 +220,10 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define STDARGvoid(name, body, ...) __forceinline void name(...) { }
 #define STDARG2void(name, body, ...)
 #define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...) __forceinline ret name(...) { }
+#define STDARG(ret, name, body, ...) __forceinline ret name(...) { return (ret)0; }
 #define STDARG2(ret, name, body, ...)
 #define STDARG3(ret, name, body, ...)
-
+#define _crt_va_restart _crt_va_start
 #endif  /* __CUDA_ARCH__ */
 
 #undef va_start

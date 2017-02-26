@@ -281,6 +281,8 @@ __END_DECLS;
 #else
 #define strtoll
 #define strtoull
+#define setenv
+#define unsetenv
 #endif  /* _STDLIBCU_H */
 __BEGIN_DECLS;
 

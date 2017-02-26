@@ -733,7 +733,7 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, va_list va)
 			spaceAvl = spaceUsed + length;
 			spaceAvl += spaceAvl/2;
 			char *new_ = (char *)_allocFast((unsigned)spaceAvl);
-			memcpy_(new_, cmd, spaceUsed);
+			memcpy(new_, cmd, spaceUsed);
 			if (cmd != fixedSpace) {
 				_freeFast(cmd);
 			}

@@ -5,7 +5,7 @@
 // See the file "license.terms" for information on usage and redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 
 #include "TclMod.h"
-#include <string.h>
+#include <stringcu.h>
 
 __device__ int tcl_split_one_arg(Tcl_Interp *interp, int *argc, const char **args[])
 {
