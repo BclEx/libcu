@@ -16,7 +16,7 @@
 __BEGIN_DECLS;
 
 #ifndef _WIN64
-#define MALLOCSIZETYPE long int
+#define MALLOCSIZETYPE long long int // must be x64 size for malloc alignment
 #else
 #define MALLOCSIZETYPE long long int
 #endif
