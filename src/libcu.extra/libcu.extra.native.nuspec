@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>Libcu.falloc.Native</id>
+    <id>Libcu.Extra.Native</id>
     <version>0.5.0</version>
     <title>Libcu falloc</title>
     <authors>Contoso</authors>
@@ -13,14 +13,17 @@
     <copyright>Copyright 2010</copyright>
     <tags>native cuda gpu runtime</tags>
     <language>en-US</language>
+    <dependencies>
+      <dependency id="Libcu.Native" version="0.5.0" />
+    </dependencies>
   </metadata>
   <files>
-    <file src="_build\**\libcu.*.lib" exclude="_build\**\libcu.tinytcl.*.lib;_build\**\libcu.jimtcl.*.lib;" target="build\native\lib" />
-    <file src="libcu\*.targets" target="build\native" />
-    <file src="libcu\**\*.h" exclude="libcu\_*\**\*;libcu\GL\*" target="build\native\include" />
-    <file src="libcu\_content\*" target="content" />
-    <file src="libcu\**\*.cpp" exclude="libcu\Debug\*;libcu\Release\*;libcu\x64\**\*" target="src" />
-    <file src="libcu\**\*.cu" exclude="libcu\_*\**\*" target="src" />
-    <file src="libcu\**\*.h" exclude="libcu\_*\**\*;libcu\GL\*" target="src" />
+    <file src="_build\**\libcu.tinytcl.*.lib" target="build\native\lib" />
+    <file src="src\libcu.extra\*.targets" target="build\native" />
+    <file src="src\libcu.extra\**\*.h" exclude="src\libcu.extra\_*\**\*" target="build\native\include" />
+    <!--<file src="src\libcu.extra\_content\*" target="content" />-->
+    <file src="src\libcu.extra\**\*.cu" exclude="src\libcu.extra\_*\**\*" target="src" />
+    <file src="src\libcu.extra\**\*.h" exclude="src\libcu.extra\_*\**\*" target="src" />
+    <file src="src\libcu.extra\**\*.tcl" exclude="src\libcu.extra\_*\**\*" target="src" />
   </files>
 </package>

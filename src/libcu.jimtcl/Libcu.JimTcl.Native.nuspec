@@ -14,16 +14,16 @@
     <tags>native cuda gpu tcl jimtcl</tags>
     <language>en-US</language>
     <dependencies>
-      <dependency id="Libcu.native" version="0.5.0" />
+      <dependency id="Libcu.Native" version="0.5.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="_build\**\libcu.jimtcl.*.lib" target="build\native\lib" />
-    <file src="libcu.jimtcl\*.targets" target="build\native" />
-    <file src="libcu.jimtcl\**\*.h" exclude="libcu.jimtcl\_*\*" target="build\native\include" />
-    <!--<file src="libcu.jimtcl\_content\*" target="content" />-->
-    <file src="libcu.jimtcl\**\*.cu" exclude="libcu.jimtcl\_*\*" target="src" />
-    <file src="libcu.jimtcl\**\*.h" exclude="libcu.jimtcl\_*\*" target="src" />
-    <file src="libcu.jimtcl\**\*.tcl" target="src" />
+    <file src="src\libcu.jimtcl\*.targets" target="build\native" />
+    <file src="src\libcu.jimtcl\**\*.h" exclude="src\libcu.jimtcl\_*\**\*" target="build\native\include" />
+    <!--<file src="src\libcu.jimtcl\_content\*" target="content" />-->
+    <file src="src\libcu.jimtcl\**\*.cu" exclude="src\libcu.jimtcl\_*\**\*" target="src" />
+    <file src="src\libcu.jimtcl\**\*.h" exclude="src\libcu.jimtcl\_*\**\*" target="src" />
+    <file src="src\libcu.jimtcl\**\*.tcl" exclude="src\libcu.jimtcl\_*\**\*" target="src" />
   </files>
 </package>

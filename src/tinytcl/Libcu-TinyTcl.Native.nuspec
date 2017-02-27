@@ -18,7 +18,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="tinytcl\**\*.cu" target="content" />
-    <file src="tinytcl\**\*.cu" target="src" />
+    <file src="src\tinytcl\**\*.cu" target="content" />
+    <file src="src\tinytcl\**\*.cu" target="src" />
   </files>
 </package>

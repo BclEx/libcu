@@ -27,7 +27,7 @@
     <CudaCompile Include="jimsh.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Libcu-JimTcl.Native.nuspec" />
+    <None Include="libcu-jimtcl.native.nuspec" />
     <None Include="tests\alias.test" />
     <None Include="tests\apply.test" />
     <None Include="tests\applyns.test" />

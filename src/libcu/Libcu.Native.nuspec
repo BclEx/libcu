@@ -15,12 +15,12 @@
     <language>en-US</language>
   </metadata>
   <files>
-    <file src="_build\**\libcu.*.lib" exclude="_build\**\libcu.tinytcl.*.lib;_build\**\libcu.jimtcl.*.lib;" target="build\native\lib" />
-    <file src="libcu\*.targets" target="build\native" />
-    <file src="libcu\**\*.h" exclude="libcu\_*\**\*;libcu\GL\*" target="build\native\include" />
-    <file src="libcu\_content\*" target="content" />
-    <file src="libcu\**\*.cpp" exclude="libcu\Debug\*;libcu\Release\*;libcu\x64\**\*" target="src" />
-    <file src="libcu\**\*.cu" exclude="libcu\_*\**\*" target="src" />
-    <file src="libcu\**\*.h" exclude="libcu\_*\**\*;libcu\GL\*" target="src" />
+    <file src="_build\**\libcu.*.lib" exclude="_build\**\libcu.falloc.*.lib;_build\**\libcu.tinytcl.*.lib;_build\**\libcu.jimtcl.*.lib;" target="build\native\lib" />
+    <file src="src\libcu\*.targets" target="build\native" />
+    <file src="src\libcu\**\*.h" exclude="src\libcu\_*\**\*" target="build\native\include" />
+    <file src="src\libcu\_content\*" target="content" />
+    <file src="src\libcu\**\*.cpp" exclude="src\libcu\_*\**\*;src\libcu\Debug\*;src\libcu\Release\*;src\libcu\x64\**\*" target="src" />
+    <file src="src\libcu\**\*.cu" exclude="src\libcu\_*\**\*" target="src" />
+    <file src="src\libcu\**\*.h" exclude="src\libcu\_*\**\*" target="src" />
   </files>
 </package>

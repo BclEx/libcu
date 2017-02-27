@@ -1,7 +1,7 @@
 properties { 
   $base_dir = resolve-path .
   $build_dir = "$base_dir\_build"
-  $sln_file = "$base_dir\GpuEx.sln"
+  $sln_file = "$base_dir\src\libcu.sln"
   $tools_dir = "$base_dir\tools"
   $version = "1.0.0"
   $config_cpu = "Release.cpu"
@@ -95,21 +95,19 @@ task Compile -depends Init {
 		#xcopy "$build_dir\60.x64.Release\." "$build_dir\x64.Release\" /Y ; rm "$build_dir\60.x64.Release\" -force -recurse
 		#xcopy "$build_dir\60.x64.Debug\." "$build_dir\x64.Debug\" /Y ; rm "$build_dir\60.x64.Debug\" -force -recurse
 	} else {
-		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Release\;Configuration=$config_cpu;Platform=Win32;CUARCH=cpu" /m
-		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Release\;Configuration=$config_cu;Platform=Win32;CUARCH=52" /m
-		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Release\;Configuration=$config_cpu;Platform=x64;CUARCH=cpu" /m
-		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Release\;Configuration=$config_cu;Platform=x64;CUARCH=52" /m
+		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Debug\;Configuration=Debug;Platform=Win32;CUARCH=cpu"
+		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Debug\;Configuration=Debug;Platform=x64;CUARCH=cpu"
+		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Debug\;Configuration=Debug;Platform=Win32;CUARCH=52"
+		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Debug\;Configuration=Debug;Platform=x64;CUARCH=52"
+
+		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Release\;Configuration=Release;Platform=Win32;CUARCH=cpu"
+		#msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Release\;Configuration=Release;Platform=x64;CUARCH=cpu"
+		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\Win32.Release\;Configuration=Release;Platform=Win32;CUARCH=52"
+		msbuild $sln_file /target:Rebuild /p:"OutDir=$build_dir\x64.Release\;Configuration=Release;Platform=x64;CUARCH=52"
 	}
 }
 
 task Test -depends Compile -precondition { return $run_tests } {
-	$old = pwd
-	cd $build_dir
-	#& $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Debug\Runtime.11.Tests.dll" /noshadow
-	#& $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Debug\Runtime.20.Tests.dll" /noshadow
-	#& $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Debug\Runtime.30.Tests.dll" /noshadow
-	#& $tools_dir\xUnit\xunit.console.clr4.exe "$build_dir\Debug\Runtime.35.Tests.dll" /noshadow
-	cd $old
 }
 
 task Dependency -precondition { return $false } {
@@ -127,15 +125,6 @@ task Package -depends Dependency, Compile, Test {
 	{
 		& $tools_dir\NuGet.exe pack $spec.FullName -o $build_dir -Symbols -BasePath $base_dir
 	}
-
-	#$old = pwd
-	#cd $build_dir
-	#$spec_files = @(Get-ChildItem $base_dir\src -include *.autopkg -recurse)
-	#foreach ($spec in $spec_files)
-	#{
-	#	Write-NuGetPackage $spec.FullName
-	#}
-	#cd $old
 }
 
 task Push {

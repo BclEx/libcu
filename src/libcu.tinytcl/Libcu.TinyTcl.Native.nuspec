@@ -19,11 +19,11 @@
   </metadata>
   <files>
     <file src="_build\**\libcu.tinytcl.*.lib" target="build\native\lib" />
-    <file src="libcu.tinytcl\*.targets" target="build\native" />
-    <file src="libcu.tinytcl\**\*.h" exclude="libcu.tinytcl\_*\*" target="build\native\include" />
-    <!--<file src="libcu.tinytcl\_content\*" target="content" />-->
-    <file src="libcu.tinytcl\**\*.cu" exclude="libcu.tinytcl\_*\*" target="src" />
-    <file src="libcu.tinytcl\**\*.h" exclude="libcu.tinytcl\_*\*" target="src" />
-    <file src="libcu.tinytcl\**\*.tcl" target="src" />
+    <file src="src\libcu.tinytcl\*.targets" target="build\native" />
+    <file src="src\libcu.tinytcl\**\*.h" exclude="src\libcu.tinytcl\_*\**\*" target="build\native\include" />
+    <!--<file src="src\libcu.tinytcl\_content\*" target="content" />-->
+    <file src="src\libcu.tinytcl\**\*.cu" exclude="src\libcu.tinytcl\_*\**\*" target="src" />
+    <file src="src\libcu.tinytcl\**\*.h" exclude="src\libcu.tinytcl\_*\**\*" target="src" />
+    <file src="src\libcu.tinytcl\**\*.tcl" exclude="src\libcu.tinytcl\_*\**\*" target="src" />
   </files>
 </package>

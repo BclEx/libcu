@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" >
-  <UsingTask TaskName="GetRuntimeArch" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+  <UsingTask TaskName="GetLibcuArch" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
     <ParameterGroup>
       <CudaCompile ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
-      <RuntimeArch ParameterType="System.String" Output="true" />
+      <LibcuArch ParameterType="System.String" Output="true" />
     </ParameterGroup>
     <Task>
       <Using Namespace="System.Linq" />
@@ -21,7 +21,7 @@ if (item != null) {
   if (item.IndexOf("compute_52") != -1 || item.IndexOf("compute_53") != -1) itemAsName = "52";
   if (item.IndexOf("compute_60") != -1) itemAsName = "60";
 }
-RuntimeArch = itemAsName;
+LibcuArch = itemAsName;
 ]]>
       </Code>
     </Task>
@@ -29,7 +29,6 @@ RuntimeArch = itemAsName;
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>HASRUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(MSBuildThisFileDirectory)lib\$(Platform).$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -38,16 +37,16 @@ RuntimeArch = itemAsName;
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <Target Name="RuntimeLink" BeforeTargets="Link;CudaLink">
-    <GetRuntimeArch CudaCompile="@(CudaCompile)">
-      <Output TaskParameter="RuntimeArch" PropertyName="RuntimeArch" />
-    </GetRuntimeArch>
+  <Target Name="LibcuLink" BeforeTargets="Link;CudaLink">
+    <GetLibcuArch CudaCompile="@(CudaCompile)">
+      <Output TaskParameter="LibcuArch" PropertyName="LibcuArch" />
+    </GetLibcuArch>
     <ItemGroup>
       <Link>
-        <AdditionalDependencies>libcu.$(RuntimeArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        <AdditionalDependencies>libcu.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
       </Link>
       <CudaLink>
-        <AdditionalDependencies>libcu.$(RuntimeArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        <AdditionalDependencies>libcu.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
       </CudaLink>
     </ItemGroup>
   </Target>

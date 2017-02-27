@@ -18,7 +18,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="jimtcl\**\*.cu" target="content" />
-    <file src="jimtcl\**\*.cu" target="src" />
+    <file src="src\jimtcl\**\*.cu" target="content" />
+    <file src="src\jimtcl\**\*.cu" target="src" />
   </files>
 </package>
