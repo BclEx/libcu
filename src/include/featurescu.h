@@ -57,7 +57,10 @@ definitions to the global namespace.  */
 #define __USING_NAMESPACE_STD(name) using std::name;
 #define __BEGIN_NAMESPACE_C99 namespace __c99 {
 #define __END_NAMESPACE_C99 }
-#define __USING_NAMESPACE_C99(name) using __c99::name;
+#define __USING_NAMESPACE_C99(name) using ext::name;
+#define __BEGIN_NAMESPACE_EXT namespace ext {
+#define __END_NAMESPACE_EXT }
+#define __USING_NAMESPACE_EXT(name) using ext::name;
 #else
 /* For compatibility we do not add the declarations into any
 namespace.  They will end up in the global namespace which is what
@@ -68,6 +71,9 @@ old code expects.  */
 #define __BEGIN_NAMESPACE_C99
 #define __END_NAMESPACE_C99
 #define __USING_NAMESPACE_C99(name)
+#define __BEGIN_NAMESPACE_EXT
+#define __END_NAMESPACE_EXT
+#define __USING_NAMESPACE_EXT(name)
 #endif
 
 #define HAS_STDIO_BUFSIZ_NONE__

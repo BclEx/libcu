@@ -52,6 +52,7 @@ THE SOFTWARE.
 #define MEMORY_ALIGNMENT 4096
 #define _ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
 #define _ROUND8(x)			(((x)+7)&~7)
+#define _ROUND64(x)			(((x)+63)&~63)
 #define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
 #define _ROUNDDOWN8(x)		((x)&~7)
 #define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
@@ -61,6 +62,31 @@ THE SOFTWARE.
 #define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 #define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+#define UNUSED_PARAMETER(x) (void)(x)
+#define UNUSED_PARAMETER2(x,y) (void)(x),(void)(y)
+
+//////////////////////
+// WSD
+#pragma region WSD
+
+// When OMIT_WSD is defined, it means that the target platform does not support Writable Static Data (WSD) such as global and static variables.
+// All variables must either be on the stack or dynamically allocated from the heap.  When WSD is unsupported, the variable declarations scattered
+// throughout the SQLite code must become constants instead.  The _WSD macro is used for this purpose.  And instead of referencing the variable
+// directly, we use its constant as a key to lookup the run-time allocated buffer that holds real variable.  The constant is also the initializer
+// for the run-time allocated buffer.
+//
+// In the usual case where WSD is supported, the _WSD and _GLOBAL macros become no-ops and have zero performance impact.
+#ifdef NEEDS_WSD
+int __wsdinit(int n, int j);
+void *__wsdfind(void *k, int l);
+#define _WSD const
+#define _GLOBAL(t, v) (*(t*)__wsdfind((void *)&(v), sizeof(v)))
+#else
+#define _WSD
+#define _GLOBAL(t, v) v
+#endif
+
+#pragma endregion
+
 
 #endif  /* _CRTDEFSCU_H */
-

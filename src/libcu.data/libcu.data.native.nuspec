@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>Libcu.Extra.Native</id>
+    <id>Libcu.Data.Native</id>
     <version>0.5.0</version>
     <title>Libcu falloc</title>
     <authors>Contoso</authors>
@@ -15,15 +15,16 @@
     <language>en-US</language>
     <dependencies>
       <dependency id="Libcu.Native" version="0.5.0" />
+      <dependency id="Libcu.Extra.Native" version="0.5.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="_build\**\libcu.extra.*.lib" target="build\native\lib" />
-    <file src="src\libcu.extra\*.targets" target="build\native" />
-    <file src="src\libcu.extra\**\*.h" exclude="src\libcu.extra\_*\**\*" target="build\native\include" />
-    <!--<file src="src\libcu.extra\_content\*" target="content" />-->
-    <file src="src\libcu.extra\**\*.cu" exclude="src\libcu.extra\_*\**\*" target="src" />
-    <file src="src\libcu.extra\**\*.h" exclude="src\libcu.extra\_*\**\*" target="src" />
-    <file src="src\libcu.extra\**\*.tcl" exclude="src\libcu.extra\_*\**\*" target="src" />
+    <file src="_build\**\libcu.data.*.lib" target="build\native\lib" />
+    <file src="src\libcu.data\*.targets" target="build\native" />
+    <file src="src\libcu.data\**\*.h" exclude="src\libcu.data\_*\**\*" target="build\native\include" />
+    <!--<file src="src\libcu.data\_content\*" target="content" />-->
+    <file src="src\libcu.data\**\*.cu" exclude="src\libcu.data\_*\**\*" target="src" />
+    <file src="src\libcu.data\**\*.h" exclude="src\libcu.data\_*\**\*" target="src" />
+    <file src="src\libcu.data\**\*.tcl" exclude="src\libcu.data\_*\**\*" target="src" />
   </files>
 </package>

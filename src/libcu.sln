@@ -32,6 +32,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.falloc", "libcu.fallo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.extra", "libcu.extra\libcu.extra.vcxproj", "{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.data", "libcu.data\libcu.data.vcxproj", "{D651983F-56C0-4681-81DC-6FA200F4EFC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -102,6 +104,14 @@ Global
 		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}.Release|Win32.Build.0 = Release|Win32
 		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}.Release|x64.ActiveCfg = Release|x64
 		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}.Release|x64.Build.0 = Release|x64
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Debug|Win32.Build.0 = Debug|Win32
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Debug|x64.ActiveCfg = Debug|x64
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Debug|x64.Build.0 = Debug|x64
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Release|Win32.ActiveCfg = Release|Win32
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Release|Win32.Build.0 = Release|Win32
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Release|x64.ActiveCfg = Release|x64
+		{D651983F-56C0-4681-81DC-6FA200F4EFC9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

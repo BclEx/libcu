@@ -33,14 +33,14 @@ THE SOFTWARE.
 _Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __forceinline __device__ void Coverage(int line) { }
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
+#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
 /* Define tag allocs */
 __forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
 __forceinline __device__ void tagfree(void *tag, void *p) { }
 __forceinline __device__ void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
 #else
 __forceinline void Coverage(int line) { }
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
+#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); exit(1); }
 /* Define tag allocs */
 __forceinline void *tagalloc(void *tag, size_t size) { return nullptr; }
 __forceinline void tagfree(void *tag, void *p) { }

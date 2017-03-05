@@ -28,7 +28,7 @@ THE SOFTWARE.
 #ifndef _LIBCU_STDIO_H
 #define _LIBCU_STDIO_H
 
-#define __STDIO_BUFFERS
+//#define __STDIO_BUFFERS
 /* ANSI/ISO mandate at least 256. */
 #if defined(HAS_STDIO_BUFSIZ_NONE__)
 /* Fake this because some apps use stdio.h BUFSIZ. */

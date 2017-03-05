@@ -154,6 +154,12 @@ extern __device__ void *calloc_(size_t nmemb, size_t size);
 #define calloc calloc_
 __END_NAMESPACE_STD;
 
+__BEGIN_NAMESPACE_EXT;
+/* SIZE bytes of memory.  */
+extern __device__ size_t _msize_(void *ptr);
+#define _msize _msize_
+__END_NAMESPACE_STD;
+
 __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
 extern __device__ void *realloc_(void *ptr, size_t size);
@@ -283,6 +289,10 @@ __END_DECLS;
 #define strtoull
 #define setenv
 #define unsetenv
+#include <malloc.h>
+#ifndef _MSC_VER
+#define _msize(p) malloc_usable_size(p)
+#endif
 #endif  /* _STDLIBCU_H */
 __BEGIN_DECLS;
 
@@ -298,6 +308,8 @@ __forceinline __device__ quad_t strtoq_(const char *__restrict nptr, char **__re
 __forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
 #define strtouq strtouq_
 #endif
+
+__forceinline __device__ void *mallocZero(size_t size) { void *p = malloc(size); if (p) memset(p, 0, size); return p; }
 
 __END_DECLS;
 #endif  /* _STDLIBCU_H */

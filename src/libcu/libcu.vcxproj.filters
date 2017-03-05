@@ -52,12 +52,6 @@
     <ClInclude Include="..\include\direntcu.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sys\bitveccu.h">
-      <Filter>include\sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\sys\hashcu.h">
-      <Filter>include\sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\sys\statcu.h">
       <Filter>include\sys</Filter>
     </ClInclude>
@@ -88,6 +82,18 @@
     <ClInclude Include="..\include\host_functions.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ext\bitvec.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\hash.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\memfile.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\tagbase.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
@@ -110,6 +116,12 @@
     </Filter>
     <Filter Include="include\sys">
       <UniqueIdentifier>{3b8669b4-7b70-4086-928c-adaec2f08228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ext">
+      <UniqueIdentifier>{4ed86195-7e36-40a0-bf2c-d0610c0c10aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\ext">
+      <UniqueIdentifier>{5bf5eda0-9971-4bbc-83ad-483b240b540c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -137,15 +149,18 @@
     <None Include="stdlibcu.cu" />
     <None Include="timecu.cu" />
     <None Include="unistdcu.cu" />
-    <None Include="sys\bitveccu.cu">
-      <Filter>sys</Filter>
-    </None>
     <None Include="sys\statcu.cu">
       <Filter>sys</Filter>
     </None>
-    <None Include="sys\hashcu.cu">
-      <Filter>sys</Filter>
-    </None>
     <None Include="stringcu.cu" />
+    <None Include="ext\bitvec.cu">
+      <Filter>ext</Filter>
+    </None>
+    <None Include="ext\hash.cu">
+      <Filter>ext</Filter>
+    </None>
+    <None Include="ext\memfile.cu">
+      <Filter>ext</Filter>
+    </None>
   </ItemGroup>
 </Project>

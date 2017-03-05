@@ -11,21 +11,6 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	c[i] = a[i] + b[i];
 	if (i != 1)
 		return;
-
-	//strchr("Me", 'M');
-	printf("%d %s\n", 2, "sky morey");
-
-	FILE *f = fopen(":\\T_\\fopen.txt", "w");
-	//fprintf(f, "The quick brown fox jumps over the lazy dog");
-	fwrite("test", 4, 1, f);
-	fflush(f);
-	fclose(f);
-
-	//char buf[100] = {0};
-	//snprintf(buf, 100, "test");
-	//printf("%s\n", buf);
-	//printf("%d\n", atoi("51236"));
-	//printf("%f\n", atof("1.2"));
 }
 
 int main()

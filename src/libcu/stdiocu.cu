@@ -6,6 +6,13 @@
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
 
+#include <ext\hash.h>
+#include <ext\memfile.h>
+#include <_dirent.h>
+#include <unistdcu.h>
+#include <errnocu.h>
+#include <fcntl.h>
+
 #define CORE_MAXLENGTH 1000000000
 
 //__device__ int _close(int a) { io_close msg(a); return msg.RC; }
@@ -18,14 +25,21 @@ __BEGIN_DECLS;
 //__constant__ FILE *__iob_file[3] = { &file0, &file1, &file2 };
 __constant__ FILE __iob_file[CORE_MAXFILESTREAM];
 
+__device__ hash_t __iob_dir = HASHINIT;
+
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)
 {
-	//if (filename[0] != ':') {
-	//	stdio_remove msg(filename); return msg.rc;
-	//}
-	panic("Not Implemented");
-	return 0;
+	if (filename[0] != ':') {
+		stdio_remove msg(filename); return msg.RC;
+	}
+	int saved_errno = errno;
+	int rv = rmdir(filename);
+	if ((rv < 0) && (errno == ENOTDIR)) {
+		_set_errno(saved_errno); // Need to restore errno.
+		rv = _unlink(filename);
+	}
+	return rv;
 }
 
 /* Rename file OLD to NEW.  */
@@ -34,6 +48,7 @@ __device__ int rename_(const char *old, const char *new_)
 	if (old[0] != ':') {
 		stdio_rename msg(old, new_); return msg.RC;
 	}
+	void *entry = hashFind(&__iob_dir, old);
 	panic("Not Implemented");
 	return 0;
 }
@@ -44,6 +59,7 @@ __device__ int _unlink_(const char *filename)
 	if (filename[0] != ':') {
 		stdio_unlink msg(filename); return msg.RC;
 	}
+	void *entry = hashFind(&__iob_dir, filename);
 	panic("Not Implemented");
 	return 0;
 }
@@ -69,14 +85,69 @@ __device__ int fflush_device(FILE *stream)
 	return 0; 
 }
 
+__device__ FILE *fopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+{
+	// Parse the specified mode.
+	unsigned short openMode = O_RDONLY;
+	if (*modes != 'r') { // Not read...
+		openMode = (O_WRONLY | O_CREAT | O_TRUNC);
+		if (*modes != 'w') { // Not write (create or truncate)...
+			openMode = (O_WRONLY | O_CREAT | O_APPEND);
+			if (*modes != 'a') {	// Not write (create or append)...
+				_set_errno(EINVAL); // So illegal mode.
+				if (stream)
+					fclose_device(stream);
+				return nullptr;
+			}
+		}
+	}
+	if (modes[1] == 'b') // Binary mode (NO-OP currently).
+		++modes;
+	if (modes[1] == '+') { // Read and Write.
+		++modes;
+		openMode |= (O_RDONLY | O_WRONLY);
+		openMode += (O_RDWR - (O_RDONLY | O_WRONLY));
+	}
+
+	// Need to allocate a FILE (not freopen).
+	if (!stream) {
+		stream = &__iob_file[4];
+		stream->_file = 4;
+	}
+	stream->_flag = openMode;
+	stream->_base = nullptr;
+
+	void *ent = hashFind(&__iob_dir, filename);
+	if (!ent) {
+		if ((openMode & O_RDONLY)) {
+			_set_errno(EINVAL); // So illegal mode.
+			if (stream)
+				fclose_device(stream);
+			return nullptr;
+		}
+		ent = malloc(_ROUND64(sizeof(dirent)) + __sizeofMemfile_t);
+		if (hashInsert(&__iob_dir, filename, ent))
+			panic("removed file");
+		dirent *dirEnt = (dirent *)ent;
+		dirEnt->d_type = 1;
+		strcpy(dirEnt->d_name, filename);
+		memfile_t *memFile = (memfile_t *)((char *)ent + __sizeofMemfile_t);
+		memfileOpen(memFile);
+		stream->_base = (char *)memFile;
+	}
+	return stream;
+}
+
 /* Open a file, replacing an existing stream with it. */
 __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
 	if (filename[0] != ':') {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
 	}
-	panic("Not Implemented");
-	return nullptr;
+	if (stream)
+		fclose_device(stream);
+	FILE *fp = fopen_device(filename, modes, stream);
+	return fp;
 }
 
 #ifdef __USE_LARGEFILE64
@@ -180,15 +251,23 @@ __device__ int ungetc_device(int c, FILE *stream)
 /* Read chunks of generic data from STREAM.  */
 __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
 {
-	panic("Not Implemented");
-	return 0;
+	memfile_t *f;
+	if (!stream || !(f = (memfile_t *)stream->_base))
+		panic("fwrite: !stream");
+	size *= n;
+	memfileRead(f, ptr, size*n, 0);
+	return size;
 }
 
 /* Write chunks of generic data to STREAM.  */
-__device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict s)
+__device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
 {
-	panic("Not Implemented");
-	return 0;
+	memfile_t *f;
+	if (!stream || !(f = (memfile_t *)stream->_base))
+		panic("fwrite: !stream");
+	size *= n;
+	memfileWrite(f, ptr, size, 0);
+	return size;
 }
 
 /* Seek to a certain position on STREAM.  */

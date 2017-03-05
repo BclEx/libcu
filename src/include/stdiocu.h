@@ -266,8 +266,8 @@ extern __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t 
 __forceinline __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fread_device(ptr, size, n, stream); stdio_fread msg(wait, size, n, stream); memcpy(ptr, msg.Ptr, msg.RC); return msg.RC; }
 #define fread fread_
 /* Write chunks of generic data to STREAM.  */
-extern __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict s);
-__forceinline __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict s, bool wait = true) { if (ISDEVICEFILE(s)) return fwrite_device(ptr, size, n, s); stdio_fwrite msg(wait, ptr, size, n, s); return msg.RC; }
+extern __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream);
+__forceinline __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fwrite_device(ptr, size, n, stream); stdio_fwrite msg(wait, ptr, size, n, stream); return msg.RC; }
 #define fwrite fwrite_
 __END_NAMESPACE_STD;
 

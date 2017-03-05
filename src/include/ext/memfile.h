@@ -1,5 +1,5 @@
-/*
-hash.h - xxx
+﻿/*
+memfile.h - xxx
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -24,35 +24,24 @@ THE SOFTWARE.
 */
 
 //#pragma once
-
-#ifdef x__CUDA_ARCH__
-#ifndef _SYS_HASHCU_H
-#define _SYS_HASHCU_H
-
-struct hashElem_t
-{
-	hashElem_t *next, *prev;			// Next and previous elements in the table
-	void *data;							// Data associated with this element
-	const char *key; int keyLength;		// Key associated with this element
-};
-
-struct hash_t
-{
-	unsigned int tableSize;			// Number of buckets in the hash table
-	unsigned int count;				// Number of entries in this table
-	hashElem_t *first;				// The first element of the array
-	struct htable_t
-	{              
-		int count;					// Number of entries with this hash
-		hashElem_t *chain;			// Pointer to first entry with this hash
-	} *table; // the hash table
-};
-
-extern __device__ hash();
-extern __device__ void hashInit(hash_t *p);
-extern __device__ void *hashInsert(hash_t *p, const char *key, int keyLength, void *data);
-extern __device__ void *hashFind(hash_t *p, const char *key, int keyLength);
-extern __device__ void hashClear(hash_t *p);
-
-#endif // _SYS_HASHCU_H
+#ifndef _EXT_MEMFILE_H
+#define _EXT_MEMFILE_H
+#include <stdint.h>
+#ifdef  __cplusplus
+extern "C" {
 #endif
+
+	typedef struct memfile_t memfile_t;
+
+	extern __constant__ int __sizeofMemfile_t;
+	extern __device__ void memfileOpen(memfile_t *f);
+	extern __device__ void memfileRead(memfile_t *f, void *buffer, int amount, int64_t offset);
+	extern __device__ bool memfileWrite(memfile_t *f, const void *buffer, int amount, int64_t offset);
+	extern __device__ void memfileTruncate(memfile_t *f, int64_t size);
+	extern __device__ void memfileClose(memfile_t *f);
+	extern __device__ int64_t memfileGetFileSize(memfile_t *f);
+
+#ifdef  __cplusplus
+}
+#endif
+#endif  /* _EXT_MEMFILE_H */

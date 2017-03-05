@@ -61,4 +61,10 @@ __device__ void *realloc_(void *ptr, size_t size)
 	return (void *)(p+1);
 }
 
+__device__ size_t _msize_(void *ptr)
+{
+	MALLOCSIZETYPE *p2 = (MALLOCSIZETYPE *)ptr;
+	return (size_t)*(p2-1);
+}
+
 __END_DECLS;

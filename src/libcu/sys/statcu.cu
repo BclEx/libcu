@@ -1,4 +1,3 @@
-//#include <cuda_runtimecu.h>
 #include <sys/statcu.h>
 
 /* Get file attributes for FILE and put them in BUF.  */
