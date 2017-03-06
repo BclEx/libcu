@@ -12,3 +12,8 @@
 #include "sys/statcu.cu"
 #include "ext/hash.cu"
 #include "ext/memfile.cu"
+
+__device__ void libcuReset()
+{
+	fsystemReset();
+}

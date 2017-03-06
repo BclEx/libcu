@@ -29,5 +29,6 @@ THE SOFTWARE.
 
 #include <cuda_runtime.h>
 #include <host_functions.h>
+extern __device__ void libcuReset();
 
 #endif /* __CUDA_RUNTIMECU_H__ */

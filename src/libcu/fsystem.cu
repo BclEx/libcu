@@ -10,8 +10,23 @@
 
 __BEGIN_DECLS;
 
-__device__ dirEnt_t __iob_root = { { 0, 0, 1, 0, ":\\" }, nullptr };
+__device__ dirEnt_t __iob_root = { { 0, 0, 1, 0, ":\\" }, nullptr, nullptr };
 __device__ hash_t __iob_dir = HASHINIT;
+
+__device__ void freeEnt(dirEnt_t *ent)
+{
+	if (ent->dir.d_type == 1) {
+		dirEnt_t *p = ent->u.list;
+		do {
+			dirEnt_t *next = p->next;
+			freeEnt(p);
+			p = next;
+		} while (p);
+	} else if (ent->dir.d_type == 2)
+		memfileClose(ent->u.file);
+	if (ent != &__iob_root) free(ent);
+	else __iob_root.u.list = nullptr;
+}
 
 __device__ dirEnt_t *findDir(const char *path, const char **file)
 {
@@ -72,6 +87,7 @@ __device__ int fsystemUnlink(const char *path)
 	}
 
 	// free entity
+	freeEnt(ent);
 	return 0;
 }
 
@@ -125,8 +141,9 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode)
 	return fileEnt;
 }
 
-__device__ void fsystemShutdown(dirEnt_t *dir)
+__device__ void fsystemReset()
 {
+	freeEnt(&__iob_root);
 }
 
 __END_DECLS;

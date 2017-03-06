@@ -106,6 +106,9 @@ __device__ FILE *tmpfile_(void)
 /* Close STREAM. */
 __device__ int fclose_device(FILE *stream)
 {
+	dirEnt_t *f;
+	if (!stream || !(f = (dirEnt_t *)stream->_base))
+		panic("fclose: !stream");
 	streamFree(stream);
 	return 0;
 }

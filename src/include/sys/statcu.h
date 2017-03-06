@@ -88,7 +88,7 @@ extern __device__ int fstat64_(int fd, struct stat64 *buf);
 #endif
 
 /* Set file access permissions for FILE to MODE. If FILE is a symbolic link, this affects its target instead.  */
-extern __device__ int chmod_(const char *file, mode_t mode);
+extern __device__ int chmod_(const char *file, mode_t mode = 0);
 #define chmod chmod_
 
 /* Set the file creation mask of the current process to MASK, and return the old creation mask.  */
@@ -96,11 +96,11 @@ extern __device__ mode_t umask_(mode_t mask);
 #define umask umask_
 
 /* Create a new directory named PATH, with permission bits MODE.  */
-extern __device__ int mkdir_(const char *path, mode_t mode);
+extern __device__ int mkdir_(const char *path, mode_t mode = 0);
 #define mkdir mkdir_
 
 /* Create a new FIFO named PATH, with permission bits MODE.  */
-extern __device__ int mkfifo_(const char *path, mode_t mode);
+extern __device__ int mkfifo_(const char *path, mode_t mode = 0);
 #define mkfifo mkfifo_
 
 __END_DECLS;

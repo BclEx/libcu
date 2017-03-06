@@ -20,7 +20,7 @@ __device__ int fsystemRename(const char *old, const char *new_);
 __device__ int fsystemUnlink(const char *path);
 __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode);
 __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode);
-__device__ void fsystemShutdown(dirEnt_t *dir);
+__device__ void fsystemReset();
 
 __END_DECLS;
 #endif  /* _FSYSTEM_H */
