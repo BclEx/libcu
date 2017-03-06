@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
 #include <stdio.h>
-#include "..\src\libcu.fileutils\sentinel-fileutilsmsg.h"
+#include "sentinel-fileutilsmsg.h"
 
 #define CAT_BUF_SIZE 4096
 

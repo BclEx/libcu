@@ -1,24 +1,23 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
 #include <stdio.h>
-#include "..\src\libcu.fileutils\sentinel-fileutilsmsg.h"
+#include "sentinel-fileutilsmsg.h"
 
 unsigned short _newMode = 0666; // & ~umask(0);
 
-int makeDir(char *name, int f)
-{
-	char iname[256];
-	strcpy(iname, name);
+__forceinline int rmdir(char *name) { fileutils_drmdir msg(name); return msg.RC; }
 
+int removeDir(char *name, int f)
+{
+	int r, r2 = 2;
 	char *line;
-	if ((line = strchr(iname, '/')) && f) {
-		while (line > iname && *line == '/')
+	while (!(r = rmdir(name)) && (line = strchr(name,'/')) && f) {
+		while (line > name && *line == '/')
 			--line;
 		line[1] = 0;
-		makeDir(iname, 1);
+		r2 = 0;
 	}
-	fileutils_dmkdir msg(name, _newMode);
-	return (msg.RC && !f ? 1 : 0);
+	return (r && r2);
 }
 
 int main(int argc, char **argv)
@@ -30,16 +29,17 @@ int main(int argc, char **argv)
 	int r = 0;
 	for (int i = parent + 1; i < argc; i++) {
 		if (argv[i][0] != '-') {
-			if (argv[i][strlen(argv[i])-1] == '/')
+			while (argv[i][strlen(argv[i])-1] == '/')
 				argv[i][strlen(argv[i])-1] = '\0';
-			if (makeDir(argv[i], parent)) {
-				fwrite("mkdir: cannot create directory ", 31, 1, stderr);
+			if (removeDir(argv[i], parent)) {
+				fwrite("rmdir: cannot remove directory ", 31, 1, stderr);
 				fwrite(argv[i], strlen(argv[i]), 1, stderr);
 				fwrite("\n", 1, 1, stderr);
 				r = 1;
 			}
-		} else {
-			fwrite("mkdir: usage error.\n", 20, 1, stderr);
+		}
+		else {
+			fwrite("rmdir: usage error.\n", 20, 1, stderr);
 			exit(1);
 		}
 	}

@@ -3,10 +3,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-char *basename (char *name)
+char *basename(char *name)
 {
-	char *base;
-	base = rindex(name, '/');
+	char *base = strchr(name, '/');
 	return (base ? base + 1 : name);
 }
 

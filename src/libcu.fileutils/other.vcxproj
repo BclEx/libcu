@@ -14,9 +14,9 @@
     <CUARCH Condition="'$(CUARCH)'==''">35</CUARCH>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F064226E-CC17-4C0C-B88C-BF2C928E0BCC}</ProjectGuid>
-    <RootNamespace>Project1</RootNamespace>
-    <ProjectName>drmdir</ProjectName>
+    <ProjectGuid>{141257E5-CBDA-4D66-BCB8-577FE6BC4F68}</ProjectGuid>
+    <RootNamespace>libcu</RootNamespace>
+    <ProjectName>other</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -87,8 +87,16 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="drmdir.cpp" />
-    <None Include="drmdir.cu" />
+    <ClCompile Include="ddd.cpp" />
+    <ClCompile Include="dl.cpp" />
+    <ClCompile Include="dln.cpp" />
+    <ClCompile Include="dmkfifo.cpp" />
+    <ClCompile Include="dmknod.cpp" />
+    <ClCompile Include="dsync.cpp" />
+    <ClCompile Include="dtouch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="futils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

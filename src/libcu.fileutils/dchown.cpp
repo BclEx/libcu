@@ -8,13 +8,11 @@ int main(int argc, char	**argv)
 	sentinelClientInitialize();
 	char *cp = argv[1];
 	int uid;
-	if (isdecimal(*cp))
-	{
+	if (isdecimal(*cp)) {
 		uid = 0;
 		while (isdecimal(*cp))
 			uid = uid * 10 + (*cp++ - '0');
-		if (*cp)
-		{
+		if (*cp) {
 			fprintf(stderr, "Bad uid value\n");
 			exit(1);
 		}
@@ -22,8 +20,7 @@ int main(int argc, char	**argv)
 	else
 	{
 		struct passwd *pwd = getpwnam(cp);
-		if (!pwd)
-		{
+		if (!pwd) {
 			fprintf(stderr, "Unknown user name\n");
 			exit(1);
 		}
@@ -32,8 +29,7 @@ int main(int argc, char	**argv)
 	//
 	argc--;
 	argv++;
-	while (argc-- > 1)
-	{
+	while (argc-- > 1) {
 		argv++;
 		struct stat	statbuf;
 		if ((stat(*argv, &statbuf) < 0) || (chown(*argv, uid, statbuf.st_gid) < 0))
