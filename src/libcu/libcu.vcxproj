@@ -31,10 +31,10 @@
     <ClInclude Include="..\include\crtdefscu.h" />
     <ClInclude Include="..\include\ctypecu.h" />
     <ClInclude Include="..\include\cuda_runtimecu.h" />
-    <ClInclude Include="..\include\ext\bitvec.h" />
     <ClInclude Include="..\include\ext\hash.h" />
     <ClInclude Include="..\include\ext\memfile.h" />
     <ClInclude Include="..\include\ext\tagbase.h" />
+    <ClInclude Include="..\include\sentinel-statmsg.h" />
     <ClInclude Include="..\include\setjmpcu.h" />
     <ClInclude Include="..\include\timecu.h" />
     <ClInclude Include="..\include\_dirent.h" />
@@ -43,7 +43,7 @@
     <ClInclude Include="..\include\featurescu.h" />
     <ClInclude Include="..\include\host_functions.h" />
     <ClInclude Include="..\include\regexcu.h" />
-    <ClInclude Include="..\include\sentinel-iomsg.h" />
+    <ClInclude Include="..\include\sentinel-unistdmsg.h" />
     <ClInclude Include="..\include\sentinel-stdiomsg.h" />
     <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
     <ClInclude Include="..\include\sentinel.h" />
@@ -55,6 +55,7 @@
     <ClInclude Include="..\include\sys\statcu.h" />
     <ClInclude Include="..\include\_unistd.h" />
     <ClInclude Include="..\include\unistdcu.h" />
+    <ClInclude Include="fsystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sentinel-msg.cpp" />
@@ -64,6 +65,7 @@
     <None Include="ext\bitvec.cu" />
     <None Include="ext\hash.cu" />
     <None Include="ext\memfile.cu" />
+    <CudaCompile Include="fsystem.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

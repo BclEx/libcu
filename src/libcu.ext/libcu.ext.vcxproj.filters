@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="libcu.ext.cu" />
+    <CudaCompile Include="bitvec.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libcu.ext.native.nuspec" />
+    <None Include="libcu.ext.native.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{e8f9a278-2b4b-4750-8474-28b1006bb876}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\ext">
+      <UniqueIdentifier>{5ac597d7-9332-41cd-8e31-4375a2b6550b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\ext\bitvec.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

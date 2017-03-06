@@ -28,11 +28,6 @@ THE SOFTWARE.
 #define _STDIOCU_H
 #include <featurescu.h>
 
-#ifndef CORE_MAXFILESTREAM
-#define CORE_MAXFILESTREAM 10
-#endif
-
-//#define _INC_SWPRINTF_INL_
 #include <stdio.h>
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #include <stdargcu.h>
@@ -84,8 +79,8 @@ __BEGIN_DECLS;
 ///* Default path prefix for `mkstemp'.  */
 //#define P_tmpdir "/tmp"
 
-#define ISDEVICEFILE(stream) (stream >= __iob_file && stream <= __iob_file + CORE_MAXFILESTREAM)
-extern __constant__ FILE __iob_file[CORE_MAXFILESTREAM];
+#define ISDEVICEFILE(stream) (stream >= __iob_file && stream <= __iob_file + CORE_MAXFILESTREAM+3)
+extern __constant__ FILE __iob_file[CORE_MAXFILESTREAM+3];
 #undef stdin
 #undef stdout
 #undef stderr
@@ -425,4 +420,3 @@ __END_NAMESPACE_STD;
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _STDIOCU_H */
-

@@ -5,27 +5,61 @@
 #include <ctypecu.h>
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
-
-#include <ext\hash.h>
-#include <ext\memfile.h>
-#include <_dirent.h>
 #include <unistdcu.h>
-#include <errnocu.h>
-#include <fcntl.h>
+#include "fsystem.h"
 
 #define CORE_MAXLENGTH 1000000000
 
-//__device__ int _close(int a) { io_close msg(a); return msg.RC; }
-
 __BEGIN_DECLS;
 
-//__constant__ FILE file0 = {};
-//__constant__ FILE file1 = {};
-//__constant__ FILE file2 = {};
-//__constant__ FILE *__iob_file[3] = { &file0, &file1, &file2 };
-__constant__ FILE __iob_file[CORE_MAXFILESTREAM];
+// STREAMS
+#pragma region STREAMS
 
-__device__ hash_t __iob_dir = HASHINIT;
+typedef struct __align__(8)
+{
+	FILE *file;				// reference
+	unsigned short id;		// ID of author
+	unsigned short threadid;// thread ID of author
+} fileRef;
+
+__device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
+volatile __device__ fileRef *__iob_freeFilePtr; // Current atomically-incremented non-wrapped offset
+volatile __device__ fileRef *__iob_retnFilePtr; // Current atomically-incremented non-wrapped offset
+__constant__ FILE __iob_file[CORE_MAXFILESTREAM+3];
+
+static __device__ __forceinline void writeFileRef(fileRef *ref, FILE *f)
+{
+	ref->file = f;
+	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
+	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
+}
+
+static __device__ FILE *streamGet()
+{
+	// advance circular buffer
+	size_t offset = atomicAdd((unsigned int *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)__iob_fileRefs;
+	offset %= _LENGTHOF(__iob_fileRefs);
+	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
+	FILE *f = ref->file;
+	if (!f) {
+		f = &__iob_file[offset+3];
+		writeFileRef(ref, f);
+	}
+	f->_file = INT_MAX-CORE_MAXFILESTREAM - offset;
+	return f;
+}
+
+static __device__ void streamFree(FILE *f)
+{
+	if (!f) return;
+	// advance circular buffer
+	size_t offset = atomicAdd((unsigned int *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)__iob_fileRefs;
+	offset %= _LENGTHOF(__iob_fileRefs);
+	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
+	writeFileRef(ref, f);
+}
+
+#pragma endregion
 
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)
@@ -48,9 +82,7 @@ __device__ int rename_(const char *old, const char *new_)
 	if (old[0] != ':') {
 		stdio_rename msg(old, new_); return msg.RC;
 	}
-	void *entry = hashFind(&__iob_dir, old);
-	panic("Not Implemented");
-	return 0;
+	return fsystemRename(old, new_);
 }
 
 /* Remove file FILENAME.  */
@@ -59,9 +91,7 @@ __device__ int _unlink_(const char *filename)
 	if (filename[0] != ':') {
 		stdio_unlink msg(filename); return msg.RC;
 	}
-	void *entry = hashFind(&__iob_dir, filename);
-	panic("Not Implemented");
-	return 0;
+	return fsystemUnlink(filename);
 }
 
 /* Create a temporary file and open it read/write. */
@@ -76,7 +106,8 @@ __device__ FILE *tmpfile_(void)
 /* Close STREAM. */
 __device__ int fclose_device(FILE *stream)
 {
-	return 0; 
+	streamFree(stream);
+	return 0;
 }
 
 /* Flush STREAM, or all streams if STREAM is NULL. */
@@ -85,8 +116,14 @@ __device__ int fflush_device(FILE *stream)
 	return 0; 
 }
 
-__device__ FILE *fopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+/* Open a file, replacing an existing stream with it. */
+__device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
+	if (filename[0] != ':') {
+		stdio_freopen msg(filename, modes, stream); return msg.RC;
+	}
+	if (stream)
+		streamFree(stream);
 	// Parse the specified mode.
 	unsigned short openMode = O_RDONLY;
 	if (*modes != 'r') { // Not read...
@@ -95,8 +132,7 @@ __device__ FILE *fopen_device(const char *__restrict filename, const char *__res
 			openMode = (O_WRONLY | O_CREAT | O_APPEND);
 			if (*modes != 'a') {	// Not write (create or append)...
 				_set_errno(EINVAL); // So illegal mode.
-				if (stream)
-					fclose_device(stream);
+				streamFree(stream);
 				return nullptr;
 			}
 		}
@@ -111,43 +147,18 @@ __device__ FILE *fopen_device(const char *__restrict filename, const char *__res
 
 	// Need to allocate a FILE (not freopen).
 	if (!stream) {
-		stream = &__iob_file[4];
-		stream->_file = 4;
+		stream = streamGet();
+		if (!stream)
+			return nullptr;
 	}
 	stream->_flag = openMode;
-	stream->_base = nullptr;
-
-	void *ent = hashFind(&__iob_dir, filename);
-	if (!ent) {
-		if ((openMode & O_RDONLY)) {
-			_set_errno(EINVAL); // So illegal mode.
-			if (stream)
-				fclose_device(stream);
-			return nullptr;
-		}
-		ent = malloc(_ROUND64(sizeof(dirent)) + __sizeofMemfile_t);
-		if (hashInsert(&__iob_dir, filename, ent))
-			panic("removed file");
-		dirent *dirEnt = (dirent *)ent;
-		dirEnt->d_type = 1;
-		strcpy(dirEnt->d_name, filename);
-		memfile_t *memFile = (memfile_t *)((char *)ent + __sizeofMemfile_t);
-		memfileOpen(memFile);
-		stream->_base = (char *)memFile;
+	stream->_base = (char *)fsystemOpen(filename, openMode);
+	if (!stream->_base) {
+		_set_errno(EINVAL);
+		streamFree(stream);
+		return nullptr;
 	}
 	return stream;
-}
-
-/* Open a file, replacing an existing stream with it. */
-__device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
-{
-	if (filename[0] != ':') {
-		stdio_freopen msg(filename, modes, stream); return msg.RC;
-	}
-	if (stream)
-		fclose_device(stream);
-	FILE *fp = fopen_device(filename, modes, stream);
-	return fp;
 }
 
 #ifdef __USE_LARGEFILE64
@@ -157,8 +168,38 @@ __device__ FILE *freopen64_(const char *__restrict filename, const char *__restr
 	if (filename[0] != ':') {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
 	}
-	panic("Not Implemented");
-	return nullptr;
+	if (stream)
+		fclose_device(stream);
+	// Parse the specified mode.
+	unsigned short openMode = O_RDONLY;
+	if (*modes != 'r') { // Not read...
+		openMode = (O_WRONLY | O_CREAT | O_TRUNC);
+		if (*modes != 'w') { // Not write (create or truncate)...
+			openMode = (O_WRONLY | O_CREAT | O_APPEND);
+			if (*modes != 'a') {	// Not write (create or append)...
+				_set_errno(EINVAL); // So illegal mode.
+				streamFree(stream);
+				return nullptr;
+			}
+		}
+	}
+	if (modes[1] == 'b') // Binary mode (NO-OP currently).
+		++modes;
+	if (modes[1] == '+') { // Read and Write.
+		++modes;
+		openMode |= (O_RDONLY | O_WRONLY);
+		openMode += (O_RDWR - (O_RDONLY | O_WRONLY));
+	}
+
+	// Need to allocate a FILE (not freopen).
+	if (!stream) {
+		stream = getNextStream();
+		if (!stream)
+			return nullptr;
+	}
+	stream->_flag = openMode;
+	stream->_base = (char *)fsystemOpen(filename, openMode);
+	return stream;
 }
 #endif
 
@@ -251,22 +292,22 @@ __device__ int ungetc_device(int c, FILE *stream)
 /* Read chunks of generic data from STREAM.  */
 __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
 {
-	memfile_t *f;
-	if (!stream || !(f = (memfile_t *)stream->_base))
+	dirEnt_t *f;
+	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
 	size *= n;
-	memfileRead(f, ptr, size*n, 0);
+	memfileRead(f->u.file, ptr, size, 0);
 	return size;
 }
 
 /* Write chunks of generic data to STREAM.  */
 __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
 {
-	memfile_t *f;
-	if (!stream || !(f = (memfile_t *)stream->_base))
+	dirEnt_t *f;
+	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
 	size *= n;
-	memfileWrite(f, ptr, size, 0);
+	memfileWrite(f->u.file, ptr, size, 0);
 	return size;
 }
 
@@ -329,7 +370,7 @@ __device__ int ferror_device(FILE *stream)
 /* Return the system file descriptor for STREAM.  */
 __device__ int fileno_device(FILE *stream)
 {
-	return (stream == stdin ? 0 : stream == stdout ? 1 : stream == stderr ? 2 : -1); 
+	return (stream == stdin ? 0 : stream == stdout ? 1 : stream == stderr ? 2 : stream->_file); 
 }
 
 // sscanf

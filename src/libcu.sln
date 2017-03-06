@@ -30,7 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jimtcl", "jimtcl\jimtcl.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.falloc", "libcu.falloc\libcu.falloc.vcxproj", "{249A27FC-D0EB-4FE2-97C0-0AE8CB26CBAB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.extra", "libcu.extra\libcu.extra.vcxproj", "{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.ext", "libcu.ext\libcu.ext.vcxproj", "{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.data", "libcu.data\libcu.data.vcxproj", "{D651983F-56C0-4681-81DC-6FA200F4EFC9}"
 EndProject

@@ -1,8 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/statcu.h>
 #include <io.h>
-#include <sentinel-iomsg.h>
+#include <sentinel-statmsg.h>
+#include <sentinel-unistdmsg.h>
 #include <sentinel-stdiomsg.h>
 #include <sentinel-stdlibmsg.h>
 #include <math.h>
@@ -35,9 +37,16 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case STDIO_FEOF: { stdio_feof *msg = (stdio_feof *)data; msg->RC = feof(msg->File); return true; }
 	case STDIO_FERROR: { stdio_ferror *msg = (stdio_ferror *)data; msg->RC = ferror(msg->File); return true; }
 	case STDIO_FILENO: { stdio_fileno *msg = (stdio_fileno *)data; msg->RC = _fileno(msg->File); return true; }
-	case IO_CLOSE: { io_close *msg = (io_close *)data; msg->RC = _close(msg->Handle); return true; }
 	case STDLIB_SYSTEM: { stdlib_system *msg = (stdlib_system *)data; msg->RC = system(msg->Str); return true; }
 	case STDLIB_EXIT: { stdlib_exit *msg = (stdlib_exit *)data; if (msg->Std) exit(msg->Status); else _exit(msg->Status); return true; }
+	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = _access(msg->Name, msg->Type); return true; }
+	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data; msg->RC = _lseek(msg->Handle, msg->Offset, msg->Whence); return true; }
+	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = _close(msg->Handle); return true; }
+	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = _read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = _write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
+	case STAT_STAT: { stat_stat *msg = (stat_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
+	case STAT_FSTAT: { stat_fstat *msg = (stat_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
+	case STAT_MKDIR: { stat_mkdir *msg = (stat_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
 	}
 	return false;
 }

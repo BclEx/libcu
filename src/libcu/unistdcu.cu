@@ -1,44 +1,54 @@
 #include <unistdcu.h>
 #include <stddefcu.h>
+#include <sentinel-unistdmsg.h>
 
 __BEGIN_DECLS;
 
 /* Test for access to NAME using the real UID and real GID.  */
 __device__ int access_(const char *name, int type)
 {
+	if (name[0] != ':') {
+		unistd_access msg(name, type); return msg.RC;
+	}
+	panic("Not Implemented");
 	return 0;
 }
 
 /* Move FD's file position to OFFSET bytes from the beginning of the file (if WHENCE is SEEK_SET),
 the current position (if WHENCE is SEEK_CUR), or the end of the file (if WHENCE is SEEK_END).
 Return the new file position.  */
-__device__ off_t lseek_(int fd, off_t offset, int whence)
+__device__ off_t lseek_device(int fd, off_t offset, int whence)
 {
+	panic("Not Implemented");
 	return 0;
 }
 
 #ifdef __USE_LARGEFILE64
-__device__ off64_t lseek64_(int fd, off64_t offset, int whence)
+__device__ off64_t lseek64_device(int fd, off64_t offset, int whence)
 {
+	panic("Not Implemented");
 	return 0;
 }
 #endif
 
 /* Close the file descriptor FD.  */
-__device__ int close_(int fd)
+__device__ int close_device(int fd)
 {
+	panic("Not Implemented");
 	return 0;
 }
 
 /* Read NBYTES into BUF from FD.  Return the number read, -1 for errors or 0 for EOF.  */
-__device__ size_t read_(int fd, void *buf, size_t nbytes)
+__device__ size_t read_device(int fd, void *buf, size_t nbytes)
 {
+	panic("Not Implemented");
 	return 0;
 }
 
 /* Write N bytes of BUF to FD.  Return the number written, or -1.  */
-__device__ size_t write_(int fd, const void *buf, size_t n)
+__device__ size_t write_device(int fd, const void *buf, size_t nbytes)
 {
+	panic("Not Implemented");
 	return 0;
 }
 

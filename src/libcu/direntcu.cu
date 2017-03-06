@@ -38,18 +38,18 @@ __device__ void rewinddir_(DIR *dirp)
 
 DIR *opendir(const char *name)
 {
-	DIR *dir = 0;
+	DIR *dir = nullptr;
 	if (name && name[0]) {
 		size_t base_length = strlen(name);
 		const char *all = (strchr("/\\", name[base_length - 1]) ? "*" : "/*"); // search pattern must end with suitable wildcard
-		if ((dir = (DIR *)malloc(sizeof(*dir))) != 0 && (dir->name = (char *)Jim_Alloc((int)(base_length + strlen(all) + 1))) != 0) {
+		if ((dir = (DIR *)malloc(sizeof(*dir))) != 0 && (dir->name = (char *)malloc((int)(base_length + strlen(all) + 1))) != 0) {
 			strcat(strcpy(dir->name, name), all);
 			if ((dir->handle = (long)_findfirst(dir->name, &dir->info)) != -1)
 				dir->result.d_name = 0;
 			else { // rollback
 				free(dir->name);
 				free(dir);
-				dir = 0;
+				dir = nullptr;
 			}
 		}
 		else { // rollback
@@ -69,8 +69,8 @@ int closedir(DIR *dir)
 	if (dir) {
 		if (dir->handle != -1)
 			result = _findclose(dir->handle);
-		Jim_Free(dir->name);
-		Jim_Free(dir);
+		free(dir->name);
+		free(dir);
 	}
 	if (result == -1) // map all errors to EBADF
 		errno = EBADF;
@@ -79,7 +79,7 @@ int closedir(DIR *dir)
 
 struct dirent *readdir(DIR * dir)
 {
-	struct dirent *result = 0;
+	struct dirent *result = nullptr;
 	if (dir && dir->handle != -1) {
 		if (!dir->result.d_name || _findnext(dir->handle, &dir->info) != -1) {
 			result = &dir->result;

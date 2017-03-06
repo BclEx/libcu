@@ -1,4 +1,4 @@
-﻿#include <ext\memfile.h>
+﻿#include <ext/memfile.h>
 #include <stdlibcu.h>
 #include <stddefcu.h>
 #include <assert.h>
@@ -32,7 +32,7 @@ extern "C" {
 		filePoint_t readpoint;		// Pointer to the end of the last xRead()
 	} memfile_t;
 
-	__constant__ int __sizeofMemfile_t = _ROUND64(sizeof(memfile_t));
+	__constant__ int __sizeofMemfile_t = sizeof(memfile_t);
 
 	__device__ void memfileOpen(memfile_t *f)
 	{

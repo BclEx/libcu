@@ -10,6 +10,5 @@
 #include "timecu.cu"
 #include "unistdcu.cu"
 #include "sys/statcu.cu"
-#include "ext/bitvec.cu"
 #include "ext/hash.cu"
 #include "ext/memfile.cu"

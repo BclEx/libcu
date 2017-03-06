@@ -2,6 +2,7 @@
 #include <sentinel.h>
 #include <stdiocu.h>
 #include <stdlibcu.h>
+#include <sys/statcu.h>
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
@@ -15,11 +16,15 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//strchr("Me", 'M');
 	printf("%d %s\n", 2, "sky morey");
 
+	mkdir(":\\T_", 6);
+	//FILE *f = fopen(":\\fopen.txt", "w");
 	FILE *f = fopen(":\\T_\\fopen.txt", "w");
-	//fprintf(f, "The quick brown fox jumps over the lazy dog");
-	fwrite("test", 4, 1, f);
-	fflush(f);
-	fclose(f);
+	if (f) {
+		//fprintf(f, "The quick brown fox jumps over the lazy dog");
+		fwrite("test", 4, 1, f);
+		fflush(f);
+		fclose(f);
+	}
 
 	//char buf[100] = {0};
 	//snprintf(buf, 100, "test");

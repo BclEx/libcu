@@ -104,6 +104,9 @@ extern __device__ int mkfifo_(const char *path, mode_t mode);
 #define mkfifo mkfifo_
 
 __END_DECLS;
+#else
+#include <direct.h>
+#define mkdir(path, mode) _mkdir(path) 
 #endif /* __CUDA_ARCH__  */
 
 #endif /* _SYS_STATCU_H  */

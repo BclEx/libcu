@@ -1,4 +1,4 @@
-﻿#include <ext\hash.h>
+﻿#include <ext/hash.h>
 #include <stdlibcu.h>
 #include <ctypecu.h>
 #include <assert.h>

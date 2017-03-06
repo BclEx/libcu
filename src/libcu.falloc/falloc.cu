@@ -162,7 +162,7 @@ extern "C" __device__ void fallocFreeChunk(void *obj, cuFallocDeviceHeap *heap)
 {
 	if (!heap) heap = _defaultDeviceHeap;
 	fallocChunkHeader *chunk = (fallocChunkHeader *)((char *)obj - sizeof(fallocChunkHeader));
-	if (chunk->magic != FALLOC_MAGIC || chunk->count > 1) __THROW;// bad magic or not a singular chunk
+	if (chunk->magic != FALLOC_MAGIC || chunk->count > 1) __THROW; // bad magic or not a singular chunk
 	// advance circular buffer
 	fallocChunkRef *chunkRefs = heap->chunkRefs;
 	size_t offset = atomicAdd((unsigned int *)&heap->retnChunkPtr, sizeof(fallocChunkRef)) - (size_t)chunkRefs;

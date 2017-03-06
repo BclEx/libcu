@@ -37,9 +37,6 @@
     <ClInclude Include="..\include\bits\libcu_stdio.h">
       <Filter>include\bits</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sentinel-iomsg.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\sentinel-stdiomsg.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -82,9 +79,6 @@
     <ClInclude Include="..\include\host_functions.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ext\bitvec.h">
-      <Filter>include\ext</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\ext\hash.h">
       <Filter>include\ext</Filter>
     </ClInclude>
@@ -94,11 +88,19 @@
     <ClInclude Include="..\include\ext\tagbase.h">
       <Filter>include\ext</Filter>
     </ClInclude>
+    <ClInclude Include="fsystem.h" />
+    <ClInclude Include="..\include\sentinel-unistdmsg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-statmsg.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
+    <CudaCompile Include="fsystem.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">

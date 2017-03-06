@@ -24,21 +24,21 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\extra.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="bitvec.cu" />
     <CudaCompile Include="program.cu" />
-    <CudaCompile Include="libcu.extra.cu" />
-    <None Include="extra.cu" />
+    <CudaCompile Include="libcu.ext.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="libcu.extra.native.nuspec" />
-    <None Include="libcu.extra.native.targets" />
+    <None Include="libcu.ext.native.nuspec" />
+    <None Include="libcu.ext.native.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\ext\bitvec.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}</ProjectGuid>
     <RootNamespace>libcu</RootNamespace>
-    <ProjectName>libcu.extra</ProjectName>
+    <ProjectName>libcu.ext</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -112,7 +112,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.extra.cu.obj" -o "$(OutDir)libcu.extra.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -134,7 +134,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.extra.cu.obj" -o "$(OutDir)libcu.extra.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -161,7 +161,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.extra.cu.obj" -o "$(OutDir)libcu.extra.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -187,7 +187,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.extra.cu.obj" -o "$(OutDir)libcu.extra.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

@@ -97,4 +97,8 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define __USE_FILE_OFFSET64	1
 #endif
 
+#ifndef CORE_MAXFILESTREAM
+#define CORE_MAXFILESTREAM 10
+#endif
+
 #endif  /* _FEATURESCU_H */
