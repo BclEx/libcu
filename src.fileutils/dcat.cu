@@ -1,4 +1,4 @@
-#include <cuda_runtimecu.h>
+#include <stdiocu.h>
 #include <errnocu.h>
 
 #define CAT_BUF_SIZE 4096
@@ -14,24 +14,24 @@ __device__ void dumpfile(FILE *f)
 		fwrite(readbuf, nred, 1, stdout);
 }
 
-__device__ __managed__ int m_rc;
+__device__ __managed__ int m_dcat_rc;
 __global__ void g_dcat(char *str)
 {
 	FILE *f = fopen(str, "r");
 	if (!f)
-		m_rc = errno;
+		m_dcat_rc = errno;
 	else
 	{
 		dumpfile(f);
 		fclose(f);
-		m_rc = 0;
+		m_dcat_rc = 0;
 	}
 }
 
 int dcat(char *str)
 {
 	g_dcat<<<1,1>>>(str);
-	return m_rc;
+	return m_dcat_rc;
 }
 
 /*
