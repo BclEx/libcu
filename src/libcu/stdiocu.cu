@@ -23,8 +23,8 @@ typedef struct __align__(8)
 } fileRef;
 
 __device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
-volatile __device__ fileRef *__iob_freeFilePtr; // Current atomically-incremented non-wrapped offset
-volatile __device__ fileRef *__iob_retnFilePtr; // Current atomically-incremented non-wrapped offset
+volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
+volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
 __constant__ FILE __iob_file[CORE_MAXFILESTREAM+3];
 
 static __device__ __forceinline void writeFileRef(fileRef *ref, FILE *f)
@@ -37,15 +37,16 @@ static __device__ __forceinline void writeFileRef(fileRef *ref, FILE *f)
 static __device__ FILE *streamGet()
 {
 	// advance circular buffer
-	size_t offset = atomicAdd((unsigned int *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)__iob_fileRefs;
-	offset %= _LENGTHOF(__iob_fileRefs);
+	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
+	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
+	int offsetId = offset / sizeof(fileRef);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
 	FILE *f = ref->file;
 	if (!f) {
-		f = &__iob_file[offset+3];
+		f = &__iob_file[offsetId+3];
 		writeFileRef(ref, f);
 	}
-	f->_file = INT_MAX-CORE_MAXFILESTREAM - offset;
+	f->_file = INT_MAX-CORE_MAXFILESTREAM - offsetId;
 	return f;
 }
 
@@ -53,8 +54,8 @@ static __device__ void streamFree(FILE *f)
 {
 	if (!f) return;
 	// advance circular buffer
-	size_t offset = atomicAdd((unsigned int *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)__iob_fileRefs;
-	offset %= _LENGTHOF(__iob_fileRefs);
+	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
+	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
 	writeFileRef(ref, f);
 }

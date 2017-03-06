@@ -10,7 +10,7 @@
 
 __BEGIN_DECLS;
 
-__device__ dirEnt_t __iob_root = { { 0, 0, 1, 0, ":\\" }, nullptr, nullptr };
+__device__ dirEnt_t __iob_root = { { 0, 0, 0, 1, ":\\" }, nullptr, nullptr };
 __device__ hash_t __iob_dir = HASHINIT;
 
 __device__ void freeEnt(dirEnt_t *ent)

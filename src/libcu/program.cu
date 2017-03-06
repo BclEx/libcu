@@ -16,7 +16,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//strchr("Me", 'M');
 	printf("%d %s\n", 2, "sky morey");
 
-	mkdir(":\\T_");
+	mkdir(":\\T_", 0);
 	FILE *f = fopen(":\\T_\\fopen.txt", "w");
 	if (f) {
 		//fprintf(f, "The quick brown fox jumps over the lazy dog");
@@ -30,7 +30,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//printf("%s\n", buf);
 	//printf("%d\n", atoi("51236"));
 	//printf("%f\n", atof("1.2"));
-	//libcuReset();
+	libcuReset();
 }
 
 int main()
