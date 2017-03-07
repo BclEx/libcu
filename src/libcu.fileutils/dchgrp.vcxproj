@@ -87,7 +87,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="dchgrp.cpp" />
+    <CudaCompile Include="dchgrp.cpp" />
     <None Include="dchgrp.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

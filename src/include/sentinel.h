@@ -51,12 +51,12 @@ extern "C" {
 		bool Wait;
 		char OP;
 		int Size;
-		char *(*Prepare)(void*,char*,char*,long);
-		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,long) = nullptr)
+		char *(*Prepare)(void*,char*,char*,intptr_t);
+		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,intptr_t) = nullptr)
 			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
 	public:
 	};
-#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,long))&P)
+#define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,intptr_t))&P)
 #ifndef _WIN64
 #define SENTINELOFFSET(O) O
 #else
@@ -72,16 +72,16 @@ extern "C" {
 		int Unknown;
 #endif
 		char *Data;
-		void Dump(long offset);
+		void Dump(intptr_t offset);
 	} sentinelCommand;
 
 	typedef struct __align__(8)
 	{
 		long GetId;
 		volatile long SetId;
-#ifndef _WIN64
-		long Offset;
-#endif
+//#ifndef _WIN64
+		intptr_t Offset; // long Offset
+//#endif
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
 	} sentinelMap;

@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <cuda_runtimecu.h>
 
-void sentinelCommand::Dump(long offset)
+void sentinelCommand::Dump(intptr_t offset)
 {
 	register char *b = Data + offset;
 	register int l = Length;
@@ -25,7 +25,6 @@ static sentinelExecutor _baseExecutor = { nullptr, "base", sentinelDefaultExecut
 // HOSTSENTINEL
 #if HAS_HOSTSENTINEL
 
-static sentinelMap *_sentinelHostMap = nullptr;
 static HANDLE _hostMapHandle = NULL;
 static int *_hostMap = nullptr;
 static HANDLE _threadHostHandle = NULL;
@@ -45,7 +44,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		//cmd->Dump(0);
+		cmd->Dump(map->Offset);
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
@@ -193,6 +192,7 @@ void sentinelClientInitialize(char *mapHostName)
 		exit(1);
 	}
 	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+	_ctx.HostMap->Offset = 0;
 }
 
 void sentinelClientShutdown()

@@ -39,7 +39,7 @@ int dcat(char *str)
 {
 	g_dcat<<<1,1>>>(str);
 	int rc;
-	cudaMemcpyFromSymbol(&rc, "d_rc", sizeof(rc), 0, cudaMemcpyDeviceToHost);
+	cudaMemcpyFromSymbol(&rc, "d_dcat_rc", sizeof(rc), 0, cudaMemcpyDeviceToHost);
 	return rc;
 }
 */
