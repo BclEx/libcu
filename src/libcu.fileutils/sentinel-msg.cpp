@@ -7,7 +7,7 @@ int dcat(char *str);
 int dmkdir(char *str, unsigned short mode);
 int drmdir(char *str);
 
-bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
+bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length)
 {
 	switch (data->OP) {
 	case FILEUTILS_DCAT: { fileutils_dcat *msg = (fileutils_dcat *)data; msg->RC = dcat(msg->Str); return true; }

@@ -20,7 +20,7 @@ void sentinelMap::Dump()
 }
 
 static sentinelContext _ctx;
-static sentinelExecutor _baseExecutor;
+static sentinelExecutor _baseExecutor = { nullptr, "base", sentinelDefaultExecutor, nullptr };
 
 // HOSTSENTINEL
 #if HAS_HOSTSENTINEL
@@ -133,9 +133,6 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 #endif
 
 	// register executor
-	_baseExecutor.Name = "base";
-	_baseExecutor.Executor = sentinelDefaultExecutor;
-	_baseExecutor.Tag = nullptr;
 	sentinelRegisterExecutor(&_baseExecutor, true);
 	if (executor)
 		sentinelRegisterExecutor(executor, true);

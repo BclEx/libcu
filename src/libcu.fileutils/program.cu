@@ -12,11 +12,13 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	c[i] = a[i] + b[i];
 	if (i != 1)
 		return;
+	printf("Kernel\n");
 }
 
 int main()
 {
 	sentinelServerInitialize();
+	sentinelRegisterFileUtils();
 
 	const int arraySize = 5;
 	const int a[arraySize] = { 1, 2, 3, 4, 5 };
@@ -34,8 +36,8 @@ int main()
 		c[0], c[1], c[2], c[3], c[4]);
 
 	// finish
-	//printf("\nPress any key to continue.\n");
-	//scanf("%c");
+	printf("\nPress any key to continue.\n");
+	scanf("%c");
 
 	sentinelServerShutdown();
 

@@ -123,6 +123,8 @@ extern "C" {
 	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
 	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
 	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
+	// file-utils
+	extern void sentinelRegisterFileUtils();
 
 #ifdef  __cplusplus
 }
