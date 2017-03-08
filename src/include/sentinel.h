@@ -71,7 +71,7 @@ extern "C" {
 #ifndef _WIN64
 		int Unknown;
 #endif
-		char *Data;
+		char Data[];
 		void Dump(intptr_t offset);
 	} sentinelCommand;
 
@@ -79,9 +79,10 @@ extern "C" {
 	{
 		long GetId;
 		volatile long SetId;
-//#ifndef _WIN64
+		//#ifndef _WIN64
+		char *Base;
 		intptr_t Offset; // long Offset
-//#endif
+		//#endif
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
 	} sentinelMap;

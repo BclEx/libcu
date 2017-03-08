@@ -110,6 +110,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			exit(1);
 		}
 		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+		_ctx.HostMap->Base = (char *)_sentinelHostMap;
 	}
 #endif
 

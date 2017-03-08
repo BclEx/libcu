@@ -21,7 +21,7 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
 	//while (InterlockedCompareExchange((long *)status, 1, 0) != 0) { }
-	cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
+	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
 	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, map->Offset)) {
