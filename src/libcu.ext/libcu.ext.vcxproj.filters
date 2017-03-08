@@ -3,11 +3,12 @@
   <ItemGroup>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
-    <CudaCompile Include="bitvec.cu" />
+    <CudaCompile Include="convert.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
     <None Include="libcu.ext.native.targets" />
+    <None Include="bitvec.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -19,6 +20,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\ext\bitvec.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\convert.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\mutex.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\utf.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\math.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\status.h">
       <Filter>include\ext</Filter>
     </ClInclude>
   </ItemGroup>

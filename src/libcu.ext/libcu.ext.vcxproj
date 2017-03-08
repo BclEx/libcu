@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="bitvec.cu" />
+    <CudaCompile Include="convert.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
   </ItemGroup>
@@ -34,6 +35,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\ext\bitvec.h" />
+    <ClInclude Include="..\include\ext\convert.h" />
+    <ClInclude Include="..\include\ext\math.h" />
+    <ClInclude Include="..\include\ext\mutex.h" />
+    <ClInclude Include="..\include\ext\status.h" />
+    <ClInclude Include="..\include\ext\utf.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}</ProjectGuid>

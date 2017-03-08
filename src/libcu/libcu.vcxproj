@@ -62,7 +62,6 @@
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
-    <None Include="ext\bitvec.cu" />
     <None Include="ext\hash.cu" />
     <None Include="ext\memfile.cu" />
     <None Include="fsystem.cu" />
