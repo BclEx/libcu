@@ -5,9 +5,9 @@
 #include <assert.h>
 #include <cuda_runtimecu.h>
 
-void sentinelCommand::Dump(intptr_t offset)
+void sentinelCommand::Dump(intptr_t base)
 {
-	register char *b = Data + offset;
+	register char *b = Data + base;
 	register int l = Length;
 	printf("Cmd: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
@@ -79,8 +79,8 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		//cmd->Dump(SENTINELOFFSET(map->Offset));
-		sentinelMessage *msg = (sentinelMessage *)(cmd->Data + SENTINELOFFSET(map->Offset));
+		//cmd->Dump(map->Offset);
+		sentinelMessage *msg = (sentinelMessage *)(cmd->Data + map->Offset);
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
 		*status = (msg->Wait ? 4 : 0);
@@ -110,7 +110,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			exit(1);
 		}
 		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
-		_ctx.HostMap->Base = (char *)_sentinelHostMap;
+		_ctx.HostMap->Offset = (intptr_t)_sentinelHostMap;
 	}
 #endif
 
@@ -124,8 +124,10 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer((void **)&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
 #ifndef _WIN64
-			_ctx.DeviceMap[i]->Offset = (int)((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
+			_ctx.DeviceMap[i]->Offset = (intptr_t)((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
 			//printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
+#else
+			_ctx.DeviceMap[i]->Offset = 0;
 #endif
 		}
 		cudaErrorCheckF(cudaMemcpyToSymbol(_sentinelDeviceMap, &d_deviceMap, sizeof(d_deviceMap)), goto initialize_error);
@@ -193,7 +195,7 @@ void sentinelClientInitialize(char *mapHostName)
 		exit(1);
 	}
 	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
-	_ctx.HostMap->Offset = 0;
+	_sentinelHostMapOffset = _ctx.HostMap->Offset - (intptr_t)_sentinelHostMap;
 }
 
 void sentinelClientShutdown()

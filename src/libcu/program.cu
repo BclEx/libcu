@@ -16,8 +16,8 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//strchr("Me", 'M');
 	printf("%d %s\n", 2, "sky morey");
 
-	mkdir(":\\T_", 0);
-	FILE *f = fopen(":\\T_\\fopen.txt", "w");
+	//mkdir(":\\T_", 0);
+	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
 	if (f) {
 		//fprintf(f, "The quick brown fox jumps over the lazy dog");
 		fwrite("test", 4, 1, f);

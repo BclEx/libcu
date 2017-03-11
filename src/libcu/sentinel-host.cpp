@@ -5,6 +5,7 @@
 #if HAS_HOSTSENTINEL
 
 sentinelMap *_sentinelHostMap = nullptr;
+intptr_t _sentinelHostMapOffset = 0;
 void sentinelClientSend(sentinelMessage *msg, int msgLength)
 {
 #ifndef _WIN64
@@ -24,7 +25,7 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, map->Offset)) {
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, _sentinelHostMapOffset)) {
 		printf("msg too long");
 		exit(0);
 	}

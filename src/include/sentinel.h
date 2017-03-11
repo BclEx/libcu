@@ -57,11 +57,11 @@ extern "C" {
 	public:
 	};
 #define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,intptr_t))&P)
-#ifndef _WIN64
-#define SENTINELOFFSET(O) O
-#else
-#define SENTINELOFFSET(O) 0
-#endif
+//#ifndef _WIN64
+//#define SENTINELOFFSET(O) O
+//#else
+//#define SENTINELOFFSET(O) 0
+//#endif
 
 	typedef struct __align__(8)
 	{
@@ -72,7 +72,7 @@ extern "C" {
 		int Unknown;
 #endif
 		char Data[];
-		void Dump(intptr_t offset);
+		void Dump(intptr_t base);
 	} sentinelCommand;
 
 	typedef struct __align__(8)
@@ -80,8 +80,7 @@ extern "C" {
 		long GetId;
 		volatile long SetId;
 		//#ifndef _WIN64
-		char *Base;
-		intptr_t Offset; // long Offset
+		intptr_t Offset;
 		//#endif
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
@@ -105,6 +104,7 @@ extern "C" {
 
 #if HAS_HOSTSENTINEL
 	extern sentinelMap *_sentinelHostMap;
+	extern intptr_t _sentinelHostMapOffset;
 #endif
 #if HAS_DEVICESENTINEL
 	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];

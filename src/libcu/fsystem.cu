@@ -17,11 +17,11 @@ __device__ void freeEnt(dirEnt_t *ent)
 {
 	if (ent->dir.d_type == 1) {
 		dirEnt_t *p = ent->u.list;
-		do {
+		while (p) {
 			dirEnt_t *next = p->next;
 			freeEnt(p);
 			p = next;
-		} while (p);
+		}
 	} else if (ent->dir.d_type == 2)
 		memfileClose(ent->u.file);
 	if (ent != &__iob_root) free(ent);
