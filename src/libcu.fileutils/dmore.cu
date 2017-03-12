@@ -1,109 +1,51 @@
-#include "futils.h"
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdlib.h>
+#include <stdio.h>
+#include "sentinel-fileutilsmsg.h"
+#include <unistdcu.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <pwd.h>
-#include <grp.h>
-#include <utime.h>
-#include <errno.h>
+__forceinline int dmore_(char *str, int fd) { fileutils_dmore msg(str, fd); return msg.RC; }
 
-int
-main(argc, argv)
-	char	**argv;
+int main(int argc, char **argv)
 {
-	FILE	*fp;
-	int	fd;
-	char	*name;
-	unsigned char 	ch;
-	int	line;
-	int	col;
-	char	buf[80];
-
 	while (argc-- > 1) {
-		name = *(++argv);
-
-		fd = open(name, O_RDONLY);
-		if (fd == -1) {
-			perror(name);
-			exit(1);
-		}
-
-		write(STDOUT_FILENO,"<< ",3);
-		write(STDOUT_FILENO,name,strlen(name));
-		write(STDOUT_FILENO," >>\n",4);
-		line = 1;
-		col = 0;
-
-		while ((fd > -1) && ((read(fd, &ch, 1)) != 0)) {
-			switch (ch) {
-				case '\r':
-					col = 0;
-					break;
-
-				case '\n':
-					line++;
-					col = 0;
-					break;
-
-				case '\t':
-					col = ((col + 1) | 0x07) + 1;
-					break;
-
-				case '\b':
-					if (col > 0)
-						col--;
-					break;
-
-				default:
-					col++;
-			}
-
-			putchar(ch);
-			if (col >= 80) {
-				col -= 80;
-				line++;
-			}
-
-			if (line < 24)
-				continue;
-
-			if (col > 0)
-				putchar('\n');
-
-			write(STDOUT_FILENO,"--More--",8);
-			fflush(stdout);
-
-			if ((read(0, buf, sizeof(buf)) < 0)) {
+		char *name = *(++argv);
+		int fd = -1;
+		while (true) {
+			fd = dmore_(name, fd);
+			if (fd == -1)
+				break;
+			static char buf[80];
+			if (read(0, buf, sizeof(buf)) < 0) {
 				if (fd > -1)
-					close(fd);
+					fd = dmore_(nullptr, fd); // close(fd);
 				exit(0);
 			}
-
-			ch = buf[0];
-			if (ch == ':')
-				ch = buf[1];
-
+			unsigned char ch = buf[0];
+			if (ch == ':') ch = buf[1];
 			switch (ch) {
-				case 'N':
-				case 'n':
-					close(fd);
-					fd = -1;
-					break;
-
-				case 'Q':
-				case 'q':
-					close(fd);
-					exit(0);
+			case 'N':
+			case 'n':
+				fd = dmore_(nullptr, fd); // close(fd);
+				break;
+			case 'Q':
+			case 'q':
+				fd = dmore_(nullptr, fd); // close(fd);
+				exit(0);
 			}
-
-			col = 0;
-			line = 1;
 		}
-		if (fd)
-			close(fd);
 	}
 	exit(0);
 }
+
+
+
+
+
+
+
+
+
+
+
+

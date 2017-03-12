@@ -87,8 +87,8 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="drmdir.cpp" />
-    <None Include="drmdir.cu" />
+    <CudaCompile Include="drmdir.cu" />
+    <None Include="drmdir.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

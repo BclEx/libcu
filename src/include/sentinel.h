@@ -57,11 +57,6 @@ extern "C" {
 	public:
 	};
 #define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,intptr_t))&P)
-//#ifndef _WIN64
-//#define SENTINELOFFSET(O) O
-//#else
-//#define SENTINELOFFSET(O) 0
-//#endif
 
 	typedef struct __align__(8)
 	{
@@ -79,9 +74,7 @@ extern "C" {
 	{
 		long GetId;
 		volatile long SetId;
-		//#ifndef _WIN64
 		intptr_t Offset;
-		//#endif
 		char Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT];
 		void Dump();
 	} sentinelMap;

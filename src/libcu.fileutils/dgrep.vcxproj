@@ -87,8 +87,8 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="dgrep.cpp" />
-    <None Include="dgrep.cu" />
+    <CudaCompile Include="dgrep.cu" />
+    <None Include="dgrep.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

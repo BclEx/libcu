@@ -371,6 +371,12 @@ __device__ int ferror_device(FILE *stream)
 	return 0;
 }
 
+/* Print a message describing the meaning of the value of errno.  */
+__device__ void perror_(const char *s)
+{
+	printf(s);
+}
+
 /* Return the system file descriptor for STREAM.  */
 __device__ int fileno_device(FILE *stream)
 {

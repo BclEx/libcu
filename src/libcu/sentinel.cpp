@@ -44,7 +44,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		cmd->Dump(map->Offset);
+		cmd->Dump(0);
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
@@ -195,7 +195,7 @@ void sentinelClientInitialize(char *mapHostName)
 		exit(1);
 	}
 	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
-	_sentinelHostMapOffset = _ctx.HostMap->Offset - (intptr_t)_sentinelHostMap;
+	_sentinelHostMapOffset = (intptr_t)((char *)_ctx.HostMap->Offset - (char *)_sentinelHostMap);
 }
 
 void sentinelClientShutdown()

@@ -1,190 +1,69 @@
-#include <sentinel.h>
-#include "futils.h"
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdlib.h>
+#include <stdio.h>
+#include "sentinel-fileutilsmsg.h"
+#include <sys/statcu.h>
+#include <unistdcu.h>
+#define	PATHLEN 256	
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <pwd.h>
-#include <grp.h>
-#include <utime.h>
-#include <errno.h>
+// Return TRUE if a filename is a directory. Nonexistant files return FALSE.
+__device__ __managed__ bool m_isadir_rc;
+__global__ void g_isadir(char *name)
+{
+	struct stat statbuf;
+	if (stat(name, &statbuf) < 0) {
+		m_isadir_rc = false;
+		return;
+	}
+	m_isadir_rc = S_ISDIR(statbuf.st_mode);
+	return;
+}
+
+bool isadir_(char *str)
+{
+	size_t strLength = strlen(str) + 1;
+	char *d_str;
+	cudaMalloc(&d_str, strLength);
+	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
+	g_isadir<<<1,1>>>(d_str);
+	cudaFree(d_str);
+	return m_isadir_rc;
+}
+
+__forceinline int dmv_(char *str, char *str2) { fileutils_dmv msg(str, str2); return msg.RC; }
+
+// Build a path name from the specified directory name and file name. If the directory name is NULL, then the original filename is returned.
+// The built path is in a static area, and is overwritten for each call.
+char *buildName(char *dirName, char *fileName)
+{
+	if (!dirName || *dirName == '\0')
+		return fileName;
+	char *cp = strrchr(fileName, '/');
+	if (cp)
+		fileName = cp + 1;
+	static char buf[PATHLEN];
+	strcpy(buf, dirName);
+	strcat(buf, "/");
+	strcat(buf, fileName);
+	return buf;
+}
 
 int main(int argc, char **argv)
 {
-	int	dirflag;
-	char *srcname;
-	char *destname;
-	char *lastarg;
-
-	lastarg = argv[argc - 1];
-
-	dirflag = isadir(lastarg);
-
-	if ((argc > 3) && !dirflag) {
-		write(STDERR_FILENO, lastarg, strlen(lastarg));
-		write(STDERR_FILENO, ": not a directory\n", 18);
+	atexit(sentinelClientShutdown);
+	sentinelClientInitialize();
+	char *lastArg = argv[argc - 1];
+	bool dirflag = isadir_(lastArg);
+	if (argc > 3 && !dirflag) {
+		fprintf(stderr, "%s: not a directory\n", lastArg);
 		exit(1);
 	}
-
 	while (argc-- > 2) {
-		srcname = *(++argv);
-		if (access(srcname, 0) < 0) {
-			perror(srcname);
-			continue;
-		}
-
-		destname = lastarg;
+		char *srcName = *(++argv);
+		char *destName = lastArg;
 		if (dirflag)
-			destname = buildname(destname, srcname);
-
-		if (rename(srcname, destname) >= 0)
-			continue;
-
-		if (errno != EXDEV) {
-			perror(destname);
-			continue;
-		}
-
-		if (!copyfile(srcname, destname, TRUE))
-			continue;
-
-		if (unlink(srcname) < 0)
-			perror(srcname);
+			destName = buildName(destName, srcName);
+		dmv_(srcName, destName);
 	}
 	exit(0);
-}
-
-#define BUF_SIZE 1024 
-
-typedef	struct chunk CHUNK;
-#define	CHUNKINITSIZE	4
-struct chunk {
-	CHUNK *next;
-	char data[CHUNKINITSIZE]; // actually of varying length
-};
-
-static	CHUNK *	chunklist;
-
-// Return TRUE if a filename is a directory.
-// Nonexistant files return FALSE.
-BOOL isadir(char *name)
-{
-	struct stat statbuf;
-	if (stat(name, &statbuf) < 0)
-		return FALSE;
-	return S_ISDIR(statbuf.st_mode);
-}
-
- // Copy one file to another, while possibly preserving its modes, times, and modes.  Returns TRUE if successful, or FALSE on a failure with an
- // error message output.  (Failure is not indicted if the attributes cannot be set.)
-BOOL copyfile(char *srcname, char *destname, BOOL setmodes)
-{
-	int rfd;
-	int wfd;
-	int rcc;
-	int wcc;
-	char *bp;
-	char *buf;
-	struct stat statbuf1;
-	struct stat statbuf2;
-	struct utimbuf times;
-
-	if (stat(srcname, &statbuf1) < 0) {
-		perror(srcname);
-		return FALSE;
-	}
-
-	if (stat(destname, &statbuf2) < 0) {
-		statbuf2.st_ino = -1;
-		statbuf2.st_dev = -1;
-	}
-
-	if ((statbuf1.st_dev == statbuf2.st_dev) &&
-		(statbuf1.st_ino == statbuf2.st_ino))
-	{
-		write(STDERR_FILENO, "Copying file \"", 14);
-		write(STDERR_FILENO, srcname, strlen(srcname));
-		write(STDERR_FILENO, "\" to itself\n", 12);
-		return FALSE;
-	}
-
-	rfd = open(srcname, 0);
-	if (rfd < 0) {
-		perror(srcname);
-		return FALSE;
-	}
-
-	wfd = creat(destname, statbuf1.st_mode);
-	if (wfd < 0) {
-		perror(destname);
-		close(rfd);
-		return FALSE;
-	}
-
-	buf = malloc(BUF_SIZE);
-	while ((rcc = read(rfd, buf, BUF_SIZE)) > 0) {
-		bp = buf;
-		while (rcc > 0) {
-			wcc = write(wfd, bp, rcc);
-			if (wcc < 0) {
-				perror(destname);
-				goto error_exit;
-			}
-			bp += wcc;
-			rcc -= wcc;
-		}
-	}
-
-	if (rcc < 0) {
-		perror(srcname);
-		goto error_exit;
-	}
-
-	close(rfd);
-	if (close(wfd) < 0) {
-		perror(destname);
-		return FALSE;
-	}
-
-	if (setmodes) {
-		chmod(destname, statbuf1.st_mode);
-
-		chown(destname, statbuf1.st_uid, statbuf1.st_gid);
-
-		times.actime = statbuf1.st_atime;
-		times.modtime = statbuf1.st_mtime;
-
-		utime(destname, &times);
-	}
-
-	return TRUE;
-
-error_exit:
-	close(rfd);
-	close(wfd);
-
-	return FALSE;
-}
-
- // Build a path name from the specified directory name and file name. If the directory name is NULL, then the original filename is returned.
- // The built path is in a static area, and is overwritten for each call.
-char *buildname(char *dirname, char *filename)
-{
-	char *cp;
-	static char buf[PATHLEN];
-
-	if ((dirname == NULL) || (*dirname == '\0'))
-		return filename;
-
-	cp = strrchr(filename, '/');
-	if (cp)
-		filename = cp + 1;
-
-	strcpy(buf, dirname);
-	strcat(buf, "/");
-	strcat(buf, filename);
-
-	return buf;
 }

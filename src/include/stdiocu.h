@@ -343,7 +343,8 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Print a message describing the meaning of the value of errno.  */
-//extern __device__ void perror_(const char *s); #define perror perror_
+extern __device__ void perror_(const char *s);
+#define perror perror_
 __END_NAMESPACE_STD;
 
 /* Return the system file descriptor for STREAM.  */

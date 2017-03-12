@@ -46,7 +46,7 @@ struct stdlib_exit
 
 struct stdlib_system
 {
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

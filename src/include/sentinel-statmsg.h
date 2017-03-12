@@ -41,7 +41,7 @@ enum {
 
 struct stat_stat
 {
-	static __forceinline __device__ char *Prepare(stat_stat *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stat_stat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -61,7 +61,7 @@ struct stat_stat
 
 struct stat_fstat
 {
-	static __forceinline __device__ char *Prepare(stat_fstat *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stat_fstat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -78,7 +78,7 @@ struct stat_fstat
 
 struct stat_mkdir
 {
-	static __forceinline __device__ char *Prepare(stat_mkdir *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stat_mkdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

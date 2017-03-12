@@ -59,7 +59,7 @@ enum {
 
 struct stdio_remove
 {
-	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -78,30 +78,30 @@ struct stdio_remove
 
 struct stdio_rename
 {
-	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int oldnameLength = (t->Oldname ? (int)strlen(t->Oldname) + 1 : 0);
-		int newnameLength = (t->Newname ? (int)strlen(t->Newname) + 1 : 0);
-		char *oldname = (char *)(data += _ROUND8(sizeof(*t)));
-		char *newname = (char *)(data += oldnameLength);
-		char *end = (char *)(data += newnameLength);
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str2 = (char *)(data += strLength);
+		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
-		memcpy(oldname, t->Oldname, oldnameLength);
-		memcpy(newname, t->Newname, newnameLength);
-		t->Oldname = oldname + offset;
-		t->Newname = newname + offset;
+		memcpy(str, t->Str, strLength);
+		memcpy(str2, t->Str2, str2Length);
+		t->Str = str + offset;
+		t->Str2 = str2 + offset;
 		return end;
 	}
 	sentinelMessage Base;
-	const char *Oldname; const char *Newname;
-	__device__ stdio_rename(const char *oldname, const char *newname)
-		: Base(true, STDIO_RENAME, 1024, SENTINELPREPARE(Prepare)), Oldname(oldname), Newname(newname) { sentinelDeviceSend(&Base, sizeof(stdio_rename)); }
+	const char *Str; const char *Str2;
+	__device__ stdio_rename(const char *str, const char *str2)
+		: Base(true, STDIO_RENAME, 1024, SENTINELPREPARE(Prepare)), Str(str), Str2(str2) { sentinelDeviceSend(&Base, sizeof(stdio_rename)); }
 	int RC;
 };
 
 struct stdio_unlink
 {
-	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -138,30 +138,30 @@ struct stdio_fflush
 
 struct stdio_freopen
 {
-	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int filenameLength = (t->Filename ? (int)strlen(t->Filename) + 1 : 0);
-		int modeLength = (t->Mode ? (int)strlen(t->Mode) + 1 : 0);
-		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
-		char *mode = (char *)(data += filenameLength);
-		char *end = (char *)(data += modeLength);
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str2 = (char *)(data += strLength);
+		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
-		memcpy(filename, t->Filename, filenameLength);
-		memcpy(mode, t->Mode, modeLength);
-		t->Filename = filename + offset;
-		t->Mode = mode + offset;
+		memcpy(str, t->Str, strLength);
+		memcpy(str2, t->Str2, str2Length);
+		t->Str = str + offset;
+		t->Str2 = str2 + offset;
 		return end;
 	}
 	sentinelMessage Base;
-	const char *Filename; const char *Mode; FILE *Stream;
-	__device__ stdio_freopen(const char *filename, const char *mode, FILE *stream)
-		: Base(true, STDIO_FREOPEN, 1024, SENTINELPREPARE(Prepare)), Filename(filename), Mode(mode), Stream(stream) { sentinelDeviceSend(&Base, sizeof(stdio_freopen)); }
+	const char *Str; const char *Str2; FILE *Stream;
+	__device__ stdio_freopen(const char *str, const char *str2, FILE *stream)
+		: Base(true, STDIO_FREOPEN, 1024, SENTINELPREPARE(Prepare)), Str(str), Str2(str2), Stream(stream) { sentinelDeviceSend(&Base, sizeof(stdio_freopen)); }
 	FILE *RC;
 };
 
 struct stdio_setvbuf
 {
-	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
 		char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
@@ -198,7 +198,7 @@ struct stdio_fputc
 
 struct stdio_fgets
 {
-	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -215,7 +215,7 @@ struct stdio_fgets
 
 struct stdio_fputs
 {
-	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -244,7 +244,7 @@ struct stdio_ungetc
 
 struct stdio_fread
 {
-	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -261,7 +261,7 @@ struct stdio_fread
 
 struct stdio_fwrite
 {
-	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		size_t size = t->Size * t->Num;
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));

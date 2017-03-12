@@ -42,7 +42,7 @@ enum {
 
 struct unistd_access
 {
-	static __forceinline __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int nameLength = (t->Name ? (int)strlen(t->Name) + 1 : 0);
 		char *name = (char *)(data += _ROUND8(sizeof(*t)));
@@ -79,7 +79,7 @@ struct unistd_close
 
 struct unistd_read
 {
-	static __forceinline __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -95,7 +95,7 @@ struct unistd_read
 
 struct unistd_write
 {
-	static __forceinline __device__ char *Prepare(unistd_write *t, char *data, char *dataEnd, long offset)
+	static __forceinline __device__ char *Prepare(unistd_write *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		size_t size = t->Size;
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));

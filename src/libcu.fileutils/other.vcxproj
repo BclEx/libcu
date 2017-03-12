@@ -87,16 +87,13 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ddd.cpp" />
-    <ClCompile Include="dl.cpp" />
-    <ClCompile Include="dln.cpp" />
-    <ClCompile Include="dmkfifo.cpp" />
-    <ClCompile Include="dmknod.cpp" />
-    <ClCompile Include="dsync.cpp" />
-    <ClCompile Include="dtouch.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="futils.h" />
+    <CudaCompile Include="ddd.cu" />
+    <CudaCompile Include="dl.cu" />
+    <CudaCompile Include="dln.cu" />
+    <CudaCompile Include="dmkfifo.cu" />
+    <CudaCompile Include="dmknod.cu" />
+    <CudaCompile Include="dsync.cu" />
+    <CudaCompile Include="dtouch.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
