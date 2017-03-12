@@ -1,24 +1,9 @@
-//#include <sentinel.h>
-//#include "futils.h"
-//
-//#include <sys/types.h>
 #include <sys/statcu.h>
-//#include <unistd.h>
+#include <unistdcu.h>
 //#include <fcntl.h>
-//#include <signal.h>
-//#include <pwd.h>
-//#include <grp.h>
-//#include <utime.h>
+#include <timecu.h>
 //#include <errno.h>
-
 #define BUF_SIZE 1024 
-//typedef	struct chunk CHUNK;
-//#define	CHUNKINITSIZE 4
-//struct chunk {
-//	CHUNK *next;
-//	char data[CHUNKINITSIZE]; // actually of varying length
-//};
-//static CHUNK *_chunkList;
 
 // Copy one file to another, while possibly preserving its modes, times, and modes.  Returns TRUE if successful, or FALSE on a failure with an
 // error message output.  (Failure is not indicted if the attributes cannot be set.)

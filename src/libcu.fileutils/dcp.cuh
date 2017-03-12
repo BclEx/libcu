@@ -1,7 +1,8 @@
 //#include <sentinel.h>
 //#include "futils.h"
 //#include <sys/types.h>
-//#include <sys/stat.h>
+#include <sys/statcu.h>
+#include <unistdcu.h>
 //#include <fcntl.h>
 //#include <signal.h>
 //#include <errno.h>
@@ -95,7 +96,7 @@ int dcp(char *str, char *str2, bool setModes)
 	cudaMalloc(&d_str2, str2Length);
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_str2, str2, str2Length, cudaMemcpyHostToDevice);
-	g_dcp<<<1,1>>>(d_str, d_str2);
+	g_dcp<<<1,1>>>(d_str, d_str2, setModes);
 	cudaFree(d_str);
 	cudaFree(d_str2);
 	return m_dcp_rc;

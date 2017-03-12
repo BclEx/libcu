@@ -6,6 +6,7 @@
 #include <timecu.h>
 #include <unistdcu.h>
 #define	PATHLEN 256	
+#undef S_ISLNK
 
 struct group { short gr_gid; };
 __device__ struct group *getgrnam(char *name) { return nullptr; }
@@ -15,7 +16,7 @@ __device__ struct passwd *getpwnam(char *name) { return nullptr; }
 #define	LISTSIZE	256
 #define COLS 80
 
-#ifdef	S_ISLNK
+#ifdef S_ISLNK
 #define	LSTAT lstat
 #else
 #define	LSTAT stat
@@ -28,6 +29,13 @@ __device__ struct passwd *getpwnam(char *name) { return nullptr; }
 #define	LSF_MULT	0x08
 #define LSF_ALL		0x10		// List files starting with `.'
 #define LSF_CLASS	0x20		// Classify files (append symbol)
+
+__device__ char **_list;
+__device__ int _listSize;
+__device__ int _listUsed;
+__device__ int _cols = 0;
+__device__ int _col = 0;
+__device__ char _fmt[10] = "%s";
 
 // Return the standard ls-like mode string from a file mode. This is static and so is overwritten on each call.
 static __device__ char _modeString_buf[12];
@@ -88,7 +96,6 @@ static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 	char *cp;
 	struct passwd *pwd;
 	struct group *grp;
-	long len;
 	char buf[PATHLEN];
 	static char userName[12];
 	static int userId;
@@ -153,13 +160,16 @@ static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 	class_ = name + strlen(name);
 	*class_ = 0;
 	if (flags & LSF_CLASS) {
-		if (S_ISLNK (statbuf->st_mode)) *class_ = '@';
-		else if (S_ISDIR (statbuf->st_mode)) *class_ = '/';
-		else if (S_IEXEC & statbuf->st_mode) *class_ = '*';
-		else if (S_ISFIFO (statbuf->st_mode)) *class_ = '|';
-		else if (S_ISSOCK (statbuf->st_mode)) *class_ = '=';
+#ifdef S_ISLNK
+		if (S_ISLNK(statbuf->st_mode)) *class_ = '@';
+		else
+#endif
+			if (S_ISDIR(statbuf->st_mode)) *class_ = '/';
+			else if (S_IEXEC & statbuf->st_mode) *class_ = '*';
+			else if (S_ISFIFO(statbuf->st_mode)) *class_ = '|';
+			else if (S_ISSOCK(statbuf->st_mode)) *class_ = '=';
 	}
-	printf(fmt, name);
+	printf(_fmt, name);
 #ifdef S_ISLNK
 	if ((flags & LSF_LONG) && S_ISLNK(statbuf->st_mode)) {
 		if (fullName) len = readlink(fullName, buf, PATHLEN - 1);
@@ -170,20 +180,11 @@ static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 		}
 	}
 #endif
-	if (flags & LSF_LONG || ++col == cols) {
+	if (flags & LSF_LONG || ++_col == _cols) {
 		fputc('\n', stdout);
-		col = 0;
+		_col = 0;
 	}
 }
-
-//#define BUF_SIZE 1024 
-//typedef	struct chunk CHUNK;
-//#define	CHUNKINITSIZE	4
-//struct chunk {
-//	CHUNK *next;
-//	char data[CHUNKINITSIZE]; // actually of varying length
-//};
-
 
 // Build a path name from the specified directory name and file name. If the directory name is NULL, then the original filename is returned.
 // The built path is in a static area, and is overwritten for each call.
@@ -208,13 +209,6 @@ __device__ int nameSort(const void *pp1, const void *pp2)
 	char **p2 = (char **)pp2;
 	return strcmp(*p1, *p2);
 }
-
-__device__ char **_list;
-__device__ int _listSize;
-__device__ int _listUsed;
-__device__ int _cols = 0;
-__device__ int _col = 0;
-__device__ char _fmt[10] = "%s";
 
 __device__ __managed__ int m_dls_rc;
 __global__ void g_dls(char *name, int flags, bool endSlash)
@@ -241,7 +235,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 	}
 
 	if ((flags & LSF_DIR) || !S_ISDIR(statbuf.st_mode)) {
-		lsfile(NULL, name, &statbuf, flags);
+		lsFile(NULL, name, &statbuf, flags);
 		if (~flags & LSF_LONG) 
 			fputc('\n', stdout);
 		m_dls_rc = -1;
@@ -269,7 +263,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		// add to list
 		strcat(fullName, dp->d_name);
 		if (_listUsed >= _listSize) {
-			char **newList = realloc(_list, (sizeof(char **) * (_listSize + LISTSIZE)));
+			char **newList = (char **)realloc(_list, (sizeof(char **) * (_listSize + LISTSIZE)));
 			if (!newList) {
 				fprintf(stderr, "No memory for ls buffer\n");
 				break;
@@ -297,8 +291,8 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 	if (~flags & LSF_LONG) {
 		int len, maxlen;
 		for (maxlen = i = 0; i < _listUsed; i++) {
-			if (cp = strrchr(list[i], '/')) cp++;
-			else cp = list[i];
+			if (cp = strrchr(_list[i], '/')) cp++;
+			else cp = _list[i];
 			if ((len = strlen(cp)) > maxlen)
 				maxlen = len;
 		}
@@ -325,7 +319,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		}
 		free(name);
 	}
-	if ((~flags & LSF_LONG) && (num % cols))
+	if ((~flags & LSF_LONG) && (num % _cols))
 		fputc('\n', stdout);
 	_listUsed = 0;
 }

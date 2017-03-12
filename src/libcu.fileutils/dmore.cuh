@@ -1,24 +1,18 @@
-//#include "futils.h"
-//#include <sys/types.h>
-//#include <sys/stat.h>
+#include <sys/statcu.h>
+#include <stdiocu.h>
 #include <unistdcu.h>
-//#include <fcntl.h>
-//#include <signal.h>
-//#include <pwd.h>
-//#include <grp.h>
-//#include <utime.h>
-//#include <errno.h>
+#include <fcntlcu.h>
 
 __device__ __managed__ int m_dmore_rc;
-__global__ void g_dmore(char *str, int fd)
+__global__ void g_dmore(char *name, int fd)
 {
-	if (!str) {
+	if (!name) {
 		close(fd);
 		m_dmore_rc = -1;
 		return;
 	}
 	else if (fd == -1) {
-		fd = open(str, O_RDONLY);
+		fd = open(name, O_RDONLY);
 		if (fd == -1) {
 			perror(name);
 			m_dmore_rc = -1;
@@ -27,6 +21,7 @@ __global__ void g_dmore(char *str, int fd)
 		printf("<< %s >>\b", name);
 	}
 	m_dmore_rc = fd;
+	unsigned char ch;
 	while (fd > -1 && (read(fd, &ch, 1))) {
 		int line = 1;
 		int col = 0;

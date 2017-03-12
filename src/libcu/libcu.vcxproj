@@ -34,6 +34,7 @@
     <ClInclude Include="..\include\ext\hash.h" />
     <ClInclude Include="..\include\ext\memfile.h" />
     <ClInclude Include="..\include\ext\tagbase.h" />
+    <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\sentinel-statmsg.h" />
     <ClInclude Include="..\include\setjmpcu.h" />
     <ClInclude Include="..\include\timecu.h" />

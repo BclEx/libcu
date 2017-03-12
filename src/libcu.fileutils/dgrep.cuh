@@ -1,5 +1,6 @@
-#include <sentinel.h>
-#include <ctype.h>
+#include <stringcu.h>
+#include <stdiocu.h>
+#include <ctypecu.h>
 
 // See if the specified word is found in the specified string.
 __device__ bool search(char *string, char *word, bool ignoreCase)
@@ -78,7 +79,7 @@ int dgrep(char *str, char *str2, bool ignoreCase, bool tellName, bool tellLine)
 	cudaMalloc(&d_str2, strLength);
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_str2, str2, str2Length, cudaMemcpyHostToDevice);
-	g_dmore<<<1,1>>>(d_str, d_str2, ignoreCase, tellName, bool tellLine);
+	g_dgrep<<<1,1>>>(d_str, d_str2, ignoreCase, tellName, tellLine);
 	cudaFree(d_str);
 	cudaFree(d_str2);
 	return m_dgrep_rc;

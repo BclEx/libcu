@@ -95,6 +95,9 @@
     <ClInclude Include="..\include\sentinel-statmsg.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\fcntlcu.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
