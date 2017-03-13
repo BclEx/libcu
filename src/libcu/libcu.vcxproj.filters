@@ -98,12 +98,17 @@
     <ClInclude Include="..\include\fcntlcu.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\pwdcu.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\grpcu.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
-    <CudaCompile Include="fcntlcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -165,5 +170,6 @@
       <Filter>ext</Filter>
     </None>
     <None Include="fsystem.cu" />
+    <None Include="fcntlcu.cu" />
   </ItemGroup>
 </Project>

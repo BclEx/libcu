@@ -7,7 +7,7 @@
 #include "dcmp.cuh"
 #include "dcp.cuh"
 #include "dgrep.cuh"
-//#include "dls.cuh"
+#include "dls.cuh"
 #include "dmkdir.cuh"
 #include "dmore.cuh"
 #include "dmv.cuh"

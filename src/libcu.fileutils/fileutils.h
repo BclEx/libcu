@@ -1,7 +1,8 @@
 #ifndef _FILEUTILS_H
 #define _FILEUTILS_H
 
-//#define	PATHLEN		256	
+#define	PATHLEN 256
+
 //#define	CMDLEN		512	
 //#define	MAXARGS		500	
 //#define	ALIASALLOC	20

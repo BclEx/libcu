@@ -5,7 +5,7 @@
 //#include <grp.h>
 #include <timecu.h>
 #include <unistdcu.h>
-#include "futils.h"
+#include "fileutils.h"
 
 #define	LISTSIZE 256
 #define COLS 80
