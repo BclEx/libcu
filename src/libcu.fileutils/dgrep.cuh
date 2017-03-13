@@ -56,7 +56,7 @@ __global__ void g_dgrep(char *name, char *word, bool ignoreCase, bool tellName, 
 	while (fgets(buf, sizeof(buf), f)) {
 		char *cp = &buf[strlen(buf) - 1];
 		if (*cp != '\n')
-			fprintf(stderr, "%s: Line too long\n", name);
+			printf("%s: Line too long\n", name);
 		if (search(buf, word, ignoreCase)) {
 			if (tellName) printf("%s: ", name);
 			if (tellLine) printf("%d: ", line);

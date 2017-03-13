@@ -103,6 +103,7 @@
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
+    <CudaCompile Include="fcntlcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">

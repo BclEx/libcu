@@ -5,22 +5,10 @@
 //#include <grp.h>
 #include <timecu.h>
 #include <unistdcu.h>
-#define	PATHLEN 256	
-#undef S_ISLNK
+#include "futils.h"
 
-struct group { short gr_gid; };
-__device__ struct group *getgrnam(char *name) { return nullptr; }
-struct passwd { short pw_uid; };
-__device__ struct passwd *getpwnam(char *name) { return nullptr; }
-
-#define	LISTSIZE	256
+#define	LISTSIZE 256
 #define COLS 80
-
-#ifdef S_ISLNK
-#define	LSTAT lstat
-#else
-#define	LSTAT stat
-#endif
 
 // Flags for the LS command.
 #define	LSF_LONG	0x01
@@ -67,9 +55,9 @@ __device__ char *modeString(int mode)
 	if (mode & S_IXOTH) _modeString_buf[9] = 'x';
 
 	// Finally fill in magic stuff like suid and sticky text.
-	if (mode & S_ISUID) _modeString_buf[3] = ((mode & S_IXUSR) ? 's' : 'S');
-	if (mode & S_ISGID) _modeString_buf[6] = ((mode & S_IXGRP) ? 's' : 'S');
-	if (mode & S_ISVTX) _modeString_buf[9] = ((mode & S_IXOTH) ? 't' : 'T');
+	//if (mode & S_ISUID) _modeString_buf[3] = ((mode & S_IXUSR) ? 's' : 'S');
+	//if (mode & S_ISGID) _modeString_buf[6] = ((mode & S_IXGRP) ? 's' : 'S');
+	//if (mode & S_ISVTX) _modeString_buf[9] = ((mode & S_IXOTH) ? 't' : 'T');
 
 	return _modeString_buf;
 }
@@ -79,8 +67,9 @@ __device__ char *modeString(int mode)
 static __device__ char _timeString_buf[26];
 __device__ char *timeString(long t)
 {
-	long now; time(&now);
+	long now; //time(&now);
 	char *str = ctime(&t);
+	char *str = "abcdefg";
 	strcpy(_timeString_buf, &str[4]);
 	_timeString_buf[12] = '\0';
 	if (t > now || t < now - 365*24*60*60L) {

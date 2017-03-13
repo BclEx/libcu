@@ -32,8 +32,11 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
-extern __device__ int open_(const char *filename, int openFlag) { return 0; }
+extern __device__ int open_(const char *filename, int openFlag);
 #define open open_
+
+extern __device__ int creat_(const char *filename, int permissionMode);
+#define creat creat_
 
 __END_DECLS;
 #else

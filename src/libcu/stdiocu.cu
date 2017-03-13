@@ -20,16 +20,16 @@ typedef struct __align__(8)
 	FILE *file;				// reference
 	unsigned short id;		// ID of author
 	unsigned short threadid;// thread ID of author
-} fileRef;
+} streamRef;
 
-__device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
-volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
-volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
-__constant__ FILE __iob_file[CORE_MAXFILESTREAM+3];
+__device__ streamRef __iob_streamRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
+volatile __device__ streamRef *__iob_freeStreamPtr = __iob_streamRefs; // Current atomically-incremented non-wrapped offset
+volatile __device__ streamRef *__iob_retnStreamPtr = __iob_streamRefs; // Current atomically-incremented non-wrapped offset
+__constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
 
-static __device__ __forceinline void writeFileRef(fileRef *ref, FILE *f)
+static __device__ __forceinline void writeStreamRef(streamRef *ref, FILE *s)
 {
-	ref->file = f;
+	ref->file = s;
 	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
 	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
 }
@@ -37,27 +37,27 @@ static __device__ __forceinline void writeFileRef(fileRef *ref, FILE *f)
 static __device__ FILE *streamGet()
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
-	int offsetId = offset / sizeof(fileRef);
-	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
-	FILE *f = ref->file;
-	if (!f) {
-		f = &__iob_file[offsetId+3];
-		writeFileRef(ref, f);
+	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
+	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
+	int offsetId = offset / sizeof(streamRef);
+	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
+	FILE *s = ref->file;
+	if (!s) {
+		s = &__iob_streams[offsetId+3];
+		writeStreamRef(ref, s);
 	}
-	f->_file = INT_MAX-CORE_MAXFILESTREAM - offsetId;
-	return f;
+	s->_file = INT_MAX-CORE_MAXFILESTREAM - offsetId;
+	return s;
 }
 
-static __device__ void streamFree(FILE *f)
+static __device__ void streamFree(FILE *s)
 {
-	if (!f) return;
+	if (!s) return;
 	// advance circular buffer
-	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
-	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
-	writeFileRef(ref, f);
+	size_t offset = atomicAdd((uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
+	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
+	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
+	writeStreamRef(ref, s);
 }
 
 #pragma endregion
@@ -299,6 +299,8 @@ __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE
 	dirEnt_t *f;
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
+	if (f->dir.d_type != 2)
+		panic("fwrite: stream !file");
 	size *= n;
 	memfileRead(f->u.file, ptr, size, 0);
 	return size;
@@ -310,6 +312,8 @@ __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t 
 	dirEnt_t *f;
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
+	if (f->dir.d_type != 2)
+		panic("fwrite: stream !file");
 	size *= n;
 	memfileWrite(f->u.file, ptr, size, 0);
 	return size;

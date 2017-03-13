@@ -79,14 +79,14 @@ __BEGIN_DECLS;
 ///* Default path prefix for `mkstemp'.  */
 //#define P_tmpdir "/tmp"
 
-#define ISDEVICEFILE(stream) (stream >= __iob_file && stream <= __iob_file + CORE_MAXFILESTREAM+3)
-extern __constant__ FILE __iob_file[CORE_MAXFILESTREAM+3];
+#define ISDEVICEFILE(stream) (stream >= __iob_streams && stream <= __iob_streams + CORE_MAXFILESTREAM+3)
+extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
 #undef stdin
 #undef stdout
 #undef stderr
-#define stdin  (&__iob_file[0]) /* Standard input stream.  */
-#define stdout (&__iob_file[1]) /* Standard output stream.  */
-#define stderr (&__iob_file[2]) /* Standard error output stream.  */
+#define stdin  (&__iob_streams[0]) /* Standard input stream.  */
+#define stdout (&__iob_streams[1]) /* Standard output stream.  */
+#define stderr (&__iob_streams[2]) /* Standard error output stream.  */
 
 __END_DECLS;
 #include <sentinel-stdiomsg.h>
@@ -343,6 +343,7 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Print a message describing the meaning of the value of errno.  */
+//__forceinline __device__ void perror_(const char *s) { printf(s); }
 extern __device__ void perror_(const char *s);
 #define perror perror_
 __END_NAMESPACE_STD;

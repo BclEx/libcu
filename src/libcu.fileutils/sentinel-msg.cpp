@@ -27,7 +27,7 @@ bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length)
 	case FILEUTILS_DCMP: { fileutils_dcmp *msg = (fileutils_dcmp *)data; msg->RC = dcmp(msg->Str, msg->Str2); return true; }
 	case FILEUTILS_DCP: { fileutils_dcp *msg = (fileutils_dcp *)data; msg->RC = dcp(msg->Str, msg->Str2, msg->SetModes); return true; }
 	case FILEUTILS_DGREP: { fileutils_dgrep *msg = (fileutils_dgrep *)data; msg->RC = dgrep(msg->Str, msg->Str2, msg->IgnoreCase, msg->TellName, msg->TellLine	); return true; }
-	case FILEUTILS_DLS: { fileutils_dls *msg = (fileutils_dls *)data; msg->RC = dls(msg->Str, msg->Flags, msg->EndSlash); return true; }
+	//case FILEUTILS_DLS: { fileutils_dls *msg = (fileutils_dls *)data; msg->RC = dls(msg->Str, msg->Flags, msg->EndSlash); return true; }
 	case FILEUTILS_DMKDIR: { fileutils_dmkdir *msg = (fileutils_dmkdir *)data; msg->RC = dmkdir(msg->Str, msg->Mode); return true; }
 	case FILEUTILS_DMORE: { fileutils_dmore *msg = (fileutils_dmore *)data; msg->RC = dmore(msg->Str, msg->Fd); return true; }
 	case FILEUTILS_DMV: { fileutils_dmv *msg = (fileutils_dmv *)data; msg->RC = dmv(msg->Str, msg->Str2); return true; }

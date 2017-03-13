@@ -1,10 +1,12 @@
 #include <sys/statcu.h>
+#include <unistdcu.h>
+#include "fileutils.h"
 
 __device__ __managed__ int m_drm_rc;
 __global__ void g_drm(char *str)
 {
 	struct stat sbuf;
-	m_drm_rc = (!lstat(str, &sbuf) && unlink(str));
+	m_drm_rc = (!LSTAT(str, &sbuf) && unlink(str));
 }
 int drm(char *str)
 {

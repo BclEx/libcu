@@ -182,6 +182,8 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="fileutils.cuh" />
+    <ClInclude Include="fileutils.h" />
     <ClInclude Include="sentinel-fileutilsmsg.h" />
   </ItemGroup>
   <ItemGroup>

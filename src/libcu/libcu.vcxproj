@@ -66,6 +66,7 @@
     <None Include="ext\hash.cu" />
     <None Include="ext\memfile.cu" />
     <None Include="fsystem.cu" />
+    <None Include="fcntlcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

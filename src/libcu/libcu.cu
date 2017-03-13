@@ -13,6 +13,7 @@
 #include "ext/hash.cu"
 #include "ext/memfile.cu"
 #include "fsystem.cu"
+#include "fcntlcu.cu"
 
 __device__ void libcuReset()
 {

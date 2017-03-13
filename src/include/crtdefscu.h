@@ -88,5 +88,4 @@ void *__wsdfind(void *k, int l);
 
 #pragma endregion
 
-
 #endif  /* _CRTDEFSCU_H */
