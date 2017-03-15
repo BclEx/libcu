@@ -1,8 +1,10 @@
 #include <sys/types.h>
 #include <sys/statcu.h>
-//#include <dirent.h>
-//#include <pwd.h>
-//#include <grp.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <direntcu.h>
+#include <pwdcu.h>
+#include <grpcu.h>
 #include <timecu.h>
 #include <unistdcu.h>
 #include "fileutils.h"
@@ -68,7 +70,7 @@ static __device__ char _timeString_buf[26];
 __device__ char *timeString(long t)
 {
 	long now; //time(&now);
-	char *str = ctime(&t);
+	//char *str = ctime(&t);
 	char *str = "abcdefg";
 	strcpy(_timeString_buf, &str[4]);
 	_timeString_buf[12] = '\0';
@@ -80,7 +82,7 @@ __device__ char *timeString(long t)
 }
 
 // Do an LS of a particular file name according to the flags.
-static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
+static __device__ void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 {
 	char *cp;
 	struct passwd *pwd;
@@ -110,7 +112,7 @@ static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 		cp += strlen(cp);
 
 		if (!userIdKnown || (statbuf->st_uid != userId)) {
-			pwd = getpwuid(statbuf->st_uid);
+			pwd = (struct passwd *)getpwuid(statbuf->st_uid);
 			if (pwd)
 				strcpy(userName, pwd->pw_name);
 			else
@@ -123,7 +125,7 @@ static void lsFile(char *fullName, char *name, struct stat *statbuf, int flags)
 		cp += strlen(cp);
 
 		if (!groupIdKnown || statbuf->st_gid != groupId) {
-			grp = getgrgid(statbuf->st_gid);
+			grp = (struct group *)getgrgid(statbuf->st_gid);
 			if (grp)
 				strcpy(groupName, grp->gr_name);
 			else
@@ -207,7 +209,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		if (_listSize == 0) {
 			_list = (char **)malloc(LISTSIZE * sizeof(char *));
 			if (!_list) {
-				fprintf(stderr, "No memory for ls buffer\n");
+				printf("No memory for ls buffer\n");
 				exit(1);
 			}
 			_listSize = LISTSIZE;
@@ -254,7 +256,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		if (_listUsed >= _listSize) {
 			char **newList = (char **)realloc(_list, (sizeof(char **) * (_listSize + LISTSIZE)));
 			if (!newList) {
-				fprintf(stderr, "No memory for ls buffer\n");
+				printf("No memory for ls buffer\n");
 				break;
 			}
 			_list = newList;
@@ -263,7 +265,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		strcat(fullName, " ");
 		_list[_listUsed] = strdup(fullName);
 		if (!_list[_listUsed]) {
-			fprintf(stderr, "No memory for filenames\n");
+			printf("No memory for filenames\n");
 			break;
 		}
 		_list[_listUsed][strlen(fullName) - 1] = 0;

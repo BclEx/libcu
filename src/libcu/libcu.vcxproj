@@ -65,10 +65,12 @@
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <None Include="pwdcu.cu" />
     <None Include="ext\hash.cu" />
     <None Include="ext\memfile.cu" />
     <None Include="fsystem.cu" />
     <None Include="fcntlcu.cu" />
+    <None Include="grpcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

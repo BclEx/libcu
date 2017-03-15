@@ -27,20 +27,50 @@ THE SOFTWARE.
 #ifndef _PWDCU_H
 #define _PWDCU_H
 #include <featurescu.h>
+#include <sys/types.h>
+#include <grpcu.h>
 
-#include <pwd.h>
+#define uid_t short
+
+struct passwd
+{
+	char *pw_name;		// user's login name
+	uid_t pw_uid;		// numerical user ID
+	gid_t pw_gid;		// numerical group ID
+	//char *pw_dir;		// initial working directory
+	//char *pw_shell;		// program to use as shell
+};
+
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
-extern __device__ int open_(const char *filename, int openFlag);
-#define open open_
+/* search user database for a name */
+extern __device__ struct passwd *getpwnam_(const char *name);
+#define getpwnam getpwnam_
 
-extern __device__ int creat_(const char *filename, int permissionMode);
-#define creat creat_
+/* search user database for a user ID */
+extern __device__ struct passwd *getpwuid_(uid_t uid);
+#define getpwuid getpwuid_
+
+/* close the user database */
+extern __device__ void endpwent_();
+#define endpwent endpwent_
+
+/* get user database entry */
+extern __device__ struct passwd *getpwent_();
+#define getpwent getpwent_
+
+/* reset user database to first entry */
+extern __device__ void setpwent_();
+#define setpwent setpwent_
 
 __END_DECLS;
 #else
-#include <io.h>
+#define getpwnam
+#define getpwuid
+#define endpwent
+#define getpwent
+#define setpwent
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _PWDCU_H */

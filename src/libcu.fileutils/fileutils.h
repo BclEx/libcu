@@ -26,9 +26,4 @@
 
 extern __device__ bool copyFile(char *srcName, char *destName, bool setModes);
 
-struct group { short gr_gid; };
-__device__ struct group *getgrnam(char *name) { return nullptr; }
-struct passwd { short pw_uid; };
-__device__ struct passwd *getpwnam(char *name) { return nullptr; }
-
 #endif  /* _FILEUTILS_H */

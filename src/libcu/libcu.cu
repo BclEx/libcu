@@ -12,6 +12,8 @@
 #include "sys/statcu.cu"
 #include "ext/hash.cu"
 #include "ext/memfile.cu"
+#include "grpcu.cu"
+#include "pwdcu.cu"
 #include "fsystem.cu"
 #include "fcntlcu.cu"
 

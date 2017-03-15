@@ -28,19 +28,44 @@ THE SOFTWARE.
 #define _GRPCU_H
 #include <featurescu.h>
 
-#include <fcntl.h>
+#define gid_t short
+struct group
+{
+	char *gr_name;		// the name of the group
+	gid_t gr_gid;		// numerical group ID
+	char  **gr_mem;		// pointer to a null-terminated array of character pointers to member names
+};
+
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
-extern __device__ int open_(const char *filename, int openFlag);
-#define open open_
+/* get group database entry for a group ID */
+extern __device__ struct group *getgrgid_(gid_t gid);
+#define getgrgid getgrgid_
 
-extern __device__ int creat_(const char *filename, int permissionMode);
-#define creat creat_
+/* search group database for a name */
+extern __device__ struct group *getgrnam_(const char *name);
+#define getgrnam getgrnam_
+
+/* get the group database entry */
+extern __device__ struct group *getgrent_();
+#define getgrent getgrent_
+
+/* close the group database */
+extern __device__ void endgrent_();
+#define endgrent endgrent_
+
+/* reset group database to first entry */
+extern __device__ void setgrent_();
+#define setgrent setgrent_
 
 __END_DECLS;
 #else
-#include <io.h>
+#define getgrgid
+#define getgrnam
+#define getgrent
+#define endgrent
+#define setgrent
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _GRPCU_H */
