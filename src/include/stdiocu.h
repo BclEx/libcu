@@ -99,9 +99,6 @@ extern __device__ int remove_(const char *filename);
 /* Rename file OLD to NEW.  */
 extern  __device__ int rename_(const char *old, const char *new_);
 #define rename rename_
-/* Remove file FILENAME.  */
-extern __device__ int _unlink_(const char *filename);
-#define _unlink _unlink_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;

@@ -37,8 +37,10 @@
     <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\grpcu.h" />
     <ClInclude Include="..\include\pwdcu.h" />
-    <ClInclude Include="..\include\sentinel-statmsg.h" />
+    <ClInclude Include="..\include\sentinel-fcntlmsg.h" />
+    <ClInclude Include="..\include\sentinel-timemsg.h" />
     <ClInclude Include="..\include\setjmpcu.h" />
+    <ClInclude Include="..\include\sys\timecu.h" />
     <ClInclude Include="..\include\timecu.h" />
     <ClInclude Include="..\include\_dirent.h" />
     <ClInclude Include="..\include\direntcu.h" />
@@ -65,6 +67,7 @@
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <None Include="sys\timecu.cu" />
     <None Include="pwdcu.cu" />
     <None Include="ext\hash.cu" />
     <None Include="ext\memfile.cu" />

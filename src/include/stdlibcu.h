@@ -148,10 +148,22 @@ __END_NAMESPACE_STD;
 __BEGIN_NAMESPACE_STD;
 /* Allocate SIZE bytes of memory.  */
 extern __device__ void *malloc_(size_t size);
+#ifdef GANGING
+__device__ __forceinline void *mallocG(size_t size) { __shared__ void *p; if (!threadIdx.x) p = malloc_(size); __syncthreads(); return p; }
+#define malloc mallocG
+#else
 #define malloc malloc_
+#endif
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
-extern __device__ void *calloc_(size_t nmemb, size_t size);
+//extern __device__ void *calloc_(size_t nmemb, size_t size);
+
+__device__ __forceinline void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
+#ifdef GANGING
+__device__ __forceinline void *callocG(size_t nmemb, size_t size) { __shared__ void *p; if (!threadIdx.x) p = calloc_(nmemb, size); __syncthreads(); return p; }
+#define calloc callocG
+#else
 #define calloc calloc_
+#endif
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_EXT;
@@ -163,10 +175,20 @@ __END_NAMESPACE_STD;
 __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
 extern __device__ void *realloc_(void *ptr, size_t size);
+#ifdef GANGING
+__device__ __forceinline void *reallocG(void *ptr, size_t size) { __shared__ void *v; if (!threadIdx.x) v = realloc_(ptr, size); __syncthreads(); return v; }
+#define realloc reallocG
+#else
 #define realloc realloc_
+#endif
 /* Free a block allocated by `malloc', `realloc' or `calloc'.  */
 extern __device__ void free_(void *ptr);
+#ifdef GANGING
+__device__ __forceinline void freeG(void *p) { if (!threadIdx.x) free_(p); __syncthreads(); }
+#define free freeG
+#else
 #define free free_
+#endif
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
@@ -309,6 +331,7 @@ __forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **_
 #define strtouq strtouq_
 #endif
 
+/* Allocate SIZE bytes of memory.  Then Zero memory. */
 __forceinline __device__ void *mallocZero(size_t size) { void *p = malloc(size); if (p) memset(p, 0, size); return p; }
 
 __END_DECLS;

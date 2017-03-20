@@ -34,10 +34,10 @@ THE SOFTWARE.
 enum {
 	UNISTD_ACCESS = 35,
 	UNISTD_LSEEK,
-	//UNISTD_LSEEK64,
 	UNISTD_CLOSE,
 	UNISTD_READ,
 	UNISTD_WRITE,
+	UNISTD_UNLINK,
 };
 
 struct unistd_access
@@ -62,9 +62,9 @@ struct unistd_access
 struct unistd_lseek
 {
 	sentinelMessage Base;
-	int Handle; long Offset; int Whence;
+	int Handle; long Offset; int Whence; bool Bit64;
 	__device__ unistd_lseek(int fd, long offset, int whence)
-		: Base(true, UNISTD_LSEEK), Handle(fd), Offset(offset), Whence(whence) { sentinelDeviceSend(&Base, sizeof(unistd_lseek)); }
+		: Base(true, UNISTD_LSEEK), Handle(fd), Offset(offset), Whence(whence), Bit64(false) { sentinelDeviceSend(&Base, sizeof(unistd_lseek)); }
 	long RC;
 };
 
@@ -110,6 +110,25 @@ struct unistd_write
 	__device__ unistd_write(bool wait, int fd, const void *buf, size_t n)
 		: Base(wait, UNISTD_WRITE, 1024, SENTINELPREPARE(Prepare)), Handle(fd), Ptr(buf), Size(n) { sentinelDeviceSend(&Base, sizeof(unistd_write)); }
 	size_t RC;
+};
+
+struct unistd_unlink
+{
+	static __forceinline __device__ char *Prepare(unistd_unlink *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += strLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(str, t->Str, strLength);
+		t->Str = str + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Str;
+	__device__ unistd_unlink(const char *str)
+		: Base(true, UNISTD_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(unistd_unlink)); }
+	int RC;
 };
 
 #endif  /* _SENTINEL_UNISTDMSG_H */

@@ -7,11 +7,13 @@ __forceinline int dgrep_(char *str, char *str2, bool ignoreCase, bool tellName, 
 
 int main(int argc, char **argv)
 {
+	atexit(sentinelClientShutdown);
+	sentinelClientInitialize();
 	argc--;
 	argv++;
 	bool ignoreCase = false;
 	bool tellLine = false;
-	if (**argv == '-') {
+	if (argc > 0 && **argv == '-') {
 		argc--;
 		char *cp = *argv++;
 		while (*++cp) switch (*cp) {

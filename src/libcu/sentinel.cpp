@@ -44,7 +44,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		cmd->Dump(0);
+		//cmd->Dump(0);
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");

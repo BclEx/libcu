@@ -46,6 +46,8 @@ enum {
 	FILEUTILS_DMV,
 	FILEUTILS_DRM,
 	FILEUTILS_DRMDIR,
+	FILEUTILS_DPWD,
+	FILEUTILS_DCD,
 };
 
 struct fileutils_dcat
@@ -308,6 +310,41 @@ struct fileutils_drmdir
 	char *Str;
 	fileutils_drmdir(char *str)
 		: Base(true, FILEUTILS_DRMDIR, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelClientSend(&Base, sizeof(fileutils_drmdir)); }
+	int RC;
+};
+
+struct fileutils_dpwd
+{
+	static __forceinline __device__ char *Prepare(fileutils_dpwd *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += 1024);
+		if (end > dataEnd) return nullptr;
+		return end;
+	}
+	sentinelMessage Base;
+	fileutils_dpwd()
+		: Base(true, FILEUTILS_DPWD, 1024, SENTINELPREPARE(Prepare)) { sentinelClientSend(&Base, sizeof(fileutils_dpwd)); }
+	int RC;
+	char *Ptr;
+};
+
+struct fileutils_dcd
+{
+	static __forceinline char *Prepare(fileutils_dcd *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += strLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(str, t->Str, strLength);
+		t->Str = str + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	char *Str;
+	fileutils_dcd(char *str)
+		: Base(true, FILEUTILS_DCD, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelClientSend(&Base, sizeof(fileutils_dcd)); }
 	int RC;
 };
 

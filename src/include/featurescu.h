@@ -77,6 +77,7 @@ old code expects.  */
 #endif
 
 #define HAS_STDIO_BUFSIZ_NONE__
+//#define _LARGEFILE64_SOURCE
 
 /* These are defined by the user (or the compiler) to specify the desired environment:
 _LARGEFILE_SOURCE	Some more functions for correct standard I/O.
@@ -100,5 +101,12 @@ All macros listed above as possibly being defined by this file are explicitly un
 #ifndef CORE_MAXFILESTREAM
 #define CORE_MAXFILESTREAM 10
 #endif
+
+extern "C" __device__ char __cwd[];
+#define ISDEVICEPATH(path) (((path)[1] != ':' && (path)[0] != '/') && (path)[0] == ':' || __cwd[0] != 0)
+#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
+// absolute host	C:\path || /path
+// absolute device	:\path
+// cdw on device
 
 #endif  /* _FEATURESCU_H */

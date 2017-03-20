@@ -29,6 +29,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "drm", "libcu.fileutils\drm.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "drmdir", "libcu.fileutils\drmdir.vcxproj", "{F064226E-CC17-4C0C-B88C-BF2C928E0BCC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dpwd", "libcu.fileutils\dpwd.vcxproj", "{76C53994-DF11-412A-BB26-E259995FF455}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dcd", "libcu.fileutils\dcd.vcxproj", "{7A2F99C0-B7FC-40A2-98B3-AF3CC1586B14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -85,6 +89,14 @@ Global
 		{F064226E-CC17-4C0C-B88C-BF2C928E0BCC}.Debug|x64.Build.0 = Debug|x64
 		{F064226E-CC17-4C0C-B88C-BF2C928E0BCC}.Release|x64.ActiveCfg = Release|x64
 		{F064226E-CC17-4C0C-B88C-BF2C928E0BCC}.Release|x64.Build.0 = Release|x64
+		{76C53994-DF11-412A-BB26-E259995FF455}.Debug|x64.ActiveCfg = Debug|x64
+		{76C53994-DF11-412A-BB26-E259995FF455}.Debug|x64.Build.0 = Debug|x64
+		{76C53994-DF11-412A-BB26-E259995FF455}.Release|x64.ActiveCfg = Release|x64
+		{76C53994-DF11-412A-BB26-E259995FF455}.Release|x64.Build.0 = Release|x64
+		{7A2F99C0-B7FC-40A2-98B3-AF3CC1586B14}.Debug|x64.ActiveCfg = Debug|x64
+		{7A2F99C0-B7FC-40A2-98B3-AF3CC1586B14}.Debug|x64.Build.0 = Debug|x64
+		{7A2F99C0-B7FC-40A2-98B3-AF3CC1586B14}.Release|x64.ActiveCfg = Release|x64
+		{7A2F99C0-B7FC-40A2-98B3-AF3CC1586B14}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

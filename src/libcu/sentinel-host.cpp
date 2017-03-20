@@ -30,7 +30,7 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 		exit(0);
 	}
 	memcpy(cmd->Data, msg, msgLength);
-	printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
+	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
 
 	*status = 2;
 	if (msg->Wait) {

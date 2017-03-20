@@ -69,22 +69,24 @@ typedef int mode_t;
 __BEGIN_DECLS;
 
 #ifndef __USE_FILE_OFFSET64
-/* Get file attributes for FILE and put them in BUF.  */
-extern __device__ int stat_(const char *__restrict file, struct stat *__restrict buf);
+/* Get file attributes about FILE and put them in BUF. If FILE is a symbolic link, do not follow it.  */
+extern __device__ int stat_(const char *__restrict file, struct stat *__restrict buf, bool lstat = false);
 #define stat(file, buf) stat_(file, buf)
-
+#define lstat(file, buf) stat_(file, buf, true)
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
-extern __device__ int fstat_(int fd, struct stat *buf);
-#define fstat fstat_
+extern __device__ int fstat_device(int fd, struct stat *buf);
+#define fstat(fd, buf) fstat_(fd, buf) { if (ISDEVICEHANDLE(fd)) return fstat_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
 #else
-#define stat stat64
-#define fstat fstat64
+#define stat(file, buf) stat64_(file, buf)
+#define lstat(file, buf) lstat64_(file, buf)
+#define fstat(fd, buf) fstat64_device(fd, buf)
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf);
+extern __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf, bool lstat = false);
 #define stat64(file, buf) stat64_(file, buf)
-extern __device__ int fstat64_(int fd, struct stat64 *buf);
-#define fstat64 fstat64_
+#define lstat64(file, buf) stat64_(file, buf, true)
+extern __device__ int fstat64_device(int fd, struct stat64 *buf);
+#define fstat64(fd, buf) fstat64_(fd, buf) { if (ISDEVICEHANDLE(fd)) return fstat64_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
 #endif
 
 /* Set file access permissions for FILE to MODE. If FILE is a symbolic link, this affects its target instead.  */
@@ -107,6 +109,7 @@ __END_DECLS;
 #else
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path) 
+#define lstat stat
 #endif /* __CUDA_ARCH__  */
 
 #endif /* _SYS_STATCU_H  */

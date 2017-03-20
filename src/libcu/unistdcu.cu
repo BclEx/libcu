@@ -7,7 +7,7 @@ __BEGIN_DECLS;
 /* Test for access to NAME using the real UID and real GID.  */
 __device__ int access_(const char *name, int type)
 {
-	if (name[0] != ':') {
+	if (!ISDEVICEPATH(name)) {
 		unistd_access msg(name, type); return msg.RC;
 	}
 	panic("Not Implemented");
@@ -70,14 +70,13 @@ __device__ void usleep_(unsigned long milliseconds)
 /* Change the owner and group of FILE.  */
 __device__ int chown_(const char *file, uid_t owner, gid_t group)
 {
-	panic("Not Implemented");
 	return 0;
 }
 
 /* Change the process's working directory to PATH.  */
 __device__ int chdir_(const char *path)
 {
-	panic("Not Implemented");
+	strncpy(__cwd, (path ? path : ":\\"), MAX_PATH);
 	return 0;
 }
 
@@ -87,7 +86,8 @@ an array is allocated with `malloc'; the array is SIZE bytes long, unless SIZE =
 big as necessary.  */
 __device__ char *getcwd_(char *buf, size_t size)
 {
-	return "GPU";
+	int pathLength = strlen(__cwd);
+	return (size > pathLength ? strncpy(buf, __cwd, size) : nullptr);
 }
 
 /* Duplicate FD, returning a new file descriptor on the same file.  */
@@ -108,10 +108,12 @@ __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer
 extern __device__ char **__environ_ = (char **)__environ_device;
 
 /* Remove the link NAME.  */
-__device__ int unlink_(const char *name)
+__device__ int unlink_(const char *filename)
 {
-	panic("Not Implemented");
-	return 0;
+	if (!ISDEVICEPATH(filename)) {
+		unistd_unlink msg(filename); return msg.RC;
+	}
+	return fsystemUnlink(filename);
 }
 
 /* Remove the directory PATH.  */

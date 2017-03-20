@@ -16,6 +16,8 @@ int dmore(char *str, int fd);
 int dmv(char *str, char *str2);
 int drm(char *str);
 int drmdir(char *str);
+int dpwd(char *str);
+int dcd(char *str);
 
 bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length)
 {
@@ -33,6 +35,8 @@ bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length)
 	case FILEUTILS_DMV: { fileutils_dmv *msg = (fileutils_dmv *)data; msg->RC = dmv(msg->Str, msg->Str2); return true; }
 	case FILEUTILS_DRM: { fileutils_drm *msg = (fileutils_drm *)data; msg->RC = drm(msg->Str); return true; }
 	case FILEUTILS_DRMDIR: { fileutils_drmdir *msg = (fileutils_drmdir *)data; msg->RC = drmdir(msg->Str); return true; }
+	case FILEUTILS_DPWD: { fileutils_dpwd *msg = (fileutils_dpwd *)data; msg->RC = dpwd(msg->Ptr); return true; }
+	case FILEUTILS_DCD: { fileutils_dcd *msg = (fileutils_dcd *)data; msg->RC = dcd(msg->Str); return true; }
 	}
 	return false;
 }

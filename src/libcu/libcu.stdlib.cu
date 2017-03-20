@@ -31,11 +31,6 @@ __device__ void *malloc_(size_t size)
 	return (void *)(p+1);
 }
 
-__device__ void *calloc_(size_t nmemb, size_t size)
-{
-	return malloc(size);
-}
-
 __device__ void free_(void *ptr)
 {
 	if (!ptr) return;

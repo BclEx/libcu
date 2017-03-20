@@ -38,8 +38,6 @@ typedef short uid_t;
 #include <sentinel-unistdmsg.h>
 __BEGIN_DECLS;
 
-#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
-
 #undef access
 #undef dup2
 //#undef execve
@@ -151,8 +149,8 @@ extern __device__ char **__environ_;
 //nosupport: extern __device__ long int fpathconf_(int fd, int name);
 //#define fpathconf fpathconf_
 
-/* Remove the link NAME.  */
-extern __device__ int unlink_(const char *name);
+/* Remove the link FILENAME.  */
+extern __device__ int unlink_(const char *filename);
 #define unlink unlink_
 
 /* Remove the directory PATH.  */

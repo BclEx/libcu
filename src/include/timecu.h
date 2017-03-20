@@ -30,26 +30,60 @@ THE SOFTWARE.
 
 #include <time.h>
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#include <stddefcu.h>
+#include <sentinel-timemsg.h>
 __BEGIN_DECLS;
 
-typedef long clock_t;
-#define CLOCKS_PER_SEC 1000
-struct timeval { long tv_sec; long tv_usec; };
+//#ifndef _WIN64
+//typedef int clock_t;
+//#else
+//typedef long long int clock_t;
+//#endif
 
-__device__ time_t time_(time_t *timer);
+__BEGIN_NAMESPACE_STD;
+/* Time used by the program so far (user time + system time). The result / CLOCKS_PER_SECOND is program time in seconds.  */
+//builtin: extern __device__ clock_t clock();
+
+/* Return the current time and put it in *TIMER if TIMER is not NULL.  */
+extern __device__ time_t time_(time_t *timer);
 #define time time_
-__device__ int gettimeofday_(struct timeval *tp, void *tz);
-#define gettimeofday gettimeofday_
+
+/* Return the difference between TIME1 and TIME0.  */
+extern __device__ double difftime_(time_t time1, time_t time0);
+#define difftime difftime_
+
+/* Return the `time_t' representation of TP and normalize TP.  */
+__forceinline __device__ time_t mktime_(struct tm *tp) { time_mktime msg(tp); return msg.RC; }
+#define mktime mktime_
+
+/* Format TP into S according to FORMAT. no more than MAXSIZE characters and return the number of characters written, or 0 if it would exceed MAXSIZE.  */
+__forceinline size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp) { time_strftime msg(s, maxsize, format, tp); return msg.RC; }
+#define strftime strftime_
+__END_NAMESPACE_STD;
+
+__BEGIN_NAMESPACE_STD;
+/* Return the `struct tm' representation of *TIMER in Universal Coordinated Time (aka Greenwich Mean Time).  */
+extern __device__ struct tm *gmtime_(const time_t *timer);
+#define gmtime gmtime_
+
+/* Return the `struct tm' representation of *TIMER in the local timezone.  */
+//localtime is gmtime: extern __device__ struct tm *localtime_(const time_t *timer);
+#define localtime gmtime_
+__END_NAMESPACE_STD;
+
+__BEGIN_NAMESPACE_STD;
+/* Return a string of the form "Day Mon dd hh:mm:ss yyyy\n" that is the representation of TP in this format.  */
+extern __device__ char *asctime_(const struct tm *tp);
+#define asctime asctime_
+
+/* Equivalent to `asctime (localtime (timer))'.  */
+__forceinline __device__ char *ctime_(const time_t *timer) { return asctime(localtime(timer)); }
+#define ctime ctime_
+__END_NAMESPACE_STD;
 
 __END_DECLS;
 #else
-#ifndef _WINSOCKAPI_
-struct timeval { long tv_sec; long tv_usec; };
-#endif
-__BEGIN_DECLS;
-int gettimeofday(struct timeval *tv, void *unused);
-__END_DECLS;
-//#define gettimeofday(tp, tz) 0
+
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _TIMECU_H */

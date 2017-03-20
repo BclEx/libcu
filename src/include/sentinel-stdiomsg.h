@@ -34,7 +34,6 @@ THE SOFTWARE.
 enum {
 	STDIO_REMOVE = 1,
 	STDIO_RENAME,
-	STDIO_UNLINK,
 	STDIO_FCLOSE,
 	STDIO_FFLUSH,
 	STDIO_FREOPEN,
@@ -72,7 +71,7 @@ struct stdio_remove
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdio_remove(const char *str)
-		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdio_remove)); }
+		: Base(true, STDIO_REMOVE, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdio_remove)); }
 	int RC;
 };
 
@@ -96,25 +95,6 @@ struct stdio_rename
 	const char *Str; const char *Str2;
 	__device__ stdio_rename(const char *str, const char *str2)
 		: Base(true, STDIO_RENAME, 1024, SENTINELPREPARE(Prepare)), Str(str), Str2(str2) { sentinelDeviceSend(&Base, sizeof(stdio_rename)); }
-	int RC;
-};
-
-struct stdio_unlink
-{
-	static __forceinline __device__ char *Prepare(stdio_unlink *t, char *data, char *dataEnd, intptr_t offset)
-	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
-		char *end = (char *)(data += strLength);
-		if (end > dataEnd) return nullptr;
-		memcpy(str, t->Str, strLength);
-		t->Str = str + offset;
-		return end;
-	}
-	sentinelMessage Base;
-	const char *Str;
-	__device__ stdio_unlink(const char *str)
-		: Base(true, STDIO_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdio_unlink)); }
 	int RC;
 };
 
@@ -231,7 +211,6 @@ struct stdio_fputs
 		: Base(wait, STDIO_FPUTS, 1024, SENTINELPREPARE(Prepare)), Str(str), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_fputs)); }
 	int RC;
 };
-
 
 struct stdio_ungetc
 {

@@ -66,7 +66,7 @@ extern "C" {
 #ifndef _WIN64
 		int Unknown;
 #endif
-		char Data[];
+		char Data[1];
 		void Dump(intptr_t base);
 	} sentinelCommand;
 

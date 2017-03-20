@@ -17,6 +17,8 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 
 int main()
 {
+	cudaErrorCheck(cudaSetDevice(gpuGetMaxGflopsDevice()));
+	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 	sentinelServerInitialize();
 	sentinelRegisterFileUtils();
 

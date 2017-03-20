@@ -9,6 +9,7 @@
 #include <unistdcu.h>
 #include "fileutils.h"
 
+#undef S_ISLNK
 #define	LISTSIZE 256
 #define COLS 80
 
@@ -67,11 +68,10 @@ __device__ char *modeString(int mode)
 // Get the time to be used for a file. This is down to the minute for new files, but only the date for old files.
 // The string is returned from a static buffer, and so is overwritten for each call.
 static __device__ char _timeString_buf[26];
-__device__ char *timeString(long t)
+__device__ char *timeString(time_t t)
 {
-	long now; //time(&now);
-	//char *str = ctime(&t);
-	char *str = "abcdefg";
+	time_t now = time(nullptr);
+	char *str = ctime(&t);
 	strcpy(_timeString_buf, &str[4]);
 	_timeString_buf[12] = '\0';
 	if (t > now || t < now - 365*24*60*60L) {
@@ -215,7 +215,6 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 			_listSize = LISTSIZE;
 		}
 		_listUsed = 0;
-		return;
 	}
 
 	struct stat statbuf;

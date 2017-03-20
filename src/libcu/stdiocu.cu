@@ -65,14 +65,16 @@ static __device__ void streamFree(FILE *s)
 /* Remove file FILENAME.  */
 __device__ int remove_(const char *filename)
 {
-	if (filename[0] != ':') {
+#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
+
+	if (!ISDEVICEPATH(filename)) {
 		stdio_remove msg(filename); return msg.RC;
 	}
 	int saved_errno = errno;
 	int rv = rmdir(filename);
-	if ((rv < 0) && (errno == ENOTDIR)) {
+	if (rv < 0 && errno == ENOTDIR) {
 		_set_errno(saved_errno); // Need to restore errno.
-		rv = _unlink(filename);
+		rv = unlink(filename);
 	}
 	return rv;
 }
@@ -80,19 +82,10 @@ __device__ int remove_(const char *filename)
 /* Rename file OLD to NEW.  */
 __device__ int rename_(const char *old, const char *new_)
 {
-	if (old[0] != ':') {
+	if (!ISDEVICEPATH(old)) {
 		stdio_rename msg(old, new_); return msg.RC;
 	}
 	return fsystemRename(old, new_);
-}
-
-/* Remove file FILENAME.  */
-__device__ int _unlink_(const char *filename)
-{
-	if (filename[0] != ':') {
-		stdio_unlink msg(filename); return msg.RC;
-	}
-	return fsystemUnlink(filename);
 }
 
 /* Create a temporary file and open it read/write. */
@@ -123,7 +116,7 @@ __device__ int fflush_device(FILE *stream)
 /* Open a file, replacing an existing stream with it. */
 __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
-	if (filename[0] != ':') {
+	if (!ISDEVICEPATH(filename)) {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
 	}
 	if (stream)
@@ -155,8 +148,9 @@ __device__ FILE *freopen_(const char *__restrict filename, const char *__restric
 		if (!stream)
 			return nullptr;
 	}
+	int r;
 	stream->_flag = openMode;
-	stream->_base = (char *)fsystemOpen(filename, openMode);
+	stream->_base = (char *)fsystemOpen(filename, openMode, &r);
 	if (!stream->_base) {
 		_set_errno(EINVAL);
 		streamFree(stream);
@@ -169,7 +163,7 @@ __device__ FILE *freopen_(const char *__restrict filename, const char *__restric
 /* Open a file, replacing an existing stream with it. */
 __device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
-	if (filename[0] != ':') {
+	if (!ISDEVICEPATH(filename)) {
 		stdio_freopen msg(filename, modes, stream); return msg.RC;
 	}
 	if (stream)

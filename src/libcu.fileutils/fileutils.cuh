@@ -63,14 +63,14 @@ __device__ bool copyFile(char *srcName, char *destName, bool setModes)
 		perror(destName);
 		return false;
 	}
-	//if (setModes) {
-	//	chmod(destName, statbuf1.st_mode);
-	//	chown(destName, statbuf1.st_uid, statbuf1.st_gid);
-	//	struct utimbuf times;
-	//	times.actime = statbuf1.st_atime;
-	//	times.modtime = statbuf1.st_mtime;
-	//	utime(destName, &times);
-	//}
+	if (setModes) {
+		chmod(destName, statbuf1.st_mode);
+		chown(destName, statbuf1.st_uid, statbuf1.st_gid);
+		//struct utimbuf times;
+		//times.actime = statbuf1.st_atime;
+		//times.modtime = statbuf1.st_mtime;
+		//utime(destName, &times);
+	}
 	return true;
 
 error_exit:

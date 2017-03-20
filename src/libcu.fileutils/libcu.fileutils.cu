@@ -13,6 +13,8 @@
 #include "dmv.cuh"
 #include "drm.cuh"
 #include "drmdir.cuh"
+#include "dpwd.cuh"
+#include "dcd.cuh"
 
 bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length);
 static sentinelExecutor _fileUtilsExecutor = { nullptr, "fileutils", sentinelFileUtilsExecutor, nullptr };

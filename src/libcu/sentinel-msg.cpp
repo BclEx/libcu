@@ -1,12 +1,15 @@
 #define _CRT_SECURE_NO_WARNINGS
+#include <host_defines.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <sys/statcu.h>
 #include <io.h>
-#include <sentinel-statmsg.h>
+#include <sentinel-fcntlmsg.h>
 #include <sentinel-unistdmsg.h>
 #include <sentinel-stdiomsg.h>
 #include <sentinel-stdlibmsg.h>
+#include <sentinel-timemsg.h>
 #include <math.h>
 
 //#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
@@ -16,7 +19,6 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	switch (data->OP) {
 	case STDIO_REMOVE: { stdio_remove *msg = (stdio_remove *)data; msg->RC = remove(msg->Str); return true; }
 	case STDIO_RENAME: { stdio_rename *msg = (stdio_rename *)data; msg->RC = rename(msg->Str, msg->Str2); return true; }
-	case STDIO_UNLINK: { stdio_unlink *msg = (stdio_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
 	case STDIO_FCLOSE: { stdio_fclose *msg = (stdio_fclose *)data; msg->RC = fclose(msg->File); return true; }
 	case STDIO_FFLUSH: { stdio_fflush *msg = (stdio_fflush *)data; msg->RC = fflush(msg->File); return true; }
 	case STDIO_FREOPEN: { stdio_freopen *msg = (stdio_freopen *)data; FILE *f = (!msg->Stream ? fopen(msg->Str, msg->Str2) : freopen(msg->Str, msg->Str2, msg->Stream)); msg->RC = f; return true; }
@@ -44,9 +46,14 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = _close(msg->Handle); return true; }
 	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = _read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
 	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = _write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
-	case STAT_STAT: { stat_stat *msg = (stat_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
-	case STAT_FSTAT: { stat_fstat *msg = (stat_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
-	case STAT_MKDIR: { stat_mkdir *msg = (stat_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
+	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
+	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
+	case FCNTL_FSTAT: { fcntl_fstat *msg = (fcntl_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
+	case FCNTL_STAT64: { fcntl_stat64 *msg = (fcntl_stat64 *)data; msg->RC = _stat64(msg->Str, msg->Ptr); return true; }
+	case FCNTL_FSTAT64: { fcntl_fstat64 *msg = (fcntl_fstat64 *)data; msg->RC = _fstat64(msg->Handle, msg->Ptr); return true; }
+	case FCNTL_MKDIR: { fcntl_mkdir *msg = (fcntl_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
+	case TIME_MKTIME: { time_mktime *msg = (time_mktime *)data; msg->RC = mktime(msg->Tp); return true; }
+	case TIME_STRFTIME: { time_strftime *msg = (time_strftime *)data; msg->RC = strftime((char *)msg->Str, msg->Maxsize, msg->Str2, msg->Tp); return true; }
 	}
 	return false;
 }

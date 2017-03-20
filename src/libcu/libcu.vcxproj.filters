@@ -92,9 +92,6 @@
     <ClInclude Include="..\include\sentinel-unistdmsg.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\sentinel-statmsg.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\fcntlcu.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -104,13 +101,20 @@
     <ClInclude Include="..\include\grpcu.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\sys\timecu.h">
+      <Filter>include\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-timemsg.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\sentinel-fcntlmsg.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
-    <CudaCompile Include="grpcu.cu" />
-    <CudaCompile Include="pwdcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -159,7 +163,6 @@
     <None Include="setjmpcu.cu" />
     <None Include="stdiocu.cu" />
     <None Include="stdlibcu.cu" />
-    <None Include="timecu.cu" />
     <None Include="unistdcu.cu" />
     <None Include="sys\statcu.cu">
       <Filter>sys</Filter>
@@ -173,5 +176,11 @@
     </None>
     <None Include="fsystem.cu" />
     <None Include="fcntlcu.cu" />
+    <None Include="grpcu.cu" />
+    <None Include="timecu.cu" />
+    <None Include="sys\timecu.cu">
+      <Filter>sys</Filter>
+    </None>
+    <None Include="pwdcu.cu" />
   </ItemGroup>
 </Project>

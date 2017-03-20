@@ -10,6 +10,7 @@
 #include "timecu.cu"
 #include "unistdcu.cu"
 #include "sys/statcu.cu"
+#include "sys/timecu.cu"
 #include "ext/hash.cu"
 #include "ext/memfile.cu"
 #include "grpcu.cu"
