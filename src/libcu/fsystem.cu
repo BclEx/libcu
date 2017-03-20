@@ -18,12 +18,28 @@ __device__ void absolutePath(const char *path, char *newPath)
 {
 	register unsigned char *d = (unsigned char *)newPath;
 	register unsigned char *s;
+	// add cwd
 	if (path[0] != ':') {
 		s = (unsigned char *)__cwd;
 		while (*s) { *d++ = *s++; }
 	}
+	// add path
 	s = (unsigned char *)path;
-	while (*s) { *d++ = *s++; }
+	int i = 0;
+	while (*s) {
+		int c = *s;
+		if (c == '/') c = '\\'; // switch from unix path
+		if (c == '\\') {
+			// directory reached
+			if (i == 1 && s[-1] == '.') d -= 2; // self directory
+			else if (i == 2 && s[-1] == '.' && s[-2] == '.') while (*d >= *newPath && *d != '\\') *d--; // parent directory
+			i = 0;
+		}
+		// advance
+		*d++ = c; s++; i++;
+	}
+	// remove trailing '\'
+	d[*d == '\\' ? 0 : 1] = 0;
 }
 
 static __device__ void freeEnt(dirEnt_t *ent)
