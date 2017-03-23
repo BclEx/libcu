@@ -10,6 +10,7 @@ x64/
 [Oo]bj/
 TestResults/
 .metadata/
+.vs/
 *.o
 *.suo
 *.sdf
