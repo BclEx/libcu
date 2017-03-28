@@ -39,25 +39,25 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v)
 		v >>= 7;
 	} while (v != 0);
 	b[0] &= 0x7f;
-	_assert(n <= 9);
+	assert(n <= 9);
 	for (i = 0, j = n - 1; j >= 0; j--, i++)
 		p[i] = b[j];
 	return n;
 }
 
-__device__ int _convert_putvarint32_(unsigned char *p, uint32 v)
+__device__ int convert_putvarint32_(unsigned char *p, uint32_t v)
 {
 	if ((v & ~0x3fff) == 0) {
 		p[0] = (uint8_t)((v>>7) | 0x80);
 		p[1] = (uint8_t)(v & 0x7f);
 		return 2;
 	}
-	return _convert_putvarint(p, v);
+	return convert_putvarint(p, v);
 }
 
-__device__ uint8_t _convert_getvarint(const unsigned char *p, uint64 *v)
+__device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 {
-	uint32 a, b, s;
+	uint32_t a, b, s;
 	a = *p;
 	// a: p0 (unmasked)
 	if (!(a & 0x80)) {

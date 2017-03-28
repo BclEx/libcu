@@ -25,7 +25,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="bitvec.cu" />
-    <CudaCompile Include="convert.cu" />
+    <CudaCompile Include="convert.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
   </ItemGroup>

@@ -60,7 +60,7 @@ extern "C" {
 #pragma region AtoX
 	extern __device__ bool convert_atof(const char *z, double *out, int length, TEXTENCODE encode);
 	__forceinline __device__ double convert_atof(const char *z) { double out = 0; if (z) convert_atof(z, &out, -1, TEXTENCODE_UTF8); return out; }
-	extern __device__ int convert_atoi64(const char *z, int64_5 *out, int length, TEXTENCODE encode);
+	extern __device__ int convert_atoi64(const char *z, int64_t *out, int length, TEXTENCODE encode);
 	extern __device__ bool convert_atoi(const char *z, int *out);
 	__forceinline __device__ int convert_atoi(const char *z) { int out = 0; if (z) convert_atoi(z, &out); return out; }
 #define convert_itoa(i, b) convert_itoa64((int64_t)i, b)
@@ -71,16 +71,16 @@ extern "C" {
 	__forceinline __device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
 	__forceinline __device__ void convert_put2(unsigned char *p, uint32_t v)
 	{
-		p[0] = (uint8)(v>>8);
-		p[1] = (uint8)v;
+		p[0] = (uint8_t)(v>>8);
+		p[1] = (uint8_t)v;
 	}
 	__forceinline __device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
 	__forceinline __device__ void convert_put4(unsigned char *p, uint32_t v)
 	{
-		p[0] = (uint8)(v>>24);
-		p[1] = (uint8)(v>>16);
-		p[2] = (uint8)(v>>8);
-		p[3] = (uint8)v;
+		p[0] = (uint8_t)(v>>24);
+		p[1] = (uint8_t)(v>>16);
+		p[2] = (uint8_t)(v>>8);
+		p[3] = (uint8_t)v;
 	}
 #else
 	extern __device__ uint16_t convert_get2nz(const uint8_t *p);
