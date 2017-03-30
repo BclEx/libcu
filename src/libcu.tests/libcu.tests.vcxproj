@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="crtdefsTest.cpp" />
     <ClCompile Include="fallocTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -194,6 +195,7 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="crtdefsTest.cu" />
     <CudaCompile Include="ctypeTest.cu" />
     <CudaCompile Include="errnoTest.cu" />
     <CudaCompile Include="fallocTest.cu" />

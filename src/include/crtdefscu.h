@@ -50,18 +50,27 @@ THE SOFTWARE.
 //#endif
 
 #define MEMORY_ALIGNMENT 4096
-#define _ROUNDT(t, x)		(((x)+sizeof(t)-1)&~(sizeof(t)-1))
+/* Memory allocation - rounds to the type in T */
+#define _ROUNDT(x, T)		(((x)+sizeof(T)-1)&~(sizeof(T)-1))
+/* Memory allocation - rounds up to 8 */
 #define _ROUND8(x)			(((x)+7)&~7)
+/* Memory allocation - rounds up to 64 */
 #define _ROUND64(x)			(((x)+63)&~63)
+/* Memory allocation - rounds up to "size" */
 #define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
+/* Memory allocation - rounds down to 8 */
 #define _ROUNDDOWN8(x)		((x)&~7)
+/* Memory allocation - rounds down to "size" */
 #define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
+/* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
 #ifdef BYTEALIGNED4
 #define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
 #else
 #define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
+/* Returns the length of an array at compile time (via math) */
 #define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+/* Removes compiler warning for unused parameter(s) */
 #define UNUSED_PARAMETER(x) (void)(x)
 #define UNUSED_PARAMETER2(x,y) (void)(x),(void)(y)
 
@@ -69,14 +78,14 @@ THE SOFTWARE.
 // WSD
 #pragma region WSD
 
-// When OMIT_WSD is defined, it means that the target platform does not support Writable Static Data (WSD) such as global and static variables.
+// When NO_WSD is defined, it means that the target platform does not support Writable Static Data (WSD) such as global and static variables.
 // All variables must either be on the stack or dynamically allocated from the heap.  When WSD is unsupported, the variable declarations scattered
-// throughout the SQLite code must become constants instead.  The _WSD macro is used for this purpose.  And instead of referencing the variable
+// throughout the code must become constants instead.  The _WSD macro is used for this purpose.  And instead of referencing the variable
 // directly, we use its constant as a key to lookup the run-time allocated buffer that holds real variable.  The constant is also the initializer
 // for the run-time allocated buffer.
 //
 // In the usual case where WSD is supported, the _WSD and _GLOBAL macros become no-ops and have zero performance impact.
-#ifdef NEEDS_WSD
+#ifdef NO_WSD
 int __wsdinit(int n, int j);
 void *__wsdfind(void *k, int l);
 #define _WSD const
