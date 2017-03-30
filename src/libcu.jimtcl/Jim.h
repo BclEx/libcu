@@ -66,7 +66,7 @@
 #define __JIM__H
 
 #include <cuda_runtimecu.h>
-#include <time.h>
+#include <sys/timecu.h>
 #include <limits.h>
 #include <stdiocu.h> /* for the FILE typedef definition */
 #include <stdlibcu.h> /* In order to export the Jim_Free() macro */

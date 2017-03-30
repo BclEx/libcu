@@ -42,13 +42,13 @@ __device__ bool search(char *string, char *word, bool ignoreCase)
 	}
 }
 
-__device__ __managed__ int m_dgrep_rc;
+__device__ int d_dgrep_rc;
 __global__ void g_dgrep(char *name, char *word, bool ignoreCase, bool tellName, bool tellLine)
 {
 	FILE *f = fopen(name, "r");
 	if (!f) {
 		perror(name);
-		m_dgrep_rc = 0;
+		d_dgrep_rc = 0;
 		return;
 	}
 	long line = 0;
@@ -66,7 +66,7 @@ __global__ void g_dgrep(char *name, char *word, bool ignoreCase, bool tellName, 
 	if (ferror(f))
 		perror(name);
 	fclose(f);
-	m_dgrep_rc = 1;
+	d_dgrep_rc = 1;
 }
 
 int dgrep(char *str, char *str2, bool ignoreCase, bool tellName, bool tellLine)
@@ -82,5 +82,5 @@ int dgrep(char *str, char *str2, bool ignoreCase, bool tellName, bool tellLine)
 	g_dgrep<<<1,1>>>(d_str, d_str2, ignoreCase, tellName, tellLine);
 	cudaFree(d_str);
 	cudaFree(d_str2);
-	return m_dgrep_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dgrep_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

@@ -2,11 +2,11 @@
 #include <unistdcu.h>
 #include "fileutils.h"
 
-__device__ __managed__ int m_drm_rc;
+__device__ int d_drm_rc;
 __global__ void g_drm(char *str)
 {
 	struct stat sbuf;
-	m_drm_rc = (!LSTAT(str, &sbuf) && unlink(str));
+	d_drm_rc = (!LSTAT(str, &sbuf) && unlink(str));
 }
 int drm(char *str)
 {
@@ -16,5 +16,5 @@ int drm(char *str)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_drm<<<1,1>>>(d_str);
 	cudaFree(d_str);
-	return m_drm_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_drm_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

@@ -201,7 +201,7 @@ __device__ int nameSort(const void *pp1, const void *pp2)
 	return strcmp(*p1, *p2);
 }
 
-__device__ __managed__ int m_dls_rc;
+__device__ int d_dls_rc;
 __global__ void g_dls(char *name, int flags, bool endSlash)
 {
 	if (!name) {
@@ -220,7 +220,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 	struct stat statbuf;
 	if (LSTAT(name, &statbuf) < 0) {
 		perror(name);
-		m_dls_rc = -1;
+		d_dls_rc = -1;
 		return;
 	}
 
@@ -228,7 +228,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 		lsFile(NULL, name, &statbuf, flags);
 		if (~flags & LSF_LONG) 
 			fputc('\n', stdout);
-		m_dls_rc = -1;
+		d_dls_rc = -1;
 		return;
 	}
 
@@ -236,7 +236,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 	DIR *dirp = opendir(name);
 	if (dirp == NULL) {
 		perror(name);
-		m_dls_rc = -1;
+		d_dls_rc = -1;
 		return;
 	}
 	if (flags & LSF_MULT)
@@ -312,6 +312,7 @@ __global__ void g_dls(char *name, int flags, bool endSlash)
 	if ((~flags & LSF_LONG) && (num % _cols))
 		fputc('\n', stdout);
 	_listUsed = 0;
+	d_dls_rc = 0;
 }
 int dls(char *str, int flags, bool endSlash)
 {
@@ -321,5 +322,5 @@ int dls(char *str, int flags, bool endSlash)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_dls<<<1,1>>>(d_str, flags, endSlash);
 	cudaFree(d_str);
-	return m_dls_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dls_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

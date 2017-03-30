@@ -1,6 +1,6 @@
 #include "fileutils.h"
 
-__device__ __managed__ int m_dcp_rc;
+__device__ int m_dcp_rc;
 __global__ void g_dcp(char *srcName, char *destName, bool setModes)
 {
 	m_dcp_rc = copyFile(srcName, destName, setModes);

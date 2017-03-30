@@ -1,9 +1,9 @@
 #include <unistdcu.h>
 
-__device__ __managed__ int m_dcd_rc;
+__device__ int d_dcd_rc;
 __global__ void g_dcd(char *str)
 {
-	m_dcd_rc = 0;
+	d_dcd_rc = 0;
 }
 int dcd(char *str)
 {
@@ -13,5 +13,5 @@ int dcd(char *str)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_dcd<<<1,1>>>(d_str);
 	cudaFree(d_str);
-	return m_dcd_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dcd_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

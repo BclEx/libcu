@@ -1,9 +1,9 @@
 #include <sys/statcu.h>
 
-__device__ __managed__ int m_dmkdir_rc;
+__device__ int d_dmkdir_rc;
 __global__ void g_dmkdir(char *str, unsigned short mode)
 {
-	m_dmkdir_rc = mkdir(str, mode);
+	d_dmkdir_rc = mkdir(str, mode);
 }
 int dmkdir(char *str, unsigned short mode)
 {
@@ -13,5 +13,5 @@ int dmkdir(char *str, unsigned short mode)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_dmkdir<<<1,1>>>(d_str, mode);
 	cudaFree(d_str);
-	return m_dmkdir_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dmkdir_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

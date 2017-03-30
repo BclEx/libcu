@@ -1,7 +1,7 @@
 #include <sys/statcu.h>
 #include <stdiocu.h>
 
-__device__ __managed__ int m_dcmp_rc;
+__device__ int m_dcmp_rc;
 __global__ void g_dcmp(char *str, char *str2)
 {
 	struct stat statbuf1;

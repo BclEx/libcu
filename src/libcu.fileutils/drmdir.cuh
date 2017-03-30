@@ -1,9 +1,9 @@
 #include <unistdcu.h>
 
-__device__ __managed__ int m_drmdir_rc;
+__device__ int d_drmdir_rc;
 __global__ void g_drmdir(char *str)
 {
-	m_drmdir_rc = rmdir(str);
+	d_drmdir_rc = rmdir(str);
 }
 int drmdir(char *str)
 {
@@ -13,5 +13,5 @@ int drmdir(char *str)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_drmdir<<<1,1>>>(d_str);
 	cudaFree(d_str);
-	return m_drmdir_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_drmdir_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

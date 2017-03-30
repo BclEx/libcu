@@ -365,7 +365,7 @@ checkAccess:
 			args[1] = "delete";
 			goto not3Args;
 		}
-		if (_unlink(fileName) == -1 && errno != ENOENT) {
+		if (unlink(fileName) == -1 && errno != ENOENT) {
 			Tcl_AppendResult(interp, "couldn't delete \"", args[2], "\": ", Tcl_OSError(interp), (char *)NULL);
 			return TCL_ERROR;
 		}

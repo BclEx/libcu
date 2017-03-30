@@ -10,16 +10,16 @@ __device__ void dumpfile(FILE *f)
 		fwrite(readbuf, nred, 1, stdout);
 }
 
-__device__ __managed__ int m_dcat_rc;
+__device__ int d_dcat_rc;
 __global__ void g_dcat(char *str)
 {
 	FILE *f = fopen(str, "r");
 	if (!f)
-		m_dcat_rc = errno;
+		d_dcat_rc = errno;
 	else {
 		dumpfile(f);
 		fclose(f);
-		m_dcat_rc = 0;
+		d_dcat_rc = 0;
 	}
 }
 int dcat(char *str)
@@ -30,6 +30,5 @@ int dcat(char *str)
 	cudaMemcpy(d_str, str, strLength, cudaMemcpyHostToDevice);
 	g_dcat<<<1,1>>>(d_str);
 	cudaFree(d_str);
-	return m_dcat_rc;
-	//int rc; cudaMemcpyFromSymbol(&rc, "d_dcat_rc", sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dcat_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }
