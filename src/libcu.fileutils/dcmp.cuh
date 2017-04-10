@@ -1,42 +1,42 @@
 #include <sys/statcu.h>
 #include <stdiocu.h>
 
-__device__ int m_dcmp_rc;
+__device__ int d_dcmp_rc;
 __global__ void g_dcmp(char *str, char *str2)
 {
 	struct stat statbuf1;
 	if (stat(str, &statbuf1) < 0) {
 		perror(str);
-		m_dcmp_rc = 2;
+		d_dcmp_rc = 2;
 		return;
 	}
 	struct stat statbuf2;
 	if (stat(str2, &statbuf2) < 0) {
 		perror(str2);
-		m_dcmp_rc = 2;
+		d_dcmp_rc = 2;
 		return;
 	}
 	if (statbuf1.st_dev == statbuf2.st_dev && statbuf1.st_ino == statbuf2.st_ino) {
 		printf("Files are links to each other\n");
-		m_dcmp_rc = 0;
+		d_dcmp_rc = 0;
 		return;
 	}
 	if (statbuf1.st_size != statbuf2.st_size) {
 		printf("Files are different sizes\n");
-		m_dcmp_rc = 1;
+		d_dcmp_rc = 1;
 		return;
 	}
 	FILE *f1 = fopen(str, "r");
 	if (!f1) {
 		perror(str);
-		m_dcmp_rc = 2;
+		d_dcmp_rc = 2;
 		return;
 	}
 	FILE *f2 = fopen(str2, "r");
 	if (!f2) {
 		perror(str2);
 		fclose(f1);
-		m_dcmp_rc = 2;
+		d_dcmp_rc = 2;
 		return;
 	}
 	//
@@ -83,17 +83,17 @@ __global__ void g_dcmp(char *str, char *str2)
 eof:
 	fclose(f1);
 	fclose(f2);
-	m_dcmp_rc = 2;
+	d_dcmp_rc = 2;
 	return;
 same:
 	fclose(f1);
 	fclose(f2);
-	m_dcmp_rc = 0;
+	d_dcmp_rc = 0;
 	return;
 differ:
 	fclose(f1);
 	fclose(f2);
-	m_dcmp_rc = 1;
+	d_dcmp_rc = 1;
 	return;
 }
 int dcmp(char *str, char *str2)
@@ -109,5 +109,5 @@ int dcmp(char *str, char *str2)
 	g_dcmp<<<1,1>>>(d_str, d_str2);
 	cudaFree(d_str);
 	cudaFree(d_str2);
-	return m_dcmp_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dcmp_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

@@ -74,6 +74,28 @@ THE SOFTWARE.
 #define UNUSED_PARAMETER(x) (void)(x)
 #define UNUSED_PARAMETER2(x,y) (void)(x),(void)(y)
 
+
+//////////////////////
+// ASSERT
+#pragma region ASSERT
+
+#ifndef NDEBUG
+#define ASSERTONLY(X) X
+#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+__forceinline __device__ void Coverage(int line) { }
+#else
+__forceinline void Coverage(int line) { }
+#endif
+#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
+#else
+#define ASSERTONLY(X)
+#define ASSERTCOVERAGE(X)
+#endif
+#define _ALWAYS(X) (X)
+#define _NEVER(X) (X)
+
+#pragma endregion
+
 //////////////////////
 // WSD
 #pragma region WSD

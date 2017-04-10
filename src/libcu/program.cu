@@ -25,11 +25,11 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 		fclose(f);
 	}
 
-	//char buf[100] = {0};
-	//snprintf(buf, 100, "test");
-	//printf("%s\n", buf);
-	//printf("%d\n", atoi("51236"));
-	//printf("%f\n", atof("1.2"));
+	char buf[100] = {0};
+	snprintf(buf, 100, "test");
+	printf("%s\n", buf);
+	printf("%d\n", atoi("51236"));
+	printf("%f\n", atof("1.2"));
 	libcuReset();
 }
 

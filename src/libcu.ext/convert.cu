@@ -1,3 +1,5 @@
+#include <ctypecu.h>
+#include <crtdefscu.h>
 #include <ext/convert.h>
 
 #pragma region Varint
@@ -123,7 +125,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 		b = b << 7;
 		a |= b;
 		s = s >> 18;
-		*v = ((uint64)s) << 32 | a;
+		*v = ((uint64_t)s) << 32 | a;
 		return 5;
 	}
 	// 2:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked)
@@ -141,7 +143,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 		a = a << 7;
 		a |= b;
 		s = s >> 18;
-		*v = ((uint64)s) << 32 | a;
+		*v = ((uint64_t)s) << 32 | a;
 		return 6;
 	}
 	p++;
@@ -154,7 +156,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 		b = b << 7;
 		a |= b;
 		s = s>>11;
-		*v = ((uint64)s) << 32 | a;
+		*v = ((uint64_t)s) << 32 | a;
 		return 7;
 	}
 	// CSE2 from below
@@ -170,7 +172,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 		a = a << 7;
 		a |= b;
 		s = s >> 4;
-		*v = ((uint64)s) << 32 | a;
+		*v = ((uint64_t)s) << 32 | a;
 		return 8;
 	}
 	p++;
@@ -187,7 +189,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	b &= 0x7f;
 	b = b >> 3;
 	s |= b;
-	*v = ((uint6_t4)s) << 32 | a;
+	*v = ((uint64_t)s) << 32 | a;
 	return 9;
 }
 
@@ -231,7 +233,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 		uint64_t v64;
 		uint8_t n = convert_getvarint(p, &v64);
 		assert(n > 3 && n <= 9);
-		*v = ((v64 & MAX_TYPE(uint32_)) != v64 ? 0xffffffff : (uint32_t)v64);
+		*v = ((v64 & MAX_TYPE(uint32_t)) != v64 ? 0xffffffff : (uint32_t)v64);
 		return n;
 	}
 
@@ -275,7 +277,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 #endif
 }
 
-__device__ int _convert_getvarintLength(uint64 v)
+__device__ int _convert_getvarintLength(uint64_t v)
 {
 	int i = 0;
 	do { i++; v >>= 7; }
@@ -287,7 +289,7 @@ __device__ int _convert_getvarintLength(uint64 v)
 
 #pragma region AtoX
 
-__device__ bool convert_atof(const char *z, double *out, int length, TEXTENCODE encode)
+__device__ bool convert_atofe(const char *z, double *out, int length, TEXTENCODE encode)
 {
 #ifndef OMIT_FLOATING_POINT
 	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
@@ -338,8 +340,8 @@ __device__ bool convert_atof(const char *z, double *out, int length, TEXTENCODE 
 	{
 		z += incr;
 		// copy digits from after decimal to significand (decrease exponent by d to shift decimal right)
-		while (z < end && _isdigit(*z) && s < ((LARGEST_INT64 - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++, d--; }
-		while (z < end && _isdigit(*z)) z += incr, digits++; // skip non-significant digits
+		while (z < end && isdigit(*z) && s < ((LARGEST_INT64 - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++, d--; }
+		while (z < end && isdigit(*z)) z += incr, digits++; // skip non-significant digits
 	}
 	if (z >= end) goto do_atof_calc;
 
@@ -353,11 +355,11 @@ __device__ bool convert_atof(const char *z, double *out, int length, TEXTENCODE 
 		if (*z == '-') { esign = -1; z += incr; }
 		else if (*z == '+') z += incr;
 		// copy digits to exponent
-		while (z < end && _isdigit(*z)) { e = (e < 10000 ? e * 10 + (*z - '0') : 10000); z += incr; eValid = true; }
+		while (z < end && isdigit(*z)) { e = (e < 10000 ? e * 10 + (*z - '0') : 10000); z += incr; eValid = true; }
 	}
 
 	// skip trailing spaces
-	if (digits && eValid) while (z < end && _isspace(*z)) z += incr;
+	if (digits && eValid) while (z < end && isspace(*z)) z += incr;
 
 do_atof_calc:
 	// adjust exponent by d, and update sign
@@ -426,7 +428,7 @@ static __device__ int compare2pow63(const char *z, int incr)
 	return c;
 }
 
-__device__ int convert_atoi64(const char *z, int64_t *out, int length, TEXTENCODE encode)
+__device__ int convert_atoi64e(const char *z, int64_t *out, int length, TEXTENCODE encode)
 {
 	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
 	//*out = 0.0; // Default return value, in case of an error
@@ -465,28 +467,28 @@ __device__ int convert_atoi64(const char *z, int64_t *out, int length, TEXTENCOD
 	int c = 0;
 	int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) u = u * 10 + c - '0';
 	if (u > LARGEST_INT64) *out = SMALLEST_INT64;
-	else *out = (neg ?  -(int64)u : (int64)u);
+	else *out = (neg ?  -(int64_t)u : (int64_t)u);
 
 	ASSERTCOVERAGE(i == 18);
 	ASSERTCOVERAGE(i == 19);
 	ASSERTCOVERAGE(i == 20);
 	if ((c != 0 && &z[i] < end) || (i == 0 && start == z) || i > 19 * incr || nonNum) return 1; // z is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
-	else if (i < 19 * incr) { _assert(u <= LARGEST_INT64); return 0; } // Less than 19 digits, so we know that it fits in 64 bits
+	else if (i < 19 * incr) { assert(u <= LARGEST_INT64); return 0; } // Less than 19 digits, so we know that it fits in 64 bits
 	else { // zNum is a 19-digit numbers.  Compare it against 9223372036854775808.
 		c = Compare2pow63(z, incr);
-		if (c < 0) { _assert(u <= LARGEST_INT64); return 0; } // zNum is less than 9223372036854775808 so it fits
+		if (c < 0) { assert(u <= LARGEST_INT64); return 0; } // zNum is less than 9223372036854775808 so it fits
 		else if (c > 0) return 1; // zNum is greater than 9223372036854775808 so it overflows
-		else { _assert(u-1 == LARGEST_INT64); _assert(*out == SMALLEST_INT64); return neg ? 0 : 2; } //(neg ? 0 : 2); } // z is exactly 9223372036854775808.  Fits if negative.  The special case 2 overflow if positive
+		else { assert(u-1 == LARGEST_INT64); assert(*out == SMALLEST_INT64); return neg ? 0 : 2; } //(neg ? 0 : 2); } // z is exactly 9223372036854775808.  Fits if negative.  The special case 2 overflow if positive
 	}
 }
 
-__device__ bool convert_atoi(const char *z, int *out)
+__device__ bool convert_atoie(const char *z, int *out)
 {
 	int neg = 0;
 	if (z[0] == '-') { neg = 1; z++; }
 	else if (z[0] == '+') z++;
 	while (z[0] == '0') z++;
-	int64 v = 0;
+	int64_t v = 0;
 	int i, c;
 	for (i = 0; i < 11 && (c = z[i] - '0') >= 0 && c <= 9; i++) { v = v*10 + c; }
 	// The longest decimal representation of a 32 bit integer is 10 digits:
@@ -501,21 +503,22 @@ __device__ bool convert_atoi(const char *z, int *out)
 }
 
 // sky: added
-static __constant__ char const __convert_digit[] = "0123456789";
-__device__ char *convert_itoa64(int64 i, char *b)
+static __constant__ char const __convert_digits[] = "0123456789";
+__device__ char *convert_itoa64(int64_t i, char *b)
 {
 	char *p = b;
 	if (i < 0) { *p++ = '-'; i *= -1; }
-	int64 shifter = i;
+	int64_t shifter = i;
 	do { ++p; shifter = shifter/10; } while(shifter); // Move to where representation ends
 	*p = '\0';
-	do { *--p = __convert_digit[i%10]; i = i/10; } while(i); // Move back, inserting digits as u go
+	do { *--p = __convert_digits[i%10]; i = i/10; } while(i); // Move back, inserting digits as u go
 	return b;
 }
 
 #pragma endregion
 
 #ifdef OMIT_INLINECONVERT
+
 __device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
 __device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
 __device__ void convert_put2(unsigned char *p, uint32_t v)
@@ -531,6 +534,7 @@ __device__ void convert_put4(unsigned char *p, uint32 v)
 	p[2] = (uint8_t)(v>>8);
 	p[3] = (uint8_t)v;
 }
+
 #endif
 
 #pragma region From: Pragma_c
@@ -548,7 +552,7 @@ __device__ uint8_t convert_atolevel(const char *z, int omitFull, uint8_t dflt)
 	int n = strlen(z);
 	for (int i = 0; i < _LENGTHOF(__safetyLevelLength) - omitFull; i++)
 		if (__safetyLevelLength[i] == n && !strncmp(&__safetyLevelText[__safetyLevelOffset[i]], z, n))
-			return _safetyLevelValue[i];
+			return __safetyLevelValue[i];
 	return dflt;
 }
 

@@ -1,9 +1,9 @@
 #include "fileutils.h"
 
-__device__ int m_dcp_rc;
+__device__ int d_dcp_rc;
 __global__ void g_dcp(char *srcName, char *destName, bool setModes)
 {
-	m_dcp_rc = copyFile(srcName, destName, setModes);
+	d_dcp_rc = copyFile(srcName, destName, setModes);
 }
 int dcp(char *str, char *str2, bool setModes)
 {
@@ -18,5 +18,5 @@ int dcp(char *str, char *str2, bool setModes)
 	g_dcp<<<1,1>>>(d_str, d_str2, setModes);
 	cudaFree(d_str);
 	cudaFree(d_str2);
-	return m_dcp_rc;
+	int rc; cudaMemcpyFromSymbol(&rc, d_dcp_rc, sizeof(rc), 0, cudaMemcpyDeviceToHost); return rc;
 }

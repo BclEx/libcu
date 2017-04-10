@@ -170,7 +170,15 @@
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="crtdefsTest.cpp" />
+    <ClCompile Include="direntTest.cpp" />
     <ClCompile Include="fallocTest.cpp" />
+    <ClCompile Include="fcntlTest.cpp" />
+    <ClCompile Include="fsystemTest.cpp" />
+    <ClCompile Include="grpTest.cpp" />
+    <ClCompile Include="pwdTest.cpp" />
+    <ClCompile Include="regexTest.cpp" />
+    <ClCompile Include="sentinelTest.cpp" />
+    <ClCompile Include="setjmpTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -180,9 +188,12 @@
     <ClCompile Include="ctypeTest.cpp" />
     <ClCompile Include="errnoTest.cpp" />
     <ClCompile Include="stdargTest.cpp" />
+    <ClCompile Include="stddefTest.cpp" />
     <ClCompile Include="stdioTest.cpp" />
     <ClCompile Include="stdlibTest.cpp" />
     <ClCompile Include="stringTest.cpp" />
+    <ClCompile Include="timeTest.cpp" />
+    <ClCompile Include="unistdTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -197,12 +208,23 @@
   <ItemGroup>
     <CudaCompile Include="crtdefsTest.cu" />
     <CudaCompile Include="ctypeTest.cu" />
+    <CudaCompile Include="direntTest.cu" />
     <CudaCompile Include="errnoTest.cu" />
     <CudaCompile Include="fallocTest.cu" />
+    <CudaCompile Include="fcntlTest.cu" />
+    <CudaCompile Include="fsystemTest.cu" />
+    <CudaCompile Include="grpTest.cu" />
+    <CudaCompile Include="pwdTest.cu" />
+    <CudaCompile Include="regexTest.cu" />
+    <CudaCompile Include="sentinelTest.cu" />
+    <CudaCompile Include="setjmpTest.cu" />
     <CudaCompile Include="stdargTest.cu" />
+    <CudaCompile Include="stddefTest.cu" />
     <CudaCompile Include="stdioTest.cu" />
     <CudaCompile Include="stdlibTest.cu" />
     <CudaCompile Include="stringTest.cu" />
+    <CudaCompile Include="timeTest.cu" />
+    <CudaCompile Include="unistdTest.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,17 +31,16 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-	enum TEXTENCODE : uint8_t
-	{
-		TEXTENCODE_UTF8 = 1,
-		TEXTENCODE_UTF16LE = 2,
-		TEXTENCODE_UTF16BE = 3,
-		TEXTENCODE_UTF16 = 4, // Use native byte order
-		TEXTENCODE_ANY = 5, // sqlite3_create_function only
-		TEXTENCODE_UTF16_ALIGNED = 8, // sqlite3_create_collation only
-	};
-	__device__ __forceinline void operator|=(TEXTENCODE &a, int b) { a = (TEXTENCODE)(a | b); }
-	__device__ __forceinline void operator&=(TEXTENCODE &a, int b) { a = (TEXTENCODE)(a & b); }
+#define TEXTENCODE char
+#define TEXTENCODE_UTF8 1
+#define TEXTENCODE_UTF16LE 2
+#define TEXTENCODE_UTF16BE 3
+	// Use native byte order
+#define TEXTENCODE_UTF16 4
+	// sqlite3_create_function only
+#define TEXTENCODE_ANY = 5
+	// sqlite3_create_collation only
+#define TEXTENCODE_UTF16_ALIGNED = 8
 
 #define convert_getvarint32(A,B) \
 	(uint8_t)((*(A)<(uint8_t)0x80)?((B)=(uint32_t)*(A)),1:\
@@ -58,11 +57,11 @@ extern "C" {
 	extern __device__ int convert_getvarintLength(uint64_t v);
 #pragma endregion
 #pragma region AtoX
-	extern __device__ bool convert_atof(const char *z, double *out, int length, TEXTENCODE encode);
-	__forceinline __device__ double convert_atof(const char *z) { double out = 0; if (z) convert_atof(z, &out, -1, TEXTENCODE_UTF8); return out; }
-	extern __device__ int convert_atoi64(const char *z, int64_t *out, int length, TEXTENCODE encode);
-	extern __device__ bool convert_atoi(const char *z, int *out);
-	__forceinline __device__ int convert_atoi(const char *z) { int out = 0; if (z) convert_atoi(z, &out); return out; }
+	extern __device__ bool convert_atofe(const char *z, double *out, int length, TEXTENCODE encode);
+	__forceinline __device__ double convert_atof(const char *z) { double out = 0; if (z) convert_atofe(z, &out, -1, TEXTENCODE_UTF8); return out; }
+	extern __device__ int convert_atoi64e(const char *z, int64_t *out, int length, TEXTENCODE encode);
+	extern __device__ bool convert_atoie(const char *z, int *out);
+	__forceinline __device__ int convert_atoi(const char *z) { int out = 0; if (z) convert_atoie(z, &out); return out; }
 #define convert_itoa(i, b) convert_itoa64((int64_t)i, b)
 	extern __device__ char *convert_itoa64(int64_t i, char *b);
 #pragma endregion
