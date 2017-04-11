@@ -9,7 +9,7 @@ cudaError_t stddef_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class stddefTest
 	{
 	private:
 		TestContext^ _testCtx;

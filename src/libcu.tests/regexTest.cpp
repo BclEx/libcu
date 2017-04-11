@@ -9,7 +9,7 @@ cudaError_t regex_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class regexTest
 	{
 	private:
 		TestContext^ _testCtx;

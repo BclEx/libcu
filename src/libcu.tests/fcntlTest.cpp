@@ -9,7 +9,7 @@ cudaError_t fcntl_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class fcntlTest
 	{
 	private:
 		TestContext^ _testCtx;

@@ -9,7 +9,7 @@ cudaError_t sentinel_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class sentinelTest
 	{
 	private:
 		TestContext^ _testCtx;

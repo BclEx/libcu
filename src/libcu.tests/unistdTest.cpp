@@ -9,7 +9,7 @@ cudaError_t unistd_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class unistdTest
 	{
 	private:
 		TestContext^ _testCtx;

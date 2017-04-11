@@ -9,7 +9,7 @@ cudaError_t time_test1();
 namespace libcutests
 {
 	[TestClass]
-	public ref class errnoTest
+	public ref class timeTest
 	{
 	private:
 		TestContext^ _testCtx;
