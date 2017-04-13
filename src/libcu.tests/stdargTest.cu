@@ -22,7 +22,7 @@ __device__ void methodVoid_(int cnt, va_list va)
 	for (int i = 1; i <= cnt; i++)
 		assert((value = va_arg(va, int)) == i);
 }
-STDARGvoid(methodVoid, methodVoid_(cnt, va), int cnt);
+STDARG1void(methodVoid, methodVoid_(cnt, va), int cnt);
 STDARG2void(methodVoid, methodVoid_(cnt, va), int cnt);
 STDARG3void(methodVoid, methodVoid_(cnt, va), int cnt);
 
@@ -33,7 +33,7 @@ __device__ int methodRet_(int cnt, va_list va)
 		assert((value = va_arg(va, int)) == i);
 	return value;
 }
-STDARG(int, methodRet, methodRet_(cnt, va), int cnt);
+STDARG1(int, methodRet, methodRet_(cnt, va), int cnt);
 STDARG2(int, methodRet, methodRet_(cnt, va), int cnt);
 STDARG3(int, methodRet, methodRet_(cnt, va), int cnt);
 

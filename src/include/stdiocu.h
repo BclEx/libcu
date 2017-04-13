@@ -374,37 +374,37 @@ __END_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Write formatted output to STREAM. */
-STDARG(int, fprintf_, vfprintf_(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+STDARG1(int, fprintf_, vfprintf_(stream, format, va), FILE *__restrict stream, const char *__restrict format);
 //#define fprintf_ fprintf
 
 //#if !defined(__CUDACC_RTC__)
 //#define fprintf(stream, format, ...) fprintf_(stream, format, __VA_ARGS__)
 //#endif
 /* Write formatted output to stdout. */
-//builtin: STDARG(int, printf_, vprintf_(format, va), const char *__restrict format);
+//builtin: STDARG1(int, printf_, vprintf_(format, va), const char *__restrict format);
 //#define printf printf_
 /* Write formatted output to S.  */
-//STDARG(int, sprintf_, vsprintf_(s, format, va), char *__restrict s, const char *__restrict format);
-//STDARG(int, sprintf_, vsprintf_(s, format, va), const char *__restrict s, const char *__restrict format);
+//STDARG1(int, sprintf_, vsprintf_(s, format, va), char *__restrict s, const char *__restrict format);
+//STDARG1(int, sprintf_, vsprintf_(s, format, va), const char *__restrict s, const char *__restrict format);
 #define sprintf(s, format, ...) snprintf_(s, 0xffffffff, format, __VA_ARGS__)
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Maximum chars of output to write in MAXLEN.  */
-STDARG(int, snprintf_, vsnprintf_(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
-STDARG(int, snprintf_, vsnprintf_((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
+STDARG1(int, snprintf_, vsnprintf_(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *__restrict format);
+STDARG1(int, snprintf_, vsnprintf_((char *)s, maxlen, format, va), const char *__restrict s, size_t maxlen, const char *__restrict format);
 #define snprintf snprintf_
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Read formatted input from STREAM.  */
-STDARG(int, fscanf_, vfscanf_(stream, format, va), FILE *__restrict stream, const char *__restrict format);
+STDARG1(int, fscanf_, vfscanf_(stream, format, va), FILE *__restrict stream, const char *__restrict format);
 #define fscanf fscanf_
 /* Read formatted input from stdin.  */
-STDARG(int, scanf_, vscanf_(format, va), const char *__restrict format);
+STDARG1(int, scanf_, vscanf_(format, va), const char *__restrict format);
 #define scanf scanf_
 /* Read formatted input from S.  */
-STDARG(int, sscanf_, vsscanf_(s, format, va), const char *__restrict s, const char *__restrict format);
+STDARG1(int, sscanf_, vsscanf_(s, format, va), const char *__restrict s, const char *__restrict format);
 STDARG2(int, sscanf_, vsscanf_(s, format, va), const char *__restrict s, const char *__restrict format);
 STDARG3(int, sscanf_, vsscanf_(s, format, va), const char *__restrict s, const char *__restrict format);
 #define sscanf sscanf_

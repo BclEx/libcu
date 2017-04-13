@@ -11,7 +11,7 @@ static __device__ group *__grpIdx = nullptr;
 __device__ struct group *getgrgid_(gid_t gid)
 {
 	register group *p = __grps;
-	while (p->gr_name || p->gr_gid == gid) *p++;
+	while (p->gr_name || p->gr_gid != gid) p++;
 	return (p->gr_name ? p : nullptr);
 }
 

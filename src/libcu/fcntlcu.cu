@@ -1,4 +1,5 @@
 #include <stddefcu.h>
+#include <stdargcu.h>
 #include <fcntlcu.h>
 
 __BEGIN_DECLS;
@@ -53,13 +54,19 @@ static __device__ void fileFree(int f)
 
 #pragma endregion
 
-__device__ int open_(const char *filename, int openFlag)
+//__device__ int fcntlv(const char *file, int oflag, va_list va)
+//{
+//	panic("Not Implemented");
+//	return 0;
+//}
+
+__device__ int openv(const char *file, int oflag, va_list va)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
-__device__ int creat_(const char *filename, int permissionMode)
+__device__ int creat_(const char *file, int mode)
 {
 	panic("Not Implemented");
 	return 0;

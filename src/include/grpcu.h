@@ -61,8 +61,8 @@ extern __device__ void setgrent_();
 
 __END_DECLS;
 #else
-#define getgrgid
-#define getgrnam
+#define getgrgid(gid) nullptr
+#define getgrnam(name) nullptr
 #define getgrent
 #define endgrent
 #define setgrent

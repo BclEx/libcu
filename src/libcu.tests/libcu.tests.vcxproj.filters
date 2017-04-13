@@ -45,7 +45,6 @@
     <CudaCompile Include="fallocTest.cu" />
     <CudaCompile Include="crtdefsTest.cu" />
     <CudaCompile Include="direntTest.cu" />
-    <CudaCompile Include="fcntlTest.cu" />
     <CudaCompile Include="fsystemTest.cu" />
     <CudaCompile Include="grpTest.cu" />
     <CudaCompile Include="pwdTest.cu" />
@@ -55,6 +54,7 @@
     <CudaCompile Include="stddefTest.cu" />
     <CudaCompile Include="timeTest.cu" />
     <CudaCompile Include="unistdTest.cu" />
+    <CudaCompile Include="fcntlTest.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Properties">
