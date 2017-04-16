@@ -52,20 +52,18 @@ extern __device__ struct group *getgrent_();
 #define getgrent getgrent_
 
 /* close the group database */
+/* setgrent - reset group database to first entry */
 extern __device__ void endgrent_();
 #define endgrent endgrent_
-
-/* reset group database to first entry */
-extern __device__ void setgrent_();
-#define setgrent setgrent_
+#define setgrent endgrent_
 
 __END_DECLS;
 #else
 #define getgrgid(gid) nullptr
 #define getgrnam(name) nullptr
-#define getgrent
-#define endgrent
-#define setgrent
+#define getgrent() nullptr
+#define endgrent()
+#define setgrent()
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _GRPCU_H */

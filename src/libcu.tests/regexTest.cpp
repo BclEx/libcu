@@ -28,6 +28,6 @@ namespace libcutests
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
 #pragma endregion 
 
-		[TestMethod] void regex_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::regex_test1()))); }
+		[TestMethod, TestCategory("core")] void regex_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::regex_test1()))); }
 	};
 }

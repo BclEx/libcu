@@ -97,7 +97,7 @@ extern "C" {
 
 	extern __device__ int regcomp_(regex_t *preg, const char *regex, int cflags);
 #define regcomp regcomp_
-	extern __device__ int regexec_(regex_t *preg,  const  char *string, size_t nmatch, regmatch_t pmatch[], int eflags);
+	extern __device__ int regexec_(regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags);
 #define regexec regexec_
 	extern __device__ size_t regerror_(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size);
 #define regerror regerror_

@@ -44,33 +44,31 @@ struct passwd
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
-/* search user database for a name */
-extern __device__ struct passwd *getpwnam_(const char *name);
-#define getpwnam getpwnam_
-
 /* search user database for a user ID */
 extern __device__ struct passwd *getpwuid_(uid_t uid);
 #define getpwuid getpwuid_
 
-/* close the user database */
-extern __device__ void endpwent_();
-#define endpwent endpwent_
+/* search user database for a name */
+extern __device__ struct passwd *getpwnam_(const char *name);
+#define getpwnam getpwnam_
 
 /* get user database entry */
 extern __device__ struct passwd *getpwent_();
 #define getpwent getpwent_
 
-/* reset user database to first entry */
-extern __device__ void setpwent_();
-#define setpwent setpwent_
+/* close the user database */
+/* setpwent - reset user database to first entry */
+extern __device__ void endpwent_();
+#define endpwent endpwent_
+#define setpwent endpwent_
 
 __END_DECLS;
 #else
-#define getpwnam
-#define getpwuid
-#define endpwent
-#define getpwent
-#define setpwent
+#define getpwuid(uid) nullptr
+#define getpwnam(name) nullptr
+#define getpwent() nullptr
+#define endpwent()
+#define setpwent()
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _PWDCU_H */

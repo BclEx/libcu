@@ -51,7 +51,8 @@ __BEGIN_DECLS;
 #undef sleep
 
 /* Test for access to NAME using the real UID and real GID.  */
-extern __device__ int access_(const char *name, int type);
+extern __device__ int access_device(const char *name, int type);
+__forceinline __device__ int access_(const char *name, int type) { if (ISDEVICEPATH(name)) return access_device(name, type); unistd_access msg(name, type); return msg.RC; }
 #define access access_
 
 /* Move FD's file position to OFFSET bytes from the beginning of the file (if WHENCE is SEEK_SET),
@@ -150,11 +151,13 @@ extern __device__ char **__environ_;
 //#define fpathconf fpathconf_
 
 /* Remove the link FILENAME.  */
-extern __device__ int unlink_(const char *filename);
+extern __device__ int unlink_device(const char *filename);
+__forceinline __device__ int unlink_(const char *filename) { if (ISDEVICEPATH(filename)) return unlink_device(filename); unistd_unlink msg(filename); return msg.RC; }
 #define unlink unlink_
 
 /* Remove the directory PATH.  */
-extern __device__ int rmdir_(const char *path);
+extern __device__ int rmdir_device(const char *path);
+__forceinline __device__ int rmdir_(const char *path) { if (ISDEVICEPATH(path)) return rmdir_device(path); unistd_rmdir msg(path); return msg.RC; }
 #define rmdir rmdir_
 
 __END_DECLS;

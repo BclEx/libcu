@@ -3,12 +3,61 @@
 #include <stddefcu.h>
 #include <assert.h>
 #include <ext/hash.h>
-#include <ext/memfile.h>
-#include <_dirent.h>
 #include <errnocu.h>
 #include "fsystem.h"
 
 __BEGIN_DECLS;
+
+// FILES
+#pragma region FILES
+
+typedef struct __align__(8)
+{
+	file_t *file;			// reference
+	unsigned short id;		// ID of author
+	unsigned short threadid;// thread ID of author
+} fileRef;
+
+__device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
+volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
+volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
+__constant__ file_t __iob_files[CORE_MAXFILESTREAM];
+
+static __device__ __forceinline void writeFileRef(fileRef *ref, file_t *f)
+{
+	ref->file = f;
+	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
+	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
+}
+
+static __device__ int fileGet(file_t **file)
+{
+	// advance circular buffer
+	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
+	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
+	int offsetId = offset / sizeof(fileRef);
+	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
+	file_t *f = ref->file;
+	if (!f) {
+		f = &__iob_files[offsetId];
+		writeFileRef(ref, f);
+	}
+	*file = f;
+	return GETFD(offsetId);
+}
+
+static __device__ void fileFree(int fd)
+{
+	//if (!f) return;
+	file_t *f = GETFILE(fd);
+	// advance circular buffer
+	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
+	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
+	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
+	writeFileRef(ref, f);
+}
+
+#pragma endregion
 
 __device__ char __cwd[MAX_PATH] = ":\\";
 __device__ dirEnt_t __iob_root = { { 0, 0, 0, 1, ":\\" }, nullptr, nullptr };
@@ -148,8 +197,9 @@ __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 	return dirEnt;
 }
 
-__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *r)
+__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd, int *r)
 {
+	file_t *f; *fd = fileGet(&f);
 	char newPath[MAX_PATH]; absolutePath(path, newPath);
 	dirEnt_t *fileEnt = (dirEnt_t *)hashFind(&__iob_dir, newPath);
 	if (fileEnt) {
@@ -176,6 +226,8 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *r)
 	memfileOpen(fileEnt->u.file);
 	// add to directory
 	fileEnt->next = parentEnt->u.list; parentEnt->u.list = fileEnt;
+	// set to file
+	f->base = (char *)fileEnt;
 	*r = 0;
 	return fileEnt;
 }

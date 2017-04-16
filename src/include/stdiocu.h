@@ -94,10 +94,12 @@ __BEGIN_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Remove file FILENAME.  */
-extern __device__ int remove_(const char *filename);
+extern __device__ int remove_device(const char *filename);
+__forceinline __device__ int remove_(const char *filename) { if (ISDEVICEPATH(filename)) return remove_device(filename); stdio_remove msg(filename); return msg.RC; }
 #define remove remove_
 /* Rename file OLD to NEW.  */
-extern  __device__ int rename_(const char *old, const char *new_);
+extern  __device__ int rename_device(const char *old, const char *new_);
+__forceinline __device__ int rename_(const char *old, const char *new_) { if (ISDEVICEPATH(old)) return rename_device(old, new_); stdio_rename msg(old, new_); return msg.RC; }
 #define rename rename_
 __END_NAMESPACE_STD;
 
@@ -126,10 +128,11 @@ __END_NAMESPACE_STD;
 __BEGIN_NAMESPACE_STD;
 #ifndef __USE_FILE_OFFSET64
 /* Open a file, replacing an existing stream with it. */
-extern __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
+extern __device__ FILE *freopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
+__forceinline __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { if (ISDEVICEPATH(filename)) return freopen_device(filename, modes, stream); stdio_freopen msg(filename, modes, stream); return msg.RC; }
 #define freopen freopen_
 /* Open a file and create a new stream for it. */
-__forceinline __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes) { return freopen_(filename, modes, nullptr); }
+__forceinline __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes) { if (ISDEVICEPATH(filename)) return freopen_device(filename, modes, nullptr); stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
 #define fopen fopen_
 #else
 #define fopen fopen64
@@ -138,10 +141,11 @@ __forceinline __device__ FILE *fopen_(const char *__restrict filename, const cha
 __END_NAMESPACE_STD;
 #ifdef __USE_LARGEFILE64
 /* Open a file, replacing an existing stream with it. */
-extern __device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
+extern __device__ FILE *freopen64_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
+__forceinline __device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { if (ISDEVICEPATH(filename)) return freopen64_device(filename, modes, stream); stdio_freopen msg(filename, modes, stream); return msg.RC; }
 #define freopen64 freopen64_
 /* Open a file and create a new stream for it. */
-__forceinline __device__ FILE *fopen64_(const char *__restrict filename, const char *__restrict modes) { return freopen64_(filename, modes, nullptr); }
+__forceinline __device__ FILE *fopen64_(const char *__restrict filename, const char *__restrict modes) { if (ISDEVICEPATH(filename)) return freopen64_device(filename, modes, nullptr); stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
 #define fopen64 fopen64_
 #endif
 

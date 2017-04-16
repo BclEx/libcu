@@ -38,6 +38,7 @@ enum {
 	UNISTD_READ,
 	UNISTD_WRITE,
 	UNISTD_UNLINK,
+	UNISTD_RMDIR,
 };
 
 struct unistd_access
@@ -128,6 +129,25 @@ struct unistd_unlink
 	const char *Str;
 	__device__ unistd_unlink(const char *str)
 		: Base(true, UNISTD_UNLINK, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(unistd_unlink)); }
+	int RC;
+};
+
+struct unistd_rmdir
+{
+	static __forceinline __device__ char *Prepare(unistd_rmdir *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += strLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(str, t->Str, strLength);
+		t->Str = str + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Str;
+	__device__ unistd_rmdir(const char *str)
+		: Base(true, UNISTD_RMDIR, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(unistd_rmdir)); }
 	int RC;
 };
 

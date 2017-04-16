@@ -103,7 +103,7 @@ All macros listed above as possibly being defined by this file are explicitly un
 #endif
 
 extern "C" __device__ char __cwd[];
-#define ISDEVICEPATH(path) (((path)[1] != ':' && (path)[0] != '/') && (path)[0] == ':' || __cwd[0] != 0)
+#define ISDEVICEPATH(path) (((path)[1] != ':') && ((path)[0] == ':' || __cwd[0] != 0))
 #define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
 // absolute host	C:\path || /path
 // absolute device	:\path

@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <sentinel-stdiomsg.h>
 #include <unistdcu.h>
+#include <fcntlcu.h>
 #include "fsystem.h"
 
 #define CORE_MAXLENGTH 1000000000
@@ -34,7 +35,7 @@ static __device__ __forceinline void writeStreamRef(streamRef *ref, FILE *s)
 	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
 }
 
-static __device__ FILE *streamGet()
+static __device__ FILE *streamGet(int fd = 0)
 {
 	// advance circular buffer
 	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
@@ -46,13 +47,14 @@ static __device__ FILE *streamGet()
 		s = &__iob_streams[offsetId+3];
 		writeStreamRef(ref, s);
 	}
-	s->_file = INT_MAX-CORE_MAXFILESTREAM - offsetId;
+	s->_file = fd;
 	return s;
 }
 
 static __device__ void streamFree(FILE *s)
 {
 	if (!s) return;
+	close(s->_file);
 	// advance circular buffer
 	size_t offset = atomicAdd((uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
 	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
@@ -63,13 +65,8 @@ static __device__ void streamFree(FILE *s)
 #pragma endregion
 
 /* Remove file FILENAME.  */
-__device__ int remove_(const char *filename)
+__device__ int remove_device(const char *filename)
 {
-#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
-
-	if (!ISDEVICEPATH(filename)) {
-		stdio_remove msg(filename); return msg.RC;
-	}
 	int saved_errno = errno;
 	int rv = rmdir(filename);
 	if (rv < 0 && errno == ENOTDIR) {
@@ -80,11 +77,8 @@ __device__ int remove_(const char *filename)
 }
 
 /* Rename file OLD to NEW.  */
-__device__ int rename_(const char *old, const char *new_)
+__device__ int rename_device(const char *old, const char *new_)
 {
-	if (!ISDEVICEPATH(old)) {
-		stdio_rename msg(old, new_); return msg.RC;
-	}
 	return fsystemRename(old, new_);
 }
 
@@ -100,7 +94,7 @@ __device__ FILE *tmpfile_(void)
 /* Close STREAM. */
 __device__ int fclose_device(FILE *stream)
 {
-	dirEnt_t *f;
+	dirEnt_t *f; UNUSED_SYMBOL(f);
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fclose: !stream");
 	streamFree(stream);
@@ -114,11 +108,8 @@ __device__ int fflush_device(FILE *stream)
 }
 
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
-	if (!ISDEVICEPATH(filename)) {
-		stdio_freopen msg(filename, modes, stream); return msg.RC;
-	}
 	if (stream)
 		streamFree(stream);
 	// Parse the specified mode.
@@ -150,7 +141,7 @@ __device__ FILE *freopen_(const char *__restrict filename, const char *__restric
 	}
 	int r;
 	stream->_flag = openMode;
-	stream->_base = (char *)fsystemOpen(filename, openMode, &r);
+	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file, &r);
 	if (!stream->_base) {
 		_set_errno(EINVAL);
 		streamFree(stream);
@@ -161,11 +152,8 @@ __device__ FILE *freopen_(const char *__restrict filename, const char *__restric
 
 #ifdef __USE_LARGEFILE64
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen64_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
-	if (!ISDEVICEPATH(filename)) {
-		stdio_freopen msg(filename, modes, stream); return msg.RC;
-	}
 	if (stream)
 		fclose_device(stream);
 	// Parse the specified mode.

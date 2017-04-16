@@ -29,7 +29,7 @@ namespace libcutests
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
 #pragma endregion 
 
-		[TestMethod] void stdarg_parse() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_parse()))); }
-		[TestMethod] void stdarg_call() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_call()))); }
+		[TestMethod, TestCategory("core")] void stdarg_parse() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_parse()))); }
+		[TestMethod, TestCategory("core")] void stdarg_call() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_call()))); }
 	};
 }

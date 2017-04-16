@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <crtdefscu.h>
+#include <stringcu.h>
 #include <assert.h>
 
 static __global__ void g_crtdefs_test1()
@@ -24,24 +25,10 @@ static __global__ void g_crtdefs_test1()
 	int c0a = HASALIGNMENT8(3); int c0b = HASALIGNMENT8(8); int c0c = HASALIGNMENT8(9); int c0d = HASALIGNMENT8(-3); assert(!c0a && c0b && !c0c && !c0d);
 	/* Returns the length of an array at compile time (via math) */
 	int integerArrayOfSixElements[6]; int d0a = _LENGTHOF(integerArrayOfSixElements); assert(d0a == 6);
+
+	bool e0a = ISDEVICEPATH("C:\\test"); bool e0b = ISDEVICEPATH("C:/test"); bool e0c = ISDEVICEPATH(":\\test"); bool e0d = ISDEVICEPATH(":/test"); assert(!e0a && !e0b && e0c && e0d);
+	memcpy(__cwd, ":\\", 3); bool e1a = ISDEVICEPATH("."); bool e1b = ISDEVICEPATH("test"); bool e1c = ISDEVICEPATH("\test"); bool e1d = ISDEVICEPATH("/test"); assert(e1a && e1b && e1c && e1d);
+	memcpy(__cwd, "\0", 1); bool e2a = ISDEVICEPATH("."); bool e2b = ISDEVICEPATH("test"); bool e2c = ISDEVICEPATH("\test"); bool e2d = ISDEVICEPATH("/test"); assert(!e2a && !e2b && !e2c && !e2d);
+	bool f0a = ISDEVICEHANDLE(1); bool f0b = ISDEVICEHANDLE(INT_MAX-CORE_MAXFILESTREAM); bool f0c = ISDEVICEHANDLE(INT_MAX); assert(!f0a && f0b && f0c);
 }
 cudaError_t crtdefs_test1() { g_crtdefs_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
-
-
-
-//#define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
-
-//#define _ROUNDDOWN8(x)		((x)&~7)
-
-//#define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
-//* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
-//#ifdef BYTEALIGNED4
-//#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
-//#else
-//#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
-//#endif
-//* Returns the length of an array at compile time (via math) */
-//#define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
-//* Removes compiler warning for unused parameter(s) */
-//#define UNUSED_PARAMETER(x) (void)(x)
-//#define UNUSED_PARAMETER2(x,y) (void)(x),(void)(y)

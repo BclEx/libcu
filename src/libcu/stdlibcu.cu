@@ -3,6 +3,7 @@
 #include <bits/libcu_fpmax.h>
 #include <ctypecu.h>
 #include <errnocu.h>
+#include <fcntlcu.h>
 #include <assert.h>
 
 __BEGIN_DECLS;
@@ -686,6 +687,11 @@ __device__ char *mktemp_(char *template_)
 {
 	panic("Not Implemented");
 	return nullptr;
+}
+
+__device__ int mkstemp_(char *template_)
+{
+	return open(mktemp_(template_), 0);
 }
 
 /* Do a binary search for KEY in BASE, which consists of NMEMB elements of SIZE bytes each, using COMPAR to perform the comparisons.  */

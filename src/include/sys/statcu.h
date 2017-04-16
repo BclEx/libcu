@@ -68,29 +68,38 @@ typedef int mode_t;
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
+__END_DECLS;
+#include <sentinel-fcntlmsg.h>
+__BEGIN_DECLS;
+
 #ifndef __USE_FILE_OFFSET64
 /* Get file attributes about FILE and put them in BUF. If FILE is a symbolic link, do not follow it.  */
-extern __device__ int stat_(const char *__restrict file, struct stat *__restrict buf, bool lstat = false);
-#define stat(file, buf) stat_(file, buf)
+extern __device__ int stat_device(const char *__restrict file, struct stat *__restrict buf, bool lstat = false);
+__forceinline __device__ int stat_(const char *__restrict file, struct stat *__restrict buf, bool lstat = false) { if (ISDEVICEPATH(file)) return stat_device(file, buf, lstat); fcntl_stat msg(file, buf, lstat); return msg.RC; }
+#define stat(file, buf) stat_(file, buf, false)
 #define lstat(file, buf) stat_(file, buf, true)
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
 extern __device__ int fstat_device(int fd, struct stat *buf);
-#define fstat(fd, buf) fstat_(fd, buf) { if (ISDEVICEHANDLE(fd)) return fstat_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
+__forceinline __device__ int fstat_(int fd, struct stat *buf) { if (ISDEVICEHANDLE(fd)) return fstat_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
+#define fstat(fd, buf) fstat_(fd, buf)
 #else
 #define stat(file, buf) stat64_(file, buf)
 #define lstat(file, buf) lstat64_(file, buf)
 #define fstat(fd, buf) fstat64_device(fd, buf)
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf, bool lstat = false);
-#define stat64(file, buf) stat64_(file, buf)
+extern __device__ int stat64_device(const char *__restrict file, struct stat64 *__restrict buf, bool lstat = false);
+__forceinline __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf, bool lstat = false) { if (ISDEVICEPATH(file)) return stat64_device(file, buf, lstat); fcntl64_stat msg(file, buf, lstat); return msg.RC; }
+#define stat64(file, buf) stat64_(file, buf, false)
 #define lstat64(file, buf) stat64_(file, buf, true)
 extern __device__ int fstat64_device(int fd, struct stat64 *buf);
-#define fstat64(fd, buf) fstat64_(fd, buf) { if (ISDEVICEHANDLE(fd)) return fstat64_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
+__forceinline __device__ int fstat64_(int fd, struct stat64 *buf) { if (ISDEVICEHANDLE(fd)) return fstat64_device(fd, buf); fcntl_fstat msg(fd, buf); return msg.RC; }
+#define fstat64(fd, buf) fstat64_(fd, buf)
 #endif
 
 /* Set file access permissions for FILE to MODE. If FILE is a symbolic link, this affects its target instead.  */
-extern __device__ int chmod_(const char *file, mode_t mode);
+extern __device__ int chmod_device(const char *file, mode_t mode);
+__forceinline __device__ int chmod_(const char *file, mode_t mode) { if (ISDEVICEPATH(file)) return chmod_device(file, mode); fcntl_chmod msg(file, mode); return msg.RC; }
 #define chmod chmod_
 
 /* Set the file creation mask of the current process to MASK, and return the old creation mask.  */
@@ -98,11 +107,13 @@ extern __device__ mode_t umask_(mode_t mask);
 #define umask umask_
 
 /* Create a new directory named PATH, with permission bits MODE.  */
-extern __device__ int mkdir_(const char *path, mode_t mode);
+extern __device__ int mkdir_device(const char *path, mode_t mode);
+__forceinline __device__ int mkdir_(const char *path, mode_t mode) { if (ISDEVICEPATH(path)) return mkdir_device(path, mode); fcntl_mkdir msg(path, mode); return msg.RC; }
 #define mkdir mkdir_
 
 /* Create a new FIFO named PATH, with permission bits MODE.  */
-extern __device__ int mkfifo_(const char *path, mode_t mode);
+extern __device__ int mkfifo_device(const char *path, mode_t mode);
+__forceinline __device__ int mkfifo_(const char *path, mode_t mode) { if (ISDEVICEPATH(path)) return mkfifo_device(path, mode); fcntl_mkfifo msg(path, mode); return msg.RC; }
 #define mkfifo mkfifo_
 
 __END_DECLS;

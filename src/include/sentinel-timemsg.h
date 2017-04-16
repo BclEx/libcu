@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include <stringcu.h>
 
 enum {
-	TIME_MKTIME = 50,
+	TIME_MKTIME = 60,
 	TIME_STRFTIME,
 };
 

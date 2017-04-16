@@ -746,7 +746,7 @@ extern "C" {
 }
 #endif
 
-STDARGvoid(Jim_AppendStrings, Jim_AppendStrings_(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
-STDARGvoid(Jim_SetResultFormatted, Jim_SetResultFormatted_(interp, format, va), Jim_Interp *interp, const char *format);
+STDARG1void(Jim_AppendStrings, Jim_AppendStrings_(interp, objPtr, va), Jim_Interp *interp, Jim_Obj *objPtr);
+STDARG1void(Jim_SetResultFormatted, Jim_SetResultFormatted_(interp, format, va), Jim_Interp *interp, const char *format);
 
 #endif // __JIM__H

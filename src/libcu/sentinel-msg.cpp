@@ -14,6 +14,9 @@
 
 //#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 
+#define fcntl(fd, cmd, ...) 0
+#define mkfifo(path, mode) 0
+
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 {
 	switch (data->OP) {
@@ -47,11 +50,15 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = _read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
 	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = _write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
 	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
+	case FCNTL_FCNTL: { fcntl_fcntl *msg = (fcntl_fcntl *)data; msg->RC = fcntl(msg->Handle, msg->Cmd, msg->P0); return true; }
+	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data; msg->RC = _open(msg->Str, msg->OFlag, msg->P0); return true; }
 	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
 	case FCNTL_FSTAT: { fcntl_fstat *msg = (fcntl_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
 	case FCNTL_STAT64: { fcntl_stat64 *msg = (fcntl_stat64 *)data; msg->RC = _stat64(msg->Str, msg->Ptr); return true; }
 	case FCNTL_FSTAT64: { fcntl_fstat64 *msg = (fcntl_fstat64 *)data; msg->RC = _fstat64(msg->Handle, msg->Ptr); return true; }
+	case FCNTL_CHMOD: { fcntl_chmod *msg = (fcntl_chmod *)data; msg->RC = _chmod(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKDIR: { fcntl_mkdir *msg = (fcntl_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
+	case FCNTL_MKFIFO: { fcntl_mkfifo *msg = (fcntl_mkfifo *)data; msg->RC = mkfifo(msg->Str, msg->Mode); return true; }
 	case TIME_MKTIME: { time_mktime *msg = (time_mktime *)data; msg->RC = mktime(msg->Tp); return true; }
 	case TIME_STRFTIME: { time_strftime *msg = (time_strftime *)data; msg->RC = strftime((char *)msg->Str, msg->Maxsize, msg->Str2, msg->Tp); return true; }
 	}

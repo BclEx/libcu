@@ -1,74 +1,40 @@
 #include <stddefcu.h>
 #include <stdargcu.h>
 #include <fcntlcu.h>
+#include "fsystem.h"
 
 __BEGIN_DECLS;
 
-// FILES
-#pragma region FILES
-
-typedef struct __align__(8)
-{
-	int file;				// reference
-	unsigned short id;		// ID of author
-	unsigned short threadid;// thread ID of author
-} fileRef;
-
-__device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
-volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
-volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
-__constant__ int __iob_files[CORE_MAXFILESTREAM+3];
-
-static __device__ __forceinline void writeFileRef(fileRef *ref, int f)
-{
-	ref->file = f;
-	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
-	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
-}
-
-static __device__ int fileGet()
-{
-	// advance circular buffer
-	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
-	int offsetId = offset / sizeof(fileRef);
-	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
-	int f = ref->file;
-	if (!f) {
-		f = __iob_files[offsetId+3];
-		writeFileRef(ref, f);
-	}
-	//f->_file = INT_MAX-CORE_MAXFILESTREAM - offsetId;
-	return f;
-}
-
-static __device__ void fileFree(int f)
-{
-	if (!f) return;
-	// advance circular buffer
-	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
-	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
-	writeFileRef(ref, f);
-}
-
-#pragma endregion
-
-//__device__ int fcntlv(const char *file, int oflag, va_list va)
-//{
-//	panic("Not Implemented");
-//	return 0;
-//}
-
-__device__ int openv(const char *file, int oflag, va_list va)
+__device__ int fcntlv_device(int fd, int cmd, va_list va)
 {
 	panic("Not Implemented");
+	// (int fd, unsigned int cmd, unsigned long arg, struct file *filp)
+	//	long err = -EINVAL;
+	//	switch (cmd) {
+	//	case F_DUPFD: err = f_dupfd(arg, filp, 0); break;
+	//	case F_GETFD: err = get_close_on_exec(fd) ? FD_CLOEXEC : 0; break;
+	//	case F_SETFD: err = 0; set_close_on_exec(fd, arg & FD_CLOEXEC); break;
+	//	case F_GETFL: err = filp->f_flags; break;
+	//	case F_SETFL: err = setfl(fd, filp, arg); break;
+	//	case F_GETOWN: err = f_getown(filp); force_successful_syscall_return(); break;
+	//	case F_SETOWN: f_setown(filp, arg, 1); err = 0; break;
+	//	default:
+	//		break;
+	//	}
+	//	return err;
 	return 0;
 }
 
-__device__ int creat_(const char *file, int mode)
+__device__ int openv_device(const char *file, int oflag, va_list va)
 {
-	panic("Not Implemented");
+	int fd; int r; fsystemOpen(file, oflag, &fd, &r);
+	return fd;
+}
+
+/* Close the file descriptor FD.  */
+__device__ int close_device(int fd)
+{
+	fileFree(fd);
 	return 0;
 }
 

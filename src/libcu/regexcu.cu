@@ -802,7 +802,7 @@ nextline:
 		{
 			if (regtry(preg, s))
 				return REG_NOERROR;
-			int c;
+			int c; UNUSED_SYMBOL(c);
 			if (*s == '\0')
 				break;
 			else

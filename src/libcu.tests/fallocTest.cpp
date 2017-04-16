@@ -34,9 +34,9 @@ namespace libcutests
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); cudaDeviceFallocHeapDestroy(_deviceFallocHeap); }
 #pragma endregion 
 
-		[TestMethod] void falloc_lauched_cuda_kernel() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_lauched_cuda_kernel()))); }
-		[TestMethod] void falloc_alloc_with_getchunk() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_getchunk()))); }
-		[TestMethod] void falloc_alloc_with_getchunks() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_getchunks()))); }
-		[TestMethod] void falloc_alloc_with_context() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_context()))); }
+		[TestMethod, TestCategory("falloc")] void falloc_lauched_cuda_kernel() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_lauched_cuda_kernel()))); }
+		[TestMethod, TestCategory("falloc")] void falloc_alloc_with_getchunk() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_getchunk()))); }
+		[TestMethod, TestCategory("falloc")] void falloc_alloc_with_getchunks() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_getchunks()))); }
+		[TestMethod, TestCategory("falloc")] void falloc_alloc_with_context() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::falloc_alloc_with_context()))); }
 	};
 }

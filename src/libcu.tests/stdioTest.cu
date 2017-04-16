@@ -5,6 +5,9 @@
 static __global__ void g_stdio_test1()
 {
 	printf("stdio_test1\n");
+
+	//bool f0a = ISDEVICEFILE(stdio); bool f0b = ISDEVICEFILE(stdio+2); bool f0c = ISDEVICEFILE(stdio-1); assert(!f0a && f0b && f0c);
+
 }
 cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

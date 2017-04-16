@@ -5,11 +5,8 @@
 __BEGIN_DECLS;
 
 /* Test for access to NAME using the real UID and real GID.  */
-__device__ int access_(const char *name, int type)
+__device__ int access_device(const char *name, int type)
 {
-	if (!ISDEVICEPATH(name)) {
-		unistd_access msg(name, type); return msg.RC;
-	}
 	panic("Not Implemented");
 	return 0;
 }
@@ -32,11 +29,7 @@ __device__ off64_t lseek64_device(int fd, off64_t offset, int whence)
 #endif
 
 /* Close the file descriptor FD.  */
-__device__ int close_device(int fd)
-{
-	panic("Not Implemented");
-	return 0;
-}
+//__device__ int close_device(int fd); // defined in fcntlcu.cu
 
 /* Read NBYTES into BUF from FD.  Return the number read, -1 for errors or 0 for EOF.  */
 __device__ size_t read_device(int fd, void *buf, size_t nbytes)
@@ -108,16 +101,13 @@ __device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer
 extern __device__ char **__environ_ = (char **)__environ_device;
 
 /* Remove the link NAME.  */
-__device__ int unlink_(const char *filename)
+__device__ int unlink_device(const char *filename)
 {
-	if (!ISDEVICEPATH(filename)) {
-		unistd_unlink msg(filename); return msg.RC;
-	}
 	return fsystemUnlink(filename);
 }
 
 /* Remove the directory PATH.  */
-__device__ int rmdir_(const char *path)
+__device__ int rmdir_device(const char *path)
 {
 	panic("Not Implemented");
 	return 0;

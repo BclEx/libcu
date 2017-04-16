@@ -22,7 +22,7 @@
     <CUARCH Condition="'$(CUARCH)'==''">35</CUARCH>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
-    <TargetName>DefaultTest</TargetName>
+    <TargetName>libcu.tests</TargetName>
     <ProjectTypes>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}</ProjectTypes>
     <ProjectGUID>{8BE5F46B-95F0-4B9C-9279-EAAFBFB1BF61}</ProjectGUID>
     <Keyword>ManagedCProj</Keyword>

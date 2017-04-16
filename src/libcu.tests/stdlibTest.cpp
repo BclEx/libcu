@@ -30,8 +30,8 @@ namespace libcutests
 		[TestCleanup()] void TestCleanup() { allTestCleanup(); }
 #pragma endregion 
 
-		[TestMethod] void stdlib_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_test1()))); }
-		[TestMethod] void stdlib_strtol() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_strtol()))); }
-		[TestMethod] void stdlib_strtoq() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_strtoq()))); }
+		[TestMethod, TestCategory("core")] void stdlib_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_test1()))); }
+		[TestMethod, TestCategory("core")] void stdlib_strtol() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_strtol()))); }
+		[TestMethod, TestCategory("core")] void stdlib_strtoq() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdlib_strtoq()))); }
 	};
 }

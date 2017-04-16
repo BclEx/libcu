@@ -60,5 +60,8 @@ static __global__ void g_fcntl_test1()
 	int h0a = creat("missing.txt", O_RDONLY); int h0b = close(h0a); assert(!h0a && h0b == -1);
 	makeAFile("test.txt");
 	int h1a = creat("test.txt", O_RDONLY); int h1b = close(h1a); assert(h1a && !h1b);
+
+
+	// TEST fcntl
 }
 cudaError_t fcntl_test1() { g_fcntl_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

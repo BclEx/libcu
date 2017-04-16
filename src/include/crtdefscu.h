@@ -71,8 +71,8 @@ THE SOFTWARE.
 /* Returns the length of an array at compile time (via math) */
 #define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
 /* Removes compiler warning for unused parameter(s) */
-#define UNUSED_PARAMETER(x) (void)(x)
-#define UNUSED_PARAMETER2(x,y) (void)(x),(void)(y)
+#define UNUSED_SYMBOL(x) (void)(x)
+#define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
 
 //////////////////////

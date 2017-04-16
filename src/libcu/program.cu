@@ -3,8 +3,14 @@
 #include <stdiocu.h>
 #include <stdlibcu.h>
 #include <sys/statcu.h>
+#include <assert.h>
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
+
+#include <stringcu.h>
+__device__ void testBed()
+{
+}
 
 __global__ void addKernel(int *c, const int *a, const int *b)
 {
@@ -13,23 +19,27 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	if (i != 1)
 		return;
 
-	//strchr("Me", 'M');
-	printf("%d %s\n", 2, "sky morey");
+	testBed();
 
-	//mkdir(":\\T_", 0);
-	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
-	if (f) {
-		//fprintf(f, "The quick brown fox jumps over the lazy dog");
-		fwrite("test", 4, 1, f);
-		fflush(f);
-		fclose(f);
-	}
 
-	char buf[100] = {0};
-	snprintf(buf, 100, "test");
-	printf("%s\n", buf);
-	printf("%d\n", atoi("51236"));
-	printf("%f\n", atof("1.2"));
+	////strchr("Me", 'M');
+	//printf("%d %s\n", 2, "sky morey");
+
+	////mkdir(":\\T_", 0);
+	//FILE *f = fopen("C:\\T_\\fopen.txt", "w");
+	//if (f) {
+	//	//fprintf(f, "The quick brown fox jumps over the lazy dog");
+	//	fwrite("test", 4, 1, f);
+	//	fflush(f);
+	//	fclose(f);
+	//}
+
+	//char buf[100] = {0};
+	//snprintf(buf, 100, "test");
+	//printf("%s\n", buf);
+	//printf("%d\n", atoi("51236"));
+	//printf("%f\n", atof("1.2"));
+
 	libcuReset();
 }
 
