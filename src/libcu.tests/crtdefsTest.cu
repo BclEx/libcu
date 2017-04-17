@@ -26,9 +26,12 @@ static __global__ void g_crtdefs_test1()
 	/* Returns the length of an array at compile time (via math) */
 	int integerArrayOfSixElements[6]; int d0a = _LENGTHOF(integerArrayOfSixElements); assert(d0a == 6);
 
+
+	/* Determines where you are based on path */
 	bool e0a = ISDEVICEPATH("C:\\test"); bool e0b = ISDEVICEPATH("C:/test"); bool e0c = ISDEVICEPATH(":\\test"); bool e0d = ISDEVICEPATH(":/test"); assert(!e0a && !e0b && e0c && e0d);
 	strcpy(__cwd, ":\\"); bool e1a = ISDEVICEPATH("."); bool e1b = ISDEVICEPATH("test"); bool e1c = ISDEVICEPATH("\test"); bool e1d = ISDEVICEPATH("/test"); assert(e1a && e1b && e1c && e1d);
 	strcpy(__cwd, "\0"); bool e2a = ISDEVICEPATH("."); bool e2b = ISDEVICEPATH("test"); bool e2c = ISDEVICEPATH("\test"); bool e2d = ISDEVICEPATH("/test"); assert(!e2a && !e2b && !e2c && !e2d);
+	/* Determines where you are based on number(handle) */
 	bool f0a = ISDEVICEHANDLE(1); bool f0b = ISDEVICEHANDLE(INT_MAX-CORE_MAXFILESTREAM); bool f0c = ISDEVICEHANDLE(INT_MAX); assert(!f0a && f0b && f0c);
 }
 cudaError_t crtdefs_test1() { g_crtdefs_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
