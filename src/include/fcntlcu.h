@@ -33,9 +33,6 @@ THE SOFTWARE.
 #include <fcntl.h>
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 #include <io.h>
-__BEGIN_DECLS;
-
-__END_DECLS;
 #include <sentinel-fcntlmsg.h>
 __BEGIN_DECLS;
 

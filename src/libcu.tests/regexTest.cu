@@ -13,7 +13,7 @@ static __device__ void exact()
 	int a = regexec(&re, &str[0], 1, &pm, REG_EXTENDED);
 	assert(a == REG_NOERROR);
 
-	int idx = 0, int offset = 0, int offsets[5];
+	int idx = 0; int offset = 0; int offsets[5];
 	while (a == REG_NOERROR) {
 		printf("%s match at %d\n", offset ? "next" : "first", offset + pm.rm_so);
 		offsets[idx++] = offset + pm.rm_so;

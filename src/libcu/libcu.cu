@@ -1,5 +1,4 @@
 #include "ctypecu.cu"
-#include "direntcu.cu"
 #include "errnocu.cu"
 #include "regexcu.cu"
 #include "sentinel-gpu.cu"
@@ -9,6 +8,7 @@
 #include "stringcu.cu"
 #include "timecu.cu"
 #include "unistdcu.cu"
+#include "direntcu.cu"
 #include "sys/statcu.cu"
 #include "sys/timecu.cu"
 #include "ext/hash.cu"
