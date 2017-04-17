@@ -5,9 +5,9 @@
 #include <assert.h>
 #include <cuda_runtimecu.h>
 
-void sentinelCommand::Dump(intptr_t base)
+void sentinelCommand::Dump()
 {
-	register char *b = Data + base;
+	register char *b = (char *)&Data;
 	register int l = Length;
 	printf("Cmd: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
@@ -44,7 +44,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		//cmd->Dump(0);
+		//cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
@@ -79,8 +79,8 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			exit(1);
 		}
 		//map->Dump();
-		cmd->Dump(map->Offset);
-		sentinelMessage *msg = (sentinelMessage *)(cmd->Data + map->Offset);
+		cmd->Dump();
+		sentinelMessage *msg = (sentinelMessage *)&cmd->Data; //(cmd->Data + map->Offset);
 		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
 		//printf(".");
 		*status = (msg->Wait ? 4 : 0);

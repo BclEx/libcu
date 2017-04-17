@@ -54,7 +54,8 @@ static __device__ FILE *streamGet(int fd = 0)
 static __device__ void streamFree(FILE *s)
 {
 	if (!s) return;
-	close(s->_file);
+	//if (s->_file != -1)
+	//	close(s->_file);
 	// advance circular buffer
 	size_t offset = atomicAdd((uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
 	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
@@ -97,6 +98,8 @@ __device__ int fclose_device(FILE *stream)
 	dirEnt_t *f; UNUSED_SYMBOL(f);
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fclose: !stream");
+	if (stream->_file != -1)
+		close(stream->_file);
 	streamFree(stream);
 	return 0;
 }
@@ -141,7 +144,7 @@ __device__ FILE *freopen_device(const char *__restrict filename, const char *__r
 	}
 	int r;
 	stream->_flag = openMode;
-	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file, &r);
+	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file);
 	if (!stream->_base) {
 		_set_errno(EINVAL);
 		streamFree(stream);
@@ -184,7 +187,7 @@ __device__ FILE *freopen64_device(const char *__restrict filename, const char *_
 			return nullptr;
 	}
 	stream->_flag = openMode;
-	stream->_base = (char *)fsystemOpen(filename, openMode);
+	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file, &r);
 	return stream;
 }
 #endif
@@ -218,7 +221,8 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
 	strbldAppendFormat(&b, false, format, va);
 	const char *v = strbldToString(&b);
-	stdio_fputs msg(wait, format, s);
+	fwrite(s, v, 0);
+	//stdio_fputs msg(wait, format, s);
 	free((void *)v);
 	return msg.RC; 
 }

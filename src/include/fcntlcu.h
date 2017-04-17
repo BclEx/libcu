@@ -42,14 +42,14 @@ __BEGIN_DECLS;
 /* Do the file control operation described by CMD on FD. The remaining arguments are interpreted depending on CMD. */
 #ifndef __USE_FILE_OFFSET64
 extern __device__ int fcntlv_device(int fd, int cmd, va_list va);
-__forceinline __device__ int fcntlv_(int fd, int cmd, va_list va) { if (ISDEVICEHANDLE(fd)) return fcntlv_device(fd, cmd, va); fcntl_fcntl msg(fd, cmd, va_arg(va, int)); return msg.RC; }
+__forceinline __device__ int fcntlv_(int fd, int cmd, va_list va) { if (ISDEVICEHANDLE(fd)) return fcntlv_device(fd, cmd, va); fcntl_fcntl msg(fd, cmd, va.i?va_arg(va, int):0); return msg.RC; }
 #define fcntl fcntl_
 #else
 #define fcntl fcntl64_
 #endif
 #ifdef __USE_LARGEFILE64
 extern __device__ int fcntl64v_device(int fd, int cmd, va_list va);
-__forceinline __device__ int fcntl64v_(int fd, int cmd, va_list va) { if (ISDEVICEHANDLE(fd)) return fcntl64v_device(fd, cmd, va); fcntl_fcntl msg(fd, cmd, va_arg(va, int)); return msg.RC; }
+__forceinline __device__ int fcntl64v_(int fd, int cmd, va_list va) { if (ISDEVICEHANDLE(fd)) return fcntl64v_device(fd, cmd, va); fcntl_fcntl msg(fd, cmd, va.i?va_arg(va, int):0); return msg.RC; }
 #define fcntl64 fcntl64_
 #endif
 
@@ -57,14 +57,14 @@ __forceinline __device__ int fcntl64v_(int fd, int cmd, va_list va) { if (ISDEVI
    the third argument is taken as a `mode_t', the mode of the created file. */
 #ifndef __USE_FILE_OFFSET64
 extern __device__ int openv_device(const char *file, int oflag, va_list va);
-__forceinline __device__ int openv_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va_arg(va, int)); return msg.RC; }
+__forceinline __device__ int openv_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
 #define open open_
 #else
 #define open open64_
 #endif
 #ifdef __USE_LARGEFILE64
 extern __device__ int open64v_device(const char *file, int oflag, va_list va);
-__forceinline __device__ int openv_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va_arg(va, int)); return msg.RC; }
+__forceinline __device__ int openv_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
 #define open64 open64_
 #endif
 

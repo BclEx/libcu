@@ -67,7 +67,7 @@ extern "C" {
 		int Unknown;
 #endif
 		char Data[1];
-		void Dump(intptr_t base);
+		void Dump();
 	} sentinelCommand;
 
 	typedef struct __align__(8)

@@ -27,8 +27,7 @@ __device__ int fcntlv_device(int fd, int cmd, va_list va)
 
 __device__ int openv_device(const char *file, int oflag, va_list va)
 {
-	int fd; int r; fsystemOpen(file, oflag, &fd, &r);
-	return fd;
+	int fd; fsystemOpen(file, oflag, &fd); return fd;
 }
 
 /* Close the file descriptor FD.  */

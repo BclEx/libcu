@@ -3,13 +3,32 @@
 #include <stdiocu.h>
 #include <stdlibcu.h>
 #include <sys/statcu.h>
+#include <unistdcu.h>
 #include <assert.h>
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
-#include <stringcu.h>
+static __device__ void makeAFile(char *file)
+{
+	FILE *f = fopen(file, "w");
+	fwrite("test", 4, 1, f);
+	fclose(f);
+}
+
+#include <fcntlcu.h>
+#define HostDir "C:\\T_\\"
+#define DeviceDir ":\\"
 __device__ void testBed()
 {
+	//char newPath[MAX_PATH]; 
+	//strcpy(__cwd, ":\\Test");
+	//expandPath(":\\one", newPath); printf("%s\n", newPath);
+	//expandPath(":\\one\\", newPath); printf("%s\n", newPath);
+	//expandPath(":\\one\\.", newPath); printf("%s\n", newPath);
+	//expandPath(":\\one\.\\", newPath); printf("%s\n", newPath);
+
+	makeAFile(DeviceDir"test.txt");
+	//int b1a = open(DeviceDir"test.txt", O_RDONLY); int b1b = close(b1a); assert(b1a && !b1b);
 }
 
 __global__ void addKernel(int *c, const int *a, const int *b)
@@ -20,7 +39,6 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 		return;
 
 	testBed();
-
 
 	////strchr("Me", 'M');
 	//printf("%d %s\n", 2, "sky morey");

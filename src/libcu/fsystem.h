@@ -22,11 +22,11 @@ struct file_t
 	char *base;
 };
 
-__device__ void absolutePath(const char *path, char *newPath);
+__device__ void expandPath(const char *path, char *newPath);
 __device__ int fsystemRename(const char *old, const char *new_);
 __device__ int fsystemUnlink(const char *path);
 __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r);
-__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd, int *r);
+__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd);
 __device__ void fsystemReset();
 
 extern __constant__ file_t __iob_files[CORE_MAXFILESTREAM];

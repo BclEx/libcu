@@ -63,7 +63,7 @@ __device__ char __cwd[MAX_PATH] = ":\\";
 __device__ dirEnt_t __iob_root = { { 0, 0, 0, 1, ":\\" }, nullptr, nullptr };
 __device__ hash_t __iob_dir = HASHINIT;
 
-__device__ void absolutePath(const char *path, char *newPath)
+__device__ void expandPath(const char *path, char *newPath)
 {
 	register unsigned char *d = (unsigned char *)newPath;
 	register unsigned char *s;
@@ -124,7 +124,7 @@ static __device__ dirEnt_t *findDir(const char *path, const char **file)
 
 __device__ int fsystemRename(const char *old, const char *new_)
 {
-	char newPath[MAX_PATH]; absolutePath(old, newPath);
+	char newPath[MAX_PATH]; expandPath(old, newPath);
 	dirEnt_t *ent = (dirEnt_t *)hashFind(&__iob_dir, old);
 	if (!ent) {
 		_set_errno(ENOENT);
@@ -135,7 +135,7 @@ __device__ int fsystemRename(const char *old, const char *new_)
 
 __device__ int fsystemUnlink(const char *path)
 {
-	char newPath[MAX_PATH]; absolutePath(path, newPath);
+	char newPath[MAX_PATH]; expandPath(path, newPath);
 	dirEnt_t *ent = (dirEnt_t *)hashFind(&__iob_dir, newPath);
 	if (!ent) {
 		_set_errno(ENOENT);
@@ -173,7 +173,7 @@ __device__ int fsystemUnlink(const char *path)
 
 __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 {
-	char newPath[MAX_PATH]; absolutePath(path, newPath);
+	char newPath[MAX_PATH]; expandPath(path, newPath);
 	dirEnt_t *dirEnt = (dirEnt_t *)hashFind(&__iob_dir, newPath);
 	if (dirEnt) {
 		*r = 1;
@@ -183,6 +183,7 @@ __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 	dirEnt_t *parentEnt = findDir(newPath, &name);
 	if (!parentEnt) {
 		_set_errno(ENOENT);
+		*r = -1;
 		return nullptr;
 	}
 	// create directory
@@ -197,23 +198,25 @@ __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 	return dirEnt;
 }
 
-__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd, int *r)
+__device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 {
-	file_t *f; *fd = fileGet(&f);
-	char newPath[MAX_PATH]; absolutePath(path, newPath);
+	char newPath[MAX_PATH]; expandPath(path, newPath);
 	dirEnt_t *fileEnt = (dirEnt_t *)hashFind(&__iob_dir, newPath);
 	if (fileEnt) {
-		*r = 1;
+		file_t *f; *fd = fileGet(&f);
+		f->base = (char *)fileEnt;
 		return fileEnt;
 	}
-	if ((mode & O_RDONLY)) {
+	if ((mode & 0xF) == O_RDONLY) {
 		_set_errno(EINVAL); // So illegal mode.
+		*fd = -1;
 		return nullptr;
 	}
 	const char *name;
 	dirEnt_t *parentEnt = findDir(newPath, &name);
 	if (!parentEnt) {
 		_set_errno(ENOENT);
+		*fd = -1;
 		return nullptr;
 	}
 	// create file
@@ -227,8 +230,8 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd,
 	// add to directory
 	fileEnt->next = parentEnt->u.list; parentEnt->u.list = fileEnt;
 	// set to file
+	file_t *f; *fd = fileGet(&f);
 	f->base = (char *)fileEnt;
-	*r = 0;
 	return fileEnt;
 }
 
