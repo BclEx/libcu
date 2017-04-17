@@ -221,10 +221,13 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
 	strbldAppendFormat(&b, false, format, va);
 	const char *v = strbldToString(&b);
-	fwrite(s, v, 0);
-	//stdio_fputs msg(wait, format, s);
+	int size = b.index + 1;
+	// chunk results
+	int offset = 0; int rc = 0;
+	if (ISDEVICEFILE(s)) while (size > 0 && !rc) { rc = fwrite_device(v + offset, (size > 1024 ? 1024 : size), 1, s); size -= 1024; }
+	else while (size > 0 && !rc) { stdio_fwrite msg(true, v + offset, (size > 1024 ? 1024 : size), 1, s); rc = msg.RC; size -= 1024; }
 	free((void *)v);
-	return msg.RC; 
+	return rc; 
 }
 #endif
 

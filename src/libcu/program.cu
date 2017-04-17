@@ -8,27 +8,38 @@
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 
-static __device__ void makeAFile(char *file)
-{
-	FILE *f = fopen(file, "w");
-	fwrite("test", 4, 1, f);
-	fclose(f);
-}
+//static __device__ void makeAFile(char *file)
+//{
+//	FILE *f = fopen(file, "w");
+//	fwrite("test", 4, 1, f);
+//	fclose(f);
+//}
 
-#include <fcntlcu.h>
 #define HostDir "C:\\T_\\"
 #define DeviceDir ":\\"
+#include "fsystem.h"
+#include <direntcu.h>
+//
+//static __device__ void testReading(DIR *d)
+//{
+//	struct dirent *a0 = readdir(d); assert(a0);
+//	bool b0 = !strcmp(a0->d_name, "dir0"); assert(!b0);
+//	struct dirent *c0 = readdir(d); assert(!c0);
+//	rewinddir(d);
+//	struct dirent *d0 = readdir(d); assert(d0);
+//	bool e0 = !strcmp(d0->d_name, "dir0"); assert(!e0);
+//}
+
 __device__ void testBed()
 {
-	//char newPath[MAX_PATH]; 
-	//strcpy(__cwd, ":\\Test");
-	//expandPath(":\\one", newPath); printf("%s\n", newPath);
-	//expandPath(":\\one\\", newPath); printf("%s\n", newPath);
-	//expandPath(":\\one\\.", newPath); printf("%s\n", newPath);
-	//expandPath(":\\one\.\\", newPath); printf("%s\n", newPath);
-
-	makeAFile(DeviceDir"test.txt");
-	//int b1a = open(DeviceDir"test.txt", O_RDONLY); int b1b = close(b1a); assert(b1a && !b1b);
+	//DIR *a0a = opendir(HostDir"missing");
+	//int a0b = closedir(a0a);
+	//assert(!a0a && a0b == -1);
+	//
+	//mkdir(HostDir"test", 0);
+	//mkdir(HostDir"test\\dir0", 0);
+	//DIR *a1a = opendir(HostDir"test");
+	//bool a1b = !strcmp(a1a->ent.d_name, "test"); testReading(a0a); int a1c = closedir(a1a); assert(a1a && a1b && !a1c);
 }
 
 __global__ void addKernel(int *c, const int *a, const int *b)

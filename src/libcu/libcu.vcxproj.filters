@@ -110,6 +110,9 @@
     <ClInclude Include="..\include\sentinel-fcntlmsg.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\sentinel-direntmsg.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />

@@ -70,25 +70,26 @@ __device__ void expandPath(const char *path, char *newPath)
 	// add cwd
 	if (path[0] != ':') {
 		s = (unsigned char *)__cwd;
-		while (*s) { *d++ = *s++; }
+		if (path[0] != '\\' && path[0] != '/') { while (*s) *d++ = *s++; *d++ = '\\'; } // relative
+		else *d++ = *s++; // absolute
 	}
 	// add path
 	s = (unsigned char *)path;
-	int i = 0;
+	int i = 0; int c;
 	while (*s) {
-		int c = *s;
+		c = *s;
 		if (c == '/') c = '\\'; // switch from unix path
 		if (c == '\\') {
 			// directory reached
-			if (i == 1 && s[-1] == '.') d -= 2; // self directory
-			else if (i == 2 && s[-1] == '.' && s[-2] == '.') while (*d >= *newPath && *d != '\\') *d--; // parent directory
+			if (i == 2 && s[-1] == '.') d -= 2; // self directory
+			else if (i == 3 && s[-1] == '.' && s[-2] == '.') { d -= 4; while (*d >= *newPath && *d != '\\') *d--; } // parent directory
 			i = 0;
 		}
 		// advance
 		*d++ = c; s++; i++;
 	}
-	// remove trailing '\'
-	d[*d == '\\' ? 0 : 1] = 0;
+	// remove trailing '\.' && '\'
+	d[c == '.' && i == 2 ? -2 : i == 1 ? -1 : 0] = 0;
 }
 
 static __device__ void freeEnt(dirEnt_t *ent)

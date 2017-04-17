@@ -5,6 +5,7 @@
 #include <time.h>
 #include <sys/statcu.h>
 #include <io.h>
+#include <sentinel-direntmsg.h>
 #include <sentinel-fcntlmsg.h>
 #include <sentinel-unistdmsg.h>
 #include <sentinel-stdiomsg.h>
@@ -59,6 +60,13 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case FCNTL_CHMOD: { fcntl_chmod *msg = (fcntl_chmod *)data; msg->RC = _chmod(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKDIR: { fcntl_mkdir *msg = (fcntl_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKFIFO: { fcntl_mkfifo *msg = (fcntl_mkfifo *)data; msg->RC = mkfifo(msg->Str, msg->Mode); return true; }
+	case DIRENT_OPENDIR: { dirent_opendir *msg = (dirent_opendir *)data; msg->RC = opendir(msg->Str); return true; }
+	case DIRENT_CLOSEDIR: { dirent_closedir *msg = (dirent_closedir *)data; msg->RC = closedir(msg->Ptr); return true; }
+	case DIRENT_READDIR: { dirent_readdir *msg = (dirent_readdir *)data; msg->RC = readdir(msg->Ptr); return true; }
+#ifdef __USE_LARGEFILE64
+	case DIRENT_READDIR64: { dirent_readdir64 *msg = (dirent_readdir64 *)data; msg->RC = readdir64(msg->Ptr); return true; }
+#endif
+	case DIRENT_REWINDDIR: { dirent_rewinddir *msg = (dirent_rewinddir *)data; rewinddir(msg->Ptr); return true; }
 	case TIME_MKTIME: { time_mktime *msg = (time_mktime *)data; msg->RC = mktime(msg->Tp); return true; }
 	case TIME_STRFTIME: { time_strftime *msg = (time_strftime *)data; msg->RC = strftime((char *)msg->Str, msg->Maxsize, msg->Str2, msg->Tp); return true; }
 	}

@@ -1,5 +1,5 @@
 /*
-sentinel-statmsg.h - messages for sentinel
+sentinel-fcntlmsg.h - messages for sentinel
 The MIT License
 
 Copyright (c) 2016 Sky Morey

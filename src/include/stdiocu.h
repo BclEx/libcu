@@ -79,7 +79,7 @@ __BEGIN_DECLS;
 ///* Default path prefix for `mkstemp'.  */
 //#define P_tmpdir "/tmp"
 
-#define ISDEVICEFILE(stream) (stream >= __iob_streams && stream <= __iob_streams + CORE_MAXFILESTREAM+3)
+#define ISDEVICEFILE(stream) ((stream) >= __iob_streams && (stream) <= __iob_streams + CORE_MAXFILESTREAM+3)
 extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
 #undef stdin
 #undef stdout
