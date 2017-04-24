@@ -70,10 +70,21 @@ struct dirent_closedir
 
 struct dirent_readdir
 {
+	static __forceinline __host__ char *HostPrepare(dirent_readdir *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		if (!t->RC) return data;
+		int ptrLength = sizeof(struct dirent);
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += ptrLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(ptr, t->RC, ptrLength);
+		t->RC = (struct dirent *)(ptr - offset);
+		return end;
+	}
 	sentinelMessage Base;
 	DIR *Ptr;
 	__device__ dirent_readdir(DIR *ptr)
-		: Base(true, DIRENT_READDIR), Ptr(ptr) { sentinelDeviceSend(&Base, sizeof(dirent_readdir)); }
+		: Base(true, DIRENT_READDIR, 1024, nullptr), Ptr(ptr) { sentinelDeviceSend(&Base, sizeof(dirent_readdir)); }
 	struct dirent *RC;
 };
 

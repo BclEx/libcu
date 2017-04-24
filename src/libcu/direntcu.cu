@@ -1,14 +1,33 @@
 #include <direntcu.h>
+#include "fsystem.h"
+
+struct cuDIR {
+    struct DIR dir;
+	void *listIdx; void *list;
+	int fakeIdx; int fake;
+};
 
 /* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
 __device__ DIR *opendir_device(const char *name)
 {
-	return nullptr;
+	dirEnt_t *ent = fsystemOpendir(name);
+	if (!ent) {
+		return nullptr;
+	}
+	cuDIR *dirp = (cuDIR *)malloc(sizeof(cuDIR));
+	memcpy(dirp, ent, sizeof(dirEnt_t));
+	dirp->dir.wdirp = nullptr;
+	// set first file
+	dirp->list = dirp->listIdx = ent->u.list;
+	dirp->fake = dirp->fakeIdx = (ent != &__iob_root ? 2 : 0);
+	return (DIR *)dirp;
 }
 
 /* Close the directory stream DIRP. Return 0 if successful, -1 if not.  */
 __device__ int closedir_device(DIR *dirp)
 {
+	if (!dirp) return -1;
+	free(dirp);
 	return 0;
 }
 
@@ -16,21 +35,39 @@ __device__ int closedir_device(DIR *dirp)
 storage returned may be overwritten by a later readdir call on the same DIR stream.
 
 If the Large File Support API is selected we have to use the appropriate interface.  */
+__constant__ struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
+
 __device__ struct dirent *readdir_device(DIR *dirp)
 {
-	return nullptr;
+	cuDIR *p = (cuDIR *)dirp;
+	if (!p || !p->listIdx) return nullptr;
+	if (p->fakeIdx)
+		return (struct dirent *)&_dirpFakes[--p->fakeIdx];
+	memcpy(p, p->listIdx, sizeof(dirent));
+	p->listIdx = ((dirEnt_t *)p->listIdx)->next;
+	return (struct dirent *)p;
 }
 
 #ifdef __USE_LARGEFILE64
 __device__ struct dirent64 *readdir64_device(DIR *dirp)
 {
-	return nullptr;
+	cuDIR *p = (cuDIR *)dirp;
+	if (!p || !p->listIdx) return nullptr;
+	if (p->fakeIdx)
+		return (struct dirent *)&_dirpFakes[--p->fakeIdx];
+	memcpy(p, p->listIdx, sizeof(dirent));
+	p->listIdx = ((dirEnt_t *)p->listIdx)->next;
+	return (struct dirent *)p;
 }
 #endif
 
 /* Rewind DIRP to the beginning of the directory.  */
 __device__ void rewinddir_device(DIR *dirp)
 {
+	cuDIR *p = (cuDIR *)dirp;
+	memcpy(p, p->list, sizeof(dirent));
+	p->listIdx = (dirEnt_t *)p->list;
+	p->fakeIdx = p->fake;
 }
 
 #if 0

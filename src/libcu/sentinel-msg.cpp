@@ -18,7 +18,7 @@
 #define fcntl(fd, cmd, ...) 0
 #define mkfifo(path, mode) 0
 
-bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
+bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
 	switch (data->OP) {
 	case STDIO_REMOVE: { stdio_remove *msg = (stdio_remove *)data; msg->RC = remove(msg->Str); return true; }
@@ -62,7 +62,7 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length)
 	case FCNTL_MKFIFO: { fcntl_mkfifo *msg = (fcntl_mkfifo *)data; msg->RC = mkfifo(msg->Str, msg->Mode); return true; }
 	case DIRENT_OPENDIR: { dirent_opendir *msg = (dirent_opendir *)data; msg->RC = opendir(msg->Str); return true; }
 	case DIRENT_CLOSEDIR: { dirent_closedir *msg = (dirent_closedir *)data; msg->RC = closedir(msg->Ptr); return true; }
-	case DIRENT_READDIR: { dirent_readdir *msg = (dirent_readdir *)data; msg->RC = readdir(msg->Ptr); return true; }
+	case DIRENT_READDIR: { dirent_readdir *msg = (dirent_readdir *)data; msg->RC = readdir(msg->Ptr); *hostPrepare = SENTINELPREPARE(dirent_readdir::HostPrepare); return true; }
 #ifdef __USE_LARGEFILE64
 	case DIRENT_READDIR64: { dirent_readdir64 *msg = (dirent_readdir64 *)data; msg->RC = readdir64(msg->Ptr); return true; }
 #endif

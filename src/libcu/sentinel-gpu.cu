@@ -15,14 +15,13 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 	sentinelMap *map = _sentinelDeviceMap[_sentinelMapId++ % SENTINEL_DEVICEMAPS];
 	if (!map)
 		panic("sentinel: device map not defined. did you start sentinel?\n");
-	int length = msgLength + msg->Size;
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, map->Offset))
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + msgLength + msg->Size, map->Offset))
 		panic("msg too long");
 	memcpy(cmd->Data, msg, msgLength);
 	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");

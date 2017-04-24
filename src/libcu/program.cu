@@ -20,26 +20,27 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 #include "fsystem.h"
 #include <direntcu.h>
 //
-//static __device__ void testReading(DIR *d)
-//{
-//	struct dirent *a0 = readdir(d); assert(a0);
-//	bool b0 = !strcmp(a0->d_name, "dir0"); assert(!b0);
-//	struct dirent *c0 = readdir(d); assert(!c0);
-//	rewinddir(d);
-//	struct dirent *d0 = readdir(d); assert(d0);
-//	bool e0 = !strcmp(d0->d_name, "dir0"); assert(!e0);
-//}
+static __device__ void testReading(DIR *d)
+{
+	struct dirent *a0 = readdir(d); assert(a0); bool a1 = !strcmp(a0->d_name, "."); assert(a1);
+	struct dirent *b0 = readdir(d); assert(b0); bool b1 = !strcmp(b0->d_name, ".."); assert(b1);
+	struct dirent *c0 = readdir(d); assert(c0); bool c1 = !strcmp(c0->d_name, "dir0"); assert(c1);
+	struct dirent *d0 = readdir(d); assert(!d0);
+	rewinddir(d);
+	struct dirent *e0 = readdir(d); assert(e0); bool e1 = !strcmp(e0->d_name, "."); assert(e1);
+}
 
 __device__ void testBed()
 {
-	//DIR *a0a = opendir(HostDir"missing");
-	//int a0b = closedir(a0a);
-	//assert(!a0a && a0b == -1);
-	//
-	//mkdir(HostDir"test", 0);
-	//mkdir(HostDir"test\\dir0", 0);
-	//DIR *a1a = opendir(HostDir"test");
-	//bool a1b = !strcmp(a1a->ent.d_name, "test"); testReading(a0a); int a1c = closedir(a1a); assert(a1a && a1b && !a1c);
+	//* Host Absolute */
+	DIR *a0a = opendir(HostDir"missing"); int a0b = closedir(a0a); assert(!a0a && a0b == -1);
+	mkdir(HostDir"test", 0); mkdir(HostDir"test\\dir0", 0);
+	DIR *a1a = opendir(HostDir"test"); testReading(a1a); int a1b = closedir(a1a); assert(a1a && !a1b);
+
+	//* Device Absolute */
+	DIR *b0a = opendir(DeviceDir":\\missing"); int b0b = closedir(b0a); assert(!b0a && b0b == -1);
+	mkdir(DeviceDir"test", 0); mkdir(DeviceDir"test\\dir0", 0);
+	DIR *b1a = opendir(DeviceDir"test"); testReading(b1a); int b1b = closedir(b1a); assert(b1a && !b1b);
 }
 
 __global__ void addKernel(int *c, const int *a, const int *b)

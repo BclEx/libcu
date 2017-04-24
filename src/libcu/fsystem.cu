@@ -92,6 +92,21 @@ __device__ void expandPath(const char *path, char *newPath)
 	d[c == '.' && i == 2 ? -2 : i == 1 ? -1 : 0] = 0;
 }
 
+static __device__ dirEnt_t *createEnt(dirEnt_t *parentEnt, const char *path, const char *name, int type, int extraSize)
+{
+	dirEnt_t *ent = (dirEnt_t *)malloc(_ROUND64(sizeof(dirEnt_t)) + extraSize);
+	char *newPath = (char *)malloc(strlen(path));
+	strcpy(newPath, path);
+	if (hashInsert(&__iob_dir, newPath, ent))
+		panic("removed entity");
+	ent->path = newPath;
+	ent->dir.d_type = type;
+	strcpy(ent->dir.d_name, name);
+	// add to directory
+	ent->next = parentEnt->u.list; parentEnt->u.list = ent;
+	return ent;
+}
+
 static __device__ void freeEnt(dirEnt_t *ent)
 {
 	if (ent->dir.d_type == 1) {
@@ -103,11 +118,22 @@ static __device__ void freeEnt(dirEnt_t *ent)
 		}
 	} else if (ent->dir.d_type == 2)
 		memfileClose(ent->u.file);
-	if (ent != &__iob_root) free(ent);
+	if (ent != &__iob_root) {
+		free(ent->path);
+		free(ent);
+	}
 	else __iob_root.u.list = nullptr;
 }
 
-static __device__ dirEnt_t *findDir(const char *path, const char **file)
+static __device__ dirEnt_t *findDir(const char *path)
+{
+	dirEnt_t *ent = !strcmp(path, ":")
+		? &__iob_root 
+		: (dirEnt_t *)hashFind(&__iob_dir, path);
+	return ent;
+}
+
+static __device__ dirEnt_t *findDirInPath(const char *path, const char **file)
 {
 	char *file2 = strrchr((char *)path, '\\');
 	if (!file2) {
@@ -120,6 +146,17 @@ static __device__ dirEnt_t *findDir(const char *path, const char **file)
 		: (dirEnt_t *)hashFind(&__iob_dir, path);
 	*file2 = '\\';
 	*file = file2 + 1;
+	return ent;
+}
+
+__device__ dirEnt_t *fsystemOpendir(const char *path)
+{
+	char newPath[MAX_PATH]; expandPath(path, newPath);
+	dirEnt_t *ent = findDir(newPath);
+	if (!ent || ent->dir.d_type != 1) {
+		_set_errno(!ent ? ENOENT : ENOTDIR);
+		return nullptr;
+	}
 	return ent;
 }
 
@@ -143,7 +180,7 @@ __device__ int fsystemUnlink(const char *path)
 		return -1;
 	}
 	const char *name;
-	dirEnt_t *parentEnt = findDir(newPath, &name);
+	dirEnt_t *parentEnt = findDirInPath(newPath, &name);
 	if (!parentEnt) {
 		_set_errno(ENOENT);
 		return -1;
@@ -181,20 +218,14 @@ __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 		return dirEnt;
 	}
 	const char *name;
-	dirEnt_t *parentEnt = findDir(newPath, &name);
+	dirEnt_t *parentEnt = findDirInPath(newPath, &name);
 	if (!parentEnt) {
 		_set_errno(ENOENT);
 		*r = -1;
 		return nullptr;
 	}
 	// create directory
-	dirEnt = (dirEnt_t *)malloc(sizeof(dirEnt_t));
-	if (hashInsert(&__iob_dir, newPath, dirEnt))
-		panic("removed directory");
-	dirEnt->dir.d_type = 1;
-	strcpy(dirEnt->dir.d_name, name);
-	// add to directory
-	dirEnt->next = parentEnt->u.list; parentEnt->u.list = dirEnt;
+	dirEnt = createEnt(parentEnt, newPath, name, 1, 0);
 	*r = 0;
 	return dirEnt;
 }
@@ -214,22 +245,16 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 		return nullptr;
 	}
 	const char *name;
-	dirEnt_t *parentEnt = findDir(newPath, &name);
+	dirEnt_t *parentEnt = findDirInPath(newPath, &name);
 	if (!parentEnt) {
 		_set_errno(ENOENT);
 		*fd = -1;
 		return nullptr;
 	}
 	// create file
-	fileEnt = (dirEnt_t *)malloc(_ROUND64(sizeof(dirEnt_t)) + __sizeofMemfile_t);
-	if (hashInsert(&__iob_dir, newPath, fileEnt))
-		panic("removed file");
-	fileEnt->dir.d_type = 2;
-	strcpy(fileEnt->dir.d_name, name);
+	fileEnt = createEnt(parentEnt, newPath, name, 2, __sizeofMemfile_t);
 	fileEnt->u.file = (memfile_t *)((char *)fileEnt + _ROUND64(sizeof(dirEnt_t)));
 	memfileOpen(fileEnt->u.file);
-	// add to directory
-	fileEnt->next = parentEnt->u.list; parentEnt->u.list = fileEnt;
 	// set to file
 	file_t *f; *fd = fileGet(&f);
 	f->base = (char *)fileEnt;

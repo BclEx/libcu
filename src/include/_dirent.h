@@ -261,7 +261,6 @@ static void _wrewinddir (_WDIR* dirp);
 #define wclosedir _wclosedir
 #define wrewinddir _wrewinddir
 
-
 /* Multi-byte character versions */
 struct dirent {
     /* Always zero */
@@ -287,15 +286,15 @@ struct DIR {
 };
 typedef struct DIR DIR;
 
-static DIR *opendir (const char *dirname);
-static struct dirent *readdir (DIR *dirp);
-static int closedir (DIR *dirp);
-static void rewinddir (DIR* dirp);
+static DIR *opendir(const char *dirname);
+static struct dirent *readdir(DIR *dirp);
+static int closedir(DIR *dirp);
+static void rewinddir(DIR* dirp);
 
 
 /* Internal utility functions */
-static WIN32_FIND_DATAW *dirent_first (_WDIR *dirp);
-static WIN32_FIND_DATAW *dirent_next (_WDIR *dirp);
+static WIN32_FIND_DATAW *dirent_first(_WDIR *dirp);
+static WIN32_FIND_DATAW *dirent_next(_WDIR *dirp);
 
 static int dirent_mbstowcs_s(
     size_t *pReturnValue,

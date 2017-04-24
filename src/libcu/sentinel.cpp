@@ -46,7 +46,8 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 		//map->Dump();
 		//cmd->Dump();
 		sentinelMessage *msg = (sentinelMessage *)cmd->Data;
-		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
+		char *(*hostPrepare)(void*,char*,char*,intptr_t) = nullptr;
+		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length, &hostPrepare); exec = exec->Next) { }
 		//printf(".");
 		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
@@ -80,9 +81,14 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 		}
 		//map->Dump();
 		cmd->Dump();
+		char *(*hostPrepare)(void*,char*,char*,intptr_t) = nullptr;
 		sentinelMessage *msg = (sentinelMessage *)&cmd->Data; //(cmd->Data + map->Offset);
-		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length); exec = exec->Next) { }
+		for (sentinelExecutor *exec = _ctx.DeviceList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length, &hostPrepare); exec = exec->Next) { }
 		//printf(".");
+		if (hostPrepare && !hostPrepare(msg, cmd->Data, cmd->Data + cmd->Length + msg->Size, map->Offset)) {
+			printf("msg too long");
+			exit(0);
+		}
 		*status = (msg->Wait ? 4 : 0);
 		map->GetId += SENTINEL_MSGSIZE;
 	}
@@ -125,7 +131,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			cudaErrorCheckF(cudaHostGetDevicePointer((void **)&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
 #ifndef _WIN64
 			_ctx.DeviceMap[i]->Offset = (intptr_t)((char *)_deviceMap[i] - (char *)d_deviceMap[i]);
-			//printf("chk: %x %x [%x]\n", _deviceMap[i], d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
+			//printf("chk: %x %x [%x]\n", (char *)_deviceMap[i], (char *)d_deviceMap[i], _ctx.DeviceMap[i]->Offset);
 #else
 			_ctx.DeviceMap[i]->Offset = 0;
 #endif

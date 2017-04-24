@@ -83,7 +83,7 @@ extern "C" {
 	{
 		sentinelExecutor *Next;
 		const char *Name;
-		bool (*Executor)(void*,sentinelMessage*,int);
+		bool (*Executor)(void*,sentinelMessage*,int, char *(**)(void*,char*,char*,intptr_t));
 		void *Tag;
 	} sentinelExecutor;
 
@@ -103,7 +103,7 @@ extern "C" {
 	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 #endif
 
-	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length);
+	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
 	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
 	extern void sentinelServerShutdown();
 #if HAS_DEVICESENTINEL

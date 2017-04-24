@@ -74,7 +74,6 @@ THE SOFTWARE.
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
-
 //////////////////////
 // ASSERT
 #pragma region ASSERT

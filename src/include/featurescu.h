@@ -37,6 +37,11 @@ and the non-ANSI way under -traditional.  */
 #define __ptr_t void *
 #define __long_double_t long double
 
+typedef struct deviceptr_t {
+	void *ptr;
+	bool device;
+} deviceptr_t;
+
 /* C++ needs to know that types and declarations are C, not C++.  */
 #ifdef	__cplusplus
 #define __BEGIN_DECLS extern "C" {

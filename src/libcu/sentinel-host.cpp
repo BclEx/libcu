@@ -17,7 +17,6 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 		printf("sentinel: device map not defined. did you start sentinel?\n");
 		exit(0);
 	}
-	int length = msgLength + msg->Size;
 	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *status = (volatile long *)&cmd->Status;
@@ -25,7 +24,7 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data+length, _sentinelHostMapOffset)) {
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + msgLength + msg->Size, _sentinelHostMapOffset)) {
 		printf("msg too long");
 		exit(0);
 	}
