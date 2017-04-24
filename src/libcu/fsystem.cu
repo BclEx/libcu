@@ -148,6 +148,13 @@ static __device__ dirEnt_t *findDirInPath(const char *path, const char **file)
 	return ent;
 }
 
+__device__ int fsystemChdir(const char *path)
+{
+	char newPath[MAX_PATH]; expandPath(path, newPath);
+	strncpy(__cwd, newPath, MAX_PATH);
+	return 0;
+}
+
 __device__ dirEnt_t *fsystemOpendir(const char *path)
 {
 	char newPath[MAX_PATH]; expandPath(path, newPath);

@@ -22,6 +22,7 @@ struct file_t {
 };
 
 __device__ void expandPath(const char *path, char *newPath);
+__device__ int fsystemChdir(const char *path);
 __device__ dirEnt_t *fsystemOpendir(const char *path);
 __device__ int fsystemRename(const char *old, const char *new_);
 __device__ int fsystemUnlink(const char *path);

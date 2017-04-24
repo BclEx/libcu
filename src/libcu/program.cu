@@ -18,25 +18,20 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 #define HostDir "C:\\T_\\"
 #define DeviceDir ":\\"
 #include "fsystem.h"
-#include <direntcu.h>
-//
-static __device__ void testReading(DIR *d)
+#include <fcntlcu.h>
+static __device__ void makeAFile(char *file)
 {
-	struct dirent *a0 = readdir(d); assert(a0); bool a1 = !strcmp(a0->d_name, "."); assert(a1);
-	struct dirent *b0 = readdir(d); assert(b0); bool b1 = !strcmp(b0->d_name, ".."); assert(b1);
-	struct dirent *c0 = readdir(d); assert(c0); bool c1 = !strcmp(c0->d_name, "dir0"); assert(c1);
-	struct dirent *d0 = readdir(d); assert(!d0);
-	rewinddir(d);
-	struct dirent *e0 = readdir(d); assert(e0); bool e1 = !strcmp(e0->d_name, "."); assert(e1);
+	FILE *fp = fopen(file, "w");
+	//fprintf_(fp, "test");
+	fclose(fp);
 }
 
 __device__ void testBed()
 {
-	//* Host Relative */
-	chdir(HostDir);
-	DIR *c0a = opendir("missing"); int c0b = closedir(c0a); assert(!c0a && c0b == -1);
-	mkdir("test", 0); mkdir("test\\dir0", 0);
-	DIR *c1a = opendir("test"); testReading(c1a); int c1b = closedir(c1a); assert(c1a && !c1b);
+	makeAFile(DeviceDir"test.txt");
+	int b1a = open(DeviceDir"test.txt", O_RDONLY);
+	int b1b = close(b1a);
+	assert(b1a && !b1b);
 }
 
 __global__ void addKernel(int *c, const int *a, const int *b)

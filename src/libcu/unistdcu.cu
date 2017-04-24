@@ -1,6 +1,7 @@
 #include <unistdcu.h>
 #include <stddefcu.h>
 #include <sentinel-unistdmsg.h>
+#include "fsystem.h"
 
 __BEGIN_DECLS;
 
@@ -69,8 +70,7 @@ __device__ int chown_device(const char *file, uid_t owner, gid_t group)
 /* Change the process's working directory to PATH.  */
 __device__ int chdir_device(const char *path)
 {
-	strncpy(__cwd, (path ? path : ":\\"), MAX_PATH);
-	return 0;
+	return fsystemChdir(path);
 }
 
 /* Get the pathname of the current working directory, and put it in SIZE bytes of BUF.  Returns NULL if the
