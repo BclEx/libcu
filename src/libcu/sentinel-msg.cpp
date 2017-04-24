@@ -50,7 +50,12 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = _close(msg->Handle); return true; }
 	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = _read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
 	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = _write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_CHOWN: { unistd_chown *msg = (unistd_chown *)data; msg->RC = /*_chown(msg->Str, msg->Owner, msg->Group)*/0; return true; }
+	case UNISTD_CHDIR: { unistd_chdir *msg = (unistd_chdir *)data; msg->RC = _chdir(msg->Str); return true; }
+	case UNISTD_GETCWD: { unistd_getcwd *msg = (unistd_getcwd *)data; msg->RC = _getcwd(msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_DUP: { unistd_dup *msg = (unistd_dup *)data; msg->RC = (msg->Dup1 ? _dup(msg->Handle) : _dup2(msg->Handle, msg->Handle2)); return true; }
 	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
+	case UNISTD_RMDIR: { unistd_rmdir *msg = (unistd_rmdir *)data; msg->RC = _rmdir(msg->Str); return true; }
 	case FCNTL_FCNTL: { fcntl_fcntl *msg = (fcntl_fcntl *)data; msg->RC = fcntl(msg->Handle, msg->Cmd, msg->P0); return true; }
 	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data; msg->RC = _open(msg->Str, msg->OFlag, msg->P0); return true; }
 	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }

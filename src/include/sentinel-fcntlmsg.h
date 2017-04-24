@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include <stringcu.h>
 
 enum {
-	FCNTL_FCNTL = 45,
+	FCNTL_FCNTL = 46,
 	FCNTL_OPEN,
 	FCNTL_CLOSE,
 	FCNTL_STAT,

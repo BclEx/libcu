@@ -32,15 +32,11 @@ static __device__ void testReading(DIR *d)
 
 __device__ void testBed()
 {
-	//* Host Absolute */
-	DIR *a0a = opendir(HostDir"missing"); int a0b = closedir(a0a); assert(!a0a && a0b == -1);
-	mkdir(HostDir"test", 0); mkdir(HostDir"test\\dir0", 0);
-	DIR *a1a = opendir(HostDir"test"); testReading(a1a); int a1b = closedir(a1a); assert(a1a && !a1b);
-
-	//* Device Absolute */
-	DIR *b0a = opendir(DeviceDir":\\missing"); int b0b = closedir(b0a); assert(!b0a && b0b == -1);
-	mkdir(DeviceDir"test", 0); mkdir(DeviceDir"test\\dir0", 0);
-	DIR *b1a = opendir(DeviceDir"test"); testReading(b1a); int b1b = closedir(b1a); assert(b1a && !b1b);
+	//* Host Relative */
+	chdir(HostDir);
+	DIR *c0a = opendir("missing"); int c0b = closedir(c0a); assert(!c0a && c0b == -1);
+	mkdir("test", 0); mkdir("test\\dir0", 0);
+	DIR *c1a = opendir("test"); testReading(c1a); int c1b = closedir(c1a); assert(c1a && !c1b);
 }
 
 __global__ void addKernel(int *c, const int *a, const int *b)

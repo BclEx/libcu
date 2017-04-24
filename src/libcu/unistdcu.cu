@@ -61,13 +61,13 @@ __device__ void usleep_(unsigned long milliseconds)
 }
 
 /* Change the owner and group of FILE.  */
-__device__ int chown_(const char *file, uid_t owner, gid_t group)
+__device__ int chown_device(const char *file, uid_t owner, gid_t group)
 {
 	return 0;
 }
 
 /* Change the process's working directory to PATH.  */
-__device__ int chdir_(const char *path)
+__device__ int chdir_device(const char *path)
 {
 	strncpy(__cwd, (path ? path : ":\\"), MAX_PATH);
 	return 0;
@@ -77,20 +77,15 @@ __device__ int chdir_(const char *path)
 directory couldn't be determined or SIZE was too small. If successful, returns BUF.  In GNU, if BUF is NULL,
 an array is allocated with `malloc'; the array is SIZE bytes long, unless SIZE == 0, in which case it is as
 big as necessary.  */
-__device__ char *getcwd_(char *buf, size_t size)
+__device__ char *getcwd_device(char *buf, size_t size)
 {
 	int pathLength = strlen(__cwd);
 	return (size > pathLength ? strncpy(buf, __cwd, size) : nullptr);
 }
 
-/* Duplicate FD, returning a new file descriptor on the same file.  */
-__device__ int dup_(int fd)
-{
-	return 0;
-}
-
-/* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-__device__ int dup2_(int fd, int fd2)
+/* dup1:true - Duplicate FD, returning a new file descriptor on the same file.  */
+/* dup1:false - Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
+__device__ int dup_device(int fd, int fd2, bool dup1)
 {
 	return 0;
 }

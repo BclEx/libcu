@@ -112,26 +112,30 @@ __device__ __forceinline void sleep_(unsigned int seconds) { usleep_(seconds * 1
 //#define pause pause_
 
 /* Change the owner and group of FILE.  */
-extern __device__ int chown_(const char *file, uid_t owner, gid_t group);
+extern __device__ int chown_device(const char *file, uid_t owner, gid_t group);
+__forceinline __device__ int chown_(const char *file, uid_t owner, gid_t group) { if (ISDEVICEPATH(file)) return chown_device(file, owner, group); __cwd[0] = 0; unistd_chown msg(file, owner, group); return msg.RC; }
 #define chown chown_
 
 /* Change the process's working directory to PATH.  */
-extern __device__ int chdir_(const char *path);
+extern __device__ int chdir_device(const char *path);
+__forceinline __device__ int chdir_(const char *path) { if (ISDEVICEPATH(path)) return chdir_device(path); __cwd[0] = 0; unistd_chdir msg(path); return msg.RC; }
 #define chdir chdir_
 
 /* Get the pathname of the current working directory, and put it in SIZE bytes of BUF.  Returns NULL if the
 directory couldn't be determined or SIZE was too small. If successful, returns BUF.  In GNU, if BUF is NULL,
 an array is allocated with `malloc'; the array is SIZE bytes long, unless SIZE == 0, in which case it is as
 big as necessary.  */
-extern __device__ char *getcwd_(char *buf, size_t size);
+extern __device__ char *getcwd_device(char *buf, size_t size);
+__forceinline __device__ char *getcwd_(char *buf, size_t size) { if (__cwd[0]) return getcwd_device(buf, size); unistd_getcwd msg(buf, size); return msg.RC; }
 #define getcwd getcwd_
 
 /* Duplicate FD, returning a new file descriptor on the same file.  */
-extern __device__ int dup_(int fd);
+extern __device__ int dup_device(int fd, int fd2, bool dup1);
+__forceinline __device__ int dup_(int fd) { if (ISDEVICEHANDLE(fd)) return dup_device(fd, -1, true); unistd_dup msg(fd, -1, true); return msg.RC; }
 #define dup dup_
 
 /* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-extern __device__ int dup2_(int fd, int fd2);
+__forceinline __device__ int dup2_(int fd, int fd2) { if (ISDEVICEHANDLE(fd)) return dup_device(fd, fd2, false); unistd_dup msg(fd, fd2, false); return msg.RC; }
 #define dup2 dup2_
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
