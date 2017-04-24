@@ -120,8 +120,8 @@ extern "C" __constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
 /* Host pointer support.  */
 extern "C" __device__ hostptr_t *__hostptrGet(void *host);
 extern "C" __device__ void __hostptrFree(hostptr_t *p);
-template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)__hostptrGet(p); }
-template <typename T> __forceinline __device__ void freehostptr(T *p) { __hostptrFree((hostptr_t *)p); }
-template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)((hostptr_t *)p)->host; }
+template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
+template <typename T> __forceinline __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
+template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
 
 #endif  /* _FEATURESCU_H */
