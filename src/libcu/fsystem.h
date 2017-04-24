@@ -7,8 +7,7 @@
 
 __BEGIN_DECLS;
 
-struct dirEnt_t
-{
+struct dirEnt_t {
 	dirent dir;		// Entry information
 	dirEnt_t *next;	// Next entity in the directory.
 	char *path;		// Path/Key
@@ -18,8 +17,7 @@ struct dirEnt_t
 	} u;
 };
 
-struct file_t
-{
+struct file_t {
 	char *base;
 };
 

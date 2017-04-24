@@ -31,8 +31,7 @@ THE SOFTWARE.
 /* Versions of the `struct stat' data structure.  */
 #define _STAT_VER		1	/* The one defined below.  */
 
-struct stat
-{
+struct stat {
 	unsigned short st_mode;		/* File mode.  */
 	short st_uid;				/* User ID of the file's owner.	*/
 	short st_gid;				/* Group ID of the file's group.*/

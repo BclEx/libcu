@@ -175,8 +175,7 @@ __BEGIN_DECLS;
 #define PRINT_BUF_SIZE 100
 #endif
 
-typedef struct strbld_t
-{
+typedef struct strbld_t {
 	void *tag;			// Optional database for lookaside.  Can be NULL
 	char *base;			// A base allocation.  Not from malloc.
 	char *text;			// The string collected so far

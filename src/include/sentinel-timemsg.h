@@ -36,8 +36,7 @@ enum {
 	TIME_STRFTIME,
 };
 
-struct time_mktime
-{
+struct time_mktime {
 	sentinelMessage Base;
 	struct tm *Tp;
 	__device__ time_mktime(struct tm *tp)
@@ -45,8 +44,7 @@ struct time_mktime
 	time_t RC;
 };
 
-struct time_strftime
-{
+struct time_strftime {
 	static __forceinline __device__ char *Prepare(time_strftime *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);

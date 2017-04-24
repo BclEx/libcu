@@ -28,8 +28,7 @@ THE SOFTWARE.
 #ifndef _LIBCU_DIRENT_H
 #define _LIBCU_DIRENT_H
 
-struct dirent
-{
+struct dirent {
 #ifndef __USE_FILE_OFFSET64
 	_ino_t d_ino;
 	_off_t d_off;

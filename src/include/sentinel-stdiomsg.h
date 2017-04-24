@@ -56,8 +56,7 @@ enum {
 	STDIO_FILENO,
 };
 
-struct stdio_remove
-{
+struct stdio_remove {
 	static __forceinline __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -75,8 +74,7 @@ struct stdio_remove
 	int RC;
 };
 
-struct stdio_rename
-{
+struct stdio_rename {
 	static __forceinline __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -98,8 +96,7 @@ struct stdio_rename
 	int RC;
 };
 
-struct stdio_fclose
-{
+struct stdio_fclose {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_fclose(bool wait, FILE *file)
@@ -107,8 +104,7 @@ struct stdio_fclose
 	int RC;
 };
 
-struct stdio_fflush
-{
+struct stdio_fflush {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_fflush(bool wait, FILE *file)
@@ -116,8 +112,7 @@ struct stdio_fflush
 	int RC;
 };
 
-struct stdio_freopen
-{
+struct stdio_freopen {
 	static __forceinline __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -139,8 +134,7 @@ struct stdio_freopen
 	FILE *RC;
 };
 
-struct stdio_setvbuf
-{
+struct stdio_setvbuf {
 	static __forceinline __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
@@ -158,8 +152,7 @@ struct stdio_setvbuf
 	int RC;
 };
 
-struct stdio_fgetc
-{
+struct stdio_fgetc {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_fgetc(FILE *file)
@@ -167,8 +160,7 @@ struct stdio_fgetc
 	int RC;
 };
 
-struct stdio_fputc
-{
+struct stdio_fputc {
 	sentinelMessage Base;
 	int Ch; FILE *File;
 	__device__ stdio_fputc(bool wait, int ch, FILE *file)
@@ -176,8 +168,7 @@ struct stdio_fputc
 	int RC;
 };
 
-struct stdio_fgets
-{
+struct stdio_fgets {
 	static __forceinline __device__ char *Prepare(stdio_fgets *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -193,8 +184,7 @@ struct stdio_fgets
 	char *RC;
 };
 
-struct stdio_fputs
-{
+struct stdio_fputs {
 	static __forceinline __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -212,8 +202,7 @@ struct stdio_fputs
 	int RC;
 };
 
-struct stdio_ungetc
-{
+struct stdio_ungetc {
 	sentinelMessage Base;
 	int Ch; FILE *File;
 	__device__ stdio_ungetc(bool wait, int ch, FILE *file)
@@ -221,8 +210,7 @@ struct stdio_ungetc
 	int RC;
 };
 
-struct stdio_fread
-{
+struct stdio_fread {
 	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
@@ -238,8 +226,7 @@ struct stdio_fread
 	void *Ptr;
 };
 
-struct stdio_fwrite
-{
+struct stdio_fwrite {
 	static __forceinline __device__ char *Prepare(stdio_fwrite *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		size_t size = t->Size * t->Num;
@@ -257,8 +244,7 @@ struct stdio_fwrite
 	size_t RC;
 };
 
-struct stdio_fseek
-{
+struct stdio_fseek {
 	sentinelMessage Base;
 	FILE *File; long int Offset; int Origin;
 	__device__ stdio_fseek(bool wait, FILE *file, long int offset, int origin)
@@ -266,8 +252,7 @@ struct stdio_fseek
 	int RC;
 };
 
-struct stdio_ftell
-{
+struct stdio_ftell {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_ftell(FILE *file)
@@ -275,16 +260,14 @@ struct stdio_ftell
 	int RC;
 };
 
-struct stdio_rewind
-{
+struct stdio_rewind {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_rewind(FILE *file)
 		: Base(true, STDIO_REWIND), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_rewind)); }
 };
 
-struct stdio_fgetpos
-{
+struct stdio_fgetpos {
 	sentinelMessage Base;
 	FILE *File;
 	fpos_t *Pos;
@@ -293,8 +276,7 @@ struct stdio_fgetpos
 	int RC;
 };
 
-struct stdio_fsetpos
-{
+struct stdio_fsetpos {
 	sentinelMessage Base;
 	FILE *File;
 	const fpos_t *Pos;
@@ -303,16 +285,14 @@ struct stdio_fsetpos
 	int RC;
 };
 
-struct stdio_clearerr
-{
+struct stdio_clearerr {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_clearerr(FILE *file)
 		: Base(false, STDIO_CLEARERR), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_clearerr)); }
 };
 
-struct stdio_feof
-{
+struct stdio_feof {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_feof(FILE *file)
@@ -320,8 +300,7 @@ struct stdio_feof
 	int RC;
 };
 
-struct stdio_ferror
-{
+struct stdio_ferror {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_ferror(FILE *file)
@@ -329,8 +308,7 @@ struct stdio_ferror
 	int RC;
 };
 
-struct stdio_fileno
-{
+struct stdio_fileno {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_fileno(FILE *file)

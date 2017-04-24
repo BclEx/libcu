@@ -44,8 +44,7 @@ enum {
 	FCNTL_MKFIFO,
 };
 
-struct fcntl_fcntl
-{
+struct fcntl_fcntl {
 	sentinelMessage Base;
 	int Handle; int Cmd; int P0;
 	__device__ fcntl_fcntl(int fd, int cmd, int p0)
@@ -53,8 +52,7 @@ struct fcntl_fcntl
 	int RC;
 };
 
-struct fcntl_open
-{
+struct fcntl_open {
 	static __forceinline __device__ char *Prepare(fcntl_open *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -72,8 +70,7 @@ struct fcntl_open
 	int RC;
 };
 
-struct fcntl_stat
-{
+struct fcntl_stat {
 	static __forceinline __device__ char *Prepare(fcntl_stat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -92,8 +89,7 @@ struct fcntl_stat
 	int RC;
 };
 
-struct fcntl_fstat
-{
+struct fcntl_fstat {
 	static __forceinline __device__ char *Prepare(fcntl_fstat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
@@ -109,8 +105,7 @@ struct fcntl_fstat
 	int RC;
 };
 
-struct fcntl_stat64
-{
+struct fcntl_stat64 {
 	static __forceinline __device__ char *Prepare(fcntl_stat64 *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -129,8 +124,7 @@ struct fcntl_stat64
 	int RC;
 };
 
-struct fcntl_fstat64
-{
+struct fcntl_fstat64 {
 	static __forceinline __device__ char *Prepare(fcntl_fstat64 *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
@@ -146,8 +140,7 @@ struct fcntl_fstat64
 	int RC;
 };
 
-struct fcntl_chmod
-{
+struct fcntl_chmod {
 	static __forceinline __device__ char *Prepare(fcntl_chmod *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -165,8 +158,7 @@ struct fcntl_chmod
 	int RC;
 };
 
-struct fcntl_mkdir
-{
+struct fcntl_mkdir {
 	static __forceinline __device__ char *Prepare(fcntl_mkdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -184,8 +176,7 @@ struct fcntl_mkdir
 	int RC;
 };
 
-struct fcntl_mkfifo
-{
+struct fcntl_mkfifo {
 	static __forceinline __device__ char *Prepare(fcntl_mkfifo *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);

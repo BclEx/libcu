@@ -16,8 +16,7 @@ __BEGIN_DECLS;
 // STREAMS
 #pragma region STREAMS
 
-typedef struct __align__(8)
-{
+typedef struct __align__(8) {
 	FILE *file;				// reference
 	unsigned short id;		// ID of author
 	unsigned short threadid;// thread ID of author

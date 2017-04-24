@@ -12,20 +12,17 @@ extern "C" {
 	typedef struct filePoint_t filePoint_t;
 	typedef struct fileChunk_t fileChunk_t;
 
-	struct fileChunk_t
-	{
+	struct fileChunk_t {
 		fileChunk_t *next;			// Next chunk in the journal
 		uint8_t chunk[JOURNAL_CHUNKSIZE]; // Content of this chunk
 	};
 
-	struct filePoint_t
-	{
+	struct filePoint_t {
 		int64_t offset;				// Offset from the beginning of the file
 		fileChunk_t *chunk;			// Specific chunk into which cursor points
 	};
 
-	typedef struct memfile_t
-	{
+	typedef struct memfile_t {
 		bool opened;
 		fileChunk_t *first;			// Head of in-memory chunk-list
 		filePoint_t endpoint;		// Pointer to the end of the file

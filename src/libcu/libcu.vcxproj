@@ -75,6 +75,7 @@
     <None Include="fsystem.cu" />
     <None Include="fcntlcu.cu" />
     <None Include="grpcu.cu" />
+    <None Include="crtdefscu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

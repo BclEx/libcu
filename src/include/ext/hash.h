@@ -30,20 +30,17 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-	struct hashElem_t
-	{
+	struct hashElem_t {
 		hashElem_t *next, *prev;		// Next and previous elements in the table
 		void *data;						// Data associated with this element
 		const char *key;				// Key associated with this element
 	};
 
-	struct hash_t
-	{
+	struct hash_t {
 		unsigned int tableSize;			// Number of buckets in the hash table
 		unsigned int count;				// Number of entries in this table
 		hashElem_t *first;				// The first element of the array
-		struct htable_t
-		{              
+		struct htable_t {
 			int count;					// Number of entries with this hash
 			hashElem_t *chain;			// Pointer to first entry with this hash
 		} *table; // the hash table

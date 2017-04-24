@@ -46,8 +46,7 @@ extern "C" {
 #define SENTINEL_NAME "Sentinel" //"Global\\Sentinel"
 #define SENTINEL_DEVICEMAPS 1
 
-	struct sentinelMessage
-	{
+	struct sentinelMessage {
 		bool Wait;
 		char OP;
 		int Size;
@@ -58,8 +57,7 @@ extern "C" {
 	};
 #define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,intptr_t))&P)
 
-	typedef struct __align__(8)
-	{
+	typedef struct __align__(8) {
 		unsigned short Magic;
 		volatile long Status;
 		int Length;
@@ -70,8 +68,7 @@ extern "C" {
 		void Dump();
 	} sentinelCommand;
 
-	typedef struct __align__(8)
-	{
+	typedef struct __align__(8) {
 		long GetId;
 		volatile long SetId;
 		intptr_t Offset;
@@ -79,16 +76,14 @@ extern "C" {
 		void Dump();
 	} sentinelMap;
 
-	typedef struct sentinelExecutor
-	{
+	typedef struct sentinelExecutor {
 		sentinelExecutor *Next;
 		const char *Name;
 		bool (*Executor)(void*,sentinelMessage*,int, char *(**)(void*,char*,char*,intptr_t));
 		void *Tag;
 	} sentinelExecutor;
 
-	typedef struct sentinelContext
-	{
+	typedef struct sentinelContext {
 		sentinelMap *DeviceMap[SENTINEL_DEVICEMAPS];
 		sentinelMap *HostMap;
 		sentinelExecutor *HostList;

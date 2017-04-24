@@ -37,10 +37,9 @@ and the non-ANSI way under -traditional.  */
 #define __ptr_t void *
 #define __long_double_t long double
 
-typedef struct deviceptr_t {
-	void *ptr;
-	bool device;
-} deviceptr_t;
+typedef struct hostptr_t {
+	void *host;
+} hostptr_t;
 
 /* C++ needs to know that types and declarations are C, not C++.  */
 #ifdef	__cplusplus
@@ -107,11 +106,22 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define CORE_MAXFILESTREAM 10
 #endif
 
+#ifndef CORE_MAXHOSTPTR
+#define CORE_MAXHOSTPTR 10
+#endif
+
+/* IsDevice support.  */
 extern "C" __device__ char __cwd[];
 #define ISDEVICEPATH(path) (((path)[1] != ':') && ((path)[0] == ':' || __cwd[0] != 0))
 #define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
-// absolute host	C:\path || /path
-// absolute device	:\path
-// cdw on device
+#define ISDEVICEPTR(ptr) ((hostptr_t *)(ptr) < __iob_hostptrs || (hostptr_t *)(ptr) > __iob_hostptrs + CORE_MAXHOSTPTR)
+extern "C" __constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
+
+/* Host pointer support.  */
+extern "C" __device__ hostptr_t *__hostptrGet(void *host);
+extern "C" __device__ void __hostptrFree(hostptr_t *p);
+template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)__hostptrGet(p); }
+template <typename T> __forceinline __device__ void freehostptr(T *p) { __hostptrFree((hostptr_t *)p); }
+template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)((hostptr_t *)p)->host; }
 
 #endif  /* _FEATURESCU_H */

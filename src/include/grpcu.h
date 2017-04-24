@@ -29,8 +29,7 @@ THE SOFTWARE.
 #include <featurescu.h>
 
 #define gid_t short
-struct group
-{
+struct group {
 	char *gr_name;		// the name of the group
 	gid_t gr_gid;		// numerical group ID
 	char  **gr_mem;		// pointer to a null-terminated array of character pointers to member names

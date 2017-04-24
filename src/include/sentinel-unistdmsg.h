@@ -41,8 +41,7 @@ enum {
 	UNISTD_RMDIR,
 };
 
-struct unistd_access
-{
+struct unistd_access {
 	static __forceinline __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int nameLength = (t->Name ? (int)strlen(t->Name) + 1 : 0);
@@ -60,8 +59,7 @@ struct unistd_access
 	int RC;
 };
 
-struct unistd_lseek
-{
+struct unistd_lseek {
 	sentinelMessage Base;
 	int Handle; long Offset; int Whence; bool Bit64;
 	__device__ unistd_lseek(int fd, long offset, int whence)
@@ -69,8 +67,7 @@ struct unistd_lseek
 	long RC;
 };
 
-struct unistd_close
-{
+struct unistd_close {
 	sentinelMessage Base;
 	int Handle;
 	__device__ unistd_close(int fd)
@@ -78,8 +75,7 @@ struct unistd_close
 	int RC;
 };
 
-struct unistd_read
-{
+struct unistd_read {
 	static __forceinline __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
@@ -94,8 +90,7 @@ struct unistd_read
 	size_t RC;
 };
 
-struct unistd_write
-{
+struct unistd_write {
 	static __forceinline __device__ char *Prepare(unistd_write *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		size_t size = t->Size;
@@ -113,8 +108,7 @@ struct unistd_write
 	size_t RC;
 };
 
-struct unistd_unlink
-{
+struct unistd_unlink {
 	static __forceinline __device__ char *Prepare(unistd_unlink *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -132,8 +126,7 @@ struct unistd_unlink
 	int RC;
 };
 
-struct unistd_rmdir
-{
+struct unistd_rmdir {
 	static __forceinline __device__ char *Prepare(unistd_rmdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);

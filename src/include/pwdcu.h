@@ -32,8 +32,7 @@ THE SOFTWARE.
 
 #define uid_t short
 
-struct passwd
-{
+struct passwd {
 	char *pw_name;		// user's login name
 	uid_t pw_uid;		// numerical user ID
 	gid_t pw_gid;		// numerical group ID

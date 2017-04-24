@@ -281,8 +281,7 @@ __device__ char *strerror_(int errnum)
 
 #define BUFSIZE PRINT_BUF_SIZE  // Size of the output buffer
 
-enum TYPE : unsigned char
-{
+enum TYPE : unsigned char {
 	TYPE_RADIX = 1,			// Integer types.  %d, %x, %o, and so forth
 	TYPE_FLOAT = 2,			// Floating point.  %f
 	TYPE_EXP = 3,			// Exponentional notation. %e and %E
@@ -304,16 +303,15 @@ enum TYPE : unsigned char
 	TYPE_INVALID = 0,		// Any unrecognized conversion type
 };
 
-enum FLAG : unsigned char
-{
+enum FLAG : unsigned char {
 	FLAG_SIGNED = 1,	// True if the value to convert is signed
 	FLAG_INTERN = 2,	// True if for internal use only
 	FLAG_STRING = 4,	// Allow infinity precision
 };
 
 // Each builtin conversion character (ex: the 'd' in "%d") is described by an instance of the following structure
-typedef struct info_t
-{   // Information about each format field
+typedef struct info_t {
+	// Information about each format field
 	char fmtType; // The format field code letter
 	unsigned char base; // The base for radix conversion
 	FLAG flags; // One or more of FLAG_ constants below

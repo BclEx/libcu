@@ -40,8 +40,7 @@ enum {
 	DIRENT_REWINDDIR,
 };
 
-struct dirent_opendir
-{
+struct dirent_opendir {
 	static __forceinline __device__ char *Prepare(dirent_opendir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
@@ -59,8 +58,7 @@ struct dirent_opendir
 	DIR *RC;
 };
 
-struct dirent_closedir
-{
+struct dirent_closedir {
 	sentinelMessage Base;
 	DIR *Ptr;
 	__device__ dirent_closedir(DIR *ptr)
@@ -68,8 +66,7 @@ struct dirent_closedir
 	int RC;
 };
 
-struct dirent_readdir
-{
+struct dirent_readdir {
 	static __forceinline __host__ char *HostPrepare(dirent_readdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		if (!t->RC) return data;
@@ -89,8 +86,7 @@ struct dirent_readdir
 };
 
 #ifdef __USE_LARGEFILE64
-struct dirent_readdir64
-{
+struct dirent_readdir64 {
 	sentinelMessage Base;
 	DIR *Ptr;
 	__device__ dirent_readdir64(DIR *ptr)
@@ -99,8 +95,7 @@ struct dirent_readdir64
 };
 #endif
 
-struct dirent_rewinddir
-{
+struct dirent_rewinddir {
 	sentinelMessage Base;
 	DIR *Ptr;
 	__device__ dirent_rewinddir(DIR *ptr)

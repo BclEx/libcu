@@ -5,8 +5,7 @@
 
 bool gpuAssert(cudaError_t code, const char *action, const char *file, int line, bool abort)
 {
-	if (code != cudaSuccess) 
-	{
+	if (code != cudaSuccess)  {
 		fprintf(stderr, "GPUassert: %s [%s:%d]\n", cudaGetErrorString(code), file, line);
 		//getchar();
 		if (abort) exit(code);
@@ -17,8 +16,7 @@ bool gpuAssert(cudaError_t code, const char *action, const char *file, int line,
 
 __forceinline int __convertSMVer2Cores(int major, int minor)
 {
-	typedef struct // Defines for GPU Architecture types (using the SM version to determine the # of cores per SM
-	{
+	typedef struct { // Defines for GPU Architecture types (using the SM version to determine the # of cores per SM
 		int SM; // 0xMm (hexidecimal notation), M = SM Major version, and m = SM minor version
 		int Cores;
 	} SMToCores;
@@ -38,8 +36,7 @@ __forceinline int __convertSMVer2Cores(int major, int minor)
         {   -1, -1 }
 	};
 	int index = 0;
-	while (gpuArchCoresPerSM[index].SM != -1)
-	{
+	while (gpuArchCoresPerSM[index].SM != -1) {
 		if (gpuArchCoresPerSM[index].SM == ((major << 4) + minor))
 			return gpuArchCoresPerSM[index].Cores;
 		index++;
@@ -57,8 +54,7 @@ int gpuGetMaxGflopsDevice()
 	if (deviceCount == 1) return 0;
 	// Find the best major SM Architecture GPU device
 	int bestMajor = 0;
-	for (int i = 0; i < deviceCount; i++)
-	{
+	for (int i = 0; i < deviceCount; i++) {
 		cudaGetDeviceProperties(&deviceProp, i);
 		// If this GPU is not running on Compute Mode prohibited, then we can add it to the list
 		if (deviceProp.computeMode != cudaComputeModeProhibited && deviceProp.major > 0 && deviceProp.major < 9999)
@@ -67,16 +63,13 @@ int gpuGetMaxGflopsDevice()
 	// Find the best CUDA capable GPU device
 	int bestDevice = 0;
 	unsigned long long basePerformace = 0;
-	for (int i = 0; i < deviceCount; i++ )
-	{
+	for (int i = 0; i < deviceCount; i++ ) {
 		cudaGetDeviceProperties(&deviceProp, i);
 		// If this GPU is not running on Compute Mode prohibited, then we can add it to the list
-		if (deviceProp.computeMode != cudaComputeModeProhibited)
-		{
+		if (deviceProp.computeMode != cudaComputeModeProhibited) {
 			int sm_per_multiproc = (deviceProp.major == 9999 && deviceProp.minor == 9999 ? 1 : __convertSMVer2Cores(deviceProp.major, deviceProp.minor));
 			unsigned long long performace = (deviceProp.multiProcessorCount * sm_per_multiproc * deviceProp.clockRate);
-			if (performace > basePerformace)
-			{
+			if (performace > basePerformace) {
 				basePerformace = performace;
 				bestDevice = i;
 			}
@@ -93,8 +86,7 @@ char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaErr
 	for (i = 0; i < length; i++)
 		size += (value[i] ? strlen(value[i]) + 1 : 0);
 	char *ptr = (char *)malloc(size);
-	if (!ptr)
-	{
+	if (!ptr) {
 		printf("cudaDeviceTransferStringArray: RC_NOMEM");
 		if (error) *error = cudaErrorMemoryAllocation;
 		return nullptr;

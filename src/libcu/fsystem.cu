@@ -11,8 +11,7 @@ __BEGIN_DECLS;
 // FILES
 #pragma region FILES
 
-typedef struct __align__(8)
-{
+typedef struct __align__(8) {
 	file_t *file;			// reference
 	unsigned short id;		// ID of author
 	unsigned short threadid;// thread ID of author

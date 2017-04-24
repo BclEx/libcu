@@ -7,16 +7,15 @@ struct cuDIR {
 	int fakeIdx; int fake;
 };
 
+__constant__ struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
+
 /* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
 __device__ DIR *opendir_device(const char *name)
 {
 	dirEnt_t *ent = fsystemOpendir(name);
-	if (!ent) {
-		return nullptr;
-	}
+	if (!ent) return nullptr;
 	cuDIR *dirp = (cuDIR *)malloc(sizeof(cuDIR));
 	memcpy(dirp, ent, sizeof(dirEnt_t));
-	dirp->dir.wdirp = nullptr;
 	// set first file
 	dirp->list = dirp->listIdx = ent->u.list;
 	dirp->fake = dirp->fakeIdx = (ent != &__iob_root ? 2 : 0);
@@ -35,8 +34,6 @@ __device__ int closedir_device(DIR *dirp)
 storage returned may be overwritten by a later readdir call on the same DIR stream.
 
 If the Large File Support API is selected we have to use the appropriate interface.  */
-__constant__ struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
-
 __device__ struct dirent *readdir_device(DIR *dirp)
 {
 	cuDIR *p = (cuDIR *)dirp;

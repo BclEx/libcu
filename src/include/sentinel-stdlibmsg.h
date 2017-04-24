@@ -35,8 +35,7 @@ enum {
 	STDLIB_SYSTEM,
 };
 
-struct stdlib_exit
-{
+struct stdlib_exit {
 	sentinelMessage Base;
 	bool Std;
 	int Status;
@@ -44,8 +43,7 @@ struct stdlib_exit
 		: Base(false, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(&Base, sizeof(stdlib_exit)); }
 };
 
-struct stdlib_system
-{
+struct stdlib_system {
 	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);

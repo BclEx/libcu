@@ -34,14 +34,12 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-	typedef struct
-	{
+	typedef struct {
 		int rm_so;
 		int rm_eo;
 	} regmatch_t;
 
-	typedef struct regexp
-	{
+	typedef struct regexp {
 		int re_nsub;		// number of parenthesized subexpressions
 
 		// private
@@ -71,8 +69,7 @@ extern "C" {
 #define REG_ICASE 2
 #define REG_NOTBOL 16
 
-	enum
-	{
+	enum {
 		REG_NOERROR,      // Success
 		REG_NOMATCH,      // Didn't find a match (for regexec)
 		REG_BADPAT,		  // >= REG_BADPAT is an error

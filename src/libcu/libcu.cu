@@ -1,3 +1,4 @@
+#include "crtdefscu.cu"
 #include "ctypecu.cu"
 #include "errnocu.cu"
 #include "regexcu.cu"
