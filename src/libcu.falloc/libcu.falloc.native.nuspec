@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Libcu.Falloc.Native</id>
-    <version>0.5.0</version>
+    <version>0.5.0-alpha</version>
     <title>Libcu Falloc</title>
     <authors>Contoso</authors>
     <owners>Contoso</owners>

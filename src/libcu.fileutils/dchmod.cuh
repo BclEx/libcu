@@ -1,8 +1,8 @@
 #include <sys/statcu.h>
-#include <unistdcu.h>
+//#include <unistdcu.h>
 
 __device__ int d_dchmod_rc;
-__global__ void g_dchmod(char *str, int mode)
+__global__ void g_dchmod(char *str, mode_t mode)
 {
 	d_dchmod_rc = (chmod(str, mode) < 0);
 }

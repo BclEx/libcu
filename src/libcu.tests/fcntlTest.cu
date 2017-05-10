@@ -4,12 +4,15 @@
 #include <unistdcu.h>
 #include <assert.h>
 
+#ifndef MAKEAFILE
+#define MAKEAFILE
 static __device__ void makeAFile(char *file)
 {
 	FILE *fp = fopen(file, "w");
 	fprintf_(fp, "test");
 	fclose(fp);
 }
+#endif
 
 #define HostDir "C:\\T_\\"
 #define DeviceDir ":\\"

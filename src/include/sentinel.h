@@ -79,7 +79,7 @@ extern "C" {
 	typedef struct sentinelExecutor {
 		sentinelExecutor *Next;
 		const char *Name;
-		bool (*Executor)(void*,sentinelMessage*,int, char *(**)(void*,char*,char*,intptr_t));
+		bool (*Executor)(void*,sentinelMessage*,int,char*(**)(void*,char*,char*,intptr_t));
 		void *Tag;
 	} sentinelExecutor;
 

@@ -206,25 +206,26 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="crtdefsTest.cu" />
-    <CudaCompile Include="ctypeTest.cu" />
-    <CudaCompile Include="direntTest.cu" />
-    <CudaCompile Include="errnoTest.cu" />
-    <CudaCompile Include="fallocTest.cu" />
-    <CudaCompile Include="fcntlTest.cu" />
-    <CudaCompile Include="fsystemTest.cu" />
-    <CudaCompile Include="grpTest.cu" />
-    <CudaCompile Include="pwdTest.cu" />
-    <CudaCompile Include="regexTest.cu" />
-    <CudaCompile Include="sentinelTest.cu" />
-    <CudaCompile Include="setjmpTest.cu" />
-    <CudaCompile Include="stdargTest.cu" />
-    <CudaCompile Include="stddefTest.cu" />
-    <CudaCompile Include="stdioTest.cu" />
-    <CudaCompile Include="stdlibTest.cu" />
-    <CudaCompile Include="stringTest.cu" />
-    <CudaCompile Include="timeTest.cu" />
-    <CudaCompile Include="unistdTest.cu" />
+    <None Include="crtdefsTest.cu" />
+    <None Include="ctypeTest.cu" />
+    <None Include="direntTest.cu" />
+    <None Include="errnoTest.cu" />
+    <None Include="fallocTest.cu" />
+    <None Include="fcntlTest.cu" />
+    <None Include="fsystemTest.cu" />
+    <None Include="grpTest.cu" />
+    <CudaCompile Include="libcu.tests.cu" />
+    <None Include="pwdTest.cu" />
+    <None Include="regexTest.cu" />
+    <None Include="sentinelTest.cu" />
+    <None Include="setjmpTest.cu" />
+    <None Include="stdargTest.cu" />
+    <None Include="stddefTest.cu" />
+    <None Include="stdioTest.cu" />
+    <None Include="stdlibTest.cu" />
+    <None Include="stringTest.cu" />
+    <None Include="timeTest.cu" />
+    <None Include="unistdTest.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

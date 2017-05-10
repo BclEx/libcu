@@ -19,7 +19,7 @@ int drmdir(char *str);
 int dpwd(char *str);
 int dcd(char *str);
 
-bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length)
+bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
 	switch (data->OP) {
 	case FILEUTILS_DCAT: { fileutils_dcat *msg = (fileutils_dcat *)data; msg->RC = dcat(msg->Str); return true; }

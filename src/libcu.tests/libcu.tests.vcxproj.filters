@@ -55,6 +55,7 @@
     <CudaCompile Include="timeTest.cu" />
     <CudaCompile Include="unistdTest.cu" />
     <CudaCompile Include="fcntlTest.cu" />
+    <CudaCompile Include="libcu.tests.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Properties">
