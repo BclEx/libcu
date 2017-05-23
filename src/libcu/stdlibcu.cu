@@ -870,7 +870,7 @@ __device__ int wctomb_(char *s, wchar_t wchar)
 }
 
 /* Convert a multibyte string to a wide char string.  */
-__device__ size_t mbstowcs_(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n)
+__device__ size_t mbstowcs_(wchar_t *__restrict pwcs, const char *__restrict s, size_t n)
 {
 	panic("Not Implemented");
 	return 0;

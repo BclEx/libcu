@@ -32,9 +32,8 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
 __BEGIN_DECLS;
 
-// builtin
-//extern void *__cdecl memset(void *, int, size_t);
-//extern void *__cdecl memcpy(void *, const void *, size_t);
+//builtin: extern void *__cdecl memset(void *, int, size_t);
+//builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
 
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */

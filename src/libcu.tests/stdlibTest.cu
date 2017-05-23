@@ -7,6 +7,105 @@
 static __global__ void g_stdlib_test1()
 {
 	printf("stdlib_test1\n");
+
+	//// ATOI, ATOL, ATOLL ////
+	//__forceinline __device__ double atof_(const char *nptr) { return strtod(nptr, NULL); }
+	//__forceinline __device__ int atoi_(const char *nptr) { return (int)__strtol(nptr, (char **)NULL, 10, 1); }
+	//__forceinline __device__ long int atol_(const char *nptr) { return __strtol(nptr, (char **)NULL, 10, 1); }
+	//__forceinline __device__ long long int atoll_(const char *nptr) { return __strtoll(nptr, (char **)NULL, 10, 1); }
+	double a0a = atof("1.0"); assert(a0a == 1.0);
+	int a1a = atoi("1.0"); assert(a1a == 1);
+	long int a2a = atol("1.0"); assert(a2a == 1);
+	long long int a3a = atoll("1.0"); assert(a3a == 1L);
+
+	//// STRTOD, STRTOF, STROLD, STRTOL, STRTOUL, STRTOLL, STRTOULL ///
+	//extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
+	//extern __device__ float strtof_(const char *__restrict nptr, char **__restrict endptr);
+	//extern __device__ long double strtold_(const char *__restrict nptr, char **__restrict endptr);
+	//__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 1); }
+	//__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 0); }
+	//__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 1); }
+	//__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 0); }
+	double b0a = strtod("1.0", nullptr); assert(b0a == 1.0);
+	float b1a = strtof("1.0", nullptr); assert(b1a == 1.0F);
+	long double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
+	long int b3a = strtol("1.0", nullptr, 10); assert(b3a == 1);
+	unsigned long int b4a = strtoul("1.0", nullptr, 10); assert(b3a == 1L);
+	long long int b5a = strotoll("1.0", nullptr, 10); assert(b5a == 1L);
+
+	//// RAND, SRAND ////
+	//extern __device__ int rand_(void);
+	//extern __device__ void srand_(unsigned int seed);
+	int c0a = rand();
+	srand(10);
+
+	//// MALLOC, CALLOC, MSIZE, REALLOC, FREE ////
+	//extern __device__ void *malloc_(size_t size);
+	//__device__ __forceinline void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
+	//extern __device__ size_t _msize_(void *ptr);
+	//extern __device__ void *realloc_(void *ptr, size_t size);
+	//extern __device__ void free_(void *ptr);
+	char *d0a = malloc(10); int d0b = msize(d0a); char *d0c = realloc(d0a, 15); int d0d = msize(d0c); free(d0c); assert(d0a && d0b == 10 && d0c && d0d == 15);
+	char *d1a = calloc(10); free(d1a); assert(d1a);
+
+	//// ABORT, ATEXIT, EXIT, _EXIT ////
+	//skipped: __forceinline __device__ void abort_(void) { asm("trap;"); }
+	//skipped: __forceinline __device__ int atexit_(void(*func)(void)) { panic("Not Supported"); return -1; }
+	//skipped: __forceinline __device__ void exit_(int status) { stdlib_exit msg(true, status); }
+	//skipped: __forceinline __device__ void _Exit_(int status) { stdlib_exit msg(false, status); }
+
+	//// GETENV, SETENV, UNSETENV ////
+	//extern __device__ char *getenv_(const char *name);
+	//extern __device__ int setenv_(const char *name, const char *value, int replace);
+	//extern __device__ int unsetenv_(const char *name);
+	char *f0a = getenv("Test"); assert(f0a);
+	int f1a = setenv("Test", "value", true); char *f1b = getenv("Test"); int f1c = unsetenv("Test"); assert(f1a && f1b && f1c);
+
+	//// MKTEMP, MKSTEMP ////
+	//extern __device__ char *mktemp_(char *template_);
+	//extern __device__ int mkstemp_(char *template_);
+	char *g0a = mktemp("Test"); assert(g0a);
+	int g1a = mkstemp("Test"); assert(g1a);
+
+	//// SYSTEM ////
+	//__forceinline __device__ int system_(const char *command) { stdlib_system msg(command); return msg.RC; }
+	int h0a = system("echo"); assert(h0a);
+
+	//// BSEARCH ////
+	//extern __device__ void *bsearch_(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+	// TODO
+
+	//// QSORT ////
+	//extern __device__ void qsort_(void *base, size_t nmemb, size_t size, __compar_fn_t compar);
+	// TODO
+
+	//// ABS, LABS, LLABS ////
+	//__forceinline __device__ int abs_(int x) { return x >= 0 ? x : -x; }
+	//__forceinline __device__ long int labs_(long int x) { return x >= 0 ? x : -x; }
+	//__forceinline __device__ long long int llabs_(long long int x) { return x >= 0 ? x : -x; }
+	int k0a = abs(0); int k0b = abs(1); int k0c = abs(-1); assert(k0a == 0 && k0b == 1 & k0c == 1);
+	long int k1a = abs(0); long int k1b = abs(1); long int k1c = abs(-1); assert(k1a == 0 && k1b == 1 & k1c == 1);
+	long long int k2a = abs(0L); long long int k2b = abs(1L); long long int k2c = abs(-1L); assert(k2a == 0L && k2b == 1L & k2c == 1L);
+
+	//// DIV, LDIV, LLDIV ////
+	//extern __device__ div_t div_(int numer, int denom);
+	//extern __device__ ldiv_t ldiv_(long int numer, long int denom);
+	//extern __device__ lldiv_t lldiv_(long long int numer, long long int denom);
+	div_t l0a = div(1, 2); assert(l0a.quot == 0 && l0a.rem == 2);
+	ldiv_t l1a = ldiv(1, 2); assert(l1a.quot == 0 && l1a.rem == 2);
+	lldiv_t l2a = lldiv(1, 2); assert(l2a.quot == 0 && l2a.rem == 2);
+
+	//// MBLEN, MBTOWC, WCTOMB, MBSTOWSCS, WCSTOMBS ////
+	//extern __device__ int mblen_(const char *s, size_t n);
+	//extern __device__ int mbtowc_(wchar_t *__restrict __pwc, const char *__restrict s, size_t n);
+	//extern __device__ int wctomb_(char *s, wchar_t wchar);
+	//extern __device__ size_t mbstowcs_(wchar_t *__restrict pwcs, const char *__restrict s, size_t n);
+	//extern __device__ size_t wcstombs_(char *__restrict s, const wchar_t *__restrict pwcs, size_t n);
+	char buf[10];
+	int m0a = mblen("test", 4); assert(m0a == 4);
+	int m1a = mbtowc(L"test", buf, sizeof(buf)); assert(m1a == 4);
+	int m2a = wctomb(buf, L'a'); bool m2b = (buf[0] == 1 && buf[1] == 0); assert(m2a && m2b);
+	size_t m3a = mbstowcs(L"test", buf, sizeof(buf));
 }
 cudaError_t stdlib_test1() { g_stdlib_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

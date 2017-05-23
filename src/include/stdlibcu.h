@@ -81,7 +81,6 @@ extern __device__ unsigned long long __strtoll(register const char *__restrict s
 __BEGIN_NAMESPACE_STD;
 /* prototype */
 extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
-#define strtod strtod_
 
 /* Convert a string to a floating-point number.  */
 __forceinline __device__ double atof_(const char *nptr) { return strtod(nptr, NULL); }
@@ -298,7 +297,7 @@ extern __device__ int wctomb_(char *s, wchar_t wchar);
 #define wctomb wctomb_
 
 /* Convert a multibyte string to a wide char string.  */
-extern __device__ size_t mbstowcs_(wchar_t *__restrict  pwcs, const char *__restrict s, size_t n);
+extern __device__ size_t mbstowcs_(wchar_t *__restrict pwcs, const char *__restrict s, size_t n);
 #define mbstowcs mbstowcs_
 /* Convert a wide char string to multibyte string.  */
 extern __device__ size_t wcstombs_(char *__restrict s, const wchar_t *__restrict pwcs, size_t n);

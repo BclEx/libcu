@@ -7,6 +7,7 @@ using namespace Microsoft::VisualStudio::TestTools::UnitTesting;
 
 cudaError_t stdio_test1();
 cudaError_t stdio_64bit();
+cudaError_t stdio_ganging();
 cudaError_t stdio_scanf();
 namespace libcutests
 {
@@ -32,6 +33,7 @@ namespace libcutests
 
 		[TestMethod, TestCategory("core")] void stdio_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_test1()))); }
 		[TestMethod, TestCategory("core")] void stdio_64bit() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_64bit()))); }
+		[TestMethod, TestCategory("core")] void stdio_ganging() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_ganging()))); }
 		[TestMethod, TestCategory("core")] void stdio_scanf() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdio_scanf()))); }
 	};
 }

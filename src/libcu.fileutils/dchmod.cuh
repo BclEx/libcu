@@ -1,5 +1,4 @@
 #include <sys/statcu.h>
-//#include <unistdcu.h>
 
 __device__ int d_dchmod_rc;
 __global__ void g_dchmod(char *str, mode_t mode)

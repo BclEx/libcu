@@ -161,7 +161,7 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Maximum chars of output to write in MAXLEN.  */
-//moved: extern __device__ int snprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, ...);
+//moved: extern __device__ int snprintf(char *__restrict s, size_t maxlen, const char *__restrict format, ...);
 extern __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, va_list va);
 #define vsnprintf vsnprintf_
 __END_NAMESPACE_C99;
