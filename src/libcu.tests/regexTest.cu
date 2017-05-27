@@ -27,8 +27,13 @@ static __device__ void exact()
 static __global__ void g_regex_test1()
 {
 	printf("regex_test1\n");
+
+	//// REGCOMP, REGEXEC, REGERROR, REGFREE ////
+	//extern __device__ int regcomp_(regex_t *preg, const char *regex, int cflags);
+	//extern __device__ int regexec_(regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags);
+	//extern __device__ size_t regerror_(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size);
+	//extern __device__ void regfree_(regex_t *preg);
 	exact();
 }
 cudaError_t regex_test1() { g_regex_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
-
 

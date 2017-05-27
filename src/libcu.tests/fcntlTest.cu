@@ -20,7 +20,12 @@ static __global__ void g_fcntl_test1()
 {
 	printf("fcntl_test1\n");
 
-	////////// Open Files //////////
+	//// FCTNL ////
+	//__forceinline __device__ int fcntlv_(int fd, int cmd, va_list va) #sentinel-branch
+	// NEEDED
+
+	//// OPENV ////
+	//__forceinline __device__ int openv_(const char *file, int oflag, va_list va) #sentinel-branch
 	/* Host Absolute */
 	int a0a = open(HostDir"missing.txt", O_RDONLY); assert(a0a < 0);
 	makeAFile(HostDir"test.txt");
@@ -43,7 +48,8 @@ static __global__ void g_fcntl_test1()
 	makeAFile("test.txt");
 	int d1a = open("test.txt", O_RDONLY); int d1b = close(d1a); assert(d1a && !d1b);
 
-	////////// CREATE FILES //////////
+	//// CREATE ////
+	//#define creat(file, mode)
 	/* Host Absolute */
 	int e0a = creat(HostDir"missing.txt", O_RDONLY); assert(e0a < 0);
 	makeAFile(HostDir"test.txt");
@@ -65,7 +71,9 @@ static __global__ void g_fcntl_test1()
 	int h0a = creat("missing.txt", O_RDONLY); assert(h0a < 0);
 	makeAFile("test.txt");
 	int h1a = creat("test.txt", O_RDONLY); int h1b = close(h1a); assert(h1a && !h1b);
-
-	// TEST fcntl
 }
 cudaError_t fcntl_test1() { g_fcntl_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
+
+
+
+

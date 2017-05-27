@@ -7,6 +7,9 @@
 
 static __device__ void testReading(DIR *d)
 {
+	//// READDIR, REWINDDIR ////
+	//__forceinline __device__ struct dirent *readdir_(DIR *dirp) { if (ISDEVICEPTR(dirp)) return readdir_device(dirp); dirent_readdir msg(hostptr<DIR>(dirp)); return msg.RC; }
+	//__forceinline __device__ void rewinddir_(DIR *dirp) { if (ISDEVICEPTR(dirp)) rewinddir_device(dirp); else dirent_rewinddir msg(hostptr<DIR>(dirp)); }
 	struct dirent *a0 = readdir(d); assert(a0); bool a1 = !strcmp(a0->d_name, "."); assert(a1);
 	struct dirent *b0 = readdir(d); assert(b0); bool b1 = !strcmp(b0->d_name, ".."); assert(b1);
 	struct dirent *c0 = readdir(d); assert(c0); bool c1 = !strcmp(c0->d_name, "dir0"); assert(c1);
@@ -21,6 +24,9 @@ static __global__ void g_dirent_test1()
 {
 	printf("dirent_test1\n");
 
+	//// OPENDIR, CLOSEDIR, *READDIR, *REWINDDIR ////
+	//__forceinline __device__ DIR *opendir_(const char *name) { if (ISDEVICEPATH(name)) return opendir_device(name); dirent_opendir msg(name); return newhostptr<DIR>(msg.RC); }
+	//__forceinline __device__ int closedir_(DIR *dirp) { if (ISDEVICEPTR(dirp)) return closedir_device(dirp); dirent_closedir msg(hostptr<DIR>(dirp)); freehostptr<DIR>(dirp); return msg.RC; }
 	//* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
 	//* Host Absolute */
 	DIR *a0a = opendir(HostDir"missing"); int a0b = closedir(a0a); assert(!a0a && a0b == -1);
@@ -46,3 +52,4 @@ static __global__ void g_dirent_test1()
 
 }
 cudaError_t dirent_test1() { g_dirent_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
+

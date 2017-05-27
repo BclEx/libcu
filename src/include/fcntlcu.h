@@ -61,7 +61,7 @@ __forceinline __device__ int openv_(const char *file, int oflag, va_list va) { i
 #endif
 #ifdef __USE_LARGEFILE64
 extern __device__ int open64v_device(const char *file, int oflag, va_list va);
-__forceinline __device__ int openv_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
+__forceinline __device__ int openv64_(const char *file, int oflag, va_list va) { if (ISDEVICEPATH(file)) return openv_device(file, oflag, va); fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
 #define open64 open64_
 #endif
 
