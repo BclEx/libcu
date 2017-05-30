@@ -156,9 +156,9 @@ __device__ __forceinline void *mallocG(size_t size) { __shared__ void *p; if (!t
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
 //extern __device__ void *calloc_(size_t nmemb, size_t size);
 
-__device__ __forceinline void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
+__forceinline __device__ void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
 #ifdef GANGING
-__device__ __forceinline void *callocG(size_t nmemb, size_t size) { __shared__ void *p; if (!threadIdx.x) p = calloc_(nmemb, size); __syncthreads(); return p; }
+__forceinline __device__ void *callocG(size_t nmemb, size_t size) { __shared__ void *p; if (!threadIdx.x) p = calloc_(nmemb, size); __syncthreads(); return p; }
 #define calloc callocG
 #else
 #define calloc calloc_

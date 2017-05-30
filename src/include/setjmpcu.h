@@ -44,11 +44,11 @@ extern __device__ int setjmp_(jmp_buf env);
 __END_NAMESPACE_STD;
 
 ///* Store the calling environment in ENV, also saving the signal mask if SAVEMASK is nonzero.  Return 0. This is the internal name for `sigsetjmp'.  */
-//nosupport: extern int __sigsetjmp_(struct __jmp_buf_tag env[1], int savemask);
+//nosupport: extern __device__ int __sigsetjmp_(struct __jmp_buf_tag env[1], int savemask);
 //#define __sigsetjmp __sigsetjmp_
 
 ///* Store the calling environment in ENV, not saving the signal mask. Return 0.  */
-//nosupport: extern int _setjmp_(struct __jmp_buf_tag env[1]);
+//nosupport: extern __device__ int _setjmp_(struct __jmp_buf_tag env[1]);
 //#define _setjmp _setjmp_
 ///* Do not save the signal mask.  This is equivalent to the `_setjmp' BSD function.  */
 //#define setjmp(env) _setjmp_(env)

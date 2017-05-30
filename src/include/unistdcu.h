@@ -104,11 +104,11 @@ SIGALRM signal while inside `sleep' call, the handling of the SIGALRM signal aft
 error, but if `sleep' returns SECONDS, it probably didn't work.  */
 extern __device__ void usleep_(unsigned long milliseconds);
 #define usleep usleep_
-__device__ __forceinline void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
+__forceinline __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
 #define sleep sleep_
 
 /* Suspend the process until a signal arrives. This always returns -1 and sets `errno' to EINTR.  */
-//nosupport: extern int pause_(void);
+//nosupport: extern __device__int pause_(void);
 //#define pause pause_
 
 /* Change the owner and group of FILE.  */
@@ -143,7 +143,7 @@ extern __device__ char **__environ_;
 #define __environ __environ_
 
 /* Terminate program execution with the low-order 8 bits of STATUS.  */
-//nosupport: extern __device__ void exit_(int status);
+//duplicate: extern __device__ void exit_(int status);
 //#define exit exit_
 
 /* Get file-specific configuration information about PATH.  */

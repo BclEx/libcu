@@ -7,6 +7,9 @@ static __global__ void g_ctype_test1()
 {
 	printf("ctype_test1\n");
 	//fprintf_(stdout, "ctype_test1\n");
+
+	//// ISCTYPE ////
+	extern __forceinline __device__ int isctype_(int c, int type);
 	bool _0 = isctype('a', 0x02); assert(_0);
 
 	//// ISALNUM, ISALPHA, ISCNTRL, ISDIGIT, ISLOWER, ISGRAPH, ISPRINT, ISPUNCT, ISSPACE, ISUPPER, ISXDIGIT ////

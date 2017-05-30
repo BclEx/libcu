@@ -65,7 +65,7 @@ __forceinline __device__ int openv64_(const char *file, int oflag, va_list va) {
 #define open64 open64_
 #endif
 
-/* Create and open FILE, with mode MODE.  This takes an `int' MODE argument because that is what `mode_t' will be widened to.*/
+/* Create and open FILE, with mode MODE.  This takes an `int' MODE argument because that is what `mode_t' will be widened to. */
 #define creat(file, mode) open_(file, O_WRONLY|O_CREAT|O_TRUNC, mode)
 #ifdef __USE_LARGEFILE64
 #define creat64(file, mode) open64_(file, O_WRONLY|O_CREAT|O_TRUNC, mode)

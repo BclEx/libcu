@@ -57,7 +57,7 @@ __forceinline __device__ time_t mktime_(struct tm *tp) { time_mktime msg(tp); re
 #define mktime mktime_
 
 /* Format TP into S according to FORMAT. no more than MAXSIZE characters and return the number of characters written, or 0 if it would exceed MAXSIZE.  */
-__forceinline size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp) { time_strftime msg(s, maxsize, format, tp); return msg.RC; }
+__forceinline __device__ size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp) { time_strftime msg(s, maxsize, format, tp); return msg.RC; }
 #define strftime strftime_
 __END_NAMESPACE_STD;
 

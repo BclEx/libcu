@@ -37,7 +37,7 @@ __BEGIN_DECLS;
 
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
-__device__ __forceinline void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return (n ? memcpy(dest, src, n) : nullptr); }
+__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return (n ? memcpy(dest, src, n) : nullptr); }
 #define memcpy memcpy_
 
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
@@ -47,7 +47,7 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Set N bytes of S to C.  */
-__device__ __forceinline void *memset_(void *s, int c, size_t n) { return (s ? memset(s, c, n) : nullptr); }
+__forceinline __device__ void *memset_(void *s, int c, size_t n) { return (s ? memset(s, c, n) : nullptr); }
 #define memset memset_
 /* Compare N bytes of S1 and S2.  */
 extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);
@@ -190,7 +190,7 @@ extern __device__ void strbldInit(strbld_t *b, char *text = nullptr, int capacit
 extern __device__ void strbldAppendSpace(strbld_t *b, int length);
 extern __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list va);
 extern __device__ void strbldAppend(strbld_t *b, const char *str, int length);
-extern __device__ __forceinline void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
+extern __forceinline __device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
 extern __device__ char *strbldToString(strbld_t *b);
 extern __device__ void strbldReset(strbld_t *b);
 
