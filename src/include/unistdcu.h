@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _UNISTDCU_H
 #define _UNISTDCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <_dirent.h>
 #include <_unistd.h>
@@ -34,7 +34,7 @@ THE SOFTWARE.
 typedef short gid_t;
 typedef short uid_t;
 
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <sentinel-unistdmsg.h>
 __BEGIN_DECLS;
 

@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _PWDCU_H
 #define _PWDCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 #include <sys/types.h>
 #include <grpcu.h>
 
@@ -40,7 +40,7 @@ struct passwd {
 	//char *pw_shell;		// program to use as shell
 };
 
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 /* search user database for a user ID */

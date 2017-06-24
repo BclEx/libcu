@@ -28,26 +28,54 @@ THE SOFTWARE.
 #define _CRTDEFSCU_H
 
 #include <crtdefs.h>
-//#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-//#endif  /* __CUDA_ARCH__ */
+#include <cuda_runtime.h>
 
-//#ifdef  __cplusplus
-//extern "C" {
-//#endif
-//
-//	/* Built In */
-//	_CRTIMP _CRTNOALIAS void __cdecl free(_Pre_maybenull_ _Post_invalid_ void *_Memory);
-//	_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(_Size) _CRTIMP _CRT_JIT_INTRINSIC _CRTNOALIAS _CRTRESTRICT void * __cdecl malloc(_In_ size_t _Size);
-//	_CRTIMP __declspec(noreturn) void __cdecl exit(_In_ int _Code);
-//	_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
-//	//void __cdecl free(void *memory);
-//	//void * __cdecl malloc(size_t size);
-//	//__declspec(noreturn) void __cdecl exit(int code);
-//	//int __cdecl printf(const char *format, ...);
-//
-//#ifdef  __cplusplus
-//}
-//#endif
+#define HAS_STDIO_BUFSIZ_NONE__
+//#define _LARGEFILE64_SOURCE
+
+/* These are defined by the user (or the compiler) to specify the desired environment:
+_LARGEFILE_SOURCE	Some more functions for correct standard I/O.
+_LARGEFILE64_SOURCE	Additional functionality from LFS for large files.
+_FILE_OFFSET_BITS=N	Select default filesystem interface.
+
+All macros listed above as possibly being defined by this file are explicitly undefined if they are not explicitly defined. */
+
+#ifdef _LARGEFILE_SOURCE
+#define __USE_LARGEFILE		1
+#endif
+
+#ifdef _LARGEFILE64_SOURCE
+#define __USE_LARGEFILE64	1
+#endif
+
+#if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS == 64
+#define __USE_FILE_OFFSET64	1
+#endif
+
+#ifndef CORE_MAXFILESTREAM
+#define CORE_MAXFILESTREAM 10
+#endif
+
+#ifndef CORE_MAXHOSTPTR
+#define CORE_MAXHOSTPTR 10
+#endif
+
+//////////////////////
+// UTILITY
+#pragma region UTILITY
+
+/* For these things, GCC behaves the ANSI way normally,
+and the non-ANSI way under -traditional.  */
+#define __CONCAT(x,y) x ## y
+#define __STRING(x) #x
+
+/* This is not a typedef so `const __ptr_t' does the right thing.  */
+#define __ptr_t void *
+#define __long_double_t long double
+/* CUDA double64 is double */
+#ifndef double64
+#define double64 double
+#endif
 
 #define MEMORY_ALIGNMENT 4096
 /* Memory allocation - rounds to the type in T */
@@ -74,13 +102,84 @@ THE SOFTWARE.
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
+#pragma endregion
+
+//////////////////////
+// NAMESPACE
+#pragma region NAMESPACE
+
+/* C++ needs to know that types and declarations are C, not C++.  */
+#ifdef	__cplusplus
+#define __BEGIN_DECLS extern "C" {
+#define __END_DECLS }
+#else
+#define __BEGIN_DECLS
+#define __END_DECLS
+#endif
+
+/* The standard library needs the functions from the ISO C90 standard
+in the std namespace.  At the same time we want to be safe for
+future changes and we include the ISO C99 code in the non-standard
+namespace __c99.  The C++ wrapper header take case of adding the
+definitions to the global namespace.  */
+#if defined(__cplusplus) && defined(_GLIBCPP_USE_NAMESPACES)
+#define __BEGIN_NAMESPACE_STD namespace std {
+#define __END_NAMESPACE_STD }
+#define __USING_NAMESPACE_STD(name) using std::name;
+#define __BEGIN_NAMESPACE_C99 namespace __c99 {
+#define __END_NAMESPACE_C99 }
+#define __USING_NAMESPACE_C99(name) using ext::name;
+#define __BEGIN_NAMESPACE_EXT namespace ext {
+#define __END_NAMESPACE_EXT }
+#define __USING_NAMESPACE_EXT(name) using ext::name;
+#else
+/* For compatibility we do not add the declarations into any
+namespace.  They will end up in the global namespace which is what
+old code expects.  */
+#define __BEGIN_NAMESPACE_STD
+#define __END_NAMESPACE_STD
+#define __USING_NAMESPACE_STD(name)
+#define __BEGIN_NAMESPACE_C99
+#define __END_NAMESPACE_C99
+#define __USING_NAMESPACE_C99(name)
+#define __BEGIN_NAMESPACE_EXT
+#define __END_NAMESPACE_EXT
+#define __USING_NAMESPACE_EXT(name)
+#endif
+
+#pragma endregion
+
+//////////////////////
+// DEVICE/HOST
+#pragma region DEVICE/HOST
+
+typedef struct hostptr_t {
+	void *host;
+} hostptr_t;
+
+/* IsDevice support.  */
+extern "C" __device__ char __cwd[];
+#define ISDEVICEPATH(path) (((path)[1] != ':') && ((path)[0] == ':' || __cwd[0] != 0))
+#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
+#define ISDEVICEPTR(ptr) ((hostptr_t *)(ptr) < __iob_hostptrs || (hostptr_t *)(ptr) > __iob_hostptrs + CORE_MAXHOSTPTR)
+extern "C" __constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
+
+/* Host pointer support.  */
+extern "C" __device__ hostptr_t *__hostptrGet(void *host);
+extern "C" __device__ void __hostptrFree(hostptr_t *p);
+template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
+template <typename T> __forceinline __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
+template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
+
+#pragma endregion
+
 //////////////////////
 // ASSERT
 #pragma region ASSERT
 
 #ifndef NDEBUG
 #define ASSERTONLY(X) X
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __forceinline __device__ void Coverage(int line) { }
 #else
 __forceinline void Coverage(int line) { }

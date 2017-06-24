@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _SYS_STATCU_H
 #define	_SYS_STATCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <sys/stat.h>
 //#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
@@ -65,7 +65,7 @@ typedef int mode_t;
 ///* Read, write, and execute by others.  */
 //#define	S_IRWXO	(S_IRWXG >> 3)
 
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 __END_DECLS;

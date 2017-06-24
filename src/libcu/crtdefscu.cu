@@ -1,4 +1,3 @@
-#include <featurescu.h>
 #include <crtdefscu.h>
 
 __BEGIN_DECLS;

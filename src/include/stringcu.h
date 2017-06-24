@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _STRINGCU_H
 #define _STRINGCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <string.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 //builtin: extern void *__cdecl memset(void *, int, size_t);

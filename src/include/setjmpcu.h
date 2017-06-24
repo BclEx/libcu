@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _SETJMPCU_H
 #define _SETJMPCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <setjmp.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 //struct __jmp_buf_tag {

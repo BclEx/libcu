@@ -2,7 +2,7 @@
 #include <sys/timecu.h>
 
 __BEGIN_DECLS;
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 
 // gettimeofday
 __device__ int gettimeofday_(struct timeval *tp, void *tz)

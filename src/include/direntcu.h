@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _DIRENTCU_H
 #define	_DIRENTCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <_dirent.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <sentinel-direntmsg.h>
 __BEGIN_DECLS;
 

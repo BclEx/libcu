@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _EXT_TAGBASE_H
 #define _EXT_TAGBASE_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 #include <malloc.h>
 __BEGIN_DECLS;
 

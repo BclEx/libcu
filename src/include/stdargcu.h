@@ -28,7 +28,7 @@ THE SOFTWARE.
 #define _STDARGCU_H
 
 #include <stdarg.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 
 #define STDARGvoid(name, body, ...) \
 	__forceinline __device__ void name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); (body); _crt_va_end(va); } \

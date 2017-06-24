@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _STDLIBCU_H
 #define _STDLIBCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 //* Shorthand for type of comparison functions.  */
 #ifndef __COMPAR_FN_T
@@ -35,7 +35,7 @@ typedef int (*__compar_fn_t)(const void *, const void *);
 #endif
 
 #include <stdlib.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <stddefcu.h>
 #include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;

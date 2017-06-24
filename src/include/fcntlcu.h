@@ -26,12 +26,12 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _FCNTLCU_H
 #define _FCNTLCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 #include <stdargcu.h>
 #include <sys/statcu.h>
 
 #include <fcntl.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <io.h>
 #include <sentinel-fcntlmsg.h>
 __BEGIN_DECLS;

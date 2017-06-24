@@ -58,9 +58,6 @@
     <ClInclude Include="..\include\bits\libcu_stat.h">
       <Filter>include\bits</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\featurescu.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\unistdcu.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -118,7 +115,6 @@
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
-    <CudaCompile Include="crtdefscu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -186,5 +182,6 @@
       <Filter>sys</Filter>
     </None>
     <None Include="pwdcu.cu" />
+    <None Include="crtdefscu.cu" />
   </ItemGroup>
 </Project>

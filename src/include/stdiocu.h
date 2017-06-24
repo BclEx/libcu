@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _STDIOCU_H
 #define _STDIOCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <stdio.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <stdargcu.h>
 
 //typedef struct __STDIO_FILE_STRUCT FILE;

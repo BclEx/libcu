@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _TIMECU_H
 #define _TIMECU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <time.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 #include <stddefcu.h>
 #include <sentinel-timemsg.h>
 __BEGIN_DECLS;

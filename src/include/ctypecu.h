@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _CTYPECU_H
 #define _CTYPECU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 __BEGIN_DECLS;
 extern __constant__ unsigned char __curtUpperToLower[256];
@@ -36,7 +36,7 @@ extern __forceinline __device__ int isctype_(int c, int type) { return (__curtCt
 __END_DECLS;
 
 #include <ctype.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 ///* set bit masks for the possible character types */

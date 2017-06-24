@@ -1,6 +1,6 @@
 #ifndef _FSYSTEM_H
 #define _FSYSTEM_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 #include <fcntl.h>
 #include <ext/memfile.h>
 #include <_dirent.h>

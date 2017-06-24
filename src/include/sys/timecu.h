@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _SYS_TIMECU_H
 #define	_SYS_TIMECU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 //#include <sys/time.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 struct timeval { long tv_sec; long tv_usec; };

@@ -31,8 +31,7 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 
 _Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
-//__forceinline __device__ void Coverage(int line) { }
+#if defined(__CUDA_ARCH__)
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
 /* Define tag allocs */
 __forceinline __device__ void *tagalloc(void *tag, size_t size) { return nullptr; }
@@ -46,21 +45,5 @@ __forceinline void *tagalloc(void *tag, size_t size) { return nullptr; }
 __forceinline void tagfree(void *tag, void *p) { }
 __forceinline void *tagrealloc(void *tag, void *old, size_t size) { return nullptr; }
 #endif  /* __CUDA_ARCH__ */
-
-/* CUDA double64 is double */
-#ifndef double64
-#define double64 double
-#endif
-
-///* Define assert helpers */
-//#ifndef NDEBUG
-//#define ASSERTONLY(X) X
-//#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
-//#else
-//#define ASSERTONLY(X)
-//#define ASSERTCOVERAGE(X)
-//#endif
-//#define _ALWAYS(X) (X)
-//#define _NEVER(X) (X)
 
 #endif  /* _STDDEFCU_H */

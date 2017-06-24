@@ -26,10 +26,10 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _ERRNOCU_H
 #define _ERRNOCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #include <errno.h>
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 extern __device__ int *_errno_(void);

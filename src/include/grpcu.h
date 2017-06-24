@@ -26,7 +26,7 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _GRPCU_H
 #define _GRPCU_H
-#include <featurescu.h>
+#include <crtdefscu.h>
 
 #define gid_t short
 struct group {
@@ -35,7 +35,7 @@ struct group {
 	char  **gr_mem;		// pointer to a null-terminated array of character pointers to member names
 };
 
-#if defined(__CUDA_ARCH__) || defined(LIBCUFORCE)
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 /* get group database entry for a group ID */
