@@ -2,7 +2,6 @@
 id: fcntlcu
 title: fcntlcu.h
 permalink: fcntlcu.html
-layout: docs
 ---
 
 ## #include <fcntlcu.h>

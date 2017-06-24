@@ -2,7 +2,6 @@
 id: host_functions
 title: host_functions.h
 permalink: host_functions.html
-layout: docs
 ---
 
 ## #include <host_functions.h>

@@ -2,7 +2,6 @@
 id: errnocu
 title: errnocu.h
 permalink: errnocu.html
-layout: docs
 ---
 
 ## #include <errnocu.h>

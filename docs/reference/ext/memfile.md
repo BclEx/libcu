@@ -2,7 +2,6 @@
 id: memfile
 title: memfile.h
 permalink: ext\memfile.html
-layout: docs
 ---
 
 ## #include <ext\memfile.h>

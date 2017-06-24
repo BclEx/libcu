@@ -2,7 +2,6 @@
 id: falloc
 title: falloc.h
 permalink: falloc.html
-layout: docs
 ---
 
 ## #include <falloc.h>

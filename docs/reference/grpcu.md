@@ -2,7 +2,6 @@
 id: grpcu
 title: grpcu.h
 permalink: grpcu.html
-layout: docs
 ---
 
 ## #include <grpcu.h>

@@ -2,7 +2,6 @@
 id: unistdcu
 title: unistdcu.h
 permalink: unistdcu.html
-layout: docs
 ---
 
 ## #include <unistdcu.h>

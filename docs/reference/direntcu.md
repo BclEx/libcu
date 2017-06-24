@@ -2,7 +2,6 @@
 id: direntcu
 title: direntcu.h
 permalink: direntcu.html
-layout: docs
 ---
 
 ## #include <direntcu.h>

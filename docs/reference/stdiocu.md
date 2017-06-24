@@ -2,7 +2,6 @@
 id: stdiocu
 title: stdiocu.h
 permalink: stdiocu.html
-layout: docs
 ---
 
 ## #include <stdiocu.h>

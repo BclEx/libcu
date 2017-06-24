@@ -2,7 +2,6 @@
 id: regexcu
 title: regexcu.h
 permalink: regexcu.html
-layout: docs
 ---
 
 ## #include <regexcu.h>

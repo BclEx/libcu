@@ -2,7 +2,6 @@
 id: convert
 title: convert.h
 permalink: ext\convert.html
-layout: docs
 ---
 
 ## #include <ext\convert.h>

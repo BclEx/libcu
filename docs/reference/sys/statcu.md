@@ -2,7 +2,6 @@
 id: statcu
 title: statcu.h
 permalink: sys\statcu.html
-layout: docs
 ---
 
 ## #include <sys\stat.h>

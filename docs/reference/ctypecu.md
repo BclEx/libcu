@@ -2,7 +2,6 @@
 id: ctypecu
 title: ctypecu.h
 permalink: ctypecu.html
-layout: docs
 ---
 
 ## #include <ctypecu.h>

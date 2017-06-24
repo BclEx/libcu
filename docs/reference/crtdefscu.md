@@ -2,7 +2,6 @@
 id: crtdefscu
 title: crtdefscu.h
 permalink: crtdefscu.html
-layout: docs
 ---
 
 ## #include <crtdefscu.h>

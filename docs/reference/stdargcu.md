@@ -2,7 +2,6 @@
 id: stdargcu
 title: stdargcu.h
 permalink: stdargcu.html
-layout: docs
 ---
 
 ## #include <stdargcu.h>

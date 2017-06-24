@@ -2,7 +2,6 @@
 id: setjmpcu
 title: setjmpcu.h
 permalink: setjmpcu.html
-layout: docs
 ---
 
 ## #include <setjmpcu.h>

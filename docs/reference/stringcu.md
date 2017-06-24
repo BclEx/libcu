@@ -2,7 +2,6 @@
 id: stringcu
 title: stringcu.h
 permalink: stringcu.html
-layout: docs
 ---
 
 ## #include <stringcu.h>

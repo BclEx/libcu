@@ -2,7 +2,6 @@
 id: stddefcu
 title: stddefcu.h
 permalink: stddefcu.html
-layout: docs
 ---
 
 ## #include <stddefcu.h>

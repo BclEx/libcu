@@ -2,7 +2,6 @@
 id: sentinel
 title: sentinel.h
 permalink: sentinel.html
-layout: docs
 ---
 
 ## #include <sentinel.h>

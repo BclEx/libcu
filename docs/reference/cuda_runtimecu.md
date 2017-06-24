@@ -2,7 +2,6 @@
 id: cuda_runtimecu
 title: cuda_runtimecu.h
 permalink: cuda_runtimecu.html
-layout: docs
 ---
 
 ## #include <cuda_runtimecu.h>

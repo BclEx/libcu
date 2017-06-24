@@ -2,7 +2,6 @@
 id: hash
 title: hash.h
 permalink: ext\hash.html
-layout: docs
 ---
 
 ## #include <ext\hash.h>

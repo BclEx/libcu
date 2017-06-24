@@ -2,7 +2,6 @@
 id: timecu
 title: timecu.h
 permalink: sys\timecu.html
-layout: docs
 ---
 
 ## #include <sys\timecu.h>

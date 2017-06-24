@@ -2,7 +2,6 @@
 id: pwdcu
 title: pwdcu.h
 permalink: pwdcu.html
-layout: docs
 ---
 
 ## #include <pwdcu.h>

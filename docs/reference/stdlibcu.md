@@ -2,7 +2,6 @@
 id: stdlibcu
 title: stdlibcu.h
 permalink: stdlibcu.html
-layout: docs
 ---
 
 ## #include <stdlibcu.h>
