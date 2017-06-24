@@ -31,7 +31,7 @@ static __global__ void g_stdlib_test1()
 	long double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
 	long int b3a = strtol("1.0", nullptr, 10); assert(b3a == 1);
 	unsigned long int b4a = strtoul("1.0", nullptr, 10); assert(b3a == 1L);
-	long long int b5a = strotoll("1.0", nullptr, 10); assert(b5a == 1L);
+	long long int b5a = strtoll("1.0", nullptr, 10); assert(b5a == 1L);
 
 	//// RAND, SRAND ////
 	//extern __device__ int rand_(void);
@@ -45,8 +45,8 @@ static __global__ void g_stdlib_test1()
 	//extern __device__ size_t _msize_(void *ptr);
 	//extern __device__ void *realloc_(void *ptr, size_t size);
 	//extern __device__ void free_(void *ptr);
-	char *d0a = malloc(10); int d0b = msize(d0a); char *d0c = realloc(d0a, 15); int d0d = msize(d0c); free(d0c); assert(d0a && d0b == 10 && d0c && d0d == 15);
-	char *d1a = calloc(10); free(d1a); assert(d1a);
+	char *d0a = (char *)malloc(10); int d0b = _msize(d0a); char *d0c = (char *)realloc(d0a, 15); int d0d = _msize(d0c); free(d0c); assert(d0a && d0b == 10 && d0c && d0d == 15);
+	char *d1a = (char *)calloc(10, 1); free(d1a); assert(d1a);
 
 	//// ABORT, ATEXIT, EXIT, _EXIT ////
 	//skipped: __forceinline __device__ void abort_(void); #trap
@@ -59,7 +59,10 @@ static __global__ void g_stdlib_test1()
 	//extern __device__ int setenv_(const char *name, const char *value, int replace);
 	//extern __device__ int unsetenv_(const char *name);
 	char *f0a = getenv("Test"); assert(f0a);
-	int f1a = setenv("Test", "value", true); char *f1b = getenv("Test"); int f1c = unsetenv("Test"); assert(f1a && f1b && f1c);
+	int f1a = setenv("Test", "value", true);
+	char *f1b = getenv("Test");
+	int f1c = unsetenv("Test");
+	assert(f1a && f1b && f1c);
 
 	//// MKTEMP, MKSTEMP ////
 	//extern __device__ char *mktemp_(char *template_);

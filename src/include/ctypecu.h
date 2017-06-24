@@ -87,7 +87,7 @@ extern __forceinline __device__ int isidchar_(int c) { return (__curtCtypeMap[(u
 __END_DECLS;
 #else
 //above: #define isctype 0
-#define isidchar 0
+#define isidchar(c) 0
 #define isblank(c) ((c) == '\t' || (c) == ' ')
 #endif  /* __CUDA_ARCH__ */
 

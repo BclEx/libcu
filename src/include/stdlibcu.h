@@ -83,7 +83,7 @@ __BEGIN_NAMESPACE_STD;
 extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
 
 /* Convert a string to a floating-point number.  */
-__forceinline __device__ double atof_(const char *nptr) { return strtod(nptr, NULL); }
+__forceinline __device__ double atof_(const char *nptr) { return strtod_(nptr, NULL); }
 #define atof atof_
 /* Convert a string to an integer.  */
 __forceinline __device__ int atoi_(const char *nptr) { return (int)__strtol(nptr, (char **)NULL, 10, 1); }
@@ -111,8 +111,8 @@ __BEGIN_NAMESPACE_C99;
 /* Likewise for `float' and `long double' sizes of floating-point numbers.  */
 extern __device__ float strtof_(const char *__restrict nptr, char **__restrict endptr);
 #define strtof strtof_
-extern __device__ long double strtold_(const char *__restrict nptr, char **__restrict endptr);
-#define strtold strtold_
+//extern __device__ long double strtold_(const char *__restrict nptr, char **__restrict endptr);
+#define strtold strtof_
 __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
@@ -306,10 +306,14 @@ __END_NAMESPACE_STD;
 
 __END_DECLS;
 #else
-#define strtoll
-#define strtoull
-#define setenv
-#define unsetenv
+#define atoll(s) 0
+#define strtof(s,e) 0.0
+#define strtold(s,e) 0.0
+#define strtoll(s,e,b) 0
+#define strtoull(s,e,b) 0
+#define setenv(n,v,r) 0
+#define unsetenv(n) 0
+#define mkstemp(t) 0
 #include <malloc.h>
 #ifndef _MSC_VER
 #define _msize(p) malloc_usable_size(p)

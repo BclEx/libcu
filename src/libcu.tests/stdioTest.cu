@@ -123,16 +123,16 @@ static __global__ void g_stdio_test1()
 	////moved: extern __device__ int sprintf(char *__restrict s, const char *__restrict format, ...); //__forceinline __device__ int vsprintf_(char *__restrict s, const char *__restrict format, va_list va);
 	int o0a = snprintf(buf, sizeof(buf), "%d", 1); bool o0b = !strcmp(buf, "1"); assert(o0a && o0b);
 	//skipped: printf("%d", 1);
-	int o1a = sprintf(buf, "%d", 1); bool o3b = !strcmp(buf, "1"); assert(o1a && o1b);
+	int o1a = sprintf(buf, "%d", 1); bool o1b = !strcmp(buf, "1"); assert(o1a && o1b);
 
 	//// FSCANF, SCANF, SSCANF ////
 	//moved: extern __device__ int fscanf(FILE *__restrict stream, const char *__restrict format, ...); //extern __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 	//moved: extern __device__ int scanf(const char *__restrict format, ...); //__forceinline __device__ int vscanf_(const char *__restrict format, va_list va);
 	//moved: extern __device__ int sscanf(const char *__restrict s, const char *__restrict format, ...); //extern __device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va);
-	FILE *n0a = fopen(HostDir"test.txt", "r"); int n0b = fscanf(n0a, "%s", buf); int n0c = fclose(n0a); bool n0d = !strcmp(buf, "1"); assert(n0a && n0b && n0c && n0d);
-	FILE *n1a = fopen(DeviceDir"test.txt", "r"); int n1b = fscanf(n1a, "%s", buf); int n1c = fclose(n1a); bool n1d = !strcmp(buf, "1"); assert(n1a && n1b && n1c && n1d);
+	FILE *p0a = fopen(HostDir"test.txt", "r"); int p0b = fscanf(p0a, "%s", buf); int p0c = fclose(p0a); bool p0d = !strcmp(buf, "1"); assert(p0a && p0b && p0c && p0d);
+	FILE *p1a = fopen(DeviceDir"test.txt", "r"); int p1b = fscanf(p1a, "%s", buf); int p1c = fclose(p1a); bool p1d = !strcmp(buf, "1"); assert(p1a && p1b && p1c && p1d);
 	//skipped: scanf("%s", buf);
-	int n2a = sscanf("test", "%s", buf); bool n2b = !strcmp(buf, "1"); assert(n2a && n2b);
+	int p2a = sscanf("test", "%s", buf); bool p2b = !strcmp(buf, "1"); assert(p2a && p2b);
 
 	//// FGETC, GETCHAR, GETC, FPUTC, PUTCHAR, PUTC, UNGETC ////
 	//__forceinline __device__ int fgetc_(FILE *stream); #sentinel-branch
@@ -180,46 +180,7 @@ cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchron
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#pragma region 64bit
+#pragma region _64bit
 
 static __global__ void g_stdio_64bit()
 {

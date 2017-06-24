@@ -463,6 +463,12 @@ doswitch:
 	}
 }
 
+/* Read formatted input from S into argument list ARG.  */
+__device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
+{
+	panic("Not Implemented");
+}
+
 __constant__ static short _basefix[17] = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; // 'basefix' is used to avoid 'if' tests in the integer scanner
 __device__ int _sscanf_(const char *str, const char *fmt, va_list va)
 {

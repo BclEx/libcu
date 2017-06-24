@@ -395,7 +395,7 @@ __device__ double strtod_(const Wchar *__restrict str, Wchar **__restrict endptr
 #endif
 }
 
-#if 0
+#if 0 // cuda - not supported
 __device__ long double strtold_(const Wchar *__restrict str, Wchar **__restrict endptr)
 {
 #if FPMAX_TYPE == 3
