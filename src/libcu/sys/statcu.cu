@@ -24,6 +24,7 @@ __device__ int stat64_device(const char *__restrict file, struct stat64 *__restr
 	return 0;
 }
 
+
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
 __device__ int fstat64_device(int fd, struct stat64 *buf)
 {
@@ -38,6 +39,7 @@ __device__ int chmod_device(const char *file, mode_t mode)
 	panic("Not Implemented");
 	return 0;
 }
+__device__ int chmod_(const char *file, mode_t mode) { if (ISDEVICEPATH(file)) return chmod_device(file, mode); fcntl_chmod msg(file, mode); return msg.RC; }
 
 /* Set the file creation mask of the current process to MASK, and return the old creation mask.  */
 __device__ mode_t umask_(mode_t mask)

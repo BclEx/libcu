@@ -1,10 +1,13 @@
 #include <sys/statcu.h>
 
 __device__ int d_dchmod_rc;
+
+
 __global__ void g_dchmod(char *str, mode_t mode)
 {
 	d_dchmod_rc = (chmod(str, mode) < 0);
 }
+
 int dchmod(char *str, int mode)
 {
 	size_t strLength = strlen(str) + 1;

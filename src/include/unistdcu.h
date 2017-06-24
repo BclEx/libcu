@@ -167,7 +167,7 @@ __forceinline __device__ int rmdir_(const char *path) { if (ISDEVICEPATH(path)) 
 __END_DECLS;
 #else
 #define __environ ((char **)nullptr)
-#define chown 0
+#define chown(f,o,g) 0
 //#define chgrp
 #endif  /* __CUDA_ARCH__ */
 

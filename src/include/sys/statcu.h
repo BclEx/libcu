@@ -99,7 +99,8 @@ __forceinline __device__ int fstat64_(int fd, struct stat64 *buf) { if (ISDEVICE
 
 /* Set file access permissions for FILE to MODE. If FILE is a symbolic link, this affects its target instead.  */
 extern __device__ int chmod_device(const char *file, mode_t mode);
-__forceinline __device__ int chmod_(const char *file, mode_t mode) { if (ISDEVICEPATH(file)) return chmod_device(file, mode); fcntl_chmod msg(file, mode); return msg.RC; }
+//__forceinline __device__ int chmod_(const char *file, mode_t mode) { if (ISDEVICEPATH(file)) return chmod_device(file, mode); fcntl_chmod msg(file, mode); return msg.RC; }
+extern __device__ int chmod_(const char *file, mode_t mode);
 #define chmod chmod_
 
 /* Set the file creation mask of the current process to MASK, and return the old creation mask.  */
