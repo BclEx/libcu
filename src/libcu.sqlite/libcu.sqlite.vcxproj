@@ -24,51 +24,41 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <CudaCompile Include="alloc.cu" />
-    <CudaCompile Include="mutex-noop.cu" />
-    <CudaCompile Include="mutex-win.cu" />
-    <CudaCompile Include="mutex.cu" />
-    <CudaCompile Include="vfile.cu" />
-    <CudaCompile Include="vsystem-map.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="vsystem-unix.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="vsystem-win.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="vsystem.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <None Include="bitvec.cu" />
-    <CudaCompile Include="convert.cu" />
-    <CudaCompile Include="journalvfile.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="memoryvfile.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
     <CudaCompile Include="program.cu" />
-    <CudaCompile Include="libcu.ext.cu" />
+    <CudaCompile Include="libcu.sqlite.cu" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="libcu.ext.native.nuspec" />
-    <None Include="libcu.ext.native.targets" />
+    <None Include="libcu.sqlite.native.nuspec" />
+    <None Include="libcu.sqlite.native.targets" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\ext\bitvec.h" />
-    <ClInclude Include="..\include\ext\convert.h" />
-    <ClInclude Include="..\include\ext\math.h" />
-    <ClInclude Include="..\include\ext\mutex.h" />
-    <ClInclude Include="..\include\ext\status.h" />
-    <ClInclude Include="..\include\ext\utf.h" />
-    <ClInclude Include="..\include\lib\sqlite_int.h" />
+    <CudaCompile Include="pager.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="pcache.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <ClCompile Include="pcache1.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <CudaCompile Include="wal.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libcuInt.h" />
+    <ClInclude Include="pager.h" />
+    <ClInclude Include="pcache.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="libcu.h" />
+    <ClInclude Include="sqliteInt.h" />
+    <ClInclude Include="sqliteLimit.h" />
+    <ClInclude Include="wal.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}</ProjectGuid>
+    <ProjectGuid>{F9A9EA50-AB8D-4BE3-BA66-43743EA9CF91}</ProjectGuid>
     <RootNamespace>libcu</RootNamespace>
-    <ProjectName>libcu.ext</ProjectName>
+    <ProjectName>libcu.sqlite</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -138,11 +128,11 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -160,11 +150,11 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -187,11 +177,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -213,11 +203,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.ext.cu.obj" -o "$(OutDir)libcu.ext.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

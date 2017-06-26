@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>Libcu.Ext.Native</id>
+    <id>Libcu.Sqlite.Native</id>
     <version>0.5.0-alpha</version>
-    <title>Libcu ext</title>
+    <title>Libcu sqlite</title>
     <authors>Contoso</authors>
     <owners>Contoso</owners>
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
@@ -15,15 +15,14 @@
     <language>en-US</language>
     <dependencies>
       <dependency id="Libcu.Native" version="0.5.0" />
+      <dependency id="Libcu.Ext.Native" version="0.5.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="_build\**\libcu.ext.*.lib" target="build\native\lib" />
-    <file src="src\libcu.ext\*.targets" target="build\native" />
-    <file src="src\libcu.ext\**\*.h" exclude="src\libcu.ext\_*\**\*" target="build\native\include" />
-    <!--<file src="src\libcu.ext\_content\*" target="content" />-->
-    <file src="src\libcu.ext\**\*.cu" exclude="src\libcu.ext\_*\**\*" target="src" />
-    <file src="src\libcu.ext\**\*.h" exclude="src\libcu.ext\_*\**\*" target="src" />
-    <file src="src\libcu.ext\**\*.tcl" exclude="src\libcu.ext\_*\**\*" target="src" />
+    <file src="_build\**\libcu.sqlite.*.lib" target="build\native\lib" />
+    <file src="src\libcu.sqlite\*.targets" target="build\native" />
+    <file src="src\libcu.sqlite\**\*.h" exclude="src\libcu.sqlite\_*\**\*" target="build\native\include" />
+    <file src="src\libcu.sqlite\**\*.cu" exclude="src\libcu.sqlite\_*\**\*" target="src" />
+    <file src="src\libcu.sqlite\**\*.h" exclude="src\libcu.sqlite\_*\**\*" target="src" />
   </files>
 </package>

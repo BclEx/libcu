@@ -4,6 +4,17 @@
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
     <CudaCompile Include="convert.cu" />
+    <CudaCompile Include="journalvfile.cu" />
+    <CudaCompile Include="memoryvfile.cu" />
+    <CudaCompile Include="vfile.cu" />
+    <CudaCompile Include="vsystem.cu" />
+    <CudaCompile Include="vsystem-map.cu" />
+    <CudaCompile Include="vsystem-unix.cu" />
+    <CudaCompile Include="vsystem-win.cu" />
+    <CudaCompile Include="mutex.cu" />
+    <CudaCompile Include="mutex-noop.cu" />
+    <CudaCompile Include="mutex-win.cu" />
+    <CudaCompile Include="alloc.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -16,6 +27,9 @@
     </Filter>
     <Filter Include="include\ext">
       <UniqueIdentifier>{5ac597d7-9332-41cd-8e31-4375a2b6550b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\lib">
+      <UniqueIdentifier>{34fb1fad-c98b-4e8f-bd3d-be9a7782677a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -36,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="..\include\ext\status.h">
       <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lib\sqlite_int.h">
+      <Filter>include\lib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -844,7 +844,7 @@ __device__ char *vmprintf_(const char *format, va_list va)
 #endif
 
 #ifdef __CUDA_ARCH__
-__device__ char *vmnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va)
+__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va)
 {
 	if (maxlen <= 0) return (char *)s;
 	strbld_t b;

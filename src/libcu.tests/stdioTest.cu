@@ -170,10 +170,10 @@ static __global__ void g_stdio_test1()
 	//// FILENO ////
 	//__forceinline __device__ int fileno_(FILE *stream); #sentinel-branch
 
-	//// MTAGPRINTF, MPRINTF, MNPRINTF ////
+	//// EXT: MTAGPRINTF, MPRINTF, MNPRINTF ////
 	//__device__ char *vmtagprintf_(void *tag, const char *format, va_list va);
 	//__device__ char *vmprintf_(const char *format, va_list va);
-	//__device__ char *vmnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
+	//__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
 
 }
 cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

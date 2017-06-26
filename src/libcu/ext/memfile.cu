@@ -13,8 +13,8 @@ extern "C" {
 	typedef struct fileChunk_t fileChunk_t;
 
 	struct fileChunk_t {
-		fileChunk_t *next;			// Next chunk in the journal
-		uint8_t chunk[JOURNAL_CHUNKSIZE]; // Content of this chunk
+		fileChunk_t *next;					// Next chunk in the journal
+		uint8_t chunk[JOURNAL_CHUNKSIZE];	// Content of this chunk
 	};
 
 	struct filePoint_t {
@@ -96,8 +96,7 @@ extern "C" {
 	{
 		assert(!size);
 		fileChunk_t *chunk = f->first;
-		while (chunk)
-		{
+		while (chunk) {
 			fileChunk_t *tmp = chunk;
 			chunk = chunk->next;
 			free(tmp);

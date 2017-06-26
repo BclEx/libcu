@@ -30,71 +30,70 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-#if !defined(THREADSAFE)
-#if defined(__THREADSAFE__)
-#define THREADSAFE __THREADSAFE__
-#else
-#define THREADSAFE 0 // IMP: R-07272-22309
-#endif
-#endif
-
-	// Figure out what version of the code to use.  The choices are
-	//   MUTEX_OMIT         No mutex logic.  Not even stubs.  The mutexes implemention cannot be overridden at start-time.
-	//   MUTEX_NOOP         For single-threaded applications.  No mutual exclusion is provided.  But this implementation can be overridden at start-time.
-	//   MUTEX_PTHREADS     For multi-threaded applications on Unix.
-	//   MUTEX_W32          For multi-threaded applications on Win32.
-#if THREADSAFE == 0
+	/*
+	** Figure out what version of the code to use.  The choices are
+	**
+	**   SQLITE_MUTEX_OMIT         No mutex logic.  Not even stubs.  The mutexes implementation cannot be overridden at start-time.
+	**
+	**   SQLITE_MUTEX_NOOP         For single-threaded applications.  No mutual exclusion is provided.  But this
+	**                             implementation can be overridden at start-time.
+	**
+	**   SQLITE_MUTEX_PTHREADS     For multi-threaded applications on Unix.
+	**
+	**   SQLITE_MUTEX_W32          For multi-threaded applications on Win32.
+	*/
+#if !THREADSAFE
 #define MUTEX_OMIT
-#else
-#if OS_GPU
-#define MUTEX_NOOP
-#elif OS_UNIX
-#define MUTEX_PTHREADS
+#endif
+#if THREADSAFE && !defined(MUTEX_NOOP)
+#if OS_UNIX
+# define MUTEX_PTHREADS
 #elif OS_WIN
-#define MUTEX_WIN
+# define MUTEX_W32
 #else
-#define MUTEX_NOOP
+# define MUTEX_NOOP
 #endif
 #endif
 
-	enum MUTEX : unsigned char
-	{
-		MUTEX_FAST = 0,
-		MUTEX_RECURSIVE = 1,
-		MUTEX_STATIC_MASTER = 2,
-		MUTEX_STATIC_MEM = 3,  // sqlite3_malloc()
-		MUTEX_STATIC_OPEN = 4,  // sqlite3BtreeOpen()
-		MUTEX_STATIC_PRNG = 5,  // sqlite3_random()
-		MUTEX_STATIC_LRU = 6,   // lru page list
-		MUTEX_STATIC_PMEM = 7, // sqlite3PageMalloc()
-	};
+#define MUTEX unsigned char
+#define MUTEX_FAST 0
+#define MUTEX_RECURSIVE 1
+#define MUTEX_STATIC_MASTER 2
+#define MUTEX_STATIC_MEM 3	// sqlite3_malloc()
+#define MUTEX_STATIC_OPEN 4	// sqlite3BtreeOpen()
+#define MUTEX_STATIC_PRNG 5 // sqlite3_random()
+#define MUTEX_STATIC_LRU 6  // lru page list
+#define MUTEX_STATIC_PMEM 7	// sqlite3PageMalloc()
 
 #ifdef MUTEX_OMIT
-	typedef void *MutexEx;
-#define mutex_held(X) ((void)(X), 1)
-#define mutex_notheld(X) ((void)(X), 1)
+	/*
+	** If this is a no-op implementation, implement everything as macros.
+	*/
+	typedef void *mutex;
+#define mutex_held(m) ((void)(X), 1)
+#define mutex_notheld(m) ((void)(X), 1)
 #define mutex_init() 0
 #define mutex_shutdown()
-#define mutex_alloc(X) ((MutexEx)1)
-#define mutex_free(X)
-#define mutex_enter(X)
-#define mutex_tryenter(X) 0
-#define mutex_leave(X)
+#define mutex_alloc(m) ((MutexEx)1)
+#define mutex_free(m)
+#define mutex_enter(m)
+#define mutex_tryenter(m) 0
+#define mutex_leave(m)
 #define MUTEX_LOGIC(X)
 #else
 	struct mutex_obj;
-	typedef mutex_obj *MutexEx;
+	typedef mutex_obj *mutex;
 #ifdef _DEBUG
-	__device__ bool mutex_held(MutexEx p);
-	__device__ bool mutex_notheld(MutexEx p);
+	__device__ bool mutex_held(mutex p);
+	__device__ bool mutex_notheld(mutex p);
 #endif
 	__device__ int mutex_init();
 	__device__ void mutex_shutdown();
 	__device__ MutexEx mutex_alloc(MUTEX id);
-	__device__ void mutex_free(MutexEx p);
-	__device__ void mutex_enter(MutexEx p);
-	__device__ bool mutex_tryenter(MutexEx p);
-	__device__ void mutex_leave(MutexEx p);
+	__device__ void mutex_free(mutex p);
+	__device__ void mutex_enter(mutex p);
+	__device__ bool mutex_tryenter(mutex p);
+	__device__ void mutex_leave(mutex p);
 #define MUTEX_LOGIC(X) X
 #endif
 

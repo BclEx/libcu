@@ -356,7 +356,7 @@ __forceinline __device__ int fileno_(FILE *stream) { if (ISDEVICEFILE(stream)) r
 
 /* If we are compiling with optimizing read this file.  It contains
 several optimizing inline functions and macros.  */
-#ifdef __LIBCU__
+#ifdef __LIBCUx__
 #define fgetc(fp)                   __FGETC(fp)
 #define fputc(ch, fp)				__FPUTC(ch, fp)
 #define getchar()                   __GETC(__stdin)
@@ -367,12 +367,17 @@ several optimizing inline functions and macros.  */
 #define ferror(fp)                  __FERROR(fp)
 #endif
 
+__BEGIN_NAMESPACE_EXT;
+/* Name */
 __device__ char *vmtagprintf_(void *tag, const char *format, va_list va);
 #define vmtagprintf vmtagprintf_
+/* Name */
 __device__ char *vmprintf_(const char *format, va_list va);
 #define vmprintf vmprintf_
-__device__ char *vmnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
-#define vmnprintf vmnprintf_
+/* Name */
+__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
+#define vmsnprintf vmsnprintf_
+__END_NAMESPACE_EXT;
 
 __END_DECLS;
 
@@ -414,12 +419,31 @@ STDARG3(int, sscanf_, vsscanf_(s, format, va), const char *__restrict s, const c
 #define sscanf sscanf_
 __END_NAMESPACE_STD;
 
+__BEGIN_NAMESPACE_EXT;
+/* Name */
+STDARG1(char *, mtagprintf, vmtagprintf_(tag, format, va), void *tag, const char *format);
+STDARG2(char *, mtagprintf, vmtagprintf_(tag, format, va), void *tag, const char *format);
+STDARG3(char *, mtagprintf, vmtagprintf_(tag, format, va), void *tag, const char *format);
+/* Name */
+STDARG1(char *, mprintf, vmprintf_(format, va), const char *format);
+STDARG2(char *, mprintf, vmprintf_(format, va), const char *format);
+STDARG3(char *, mprintf, vmprintf_(format, va), const char *format);
+/* Name */
+STDARG1(char *, msnprintf, vmsnprintf_(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+STDARG2(char *, msnprintf, vmsnprintf_(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+STDARG3(char *, msnprintf, vmsnprintf_(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+__END_NAMESPACE_EXT;
+
 #else
 #define snprintf _snprintf
 #define fprintf_ fprintf
+// EXT
+#define mtagprintf(tag, format, ...) format
 #define vmtagprintf(tag, format, va) format
+#define mprintf(format, ...) format
 #define vmprintf(format, va) format
-#define vmnprintf(s, maxlen, format, va) nullptr
+#define msnprintf(s, maxlen, format, ...) nullptr
+#define vmsnprintf(s, maxlen, format, va) nullptr
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _STDIOCU_H */

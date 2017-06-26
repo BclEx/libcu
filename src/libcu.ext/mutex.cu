@@ -1,65 +1,83 @@
-#include "Runtime.h"
+#include <stdlibcu.h>
+#include <ext/mutex.h>
+#include <assert.h>
 #ifndef MUTEX_OMIT
-RUNTIME_NAMEBEGIN
 
-#if _DEBUG
-// For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
-// allocate a mutex while the system is uninitialized.
-__device__ static _WSD bool g_mutexIsInit = false;
+#if defined(DEBUG)
+/*
+** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
+** allocate a mutex while the system is uninitialized.
+*/
+static __device__ _WSD bool g_mutexIsInit = false;
 #endif
 
-// Initialize the mutex system.
-__device__ int _mutex_init()
+/* Initialize the mutex system. */
+__device__ int mutex_initialize()
 { 
-	if (!__mutexsystem.Alloc)
-	{
+	if (!__mutexsystem.Alloc) {
 		// If the xMutexAlloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
 		// sqlite3_initialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
-		_mutex_methods const *from;
 		_mutex_methods *to = &__mutexsystem;
-		if (__mutexsystem_enabled)
-			from = sqlite3DefaultMutex();
-		else
-			from = sqlite3NoopMutex();
+		_mutex_methods const *from = (__mutexsystem_enabled ? sqlite3DefaultMutex() : sqlite3NoopMutex());
+		to->MutexInit = from->MutexInit;
+		to->MutexEnd = from->MutexEnd;
+		to->MutexFree = from->MutexFree;
+		to->MutexEnter = from->MutexEnter;
+		to->MutexTry = from->MutexTry;
+		to->MutexLeave = from->MutexLeave;
+		to->MutexHeld = from->MutexHeld;
+		to->MutexNotheld = from->MutexNotheld;
+		sqlite3MemoryBarrier();
+		to->MutexAlloc = from->MutexAlloc;
 		memcpy(to, from, offsetof(_mutex_methods, Alloc));
 		memcpy(&to->Free, &from->Free, sizeof(*to) - offsetof(_mutex_methods, Free));
 		to->Alloc = from->Alloc;
 	}
-	int rc = __mutexsystem.Init();
-#ifdef _DEBUG
-	GLOBAL(bool, g_mutexIsInit) = true;
+	int rc = __mutexsystem.Initialize();
+#ifdef DEBUG
+	_GLOBAL(bool, g_mutexIsInit) = true;
 #endif
 	return rc;
 }
 
-// Shutdown the mutex system. This call frees resources allocated by sqlite3MutexInit().
-__device__ void _mutex_shutdown()
+/* Shutdown the mutex system. This call frees resources allocated by mutex_initialize(). */
+__device__ int mutex_shutdown()
 {
+	int rc = 0;
 	if (__mutexsystem.Shutdown)
 		rc = __mutexsystem.Shutdown();
-#ifdef _DEBUG
-	GLOBAL(bool, g_mutexIsInit) = false;
+#ifdef DEBUG
+	_GLOBAL(bool, g_mutexIsInit) = false;
 #endif
+	return rc;
 }
 
-// Retrieve a pointer to a static mutex or allocate a new dynamic one.
-__device__ MutexEx _mutex_alloc2(MUTEX id)
+/* Retrieve a pointer to a static mutex or allocate a new dynamic one. */
+__device__ mutex *mutex_alloc2(MUTEX id)
 {
-	//#ifndef OMIT_AUTOINIT
-	//	if (sqlite3_initialize()) return 0;
-	//#endif
+#ifndef OMIT_AUTOINIT
+	if (id <= MUTEX_RECURSIVE && system_initialize()) return 0;
+	if (id > MUTEX_RECURSIVE && mutex_initialize()) return 0;
+#endif
+	assert(__mutexsystem.Alloc);
 	return __mutexsystem.Alloc(id);
 }
-__device__ MutexEx _mutex_alloc(MUTEX id)
+__device__ mutex *mutex_alloc(MUTEX id)
 {
 	if (!__mutexsystem_enabled)
 		return nullptr;
-	_assert(GLOBAL(bool, g_mutexIsInit));
+	assert(_GLOBAL(bool, g_mutexIsInit));
 	return __mutexsystem.Alloc(id);
 }
 
+
+
+
 // Free a dynamic mutex.
-__device__ void _mutex_free(MutexEx p) { if (p) __mutexsystem.Free(p); }
+__device__ void mutex_free(mutex *m)
+{
+	if (p) __mutexsystem.Free(p);
+}
 
 // Obtain the mutex p. If some other thread already has the mutex, block until it can be obtained.
 __device__ void _mutex_enter(MutexEx p) { if (p) __mutexsystem.Enter(p); }

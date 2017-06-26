@@ -1,22 +1,20 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include "Runtime.h"
-RUNTIME_NAMEBEGIN
 
 #ifdef MUTEX_WIN
 #pragma region MUTEX_WIN
 
-struct _mutex_obj
+struct mutex
 {
 	CRITICAL_SECTION Mutex;		// Mutex controlling the lock
-	MUTEX Id;						// Mutex type
-#ifdef _DEBUG
+	MUTEX Id;					// Mutex type
+#ifdef DEBUG
 	volatile int Refs;			// Number of enterances
 	volatile DWORD Owner;		// Thread holding this mutex
 	bool Trace;					// True to trace changes
 #endif
 };
-#ifdef _DEBUG
+#ifdef DEBUG
 #define MUTEX_INIT { 0, 0, 0L, (DWORD)0, 0 }
 #else
 #define MUTEX_INIT { 0, 0 }
@@ -27,7 +25,8 @@ static bool MutexIsInit = false;
 static long MutexLock = 0;
 
 #ifdef _DEBUG
-bool MutexHeld(MutexEx p) { return (!p || (p->Refs != 0 && p->Owner == GetCurrentThreadId())); }
+bool MutexHeld(mutex *p) {
+	return (!p || (p->Refs != 0 && p->Owner == GetCurrentThreadId())); }
 bool MutexNotHeld2(MutexEx p, DWORD tid) { return (!p || p->Refs == 0 || p->Owner != tid); }
 bool MutexNotHeld(MutexEx p) { DWORD tid = GetCurrentThreadId(); return (!p || MutexNotHeld2(p, tid)); }
 #endif

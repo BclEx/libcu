@@ -171,6 +171,10 @@
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="crtdefsTest.cpp" />
     <ClCompile Include="direntTest.cpp" />
+    <ClCompile Include="ext\ext_bitvecTest.cpp" />
+    <ClCompile Include="ext\ext_convertTest.cpp" />
+    <ClCompile Include="ext\ext_hashTest.cpp" />
+    <ClCompile Include="ext\ext_memfileTest.cpp" />
     <ClCompile Include="fallocTest.cpp" />
     <ClCompile Include="fcntlTest.cpp" />
     <ClCompile Include="fsystemTest.cpp" />
@@ -192,6 +196,8 @@
     <ClCompile Include="stdioTest.cpp" />
     <ClCompile Include="stdlibTest.cpp" />
     <ClCompile Include="stringTest.cpp" />
+    <ClCompile Include="sys\sys_statTest.cpp" />
+    <ClCompile Include="sys\sys_timeTest.cpp" />
     <ClCompile Include="timeTest.cpp" />
     <ClCompile Include="unistdTest.cpp" />
   </ItemGroup>
@@ -206,6 +212,26 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ext\ext_hashTest.cu">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="ext\ext_memfileTest.cu">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="ext\ext_bitvecTest.cu">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="ext\ext_convertTest.cu">
+      <FileType>Document</FileType>
+    </None>
+    <CudaCompile Include="ext\ext_libcu.tests.cu" />
+    <CudaCompile Include="sys\sys_libcu.tests.cu" />
+    <None Include="sys\sys_statTest.cu">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="sys\sys_timeTest.cu">
+      <FileType>Document</FileType>
+    </None>
     <None Include="crtdefsTest.cu" />
     <None Include="ctypeTest.cu" />
     <None Include="direntTest.cu" />

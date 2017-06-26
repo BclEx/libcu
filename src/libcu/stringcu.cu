@@ -353,12 +353,12 @@ __device__ static const info_t _info[] = {
 };
 
 #ifndef OMIT_FLOATING_POINT
-__device__ static char GetDigit(double64 *val, int *cnt)
+__device__ static char GetDigit(long_double *val, int *cnt)
 {
 	if (*cnt <= 0) return '0';
 	(*cnt)--;
 	int digit = (int)*val;
-	double64 d = digit;
+	long_double d = digit;
 	digit += '0';
 	*val = (*val - d)*10.0;
 	return (char)digit;
@@ -489,7 +489,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 
 		char prefix; // Prefix character.  "+" or "-" or " " or '\0'.
 		unsigned long long longvalue; // Value for integer types
-		double64 realvalue; // Value for real types
+		long_double realvalue; // Value for real types
 #ifndef OMIT_FLOATING_POINT
 		int exp, e2; // exponent of real numbers
 		int nsd; // Number of significant digits returned
@@ -617,7 +617,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 				break;
 			}
 			if (realvalue > 0.0) {
-				double64 scale = 1.0;
+				long_double scale = 1.0;
 				while (realvalue >= 1e100*scale && exp <= 350) { scale *= 1e100; exp += 100; }
 				while (realvalue >= 1e64*scale && exp <= 350) { scale *= 1e64; exp += 64; }
 				while (realvalue >= 1e8*scale && exp <= 350) { scale *= 1e8; exp += 8; }

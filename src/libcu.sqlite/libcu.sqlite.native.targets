@@ -43,10 +43,10 @@ LibcuArch = itemAsName;
     </GetLibcuArch>
     <ItemGroup>
       <Link>
-        <AdditionalDependencies>libcu.ext.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        <AdditionalDependencies>libcu.sqlite.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
       </Link>
       <CudaLink>
-        <AdditionalDependencies>libcu.ext.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        <AdditionalDependencies>libcu.sqlite.$(LibcuArch).lib;%(AdditionalDependencies)</AdditionalDependencies>
       </CudaLink>
     </ItemGroup>
   </Target>

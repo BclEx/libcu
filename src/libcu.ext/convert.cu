@@ -1,29 +1,376 @@
 #include <ctypecu.h>
-#include <crtdefscu.h>
+#include <stringcu.h>
 #include <ext/convert.h>
+#include <assert.h>
 
-#pragma region Varint
+#pragma region ATOX
 
-// The variable-length integer encoding is as follows:
-//
-// KEY:
-//         A = 0xxxxxxx    7 bits of data and one flag bit
-//         B = 1xxxxxxx    7 bits of data and one flag bit
-//         C = xxxxxxxx    8 bits of data
-//  7 bits - A
-// 14 bits - BA
-// 21 bits - BBA
-// 28 bits - BBBA
-// 35 bits - BBBBA
-// 42 bits - BBBBBA
-// 49 bits - BBBBBBA
-// 56 bits - BBBBBBBA
-
-#define SLOT_2_0     0x001fc07f
-#define SLOT_4_2_0   0xf01fc07f
-
-__device__ int convert_putvarint(unsigned char *p, uint64_t v)
+/*
+** The string z[] is an text representation of a real number. Convert this string to a double and write it into *r.
+**
+** The string z[] is length bytes in length (bytes, not characters) and uses the encoding enc.  The string is not necessarily zero-terminated.
+**
+** Return TRUE if the result is a valid real number (or integer) and FALSE if the string is empty or contains extraneous text.  Valid numbers
+** are in one of these formats:
+**
+**    [+-]digits[E[+-]digits]
+**    [+-]digits.[digits][E[+-]digits]
+**    [+-].digits[E[+-]digits]
+**
+** Leading and trailing whitespace is ignored for the purpose of determining validity.
+**
+** If some prefix of the input string is a valid number, this routine returns FALSE but it still converts the prefix and writes the result into *r.
+*/
+__device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE encode) //: sqlite3AtoF
 {
+#ifndef OMIT_FLOATING_POINT
+	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
+	*r = 0.0; // Default return value, in case of an error
+	const char *end = z + length;
+	// get size
+	int incr;
+	bool nonNum = false;
+	if (encode == TEXTENCODE_UTF8)
+		incr = 1;
+	else {
+		incr = 2;
+		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
+		int i; for (i = 3 - encode; i < length && !z[i]; i += 2) { }
+		nonNum = (i < length);
+		end = &z[i ^ 1];
+		z += (encode & 1);
+	}
+
+	// skip leading spaces
+	while (z < end && isspace(*z)) z += incr;
+	if (z >= end) return false;
+
+	// get sign of significand
+	int sign = 1; // sign of significand
+	if (*z == '-') { sign = -1; z += incr; }
+	else if (*z == '+') z += incr;
+
+	int64_t s = 0; // significand
+	int digits = 0; 	
+	int d = 0; // adjust exponent for shifting decimal point
+	bool eValid = true;  // True exponent is either not used or is well-formed
+	int e = 0; // exponent
+	int esign = 1; // sign of exponent
+
+	// copy max significant digits to significand
+	while (z < end && isdigit(*z) && s < ((INT64_MAX - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++; }
+	// skip non-significant significand digits (increase exponent by d to shift decimal left)
+	while (z < end && isdigit(*z)) { z += incr, digits++, d++; }
+	if (z >= end) goto do_atof_calc;
+
+	// if decimal point is present
+	if (*z == '.') {
+		z += incr;
+		// copy digits from after decimal to significand (decrease exponent by d to shift decimal right)
+		while (z < end && isdigit(*z) && s < ((INT64_MAX - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++, d--; }
+	}
+	if (z >= end) goto do_atof_calc;
+
+	// if exponent is present
+	if (*z == 'e' || *z == 'E')
+	{
+		z += incr;
+		eValid = false;
+		// This branch is needed to avoid a (harmless) buffer overread.  The special comment alerts the mutation tester that the correct answer
+		// is obtained even if the branch is omitted
+		if (z >= end) goto do_atof_calc; /* PREVENTS-HARMLESS-OVERREAD */
+		// get sign of exponent
+		if (*z == '-') { esign = -1; z += incr; }
+		else if (*z == '+') z += incr;
+		// copy digits to exponent
+		while (z < end && isdigit(*z)) { e = (e < 10000 ? e * 10 + (*z - '0') : 10000); z += incr; eValid = true; }
+	}
+
+	// skip trailing spaces
+	while (z < end && isspace(*z)) z += incr;
+
+do_atof_calc:
+	// adjust exponent by d, and update sign
+	e = (e * esign) + d;
+	if (e < 0) { esign = -1; e *= -1; }
+	else esign = 1;
+
+	double result;
+	if (!s) // In the IEEE 754 standard, zero is signed.
+		result = (sign < 0 ? -(double)0 : (double)0);
+	else {
+		// Attempt to reduce exponent.
+		//
+		// Branches that are not required for the correct answer but which only help to obtain the correct answer faster are marked with special
+		// comments, as a hint to the mutation tester.
+		while (e > 0) {
+			if (esign > 0) { if (s >= (INT64_MAX / 10)) break; s *= 10; }
+			else { if (s % 10) break; s /= 10; }
+			e--;
+		}
+
+		// adjust the sign of significand
+		s = (sign < 0 ? -s : s);
+
+		if (!e) result = (double)s;
+		else {
+			long_double scale = 1.0;
+			// attempt to handle extremely small/large numbers better
+			if (e > 307) {
+				if (e < 342) {
+					while (e % 308) { scale *= 1.0e+1; e -= 1; }
+					if (esign < 0) { result = s / scale; result /= 1.0e+308; }
+					else { result = s * scale; result *= 1.0e+308; }
+				}
+				else {
+					assert(e >= 342);
+					result = (esign < 0 ? 0.0 * s : /*Infinity*/1e308*1e308 * s);
+				}
+			}
+			else {
+				// 1.0e+22 is the largest power of 10 than can be represented exactly.
+				while (e % 22) { scale *= 1.0e+1; e -= 1; }
+				while (e > 0) { scale *= 1.0e+22; e -= 22; }
+				result = (esign < 0 ? s / scale : s * scale);
+			}
+		}
+	}
+	// store the result
+	*r = result;
+	// return true if number and no extra non-whitespace chracters after
+	return (z > end && digits > 0 && eValid && !nonNum);
+#else
+	return !convert_atoi64e(z, r, length, encode);
+#endif
+}
+
+/*
+** Compare the 19-character string z against the text representation value 2^63:  9223372036854775808.  Return negative, zero, or positive
+** if z is less than, equal to, or greater than the string. Note that z must contain exactly 19 characters.
+**
+** Unlike memcmp() this routine is guaranteed to return the difference in the values of the last digit if the only difference is in the
+** last digit.  So, for example,
+**
+**      compare2pow63("9223372036854775800", 1)
+**
+** will return -8.
+*/
+static __device__ int compare2pow63(const char *z, int incr)
+{
+	const char *pow63 = "922337203685477580"; // 012345678901234567
+	int c = 0;
+	for (int i = 0; !c && i < 18; i++)
+		c = (z[i * incr] - pow63[i]) * 10;
+	if (c == 0) {
+		c = z[18 * incr] - '8';
+		ASSERTCOVERAGE(c == -1);
+		ASSERTCOVERAGE(c == 0);
+		ASSERTCOVERAGE(c == +1);
+	}
+	return c;
+}
+
+/*
+** Convert z to a 64-bit signed integer.  z must be decimal. This routine does *not* accept hexadecimal notation.
+**
+** If the z value is representable as a 64-bit twos-complement integer, then write that value into *pNum and return 0.
+**
+** If z is exactly 9223372036854775808, return 2.  This special case is broken out because while 9223372036854775808 cannot be a 
+** signed 64-bit integer, its negative -9223372036854775808 can be.
+**
+** If z is too big for a 64-bit integer and is not 9223372036854775808  or if z contains any non-numeric text,
+** then return 1.
+**
+** length is the number of bytes in the string (bytes, not characters). The string is not necessarily zero-terminated.  The encoding is given by enc.
+*/
+__device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE encode) //: sqlite3Atoi64
+{
+	const char *start;
+	const char *end = z + length;
+	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
+	// get size
+	int incr;
+	bool nonNum = false;
+	if (encode == TEXTENCODE_UTF8)
+		incr = 1;
+	else {
+		incr = 2;
+		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
+		int i; for (i = 3 - encode; i < length && !z[i]; i += 2) { }
+		nonNum = (i < length);
+		end = &z[i ^ 1];
+		z += (encode & 1);
+	}
+
+	// skip leading spaces
+	while (z < end && isspace(*z)) z += incr;
+
+	// get sign of significand
+	int neg = 0; // assume positive
+	if (z < end) {
+		if (*z == '-') { neg = 1; z += incr; }
+		else if (*z == '+') z += incr;
+	}
+	start = z;
+
+	// skip leading zeros
+	while (z < end && z[0] == '0') z += incr;
+
+	uint64_t u = 0;
+	int c = 0;
+	int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) { u = u * 10 + c - '0'; }
+	if (u > INT64_MAX) *r = (neg ? INT64_MIN : INT64_MAX);
+	else *r = (neg ? -(int64_t)u : (int64_t)u);
+
+	ASSERTCOVERAGE(i == 18);
+	ASSERTCOVERAGE(i == 19);
+	ASSERTCOVERAGE(i == 20);
+	// r is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
+	if (&z[i] < end || (!i && start == z) || i > 19 * incr || nonNum) return 1;
+	// Less than 19 digits, so we know that it fits in 64 bits
+	else if (i < 19 * incr) { assert(u <= INT64_MAX); return 0; }
+	// z is a 19-digit numbers.  Compare it against 9223372036854775808.
+	else {
+		c = compare2pow63(z, incr);
+		// z is less than 9223372036854775808 so it fits
+		if (c < 0) { assert(u <= INT64_MAX); return 0; }
+		// z is greater than 9223372036854775808 so it overflows
+		else if (c > 0) return 1;
+		// z is exactly 9223372036854775808. Fits if negative. The special case 2 overflow if positive */
+		else { assert(u - 1 == INT64_MAX); return (neg ? 0 : 2); }
+	}
+}
+
+/*
+** Transform a UTF-8 integer literal, in either decimal or hexadecimal, into a 64-bit signed integer.  This routine accepts hexadecimal literals, whereas convert_atoi64e() does not.
+**
+** Returns:
+**
+**     0    Successful transformation.  Fits in a 64-bit signed integer.
+**     1    Integer too large for a 64-bit signed integer or is malformed
+**     2    Special case of 9223372036854775808
+*/
+__device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHexToI64
+#ifndef LIBCU_OMIT_HEX_INTEGER
+	if (z[0] == '0' && (z[1] == 'x' || z[1] == 'X')) {
+		uint64_t u = 0;
+		int i; for (i = 2; z[i] == '0'; i++) { }
+		int k; for (k = i; isxdigit(z[k]); k++) { u = u*16 + convert_xtoi(z[k]); }
+		memcpy(r, &u, 8);
+		return (!z[k] && k - i <= 16 ? 0 : 1);
+	} else
+#endif
+	{ return convert_atoi64e(z, r, strlen(z), TEXTENCODE_UTF8); }
+}
+
+/*
+** If z represents an integer that will fit in 32-bits, then set *r to that integer and return true.  Otherwise return false.
+**
+** This routine accepts both decimal and hexadecimal notation for integers.
+**
+** Any non-numeric characters that following z are ignored. This is different from convert_atoi64e() which requires the
+** input number to be zero-terminated.
+*/
+__device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
+{
+	int i, c;
+	// get sign of significand
+	int neg = 0;
+	if (z[0] == '-') { neg = 1; z++; }
+	else if (z[0] == '+') z++;
+#ifndef LIBCU_OMIT_HEX_INTEGER
+	else if (z[0] == '0' && (z[1] == 'x' || z[1] == 'X') && isxdigit(z[2])) {
+		uint32_t u = 0;
+		z += 2;
+		while (z[0] == '0') z++;
+		for (i = 0; isxdigit(z[i]) && i < 8; i++) { u = u*16 + convert_xtoi(z[i]); }
+		if (!(u & 0x80000000) && !isxdigit(z[i])) { memcpy(r, &u, 4); return true; }
+		else return false;
+	}
+#endif
+	// skip leading zeros
+	while (z[0] == '0') z++;
+	int64_t v = 0;
+	for (i = 0; i < 11 && (c = z[i] - '0') >= 0 && c <= 9; i++) { v = v*10 + c; }
+	// The longest decimal representation of a 32 bit integer is 10 digits:
+	//             1234567890
+	//     2^31 -> 2147483648
+	ASSERTCOVERAGE(i == 10);
+	if (i > 10) return false;
+	ASSERTCOVERAGE(v - neg == 2147483647);
+	if (v - neg > 2147483647) return false;
+	*r = (int)(neg ? -v : v);
+	return true;
+}
+
+// inline: convert_atoi(z) //: sqlite3Atoi
+
+/* Translate a single byte of Hex into an integer. This routine only works if h really is a valid hexadecimal character:  0..9a..fA..F */
+__device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
+	assert((h >= '0' && h <= '9') || (h >= 'a' && h <= 'f') || (h >= 'A' && h <= 'F'));
+#ifdef LIBCU_ASCII
+	h += 9 * (1 & (h >> 6));
+#endif
+#ifdef LIBCU_EBCDIC
+	h += 9 * (1 & ~(h >> 4));
+#endif
+	return (uint8_t)(h & 0xf);
+}
+
+//static __constant__ char const __convert_digits[] = "0123456789";
+//__device__ char *convert_itoa64(int64_t i, char *b) //: sky
+//{
+//	char *p = b;
+//	if (i < 0) { *p++ = '-'; i *= -1; }
+//	int64_t shifter = i;
+//	do { ++p; shifter = shifter/10; } while(shifter); // Move to where representation ends
+//	*p = '\0';
+//	do { *--p = __convert_digits[i%10]; i = i/10; } while(i); // Move back, inserting digits as u go
+//	return b;
+//}
+
+#pragma endregion
+
+#pragma region VARINT
+
+/*
+** The variable-length integer encoding is as follows:
+**
+** KEY:
+**         A = 0xxxxxxx    7 bits of data and one flag bit
+**         B = 1xxxxxxx    7 bits of data and one flag bit
+**         C = xxxxxxxx    8 bits of data
+**
+**  7 bits - A
+** 14 bits - BA
+** 21 bits - BBA
+** 28 bits - BBBA
+** 35 bits - BBBBA
+** 42 bits - BBBBBA
+** 49 bits - BBBBBBA
+** 56 bits - BBBBBBBA
+** 64 bits - BBBBBBBBC
+*/
+
+/*
+** Write a 64-bit variable-length integer to memory starting at p[0]. The length of data write will be between 1 and 9 bytes.  The number
+** of bytes written is returned.
+**
+** A variable-length integer consists of the lower 7 bits of each byte for all bytes that have the 8th bit set and one byte with the 8th
+** bit clear.  Except, if we get to the 9th byte, it stores the full 8 bits and is the last byte.
+*/
+__device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVarint
+{
+	if (v <= 0x7f) {
+		p[0] = v & 0x7f;
+		return 1;
+	}
+	if (v <= 0x3fff) {
+		p[0] = ((v >> 7) & 0x7f) | 0x80;
+		p[1] = v & 0x7f;
+		return 2;
+	}
+	//
 	int i, j, n;
 	if (v & (((uint64_t)0xff000000) << 32)) {
 		p[8] = (uint8_t)v;
@@ -47,17 +394,21 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v)
 	return n;
 }
 
-__device__ int convert_putvarint32_(unsigned char *p, uint32_t v)
-{
-	if ((v & ~0x3fff) == 0) {
-		p[0] = (uint8_t)((v>>7) | 0x80);
-		p[1] = (uint8_t)(v & 0x7f);
-		return 2;
-	}
-	return convert_putvarint(p, v);
-}
+/*
+** Bitmasks used by convert_getvarint().  These precomputed constants are defined here rather than simply putting the constant expressions
+** inline in order to work around bugs in the RVT compiler.
+**
+** SLOT_2_0     A mask for  (0x7f<<14) | 0x7f
+**
+** SLOT_4_2_0   A mask for  (0x7f<<28) | SLOT_2_0
+*/
+#define SLOT_2_0     0x001fc07f
+#define SLOT_4_2_0   0xf01fc07f
 
-__device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
+/*
+** Read a 64-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v.
+*/
+__device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sqlite3GetVarint
 {
 	uint32_t a, b, s;
 	a = *p;
@@ -82,7 +433,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	p++;
 	a = a << 14;
 	a |= *p;
-	// a: p0<<14 | p2 (unmasked)
+	// a: p0 << 14 | p2 (unmasked)
 	if (!(a & 0x80)) {
 		a &= SLOT_2_0;
 		b &= 0x7f;
@@ -96,49 +447,49 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	p++;
 	b = b << 14;
 	b |= *p;
-	// b: p1<<14 | p3 (unmasked)
+	// b: p1 << 14 | p3 (unmasked)
 	if (!(b & 0x80)) {
 		b &= SLOT_2_0;
 		// moved CSE1 up
-		// a &= (0x7f<<14)|(0x7f);
+		// a &= (0x7f << 14) | 0x7f;
 		a = a << 7;
 		a |= b;
 		*v = a;
 		return 4;
 	}
-	// a: p0<<14 | p2 (masked)
-	// b: p1<<14 | p3 (unmasked)
-	// 1:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked)
+	// a: p0 << 14 | p2 (masked)
+	// b: p1 << 14 | p3 (unmasked)
+	// 1: save off p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
 	// moved CSE1 up
-	// a &= (0x7f<<14)|(0x7f);
+	// a &= (0x7f << 14) | 0x7f;
 	b &= SLOT_2_0;
 	s = a;
-	// s: p0<<14 | p2 (masked)
+	// s: p0 << 14 | p2 (masked)
 	p++;
 	a = a << 14;
 	a |= *p;
-	// a: p0<<28 | p2<<14 | p4 (unmasked)
+	// a: p0 << 28 | p2 << 14 | p4 (unmasked)
 	if (!(a & 0x80)) {
 		// we can skip these cause they were (effectively) done above in calc'ing s
-		// a &= (0x7f<<28)|(0x7f<<14)|0x7f;
-		// b &= (0x7f<<14)|0x7f;
+		// a &= (0x7f << 28) | (0x7f << 14) | 0x7f;
+		// b &= (0x7f << 14) | 0x7f;
 		b = b << 7;
 		a |= b;
 		s = s >> 18;
 		*v = ((uint64_t)s) << 32 | a;
 		return 5;
 	}
-	// 2:save off p0<<21 | p1<<14 | p2<<7 | p3 (masked)
+	// 2: save off p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
 	s = s << 7;
 	s |= b;
-	// s: p0<<21 | p1<<14 | p2<<7 | p3 (masked)
+	// s: p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
 	p++;
 	b = b << 14;
 	b |= *p;
-	/* b: p1<<28 | p3<<14 | p5 (unmasked) */
+	/* b: p1 << 28 | p3 << 14 | p5 (unmasked) */
 	if (!(b & 0x80)) {
 		// we can skip this cause it was (effectively) done above in calc'ing s
-		// b &= (0x7f<<28)|(0x7f<<14)|0x7f;
+		// b &= (0x7f << 28)|(0x7f << 14) | 0x7f;
 		a &= SLOT_2_0;
 		a = a << 7;
 		a |= b;
@@ -149,13 +500,13 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	p++;
 	a = a << 14;
 	a |= *p;
-	// a: p2<<28 | p4<<14 | p6 (unmasked)
+	// a: p2 << 28 | p4 << 14 | p6 (unmasked)
 	if (!(a & 0x80)) {
 		a &= SLOT_4_2_0;
 		b &= SLOT_2_0;
 		b = b << 7;
 		a |= b;
-		s = s>>11;
+		s = s >> 11;
 		*v = ((uint64_t)s) << 32 | a;
 		return 7;
 	}
@@ -164,11 +515,11 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	p++;
 	b = b << 14;
 	b |= *p;
-	// b: p3<<28 | p5<<14 | p7 (unmasked)
+	// b: p3 << 28 | p5 << 14 | p7 (unmasked)
 	if (!(b & 0x80)) {
 		b &= SLOT_4_2_0;
 		// moved CSE2 up
-		// a &= (0x7f<<14)|0x7f;
+		// a &= (0x7f << 14) | 0x7f;
 		a = a << 7;
 		a |= b;
 		s = s >> 4;
@@ -178,9 +529,9 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	p++;
 	a = a << 15;
 	a |= *p;
-	// a: p4<<29 | p6<<15 | p8 (unmasked)
+	// a: p4 << 29 | p6 << 15 | p8 (unmasked)
 	// moved CSE2 up
-	// a &= (0x7f<<29)|(0x7f<<15)|(0xff);
+	// a &= (0x7f << 29) | (0x7f << 15) | 0xff;
 	b &= SLOT_2_0;
 	b = b << 8;
 	a |= b;
@@ -193,12 +544,27 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v)
 	return 9;
 }
 
-__device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
+/*
+** Read a 32-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v.
+**
+** If the varint stored in p[0] is larger than can fit in a 32-bit unsigned integer, then set *v to 0xffffffff.
+**
+** A MACRO version, getVarint32, is provided which inlines the single-byte case.  All code should use the MACRO version as 
+** this function assumes the single-byte case has already been handled.
+*/
+__device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: sqlite3GetVarint32
 {
 	uint32_t a, b;
 	// The 1-byte case.  Overwhelmingly the most common.  Handled inline by the getVarin32() macro
 	a = *p;
 	// a: p0 (unmasked)
+#ifndef _getvarint32
+	if (!(a & 0x80)) {
+		// Values between 0 and 127
+		*v = a;
+		return 1;
+	}
+#endif
 	// The 2-byte case
 	p++;
 	b = *p;
@@ -214,7 +580,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 	p++;
 	a = a << 14;
 	a |= *p;
-	// a: p0<<14 | p2 (unmasked)
+	// a: p0 << 14 | p2 (unmasked)
 	if (!(a & 0x80)) {
 		// Values between 16384 and 2097151
 		a &= (0x7f << 14) | 0x7f;
@@ -226,14 +592,14 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 
 	// A 32-bit varint is used to store size information in btrees. Objects are rarely larger than 2MiB limit of a 3-byte varint.
 	// A 3-byte varint is sufficient, for example, to record the size of a 1048569-byte BLOB or string.
+	//
 	// We only unroll the first 1-, 2-, and 3- byte cases.  The very rare larger cases can be handled by the slower 64-bit varint routine.
 #if 1
 	{
 		p -= 2;
-		uint64_t v64;
-		uint8_t n = convert_getvarint(p, &v64);
+		uint64_t v64; uint8_t n = convert_getvarint(p, &v64);
 		assert(n > 3 && n <= 9);
-		*v = ((v64 & MAX_TYPE(uint32_t)) != v64 ? 0xffffffff : (uint32_t)v64);
+		*v = ((v64 & UINT32_MAX) != v64 ? 0xffffffff : (uint32_t)v64);
 		return n;
 	}
 
@@ -243,7 +609,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 	p++;
 	b = b << 14;
 	b |= *p;
-	// b: p1<<14 | p3 (unmasked)
+	// b: p1 << 14 | p3 (unmasked)
 	if (!(b & 0x80)) {
 		// Values between 2097152 and 268435455
 		b &= (0x7f << 14) | 0x7f;
@@ -255,7 +621,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 	p++;
 	a = a << 14;
 	a |= *p;
-	// a: p0<<28 | p2<<14 | p4 (unmasked)
+	// a: p0 << 28 | p2 << 14 | p4 (unmasked)
 	if (!(a & 0x80)) {
 		// Values  between 268435456 and 34359738367
 		a &= SLOT_4_2_0;
@@ -264,12 +630,11 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 		*v = a | b;
 		return 5;
 	}
-	// We can only reach this point when reading a corrupt database file.  In that case we are not in any hurry.  Use the (relatively
-	// slow) general-purpose sqlite3GetVarint() routine to extract the value.
+	// We can only reach this point when reading a corrupt database file.  In that case we are not in any hurry.
+	// Use the (relatively slow) general-purpose convert_getvarint() routine to extract the value.
 	{
 		p -= 4;
-		uint64_t v64;
-		uint8_t n = convert_getvarint(p, &v64);
+		uint64_t v64; uint8_t n = convert_getvarint(p, &v64);
 		assert(n > 5 && n <= 9);
 		*v = (uint32)v64;
 		return n;
@@ -277,245 +642,15 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v)
 #endif
 }
 
-__device__ int _convert_getvarintLength(uint64_t v)
+__device__ int _convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 {
-	int i = 0;
-	do { i++; v >>= 7; }
-	while (v != 0 && _ALWAYS(i < 9));
+	int i; for (i = 1; v >>= 7; i++) { assert(i < 10); }
 	return i;
 }
 
 #pragma endregion
 
-#pragma region AtoX
 
-__device__ bool convert_atofe(const char *z, double *out, int length, TEXTENCODE encode)
-{
-#ifndef OMIT_FLOATING_POINT
-	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
-	*out = 0.0; // Default return value, in case of an error
-	const char *end = z + length;
-
-	// get size
-	int incr;
-	bool nonNum = false;
-	if (encode == TEXTENCODE_UTF8)
-		incr = 1;
-	else {
-		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
-		incr = 2;
-		int i; for (i = 3 - encode; i < length && z[i] == 0; i += 2) { }
-		nonNum = (i < length);
-		end = z + i + encode - 3;
-		z += (encode & 1);
-	}
-
-	// skip leading spaces
-	while (z < end && isspace(*z)) z += incr;
-	if (z >= end) return false;
-
-	// get sign of significand
-	int sign = 1; // sign of significand
-	if (*z == '-') { sign = -1; z += incr; }
-	else if (*z == '+') z += incr;
-
-	// sign * significand * (10 ^ (esign * exponent))
-	int digits = 0; 
-	bool eValid = true;  // True exponent is either not used or is well-formed
-	int64_t s = 0; // significand
-	int esign = 1; // sign of exponent
-	int e = 0; // exponent
-	int d = 0; // adjust exponent for shifting decimal point
-
-	// skip leading zeroes
-	while (z < end && z[0] == '0') z += incr, digits++;
-
-	// copy max significant digits to significand
-	while (z < end && isdigit(*z) && s < ((LARGEST_INT64 - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++; }
-	while (z < end && isdigit(*z)) z += incr, digits++, d++; // skip non-significant significand digits (increase exponent by d to shift decimal left)
-	if (z >= end) goto do_atof_calc;
-
-	// if decimal point is present
-	if (*z == '.')
-	{
-		z += incr;
-		// copy digits from after decimal to significand (decrease exponent by d to shift decimal right)
-		while (z < end && isdigit(*z) && s < ((LARGEST_INT64 - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++, d--; }
-		while (z < end && isdigit(*z)) z += incr, digits++; // skip non-significant digits
-	}
-	if (z >= end) goto do_atof_calc;
-
-	// if exponent is present
-	if (*z == 'e' || *z == 'E')
-	{
-		z += incr;
-		eValid = false;
-		if (z >= end) goto do_atof_calc;
-		// get sign of exponent
-		if (*z == '-') { esign = -1; z += incr; }
-		else if (*z == '+') z += incr;
-		// copy digits to exponent
-		while (z < end && isdigit(*z)) { e = (e < 10000 ? e * 10 + (*z - '0') : 10000); z += incr; eValid = true; }
-	}
-
-	// skip trailing spaces
-	if (digits && eValid) while (z < end && isspace(*z)) z += incr;
-
-do_atof_calc:
-	// adjust exponent by d, and update sign
-	e = (e * esign) + d;
-	if (e < 0) { esign = -1; e *= -1; }
-	else esign = 1;
-
-	// if !significand
-	double result;
-	if (!s)
-		result = (sign < 0 && digits ? -0.0 : 0.0); // In the IEEE 754 standard, zero is signed. Add the sign if we've seen at least one digit
-	else
-	{
-		// attempt to reduce exponent
-		if (esign > 0) while (s < (LARGEST_INT64 / 10) && e > 0) e--, s *= 10;
-		else while (!(s % 10) && e > 0) e--, s /= 10;
-
-		// adjust the sign of significand
-		s = (sign < 0 ? -s : s);
-
-		// if exponent, scale significand as appropriate and store in result.
-		if (e) {
-#if __CUDACC__
-			double scale = 1.0;
-#else
-			long double scale = 1.0;
-#endif
-			// attempt to handle extremely small/large numbers better
-			if (e > 307 && e < 342) {
-				while (e % 308) { scale *= 1.0e+1; e -= 1; }
-				if (esign < 0) { result = s / scale; result /= 1.0e+308; }
-				else { result = s * scale; result *= 1.0e+308; }
-			}
-			else if (e >= 342)
-				result = (esign < 0 ? 0.0 * s : 1e308 * 1e308 * s); // Infinity
-			else {
-				// 1.0e+22 is the largest power of 10 than can be represented exactly. */
-				while (e % 22) { scale *= 1.0e+1; e -= 1; }
-				while (e > 0) { scale *= 1.0e+22; e -= 22; }
-				result = (esign < 0 ? s / scale : s * scale);
-			}
-		}
-		else
-			result = (double)s;
-	}
-
-	*out = result; // store the result
-	return (z > end && digits > 0 && eValid && !nonNum); // return true if number and no extra non-whitespace chracters after
-#else
-	return !Atoi64(z, rResult, length, enc);
-#endif
-}
-
-static __device__ int compare2pow63(const char *z, int incr)
-{
-	const char *pow63 = "922337203685477580"; // 012345678901234567
-	int c = 0;
-	for (int i = 0; c == 0 && i < 18; i++)
-		c = (z[i * incr] - pow63[i]) * 10;
-	if (c == 0) {
-		c = z[18 * incr] - '8';
-		ASSERTCOVERAGE(c == -1);
-		ASSERTCOVERAGE(c == 0);
-		ASSERTCOVERAGE(c == +1);
-	}
-	return c;
-}
-
-__device__ int convert_atoi64e(const char *z, int64_t *out, int length, TEXTENCODE encode)
-{
-	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
-	//*out = 0.0; // Default return value, in case of an error
-	const char *start;
-	const char *end = z + length;
-
-	// get size
-	int incr;
-	bool nonNum = false;
-	if (encode == TEXTENCODE_UTF8)
-		incr = 1;
-	else {
-		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
-		incr = 2;
-		int i; for (i = 3 - encode; i < length && z[i] == 0; i += 2) { }
-		nonNum = (i < length);
-		end = z + i + encode - 3;
-		z += (encode & 1);
-	}
-
-	// skip leading spaces
-	while (z < end && isspace(*z)) z += incr;
-
-	// get sign of significand
-	int neg = 0; // assume positive
-	if (z < end) {
-		if (*z == '-') { neg = 1; z += incr; }
-		else if (*z == '+') z += incr;
-	}
-	start = z;
-
-	// skip leading zeros
-	while (z < end && z[0] == '0') z += incr;
-
-	uint64_t u = 0;
-	int c = 0;
-	int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) u = u * 10 + c - '0';
-	if (u > LARGEST_INT64) *out = SMALLEST_INT64;
-	else *out = (neg ?  -(int64_t)u : (int64_t)u);
-
-	ASSERTCOVERAGE(i == 18);
-	ASSERTCOVERAGE(i == 19);
-	ASSERTCOVERAGE(i == 20);
-	if ((c != 0 && &z[i] < end) || (i == 0 && start == z) || i > 19 * incr || nonNum) return 1; // z is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
-	else if (i < 19 * incr) { assert(u <= LARGEST_INT64); return 0; } // Less than 19 digits, so we know that it fits in 64 bits
-	else { // zNum is a 19-digit numbers.  Compare it against 9223372036854775808.
-		c = Compare2pow63(z, incr);
-		if (c < 0) { assert(u <= LARGEST_INT64); return 0; } // zNum is less than 9223372036854775808 so it fits
-		else if (c > 0) return 1; // zNum is greater than 9223372036854775808 so it overflows
-		else { assert(u-1 == LARGEST_INT64); assert(*out == SMALLEST_INT64); return neg ? 0 : 2; } //(neg ? 0 : 2); } // z is exactly 9223372036854775808.  Fits if negative.  The special case 2 overflow if positive
-	}
-}
-
-__device__ bool convert_atoie(const char *z, int *out)
-{
-	int neg = 0;
-	if (z[0] == '-') { neg = 1; z++; }
-	else if (z[0] == '+') z++;
-	while (z[0] == '0') z++;
-	int64_t v = 0;
-	int i, c;
-	for (i = 0; i < 11 && (c = z[i] - '0') >= 0 && c <= 9; i++) { v = v*10 + c; }
-	// The longest decimal representation of a 32 bit integer is 10 digits:
-	//             1234567890
-	//     2^31 -> 2147483648
-	ASSERTCOVERAGE(i == 10);
-	if (i > 10) return false;
-	ASSERTCOVERAGE(v-neg == 2147483647);
-	if (v - neg > 2147483647) return false;
-	*out = (int)(neg ? -v : v);
-	return true;
-}
-
-// sky: added
-static __constant__ char const __convert_digits[] = "0123456789";
-__device__ char *convert_itoa64(int64_t i, char *b)
-{
-	char *p = b;
-	if (i < 0) { *p++ = '-'; i *= -1; }
-	int64_t shifter = i;
-	do { ++p; shifter = shifter/10; } while(shifter); // Move to where representation ends
-	*p = '\0';
-	do { *--p = __convert_digits[i%10]; i = i/10; } while(i); // Move back, inserting digits as u go
-	return b;
-}
-
-#pragma endregion
 
 #ifdef OMIT_INLINECONVERT
 

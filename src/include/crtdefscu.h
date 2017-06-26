@@ -29,6 +29,7 @@ THE SOFTWARE.
 
 #include <crtdefs.h>
 #include <cuda_runtime.h>
+#define __LIBCU__
 
 #define HAS_STDIO_BUFSIZ_NONE__
 //#define _LARGEFILE64_SOURCE
@@ -71,11 +72,9 @@ and the non-ANSI way under -traditional.  */
 
 /* This is not a typedef so `const __ptr_t' does the right thing.  */
 #define __ptr_t void *
-#define __long_double_t long double
-/* CUDA double64 is double */
-#ifndef double64
-#define double64 double
-#endif
+//#define __long_double_t long double
+/* CUDA long_double is double */
+#define long_double double
 
 #define MEMORY_ALIGNMENT 4096
 /* Memory allocation - rounds to the type in T */
