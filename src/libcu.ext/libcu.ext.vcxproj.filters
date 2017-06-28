@@ -12,9 +12,10 @@
     <CudaCompile Include="vsystem-unix.cu" />
     <CudaCompile Include="vsystem-win.cu" />
     <CudaCompile Include="mutex.cu" />
-    <CudaCompile Include="mutex-noop.cu" />
-    <CudaCompile Include="mutex-win.cu" />
     <CudaCompile Include="alloc.cu" />
+    <CudaCompile Include="mutex-noop.cuh" />
+    <CudaCompile Include="mutex-win.cuh" />
+    <CudaCompile Include="mutex-unix.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />

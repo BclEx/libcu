@@ -33,14 +33,14 @@ extern "C" {
 	/*
 	** Figure out what version of the code to use.  The choices are
 	**
-	**   SQLITE_MUTEX_OMIT         No mutex logic.  Not even stubs.  The mutexes implementation cannot be overridden at start-time.
+	**   MUTEX_OMIT         No mutex logic.  Not even stubs.  The mutexes implementation cannot be overridden at start-time.
 	**
-	**   SQLITE_MUTEX_NOOP         For single-threaded applications.  No mutual exclusion is provided.  But this
+	**   MUTEX_NOOP         For single-threaded applications.  No mutual exclusion is provided.  But this
 	**                             implementation can be overridden at start-time.
 	**
-	**   SQLITE_MUTEX_PTHREADS     For multi-threaded applications on Unix.
+	**   MUTEX_PTHREADS     For multi-threaded applications on Unix.
 	**
-	**   SQLITE_MUTEX_W32          For multi-threaded applications on Win32.
+	**   MUTEX_W32          For multi-threaded applications on Win32.
 	*/
 #if !THREADSAFE
 #define MUTEX_OMIT
@@ -56,44 +56,57 @@ extern "C" {
 #endif
 
 #define MUTEX unsigned char
-#define MUTEX_FAST 0
-#define MUTEX_RECURSIVE 1
-#define MUTEX_STATIC_MASTER 2
-#define MUTEX_STATIC_MEM 3	// sqlite3_malloc()
-#define MUTEX_STATIC_OPEN 4	// sqlite3BtreeOpen()
-#define MUTEX_STATIC_PRNG 5 // sqlite3_random()
-#define MUTEX_STATIC_LRU 6  // lru page list
-#define MUTEX_STATIC_PMEM 7	// sqlite3PageMalloc()
+#define MUTEX_FAST             0
+#define MUTEX_RECURSIVE        1
+#define MUTEX_STATIC_MASTER    2
+#define MUTEX_STATIC_MEM       3  // sqlite3_malloc()
+#define MUTEX_STATIC_MEM2      4  // NOT USED
+#define MUTEX_STATIC_OPEN      4  // sqlite3BtreeOpen()
+#define MUTEX_STATIC_PRNG      5  // sqlite3_randomness()
+#define MUTEX_STATIC_LRU       6  // lru page list
+#define MUTEX_STATIC_LRU2      7  // NOT USED
+#define MUTEX_STATIC_PMEM      7  // sqlite3PageMalloc()
+#define MUTEX_STATIC_APP1      8  // For use by application
+#define MUTEX_STATIC_APP2      9  // For use by application
+#define MUTEX_STATIC_APP3     10  // For use by application
+#define MUTEX_STATIC_VFS1     11  // For use by built-in VFS
+#define MUTEX_STATIC_VFS2     12  // For use by extension VFS
+#define MUTEX_STATIC_VFS3     13  // For use by application VFS
+
+	typedef struct mutex_methods mutex_methods;
+	struct mutex_methods {
+		int (*MutexInitialize)();
+		int (*MutexShutdown)();
+		mutex *(*MutexAlloc)(int);
+		void (*MutexFree)(mutex *);
+		void (*MutexEnter)(mutex *);
+		int (*MutexTryEnter)(mutex *);
+		void (*MutexLeave)(mutex *);
+		int (*MutexHeld)(mutex *);
+		int (*MutexNotheld)(mutex *);
+	};
+	__device__ void __mutexsystem_setdefault(); // Default mutex interface
+	#define __mutexsystem g_RuntimeStatics.MutexSystem
 
 #ifdef MUTEX_OMIT
 	/*
 	** If this is a no-op implementation, implement everything as macros.
 	*/
 	typedef void *mutex;
-#define mutex_held(m) ((void)(X), 1)
-#define mutex_notheld(m) ((void)(X), 1)
-#define mutex_init() 0
-#define mutex_shutdown()
-#define mutex_alloc(m) ((MutexEx)1)
+#define mutex_alloc(m) ((mutex *)8)
 #define mutex_free(m)
 #define mutex_enter(m)
-#define mutex_tryenter(m) 0
+#define mutex_tryenter(m) false
 #define mutex_leave(m)
+#ifdef DEBUG
+#define mutex_held(m) ((void)(m), 1)
+#define mutex_notheld(m) ((void)(m), 1)
+#endif
+#define mutexAlloc(m) ((mutex *)8)
+#define mutexInitialize() 0
+#define mutexShutdown() 0
 #define MUTEX_LOGIC(X)
 #else
-	struct mutex_obj;
-	typedef mutex_obj *mutex;
-#ifdef _DEBUG
-	__device__ bool mutex_held(mutex p);
-	__device__ bool mutex_notheld(mutex p);
-#endif
-	__device__ int mutex_init();
-	__device__ void mutex_shutdown();
-	__device__ MutexEx mutex_alloc(MUTEX id);
-	__device__ void mutex_free(mutex p);
-	__device__ void mutex_enter(mutex p);
-	__device__ bool mutex_tryenter(mutex p);
-	__device__ void mutex_leave(mutex p);
 #define MUTEX_LOGIC(X) X
 #endif
 

@@ -25,8 +25,9 @@
   </PropertyGroup>
   <ItemGroup>
     <CudaCompile Include="alloc.cu" />
-    <CudaCompile Include="mutex-noop.cu" />
-    <CudaCompile Include="mutex-win.cu" />
+    <CudaCompile Include="mutex-noop.cuh" />
+    <CudaCompile Include="mutex-unix.cu" />
+    <CudaCompile Include="mutex-win.cuh" />
     <CudaCompile Include="mutex.cu" />
     <CudaCompile Include="vfile.cu" />
     <CudaCompile Include="vsystem-map.cu">

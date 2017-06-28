@@ -3,6 +3,10 @@
 #include <assert.h>
 #ifndef MUTEX_OMIT
 
+#include "mutext-noop.cuh"
+#include "mutext-win.cuh"
+#include "mutext-unix.cuh"
+
 #if defined(DEBUG)
 /*
 ** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
@@ -12,28 +16,26 @@ static __device__ _WSD bool g_mutexIsInit = false;
 #endif
 
 /* Initialize the mutex system. */
-__device__ int mutex_initialize()
+__device__ int mutexInitialize()
 { 
-	if (!__mutexsystem.Alloc) {
-		// If the xMutexAlloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
-		// sqlite3_initialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
+	// If the MutexAlloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
+	// systemInitialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
+	if (!__mutexsystem.MutexAlloc) {
+		_mutex_methods const *from = (g_RuntimeStatics.CoreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
 		_mutex_methods *to = &__mutexsystem;
-		_mutex_methods const *from = (__mutexsystem_enabled ? sqlite3DefaultMutex() : sqlite3NoopMutex());
-		to->MutexInit = from->MutexInit;
-		to->MutexEnd = from->MutexEnd;
+		to->MutexInitialize = from->MutexInitialize;
+		to->MutexShutdown = from->MutexShutdown;
 		to->MutexFree = from->MutexFree;
 		to->MutexEnter = from->MutexEnter;
-		to->MutexTry = from->MutexTry;
+		to->MutexTryEnter = from->MutexTryEnter;
 		to->MutexLeave = from->MutexLeave;
 		to->MutexHeld = from->MutexHeld;
 		to->MutexNotheld = from->MutexNotheld;
-		sqlite3MemoryBarrier();
+		mutexMemoryBarrier();
 		to->MutexAlloc = from->MutexAlloc;
-		memcpy(to, from, offsetof(_mutex_methods, Alloc));
-		memcpy(&to->Free, &from->Free, sizeof(*to) - offsetof(_mutex_methods, Free));
-		to->Alloc = from->Alloc;
 	}
-	int rc = __mutexsystem.Initialize();
+	assert(__mutexsystem.MutexInitialize);
+	int rc = __mutexsystem.MutexInitialize();
 #ifdef DEBUG
 	_GLOBAL(bool, g_mutexIsInit) = true;
 #endif
@@ -41,11 +43,11 @@ __device__ int mutex_initialize()
 }
 
 /* Shutdown the mutex system. This call frees resources allocated by mutex_initialize(). */
-__device__ int mutex_shutdown()
+__device__ int mutexShutdown()
 {
 	int rc = 0;
-	if (__mutexsystem.Shutdown)
-		rc = __mutexsystem.Shutdown();
+	if (__mutexsystem.MutexShutdown)
+		rc = __mutexsystem.MutexShutdown();
 #ifdef DEBUG
 	_GLOBAL(bool, g_mutexIsInit) = false;
 #endif
@@ -53,47 +55,75 @@ __device__ int mutex_shutdown()
 }
 
 /* Retrieve a pointer to a static mutex or allocate a new dynamic one. */
-__device__ mutex *mutex_alloc2(MUTEX id)
-{
-#ifndef OMIT_AUTOINIT
-	if (id <= MUTEX_RECURSIVE && system_initialize()) return 0;
-	if (id > MUTEX_RECURSIVE && mutex_initialize()) return 0;
-#endif
-	assert(__mutexsystem.Alloc);
-	return __mutexsystem.Alloc(id);
-}
 __device__ mutex *mutex_alloc(MUTEX id)
 {
-	if (!__mutexsystem_enabled)
+#ifndef OMIT_AUTOINIT
+	if (id <= MUTEX_RECURSIVE && systemInitialize()) return 0;
+	if (id > MUTEX_RECURSIVE && mutexInitialize()) return 0;
+#endif
+	assert(__mutexsystem.MutexAlloc);
+	return __mutexsystem.MutexAlloc(id);
+}
+__device__ mutex *mutexAlloc(MUTEX id)
+{
+	if (!g_RuntimeStatics.CoreMutex)
 		return nullptr;
 	assert(_GLOBAL(bool, g_mutexIsInit));
-	return __mutexsystem.Alloc(id);
+	return __mutexsystem.MutexAlloc(id);
 }
 
-
-
-
-// Free a dynamic mutex.
+/* Free a dynamic mutex. */
 __device__ void mutex_free(mutex *m)
 {
-	if (p) __mutexsystem.Free(p);
+	if (m) {
+		assert(__mutexsystem.MutexFree);
+		__mutexsystem.MutexFree(m);
+	}
 }
 
-// Obtain the mutex p. If some other thread already has the mutex, block until it can be obtained.
-__device__ void _mutex_enter(MutexEx p) { if (p) __mutexsystem.Enter(p); }
+/* Obtain the mutex m. If some other thread already has the mutex, block until it can be obtained. */
+__device__ void mutex_enter(mutex *m)
+{
+	if (m) {
+		assert(__mutexsystem.MutexEnter);
+		__mutexsystem.MutexEnter(m);
+	}
+}
 
-// Obtain the mutex p. If successful, return SQLITE_OK. Otherwise, if another thread holds the mutex and it cannot be obtained, return SQLITE_BUSY.
-__device__ bool _mutex_tryenter(MutexEx p) { return !p || __mutexsystem.TryEnter(p); }
+/* Obtain the mutex p. If successful, return true. Otherwise, if another thread holds the mutex and it cannot be obtained, return false. */
+__device__ bool mutex_tryenter(mutex *m)
+{
+	if (p) {
+		assert(__mutexsystem.MutexTryEnter);
+		return __mutexsystem.MutexTryEnter(m);
+	}
+	return false;
+}
 
-// The sqlite3_mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
-// is not currently entered. If a NULL pointer is passed as an argument this function is a no-op.
-__device__ void _mutex_leave(MutexEx p) { if (p) __mutexsystem.Leave(p); }
+/*
+** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
+** is not currently entered. If a NULL pointer is passed as an argument this function is a no-op.
+*/
+__device__ void mutex_leave(mutex *m)
+{
+	if (p) {
+		assert(__mutexsystem.MutexLeave);
+		__mutexsystem.MutexLeave(p);
+	}
+}
 
-#ifdef _DEBUG
-// The sqlite3_mutex_held() and sqlite3_mutex_notheld() routine are intended for use inside assert() statements.
-__device__ bool _mutex_held(MutexEx p) { return !p || __mutexsystem.Held(p); }
-__device__ bool _mutex_notheld(MutexEx p) { return !p || __mutexsystem.Notheld(p); }
+#ifdef DEBUG
+/* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
+__device__ bool mutex_held(mutex *m)
+{
+	assert(!m || __mutexsystem.MutexHeld);
+	return !m || __mutexsystem.MutexHeld(p);
+}
+__device__ bool mutex_notheld(mutex *m)
+{
+	assert(!m || __mutexsystem.MutexNotheld);
+	return !m || __mutexsystem.MutexNotheld(m);
+}
 #endif
 
-RUNTIME_NAMEEND
 #endif
