@@ -29,6 +29,7 @@ THE SOFTWARE.
 #ifdef  __cplusplus
 extern "C" {
 #endif
+#define THREADSAFE 0
 
 	/*
 	** Figure out what version of the code to use.  The choices are
@@ -55,6 +56,26 @@ extern "C" {
 #endif
 #endif
 
+	// CAPI3REF: Mutex Handle
+	typedef struct mutex mutex;
+
+	// CAPI3REF: Mutex Methods Object
+	typedef struct mutex_methods mutex_methods;
+	struct mutex_methods {
+		int (*MutexInitialize)();
+		int (*MutexShutdown)();
+		mutex *(*MutexAlloc)(int);
+		void (*MutexFree)(mutex *);
+		void (*MutexEnter)(mutex *);
+		int (*MutexTryEnter)(mutex *);
+		void (*MutexLeave)(mutex *);
+		int (*MutexHeld)(mutex *);
+		int (*MutexNotheld)(mutex *);
+	};
+	//?__device__ void __mutexsystem_setdefault(); // Default mutex interface
+#define __mutexsystem g_runtimeStatics.MutexSystem
+
+	// CAPI3REF: Mutex Types
 #define MUTEX unsigned char
 #define MUTEX_FAST             0
 #define MUTEX_RECURSIVE        1
@@ -73,26 +94,10 @@ extern "C" {
 #define MUTEX_STATIC_VFS2     12  // For use by extension VFS
 #define MUTEX_STATIC_VFS3     13  // For use by application VFS
 
-	typedef struct mutex_methods mutex_methods;
-	struct mutex_methods {
-		int (*MutexInitialize)();
-		int (*MutexShutdown)();
-		mutex *(*MutexAlloc)(int);
-		void (*MutexFree)(mutex *);
-		void (*MutexEnter)(mutex *);
-		int (*MutexTryEnter)(mutex *);
-		void (*MutexLeave)(mutex *);
-		int (*MutexHeld)(mutex *);
-		int (*MutexNotheld)(mutex *);
-	};
-	__device__ void __mutexsystem_setdefault(); // Default mutex interface
-	#define __mutexsystem g_RuntimeStatics.MutexSystem
-
 #ifdef MUTEX_OMIT
 	/*
 	** If this is a no-op implementation, implement everything as macros.
 	*/
-	typedef void *mutex;
 #define mutex_alloc(m) ((mutex *)8)
 #define mutex_free(m)
 #define mutex_enter(m)

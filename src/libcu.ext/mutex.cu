@@ -3,10 +3,6 @@
 #include <assert.h>
 #ifndef MUTEX_OMIT
 
-#include "mutext-noop.cuh"
-#include "mutext-win.cuh"
-#include "mutext-unix.cuh"
-
 #if defined(DEBUG)
 /*
 ** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
@@ -21,8 +17,8 @@ __device__ int mutexInitialize()
 	// If the MutexAlloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
 	// systemInitialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
 	if (!__mutexsystem.MutexAlloc) {
-		_mutex_methods const *from = (g_RuntimeStatics.CoreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
-		_mutex_methods *to = &__mutexsystem;
+		mutex_methods const *from = (g_runtimeStatics.CoreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
+		mutex_methods *to = &__mutexsystem;
 		to->MutexInitialize = from->MutexInitialize;
 		to->MutexShutdown = from->MutexShutdown;
 		to->MutexFree = from->MutexFree;
@@ -66,7 +62,7 @@ __device__ mutex *mutex_alloc(MUTEX id)
 }
 __device__ mutex *mutexAlloc(MUTEX id)
 {
-	if (!g_RuntimeStatics.CoreMutex)
+	if (!g_runtimeStatics.CoreMutex)
 		return nullptr;
 	assert(_GLOBAL(bool, g_mutexIsInit));
 	return __mutexsystem.MutexAlloc(id);

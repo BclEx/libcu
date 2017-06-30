@@ -101,6 +101,15 @@ and the non-ANSI way under -traditional.  */
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
+/*
+** The _WITHIN(P,S,E) macro checks to see if pointer P points to something between S (inclusive) and E (exclusive).
+**
+** In other words, S is a buffer and E is a pointer to the first byte after the end of buffer S.  This macro returns true if P points to something
+** contained within the buffer S.
+*/
+// SKY ADD TEST
+#define _WITHIN(P,S,E) (((uintptr_t)(P)>=(uintptr_t)(S))&&((uintptr_t)(P)<(uintptr_t)(E)))
+
 #pragma endregion
 
 //////////////////////
