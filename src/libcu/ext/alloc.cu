@@ -261,7 +261,7 @@ __host_device__ void *scratchAlloc(int size) //: sqlite3ScratchMalloc
 		}
 		memdbg_settype(p, MEMTYPE_SCRATCH);
 	}
-	assert(mutex_notheld(mem0.Mutex));
+	assert(mutex_notheld(mem0.mutex));
 #if LIBCU_THREADSAFE == 0 && !defined(NDEBUG)
 	/* EVIDENCE-OF: R-12970-05880 Libcu will not use more than one scratch buffers per thread.
 	**
