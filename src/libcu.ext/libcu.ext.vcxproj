@@ -24,17 +24,6 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <CudaCompile Include="alloc.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="mutex-noop.cu" />
-    <ClCompile Include="mutex-unix.c">
-      <FileType>Document</FileType>
-    </ClCompile>
-    <ClCompile Include="mutex-win.c">
-      <FileType>CppHeader</FileType>
-    </ClCompile>
-    <CudaCompile Include="mutex.cu" />
     <CudaCompile Include="vfile.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
@@ -52,12 +41,6 @@
     </CudaCompile>
     <None Include="bitvec.cu" />
     <CudaCompile Include="convert.cu" />
-    <CudaCompile Include="journalvfile.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="memoryvfile.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
   </ItemGroup>
@@ -66,12 +49,9 @@
     <None Include="libcu.ext.native.targets" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\ext\alloc.h" />
     <ClInclude Include="..\include\ext\bitvec.h" />
     <ClInclude Include="..\include\ext\convert.h" />
     <ClInclude Include="..\include\ext\math.h" />
-    <ClInclude Include="..\include\ext\mutex.h" />
-    <ClInclude Include="..\include\ext\status.h" />
     <ClInclude Include="..\include\ext\utf.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

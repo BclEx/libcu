@@ -23,32 +23,58 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#pragma once
+#include <ext\global.h>
 #ifndef _EXT_STATUS_H
 #define _EXT_STATUS_H
-#include <stdint.h>
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-	enum STATUS : unsigned char
-	{
-		STATUS_MEMORY_USED = 0,
-		STATUS_PAGECACHE_USED = 1,
-		STATUS_PAGECACHE_OVERFLOW = 2,
-		STATUS_SCRATCH_USED = 3,
-		STATUS_SCRATCH_OVERFLOW = 4,
-		STATUS_MALLOC_SIZE = 5,
-		STATUS_PARSER_STACK = 6,
-		STATUS_PAGECACHE_SIZE = 7,
-		STATUS_SCRATCH_SIZE = 8,
-		STATUS_MALLOC_COUNT = 9,
-	};
+	// CAPI3REF: Status Parameters
+#define STATUS int
+#define STATUS_MEMORY_USED			0
+#define STATUS_PAGECACHE_USED       1
+#define STATUS_PAGECACHE_OVERFLOW   2
+#define STATUS_SCRATCH_USED         3
+#define STATUS_SCRATCH_OVERFLOW     4
+#define STATUS_MALLOC_SIZE          5
+#define STATUS_PARSER_STACK         6
+#define STATUS_PAGECACHE_SIZE       7
+#define STATUS_SCRATCH_SIZE         8
+#define STATUS_MALLOC_COUNT         9
 
-	extern __device__ int status_value(STATUS op);
-	extern __device__ void status_add(STATUS op, int n);
-	extern __device__ void status_set(STATUS op, int x);
-	extern __device__ bool status(STATUS op, int *current, int *highwater, bool resetFlag);
+	// CAPI3REF: Libcu Runtime Status
+	/* Query status information. */
+	extern __host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFlag);
+	/* Query status information. */
+	extern __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag);
+
+	// CAPI3REF: Status Parameters for tag objects
+#define TAGSTATUS_LOOKASIDE_USED       0
+//#define TAGSTATUS_CACHE_USED           1
+//#define TAGSTATUS_SCHEMA_USED          2
+//#define TAGSTATUS_STMT_USED            3
+#define TAGSTATUS_LOOKASIDE_HIT        4
+#define TAGSTATUS_LOOKASIDE_MISS_SIZE  5
+#define TAGSTATUS_LOOKASIDE_MISS_FULL  6
+//#define TAGSTATUS_CACHE_HIT            7
+//#define TAGSTATUS_CACHE_MISS           8
+//#define TAGSTATUS_CACHE_WRITE          9
+//#define TAGSTATUS_DEFERRED_FKS        10
+//#define TAGSTATUS_CACHE_USED_SHARED   11
+#define TAGSTATUS_MAX                 11   // Largest defined TAGSTATUS
+
+	// CAPI3REF: Database Connection Status
+	extern __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highwater, bool resetFlag);
+
+	/* Return the current value of a status parameter. */
+	extern __host_device__ int64_t status_now(STATUS op);
+	/* Add N to the value of a status record. */
+	extern __host_device__ void status_inc(STATUS op, int n);
+	/* Dec N to the value of a status record. */
+	extern __host_device__ void status_dec(STATUS op, int n);
+	/* Adjust the highwater mark if necessary. */
+	extern __host_device__ void status_max(STATUS op, int x);
 
 #ifdef  __cplusplus
 }

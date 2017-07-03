@@ -224,8 +224,8 @@ LOOP:
 			do {
 				/* Unfortunately, we have no memcasecmp(). */
 				int j = 0;
-				/* | 0x20 is a cheap lowercasing (valid for ASCII letters and numbers only) */
-				while ((pos[j] | 0x20) == nan_inf_str[i+1+j]) {
+				/* |0x20 is a cheap lowercasing (valid for ASCII letters and numbers only) */
+				while ((pos[j]|0x20) == nan_inf_str[i+1+j]) {
 					++j;
 					if (!nan_inf_str[i+1+j]) {
 						number = i / 0.;
@@ -460,8 +460,8 @@ __device__ unsigned long __strtol(register const Wchar *__restrict str, Wchar **
 		do {
 			digit = ((Wuchar)(*str - '0') <= 9)
 				? /* 0..9 */ (*str - '0')
-				: /* else */ (((Wuchar)(0x20 | *str) >= 'a') /* WARNING: assumes ascii. */
-				? /* >= A/a */ ((Wuchar)(0x20 | *str) - ('a' - 10))
+				: /* else */ (((Wuchar)(0x20|*str) >= 'a') /* WARNING: assumes ascii. */
+				? /* >= A/a */ ((Wuchar)(0x20|*str) - ('a' - 10))
 				: /* else   */ 40 /* bad value */);
 
 			if (digit >= base) {
@@ -543,8 +543,8 @@ __device__ unsigned long long __strtoll(register const Wchar * __restrict str, W
 		do {
 			digit = ((Wuchar)(*str - '0') <= 9)
 				? /* 0..9 */ (*str - '0')
-				: /* else */ (((Wuchar)(0x20 | *str) >= 'a') /* WARNING: assumes ascii. */
-				? /* >= A/a */ ((Wuchar)(0x20 | *str) - ('a' - 10))
+				: /* else */ (((Wuchar)(0x20|*str) >= 'a') /* WARNING: assumes ascii. */
+				? /* >= A/a */ ((Wuchar)(0x20|*str) - ('a' - 10))
 				: /* else   */ 40 /* bad value */);
 
 			if (digit >= base) {

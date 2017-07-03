@@ -117,9 +117,9 @@ __device__ FILE *freopen_device(const char *__restrict filename, const char *__r
 	// Parse the specified mode.
 	unsigned short openMode = O_RDONLY;
 	if (*modes != 'r') { // Not read...
-		openMode = (O_WRONLY | O_CREAT | O_TRUNC);
+		openMode = (O_WRONLY|O_CREAT|O_TRUNC);
 		if (*modes != 'w') { // Not write (create or truncate)...
-			openMode = (O_WRONLY | O_CREAT | O_APPEND);
+			openMode = (O_WRONLY|O_CREAT|O_APPEND);
 			if (*modes != 'a') {	// Not write (create or append)...
 				_set_errno(EINVAL); // So illegal mode.
 				streamFree(stream);
@@ -131,8 +131,8 @@ __device__ FILE *freopen_device(const char *__restrict filename, const char *__r
 		++modes;
 	if (modes[1] == '+') { // Read and Write.
 		++modes;
-		openMode |= (O_RDONLY | O_WRONLY);
-		openMode += (O_RDWR - (O_RDONLY | O_WRONLY));
+		openMode |= (O_RDONLY|O_WRONLY);
+		openMode += (O_RDWR - (O_RDONLY|O_WRONLY));
 	}
 
 	// Need to allocate a FILE (not freopen).
@@ -141,7 +141,6 @@ __device__ FILE *freopen_device(const char *__restrict filename, const char *__r
 		if (!stream)
 			return nullptr;
 	}
-	int r;
 	stream->_flag = openMode;
 	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file);
 	if (!stream->_base) {
@@ -161,9 +160,9 @@ __device__ FILE *freopen64_device(const char *__restrict filename, const char *_
 	// Parse the specified mode.
 	unsigned short openMode = O_RDONLY;
 	if (*modes != 'r') { // Not read...
-		openMode = (O_WRONLY | O_CREAT | O_TRUNC);
+		openMode = (O_WRONLY|O_CREAT|O_TRUNC);
 		if (*modes != 'w') { // Not write (create or truncate)...
-			openMode = (O_WRONLY | O_CREAT | O_APPEND);
+			openMode = (O_WRONLY|O_CREAT|O_APPEND);
 			if (*modes != 'a') {	// Not write (create or append)...
 				_set_errno(EINVAL); // So illegal mode.
 				streamFree(stream);
@@ -175,8 +174,8 @@ __device__ FILE *freopen64_device(const char *__restrict filename, const char *_
 		++modes;
 	if (modes[1] == '+') { // Read and Write.
 		++modes;
-		openMode |= (O_RDONLY | O_WRONLY);
-		openMode += (O_RDWR - (O_RDONLY | O_WRONLY));
+		openMode |= (O_RDONLY|O_WRONLY);
+		openMode += (O_RDWR - (O_RDONLY|O_WRONLY));
 	}
 
 	// Need to allocate a FILE (not freopen).
@@ -467,6 +466,7 @@ doswitch:
 __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	panic("Not Implemented");
+	return 0;
 }
 
 __constant__ static short _basefix[17] = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; // 'basefix' is used to avoid 'if' tests in the integer scanner
@@ -576,7 +576,7 @@ literal_:
 			c = CT_CHAR;
 			break;
 		case 'p': // pointer format is like hex
-			flags |= POINTER | PFXOK;
+			flags |= POINTER|PFXOK;
 			c = CT_INT;
 			flags |= UNSIGNED;
 			base = 16;
@@ -716,7 +716,7 @@ literal_:
 				width = sizeof(buf) - 2;
 			width++;
 #endif
-			flags |= SIGNOK | NDIGITS | NZDIGITS;
+			flags |= SIGNOK|NDIGITS|NZDIGITS;
 			for (p = buf; width; width--) {
 				c = *str;
 				// Switch on the character; `goto ok' if we accept it as a part of number.
@@ -736,12 +736,12 @@ literal_:
 				case '1': case '2': case '3': // 1 through 7 always legal
 				case '4': case '5': case '6': case '7':
 					base = _basefix[base];
-					flags &= ~(SIGNOK | PFXOK | NDIGITS);
+					flags &= ~(SIGNOK|PFXOK|NDIGITS);
 					goto ok;
 				case '8': case '9': // digits 8 and 9 ok iff decimal or hex
 					base = _basefix[base];
 					if (base <= 8) break; // not legal here
-					flags &= ~(SIGNOK | PFXOK | NDIGITS);
+					flags &= ~(SIGNOK|PFXOK|NDIGITS);
 					goto ok;
 				case 'A': case 'B': case 'C': // letters ok iff hex
 				case 'D': case 'E': case 'F':
@@ -749,7 +749,7 @@ literal_:
 				case 'd': case 'e': case 'f':
 					// no need to fix base here
 					if (base <= 10) break; // not legal here
-					flags &= ~(SIGNOK | PFXOK | NDIGITS);
+					flags &= ~(SIGNOK|PFXOK|NDIGITS);
 					goto ok;
 				case '+': case '-': // sign ok only as first character
 					if (flags & SIGNOK) {

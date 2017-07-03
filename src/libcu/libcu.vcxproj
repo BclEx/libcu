@@ -31,9 +31,13 @@
     <ClInclude Include="..\include\crtdefscu.h" />
     <ClInclude Include="..\include\ctypecu.h" />
     <ClInclude Include="..\include\cuda_runtimecu.h" />
+    <ClInclude Include="..\include\ext\alloc.h" />
     <ClInclude Include="..\include\ext\hash.h" />
     <ClInclude Include="..\include\ext\memfile.h" />
-    <ClInclude Include="..\include\ext\tagbase.h" />
+    <ClInclude Include="..\include\ext\mutex.h" />
+    <ClInclude Include="..\include\ext\status.h" />
+    <ClInclude Include="..\include\ext\global.h" />
+    <ClInclude Include="..\include\ext\util.h" />
     <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\grpcu.h" />
     <ClInclude Include="..\include\pwdcu.h" />
@@ -63,6 +67,8 @@
     <ClInclude Include="fsystem.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ext\mutex-unix.c" />
+    <ClCompile Include="ext\mutex-win.c" />
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
@@ -75,6 +81,19 @@
     <None Include="fcntlcu.cu" />
     <None Include="grpcu.cu" />
     <None Include="crtdefscu.cu" />
+    <CudaCompile Include="ext\alloc.cu" />
+    <CudaCompile Include="ext\allocmem0.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="ext\allocmem1.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="ext\mutex-gpu.cu" />
+    <CudaCompile Include="ext\mutex-noop.cu" />
+    <CudaCompile Include="ext\mutex.cu" />
+    <CudaCompile Include="ext\status.cu" />
+    <CudaCompile Include="ext\global.cu" />
+    <CudaCompile Include="ext\util.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

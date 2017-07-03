@@ -1,8 +1,9 @@
 
 //////////////////////
 // MUTEX PTHREADS
-#ifdef MUTEX_PTHREADS
-#pragma region MUTEX_PTHREADS
+#pragma region MUTEX PTHREADS
+#ifdef LIBCU_MUTEX_PTHREADS
+
 #include <pthread.h>
 
 /*
@@ -312,7 +313,7 @@ static const mutex_methods DefaultMethods = {
 #endif
 };
 
-__host__ __device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
 
-#pragma endregion
 #endif
+#pragma endregion

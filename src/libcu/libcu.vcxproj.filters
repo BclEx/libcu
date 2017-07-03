@@ -82,9 +82,6 @@
     <ClInclude Include="..\include\ext\memfile.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ext\tagbase.h">
-      <Filter>include\ext</Filter>
-    </ClInclude>
     <ClInclude Include="fsystem.h" />
     <ClInclude Include="..\include\sentinel-unistdmsg.h">
       <Filter>include</Filter>
@@ -110,11 +107,53 @@
     <ClInclude Include="..\include\sentinel-direntmsg.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ext\alloc.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\mutex.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\status.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\global.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\util.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
+    <CudaCompile Include="ext\alloc.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\allocmem0.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\allocmem1.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\mutex.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\mutex-gpu.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\mutex-noop.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\status.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\global.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\util.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -145,6 +184,12 @@
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <ClCompile Include="ext\mutex-unix.c">
+      <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\mutex-win.c">
+      <Filter>ext</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libcu.Native.nuspec" />

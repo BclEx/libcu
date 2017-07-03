@@ -5,6 +5,7 @@
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
+#include <ext\alloc.h>
 
 __BEGIN_DECLS;
 
@@ -656,7 +657,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 			}
 			out_ = bufpt;
 			nsd = 16 + flag_altform2*10;
-			flag_dp = (precision > 0) | flag_alternateform | flag_altform2;
+			flag_dp = (precision > 0)|flag_alternateform|flag_altform2;
 			// The sign in front of the number
 			if (prefix) *bufpt++ = prefix;
 			// Digits prior to the decimal point
@@ -794,7 +795,7 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 {
 	assert(str != nullptr || length == 0);
-	if (b->overflowed | b->allocFailed) {
+	if (b->overflowed|b->allocFailed) {
 		ASSERTCOVERAGE(b->overflowed);
 		ASSERTCOVERAGE(b->allocFailed);
 		return;
@@ -823,7 +824,7 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 			}
 			else
 				b->size = (int)newSize;
-			newText = (char *)(b->allocType == 1 ? tagrealloc(b->tag, oldText, b->size) : realloc(oldText, b->size));
+			newText = (char *)(b->allocType == 1 ? tagrealloc((tagbase_t *)b->tag, oldText, b->size) : realloc(oldText, b->size));
 			if (newText) {
 				if (!oldText && b->index > 0) memcpy(newText, b->text, b->index);
 				b->text = newText;
@@ -845,7 +846,7 @@ __device__ char *strbldToString(strbld_t *b)
 	if (b->text) {
 		b->text[b->index] = 0;
 		if (b->allocType && b->text == b->base) {
-			b->text = (char *)(b->allocType == 1 ? tagalloc(b->tag, b->index + 1) : malloc(b->index + 1));
+			b->text = (char *)(b->allocType == 1 ? tagallocRaw((tagbase_t *)b->tag, b->index + 1) : malloc(b->index + 1));
 			if (b->text) memcpy(b->text, b->base, b->index + 1);
 			else b->allocFailed = true;
 		}
@@ -857,7 +858,7 @@ __device__ void strbldReset(strbld_t *b)
 {
 	if (b->text != b->base) {
 		if (b->allocType == 1)
-			tagfree(b->tag, b->text);
+			tagfree((tagbase_t *)b->tag, b->text);
 		else
 			free(b->text);
 	}

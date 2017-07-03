@@ -1,4 +1,0 @@
-#include "Runtime.h"
-RUNTIME_NAMEBEGIN
-
-RUNTIME_NAMEEND

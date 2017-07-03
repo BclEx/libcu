@@ -1,7 +1,7 @@
 //////////////////////
 // MUTEX NOOP
-#pragma region MUTEX_NOOP
-#ifdef MUTEX_NOOP
+#pragma region MUTEX NOOP
+#ifdef LIBCU_MUTEX_NOOP
 
 #ifndef DEBUG
 
@@ -10,14 +10,14 @@
 **
 ** This routines provide no mutual exclusion or error checking.
 */
-static __host__ __device__ int noopMutexInitialize() { return 0; }
-static __host__ __device__ int noopMutexShutdown() { return 0; }
+static __host_device__ RC noopMutexInitialize() { return 0; }
+static __host_device__ RC noopMutexShutdown() { return 0; }
 
-static __host__ __device__ mutex *noopMutexAlloc(MUTEX id) { UNUSED_SYMBOL(id); return (mutex *)8;  }
-static __host__ __device__ void noopMutexFree(mutex *m) { UNUSED_SYMBOL(m); }
-static __host__ __device__ void noopMutexEnter(mutex *m) { UNUSED_SYMBOL(m); }
-static __host__ __device__ bool noopMutexTryEnter(mutex *m) { UNUSED_SYMBOL(m); return true; }
-static __host__ __device__ void noopMutexLeave(mutex *m) { UNUSED_SYMBOL(m); }
+static __host_device__ mutex *noopMutexAlloc(MUTEX id) { UNUSED_SYMBOL(id); return (mutex *)8;  }
+static __host_device__ void noopMutexFree(mutex *m) { UNUSED_SYMBOL(m); }
+static __host_device__ void noopMutexEnter(mutex *m) { UNUSED_SYMBOL(m); }
+static __host_device__ bool noopMutexTryEnter(mutex *m) { UNUSED_SYMBOL(m); return true; }
+static __host_device__ void noopMutexLeave(mutex *m) { UNUSED_SYMBOL(m); }
 
 static __host__ __constant__ const mutex_methods noopDefaultMethods = {
 	noopMutexInitialize,
@@ -30,7 +30,7 @@ static __host__ __constant__ const mutex_methods noopDefaultMethods = {
 	nullptr,
 	nullptr,
 };
-__host__ __device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMethods; }
 
 #else
 /* In this implementation, error checking is provided for testing and debugging purposes.  The mutexes still do not provide any mutual exclusion. */
@@ -42,17 +42,17 @@ struct mutex {
 };
 
 /* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
-static __host__ __device__ bool noopMutexHeld(mutex *m) { return (!p || p->Refs); }
-static __host__ __device__ bool noopMutexNotheld(mutex *m) { return (!p || !p->Refs); }
+static __host_device__ bool noopMutexHeld(mutex *m) { return (!p || p->Refs); }
+static __host_device__ bool noopMutexNotheld(mutex *m) { return (!p || !p->Refs); }
 
 /* Initialize and deinitialize the mutex subsystem. */
-static __host__ __device__ mutex *noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
+static __host_device__ mutex *noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
 
-static __host__ __device__ int noopMutexInitialize() { return 0; }
-static __host__ __device__ int noopMutexEnd() { return 0; }
+static __host_device__ int noopMutexInitialize() { return 0; }
+static __host_device__ int noopMutexEnd() { return 0; }
 
 /* The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL that means that a mutex could not be allocated. */
-static __host__ __device__ mutex *noopMutexAlloc(MUTEX id)
+static __host_device__ mutex *noopMutexAlloc(MUTEX id)
 {
 	mutex *m;
 	switch (id) {
@@ -79,7 +79,7 @@ static __host__ __device__ mutex *noopMutexAlloc(MUTEX id)
 }
 
 /* This routine deallocates a previously allocated mutex. */
-static __host__ __device__ void noopMutexFree(mutex *m)
+static __host_device__ void noopMutexFree(mutex *m)
 {
 	assert(!p->Refs);
 	if (p->Id == MUTEX_FAST || p->Id == MUTEX_RECURSIVE) {
@@ -99,13 +99,13 @@ static __host__ __device__ void noopMutexFree(mutex *m)
 ** mutex must be exited an equal number of times before another thread can enter.  If the same thread tries to enter any other kind of mutex
 ** more than once, the behavior is undefined.
 */
-static __host__ __device__ void noopMutexEnter(mutex *m)
+static __host_device__ void noopMutexEnter(mutex *m)
 {
 	assert(m->Id == MUTEX_RECURSIVE || mutex_notheld(m));
 	m->Refs++;
 }
 
-static __host__ __device__ bool noopMutexTryEnter(mutex *m)
+static __host_device__ bool noopMutexTryEnter(mutex *m)
 {
 	assert(m->Id == MUTEX_RECURSIVE || mutex_notheld(m));
 	m->Refs++;
@@ -116,7 +116,7 @@ static __host__ __device__ bool noopMutexTryEnter(mutex *m)
 ** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
 ** is undefined if the mutex is not currently entered or is not currently allocated.  Libcu will never do either.
 */
-static __host__ __device__ void noopMutexLeave(mutex *m)
+static __host_device__ void noopMutexLeave(mutex *m)
 {
 	assert(mutex_held(m));
 	m->Refs--;
@@ -135,13 +135,13 @@ static __host__ __constant__ const mutex_methods noopDefaultMethods = {
 	noopMutexNotHeld
 };
 
-__host__ __device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMethods; }
 
 #endif
 
 /* If compiled with MUTEX_NOOP, then the no-op mutex implementation is used regardless of the run-time threadsafety setting. */
 #ifdef MUTEX_NOOP
-__host__ __device__ mutex_methods const *__mutexsystemDefault() { return &noopDefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemDefault() { return &noopDefaultMethods; }
 #endif
 
 #endif

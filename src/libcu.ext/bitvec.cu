@@ -1,6 +1,6 @@
 ﻿#include <stdlibcu.h>
+#include <ext/global.h>
 #include <ext/bitvec.h>
-#include <ext/tagbase.h>
 #include <assert.h>
 
 /* Size of the Bitvec structure in bytes. */
@@ -55,7 +55,7 @@ struct bitvec_t {
 ** Create a new bitmap object able to handle bits between 0 and "size", inclusive.  Return a pointer to the new object.  Return NULL if 
 ** malloc fails.
 */
-__device__ bitvec_t *bitvecNew(uint32_t size)
+__device__ bitvec_t *bitvecNew(uint32_t size) //: sqlite3BitvecCreate
 {
 	assert(sizeof(bitvec_t) == BITVEC_SZ);
 	bitvec_t *p = (bitvec_t *)mallocZero(sizeof(bitvec_t));
@@ -68,7 +68,7 @@ __device__ bitvec_t *bitvecNew(uint32_t size)
 ** Check to see if the i-th bit is set.  Return true or false. If p is NULL (if the bitmap has not been created) or if
 ** i is out of range, then return false.
 */
-__device__ bool bitvecGet(bitvec_t *p, uint32_t index)
+__device__ bool bitvecGet(bitvec_t *p, uint32_t index) //: sqlite3BitvecTestNotNull
 {
 	assert(p);
 	if (index > p->size)
@@ -101,7 +101,7 @@ __device__ bool bitvecGet(bitvec_t *p, uint32_t index)
 ** The calling function must ensure that p is a valid Bitvec object and that the value for "i" is within range of the Bitvec object.
 ** Otherwise the behavior is undefined.
 */
-__device__ bool bitvecSet(bitvec_t *p, uint32_t index)
+__device__ bool bitvecSet(bitvec_t *p, uint32_t index) //: sqlite3BitvecSet
 {
 	if (!p)
 		return true;
@@ -112,7 +112,7 @@ __device__ bool bitvecSet(bitvec_t *p, uint32_t index)
 		uint32_t bin = index / p->divisor;
 		index %= p->divisor;
 		if (!p->u.sub[bin] && !(p->u.sub[bin] = bitvecNew(p->divisor)))
-			return false;
+			return RC_NOMEM_BKPT;
 		p = p->u.sub[bin];
 	}
 	if (p->size <= BITVEC_NBIT) {
@@ -134,16 +134,16 @@ __device__ bool bitvecSet(bitvec_t *p, uint32_t index)
 		// we didn't find it in the hash.  h points to the first available free spot. check to see if this is going to make our hash too "full".
 bitvec_set_rehash:
 		if (p->set >= BITVEC_MXHASH) {
-			uint32_t *values = (uint32_t *)tagalloca(nullptr, sizeof(p->u.hash));
+			uint32_t *values = (uint32_t *)tagstackAllocRaw(nullptr, sizeof(p->u.hash));
 			if (!values)
-				return false;
+				return RC_NOMEM_BKPT;
 			memcpy(values, p->u.hash, sizeof(p->u.hash));
 			memset(p->u.sub, 0, sizeof(p->u.sub));
 			p->divisor = ((p->size + BITVEC_NPTR - 1) / BITVEC_NPTR);
 			bool rc = bitvecSet(p, index);
 			for (unsigned int j = 0; j < BITVEC_NINT; j++)
 				if (values[j]) rc |= bitvecSet(p, values[j]);
-			tagfreea(nullptr, values);
+			tagstackFree(nullptr, values);
 			return rc;
 		}
 bitvec_set_end:
@@ -158,7 +158,7 @@ bitvec_set_end:
 ** pBuf must be a pointer to at least BITVEC_SZ bytes of temporary storage
 ** that BitvecClear can use to rebuilt its hash table.
 */
-__device__ void bitvecClear(bitvec_t *p, uint32_t index, void *buffer)
+__device__ void bitvecClear(bitvec_t *p, uint32_t index, void *buffer) //: sqlite3BitvecClear
 {
 	if (!p)
 		return;
@@ -194,7 +194,7 @@ __device__ void bitvecClear(bitvec_t *p, uint32_t index, void *buffer)
 /*
 ** Destroy a bitmap object.  Reclaim all memory used.
 */
-__device__ void bitvecDestroy(bitvec_t *p)
+__device__ void bitvecDestroy(bitvec_t *p) //: sqlite3BitvecDestroy
 {
 	if (!p)
 		return;
@@ -207,7 +207,7 @@ __device__ void bitvecDestroy(bitvec_t *p)
 /*
 ** Return the value of the iSize parameter specified when Bitvec *p was created.
 */
-__device__ uint32_t bitvecSize(bitvec_t *p)
+__device__ uint32_t bitvecSize(bitvec_t *p) //: sqlite3BitvecSize
 {
 	return p->size;
 }
@@ -253,7 +253,7 @@ __device__ uint32_t bitvecSize(bitvec_t *p)
 **
 ** If a memory allocation error occurs, return -1.
 */
-__device__ int bitvecBuiltinTest(int size, int *ops)
+__device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTest
 {
 	int i, rc = -1;
 

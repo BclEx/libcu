@@ -1,7 +1,7 @@
 //////////////////////
 // MUTEX W32
-#pragma region MUTEX_W32
-#ifdef MUTEX_W32
+#pragma region MUTEX W32
+#ifdef LIBCU_MUTEX_W32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
@@ -299,7 +299,7 @@ static const mutex_methods DefaultMethods = {
 #endif
 };
 
-__host__ __device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
 
 #endif
 #pragma endregion

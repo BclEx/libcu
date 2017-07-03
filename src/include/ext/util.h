@@ -1,5 +1,5 @@
 /*
-tagbase.h - xxx
+util.h - xxx
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -23,34 +23,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//#pragma once
-#ifndef _EXT_TAGBASE_H
-#define _EXT_TAGBASE_H
-#include <crtdefscu.h>
-#include <malloc.h>
-__BEGIN_DECLS;
-
-__forceinline __device__ void *allocaZero(size_t size) { void *p = alloca(size); if (p) memset(p, 0, size); return p; }
-
-/*
-** On systems with ample stack space and that support alloca(), make use of alloca() to obtain space for large automatic objects.  By default,
-** obtain space from malloc().
-**
-** The alloca() routine never returns NULL.  This will cause code paths that deal with sqlite3StackAlloc() failures to be unreachable.
-*/
-#ifdef LIBCU_ALLOCA
-#define tagalloca(tag, size) alloca(size)
-#define tagallocaZero(tag, size) allocaZero(size)
-#define tagfreea(tag, ptr)
-#elif 0
-#define tagalloca(tag, size) tagalloc(tag, size)
-#define tagallocaZero(tag, size) tagallocZero(tag, size)
-#define tagfreea(tag, ptr) tagfree(tag, ptr)
-#else
-#define tagalloca(tag, size) malloc(size)
-#define tagallocaZero(tag, size) mallocZero(size)
-#define tagfreea(tag, ptr) free(ptr)
+#include <ext\global.h>
+#ifndef _EXT_UTIL_H
+#define _EXT_UTIL_H
+#ifdef  __cplusplus
+extern "C" {
 #endif
 
-__END_DECLS;
-#endif  /* _EXT_TAGBASE_H */
+#ifdef LIBCU_UNTESTABLE
+#define sqlite3FaultSim(X) RC_OK
+#else
+	__host_device__ RC sqlite3FaultSim(int);
+#endif
+
+	//__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...)
+	__host_device__ void tagError(tagbase_t *tag, int errCode);
+	__host_device__ void tagSystemError(tagbase_t *tag, RC rc);
+	__host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
+	__host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
+
+#ifdef  __cplusplus
+}
+#endif
+#endif	/* _EXT_UTIL_H */

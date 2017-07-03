@@ -1,0 +1,125 @@
+#include <stdlibcu.h>
+#include <ext/mutex.h>
+#include <assert.h>
+#ifndef LIBCU_MUTEX_OMIT
+
+#if defined(DEBUG)
+/*
+** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
+** allocate a mutex while the system is uninitialized.
+*/
+static __hostb_device__ _WSD bool _mutexIsInit = false;
+#endif
+
+/* Initialize the mutex system. */
+__host_device__ RC mutexInitialize()
+{ 
+	// If the _.alloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
+	// systemInitialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
+	if (!__mutexsystem.alloc) {
+		mutex_methods const *from = (_runtimeStatics.coreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
+		mutex_methods *to = &__mutexsystem;
+		to->initialize = from->initialize;
+		to->shutdown = from->shutdown;
+		to->free = from->free;
+		to->enter = from->enter;
+		to->tryEnter = from->tryEnter;
+		to->leave = from->leave;
+		to->held = from->held;
+		to->notheld = from->notheld;
+		systemMemoryBarrier();
+		to->alloc = from->alloc;
+	}
+	assert(__mutexsystem.initialize);
+	RC rc = __mutexsystem.initialize();
+#ifdef DEBUG
+	_GLOBAL(bool, _mutexIsInit) = true;
+#endif
+	return rc;
+}
+
+/* Shutdown the mutex system. This call frees resources allocated by mutex_initialize(). */
+__host_device__ RC mutexShutdown()
+{
+	RC rc = 0;
+	if (__mutexsystem.shutdown)
+		rc = __mutexsystem.shutdown();
+#ifdef DEBUG
+	_GLOBAL(bool, _mutexIsInit) = false;
+#endif
+	return rc;
+}
+
+/* Retrieve a pointer to a static mutex or allocate a new dynamic one. */
+__host_device__ mutex *mutex_alloc(MUTEX id)
+{
+#ifndef OMIT_AUTOINIT
+	if (id <= MUTEX_RECURSIVE && systemInitialize()) return nullptr;
+	if (id > MUTEX_RECURSIVE && mutexInitialize()) return nullptr;
+#endif
+	assert(__mutexsystem.alloc);
+	return __mutexsystem.alloc(id);
+}
+__host_device__ mutex *mutexAlloc(MUTEX id)
+{
+	if (!_runtimeStatics.coreMutex)
+		return nullptr;
+	assert(_GLOBAL(bool, _mutexIsInit));
+	return __mutexsystem.alloc(id);
+}
+
+/* Free a dynamic mutex. */
+__host_device__ void mutex_free(mutex *m)
+{
+	if (m) {
+		assert(__mutexsystem.free);
+		__mutexsystem.free(m);
+	}
+}
+
+/* Obtain the mutex m. If some other thread already has the mutex, block until it can be obtained. */
+__host_device__ void mutex_enter(mutex *m)
+{
+	if (m) {
+		assert(__mutexsystem.enter);
+		__mutexsystem.enter(m);
+	}
+}
+
+/* Obtain the mutex p. If successful, return true. Otherwise, if another thread holds the mutex and it cannot be obtained, return false. */
+__host_device__ bool mutex_tryenter(mutex *m)
+{
+	if (m) {
+		assert(__mutexsystem.tryEnter);
+		return __mutexsystem.tryEnter(m);
+	}
+	return true;
+}
+
+/*
+** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
+** is not currently entered. If a NULL pointer is passed as an argument this function is a no-op.
+*/
+__host_device__ void mutex_leave(mutex *m)
+{
+	if (m) {
+		assert(__mutexsystem.leave);
+		__mutexsystem.leave(m);
+	}
+}
+
+#ifdef DEBUG
+/* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
+__host_device__ bool mutex_held(mutex *m)
+{
+	assert(!m || __mutexsystem.MutexHeld);
+	return !m || __mutexsystem.MutexHeld(p);
+}
+__host_device__ bool mutex_notheld(mutex *m)
+{
+	assert(!m || __mutexsystem.MutexNotheld);
+	return !m || __mutexsystem.MutexNotheld(m);
+}
+#endif
+
+#endif

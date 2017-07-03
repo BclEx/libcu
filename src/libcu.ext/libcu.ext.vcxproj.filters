@@ -4,16 +4,11 @@
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
     <CudaCompile Include="convert.cu" />
-    <CudaCompile Include="journalvfile.cu" />
-    <CudaCompile Include="memoryvfile.cu" />
     <CudaCompile Include="vfile.cu" />
     <CudaCompile Include="vsystem.cu" />
     <CudaCompile Include="vsystem-map.cu" />
     <CudaCompile Include="vsystem-unix.cu" />
     <CudaCompile Include="vsystem-win.cu" />
-    <CudaCompile Include="mutex.cu" />
-    <CudaCompile Include="alloc.cu" />
-    <CudaCompile Include="mutex-noop.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -35,24 +30,11 @@
     <ClInclude Include="..\include\ext\convert.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ext\mutex.h">
-      <Filter>include\ext</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\ext\utf.h">
       <Filter>include\ext</Filter>
     </ClInclude>
     <ClInclude Include="..\include\ext\math.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ext\status.h">
-      <Filter>include\ext</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\ext\alloc.h">
-      <Filter>include\ext</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="mutex-win.c" />
-    <ClCompile Include="mutex-unix.c" />
   </ItemGroup>
 </Project>

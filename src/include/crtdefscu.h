@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//#pragma once
 #ifndef _CRTDEFSCU_H
 #define _CRTDEFSCU_H
 
 #include <crtdefs.h>
 #include <cuda_runtime.h>
+#include <stdint.h>
 #define __LIBCU__
 
 #define HAS_STDIO_BUFSIZ_NONE__
@@ -60,6 +60,14 @@ All macros listed above as possibly being defined by this file are explicitly un
 #ifndef CORE_MAXHOSTPTR
 #define CORE_MAXHOSTPTR 10
 #endif
+
+_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+#if defined(__CUDA_ARCH__)
+#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
+#else
+//__forceinline void Coverage(int line) { }
+#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); exit(1); }
+#endif  /* __CUDA_ARCH__ */
 
 //////////////////////
 // UTILITY
@@ -101,13 +109,39 @@ and the non-ANSI way under -traditional.  */
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
+#pragma endregion
+
+//////////////////////
+// PTRSIZE
+#pragma region PTRSIZE
+// SKY ADD TEST
+
+/* Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer */
+#ifndef _PTRSIZE
+#if defined(__SIZEOF_POINTER__)
+#define _PTRSIZE __SIZEOF_POINTER__
+#elif defined(i386) || defined(__i386__) || defined(_M_IX86) || defined(_M_ARM) || defined(__arm__) || defined(__x86)
+#define _PTRSIZE 4
+#else
+#define _PTRSIZE 8
+#endif
+#endif
+
+/* The uptr type is an unsigned integer large enough to hold a pointer */
+#if defined(HAVE_STDINT_H)
+//typedef uintptr_t uintptr_t;
+#elif _PTRSIZE == 4
+typedef uint32_t uintptr_t;
+#else
+typedef uint64_t uintptr_t;
+#endif
+
 /*
 ** The _WITHIN(P,S,E) macro checks to see if pointer P points to something between S (inclusive) and E (exclusive).
 **
 ** In other words, S is a buffer and E is a pointer to the first byte after the end of buffer S.  This macro returns true if P points to something
 ** contained within the buffer S.
 */
-// SKY ADD TEST
 #define _WITHIN(P,S,E) (((uintptr_t)(P)>=(uintptr_t)(S))&&((uintptr_t)(P)<(uintptr_t)(E)))
 
 #pragma endregion
@@ -161,6 +195,15 @@ old code expects.  */
 // DEVICE/HOST
 #pragma region DEVICE/HOST
 
+#define __host_device__ __host__ __device__
+#ifndef __CUDA_ARCH__
+#define __hostb_device__
+#define __host_constant__
+#else
+#define __hostb_device__ __device__
+#define __host_constant__ __constant__
+#endif
+
 typedef struct hostptr_t {
 	void *host;
 } hostptr_t;
@@ -184,6 +227,20 @@ template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p
 //////////////////////
 // ASSERT
 #pragma region ASSERT
+
+/*
+** NDEBUG and DEBUG are opposites.  It should always be true that defined(NDEBUG) == !defined(DEBUG).  If this is not currently true,
+** make it true by defining or undefining NDEBUG.
+**
+** Setting NDEBUG makes the code smaller and faster by disabling the assert() statements in the code.  So we want the default action
+** to be for NDEBUG to be set and NDEBUG to be undefined only if DEBUG is set.  Thus NDEBUG becomes an opt-in rather than an opt-out feature.
+*/
+#if !defined(NDEBUG) && !defined(DEBUG)
+#define NDEBUG 1
+#endif
+#if defined(NDEBUG) && defined(DEBUG)
+#undef NDEBUG
+#endif
 
 #ifndef NDEBUG
 #define ASSERTONLY(X) X

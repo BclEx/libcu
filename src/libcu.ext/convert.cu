@@ -3,6 +3,23 @@
 #include <ext/convert.h>
 #include <assert.h>
 
+//////#ifndef OMIT_BLOB_LITERAL
+//////__device__ void *_taghextoblob(TagBase *tag, const char *z, size_t size)
+//////{
+//////	char *b = (char *)_tagalloc(tag, size / 2 + 1);
+//////	size--;
+//////	if (b)
+//////	{
+//////		int bIdx = 0;
+//////		for (int i = 0; i < size; i += 2, bIdx++)
+//////			b[bIdx] = (_hextobyte(z[i]) << 4) | _hextobyte(z[i + 1]);
+//////		b[bIdx] = 0;
+//////	}
+//////	return b;
+//////}
+//////#endif
+
+
 #pragma region ATOX
 
 /*

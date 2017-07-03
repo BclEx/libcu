@@ -23,7 +23,7 @@
 #define __implement__ panic("__implement__") 
 
 // CAPI3REF: OS Interface Open File Handle
-#define sqlite3_file sytem_vfile
+#define sqlite3_file vsystemfile
 
 // CAPI3REF: OS Interface File Virtual Methods Object
 #define sqlite3_io_methods __error__
@@ -32,7 +32,7 @@
 #define sqlite3_mutex mutex
 
 // CAPI3REF: OS Interface Object
-#define sqlite3_vfs system
+#define sqlite3_vfs vsystem
 
 // CAPI3REF: OS Interface Object
 #define sqlite3_syscall_ptr __error__
@@ -50,7 +50,7 @@
 #define sqlite3_db_vconfig(tag, op, ...) __implement__
 
 // CAPI3REF: Memory Allocation Routines
-#define sqlite3_mem_methods __error__
+#define sqlite3_mem_methods alloc_methods
 
 // CAPI3REF: Formatted String Printing Functions
 //header: #define sqlite3_mprintf(f, ...) mprintf(f, __VA_ARGS__)
@@ -59,14 +59,14 @@
 //header: #define sqlite3_vsnprintf(m, s, f, va) vmsnprintf(s, m, f, va)
 
 // CAPI3REF: Memory Allocation Subsystem
-#define sqlite3_malloc(s) malloc(s)
-#define sqlite3_malloc64(s) malloc(s)
-#define sqlite3_realloc(p, s) realloc(p, s)
-#define sqlite3_realloc64(p, s) realloc(p, s)
-#define sqlite3_free(p) free(p)
-#define sqlite3_msize(p) (sqlite3_uint64)_msize(p)
-#define sqlite3_memory_used() __implement__
-#define sqlite3_memory_highwater(resetFlag) __implement__
+#define sqlite3_malloc(s) alloc(s)
+#define sqlite3_malloc64(s) alloc(s)
+#define sqlite3_realloc(p, s) alloc_realloc(p, s)
+#define sqlite3_realloc64(p, s) alloc_realloc(p, s)
+#define sqlite3_free(p) alloc_free(p)
+#define sqlite3_msize(p) (sqlite3_uint64)alloc_msize(p)
+#define sqlite3_memory_used() alloc_memoryused()
+#define sqlite3_memory_highwater(resetFlag) alloc_memoryhighwater(resetFlag)
 
 // CAPI3REF: Pseudo-Random Number Generator
 #define sqlite3_randomness(n, p) __implement__
@@ -96,28 +96,28 @@
 #define sqlite3_db_release_memory(tag) __implement__
 
 // CAPI3REF: Impose A Limit On Heap Size
-#define sqlite3_soft_heap_limit64(n) __implement__
+#define sqlite3_soft_heap_limit64(n) alloc_softheaplimit64(n)
 #define sqlite3_soft_heap_limit(n) sqlite3_soft_heap_limit64(n) // SQLITE_DEPRECATED
 
 // CAPI3REF: Virtual File System Objects
-#define sqlite3_vfs_find(zVfsName) __implement__
-#define sqlite3_vfs_register(system, makeDflt) __implement__
-#define sqlite3_vfs_unregister(system) __implement__
+#define sqlite3_vfs_find(zVfsName) vsystem_find(zVfsName)
+#define sqlite3_vfs_register(system, makeDflt) vsystem_register(system, makeDflt)
+#define sqlite3_vfs_unregister(system) vsystem_unregister(system)
 
 // CAPI3REF: Mutexes
-#define sqlite3_mutex_alloc(n) __implement__
-#define sqlite3_mutex_free(m) __implement__
-#define sqlite3_mutex_enter(m) __implement__
-#define sqlite3_mutex_try(m) __implement__
-#define sqlite3_mutex_leave(m) __implement__
+#define sqlite3_mutex_alloc(n) mutex_alloc(m)
+#define sqlite3_mutex_free(m) mutex_free(m)
+#define sqlite3_mutex_enter(m) mutex_enter(m)
+#define sqlite3_mutex_try(m) mutex_tryenter(m)
+#define sqlite3_mutex_leave(m) mutex_leave(m)
 
 // CAPI3REF: Mutex Methods Object
-#define sqlite3_mutex_methods __error__
+#define sqlite3_mutex_methods mutex_methods
 
 // CAPI3REF: Mutex Verification Routines
 #ifndef NDEBUG
-#define sqlite3_mutex_held(m) __implement__
-#define sqlite3_mutex_notheld(m) __implement__
+#define sqlite3_mutex_held(m) mutex_held(m)
+#define sqlite3_mutex_notheld(m) mutex_notheld(m)
 #endif
 
 // CAPI3REF: Retrieve the mutex for a database connection
@@ -130,8 +130,8 @@
 #define sqlite3_test_vcontrol(op, ...) __implement__
 
 // CAPI3REF: SQLite Runtime Status
-#define sqlite3_status(op, pCurrent, pHighwater, resetFlag) __implement__
-#define sqlite3_status64(op, pCurrent, pHighwater, resetFlag) __implement__
+#define sqlite3_status(op, pCurrent, pHighwater, resetFlag) status(op, pCurrent, pHighwater, resetFlag)
+#define sqlite3_status64(op, pCurrent, pHighwater, resetFlag) status64(op, pCurrent, pHighwater, resetFlag)
 
 // CAPI3REF: Database Connection Status
 #define sqlite3_db_status(tag, op, pCur, pHiwtr, resetFlg) __implement__

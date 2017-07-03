@@ -126,7 +126,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 		_sentinelDevice = true;
 		sentinelMap *d_deviceMap[SENTINEL_DEVICEMAPS];
 		for (int i = 0; i < SENTINEL_DEVICEMAPS; i++) {
-			cudaErrorCheckF(cudaHostAlloc((void **)&_deviceMap[i], sizeof(sentinelMap), cudaHostAllocPortable | cudaHostAllocMapped), goto initialize_error);
+			cudaErrorCheckF(cudaHostAlloc((void **)&_deviceMap[i], sizeof(sentinelMap), cudaHostAllocPortable|cudaHostAllocMapped), goto initialize_error);
 			d_deviceMap[i] = _ctx.DeviceMap[i] = (sentinelMap *)_deviceMap[i];
 			cudaErrorCheckF(cudaHostGetDevicePointer((void **)&d_deviceMap[i], _ctx.DeviceMap[i], 0), goto initialize_error);
 #ifndef _WIN64
