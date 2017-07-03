@@ -5,7 +5,6 @@
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
-#include <ext\alloc.h>
 
 __BEGIN_DECLS;
 
@@ -792,6 +791,11 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 	}
 }
 
+struct tagbase_t;
+__host_device__ void *tagallocRaw(tagbase_t *tag, uint64_t size);
+__host_device__ void *tagrealloc(tagbase_t *tag, void *old, uint64_t newSize);
+__host_device__ void tagfree(tagbase_t *tag, void *p);
+
 __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 {
 	assert(str != nullptr || length == 0);
@@ -840,6 +844,7 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 	memcpy(&b->text[b->index], str, length);
 	b->index += length;
 }
+
 
 __device__ char *strbldToString(strbld_t *b)
 {
