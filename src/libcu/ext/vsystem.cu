@@ -1,6 +1,67 @@
-﻿// os.c
-#include "Core.cu.h"
-namespace CORE_NAME
+﻿
+#pragma region Preamble
+
+#if defined(_TEST) || defined(_DEBUG)
+	bool OsTrace = false;
+#define OSTRACE(X, ...) if (OsTrace) { _dprintf("OS: "X, __VA_ARGS__); }
+#else
+#define OSTRACE(X, ...)
+#endif
+
+#ifdef _TEST
+	__device__ int g_io_error_hit = 0;            // Total number of I/O Errors
+	__device__ int g_io_error_hardhit = 0;        // Number of non-benign errors
+	__device__ int g_io_error_pending = 0;        // Count down to first I/O error
+	__device__ int g_io_error_persist = 0;        // True if I/O errors persist
+	__device__ int g_io_error_benign = 0;         // True if errors are benign
+	__device__ int g_diskfull_pending = 0;
+	__device__ int g_diskfull = 0;
+#define SimulateIOErrorBenign(X) g_io_error_benign=(X)
+#define SimulateIOError(CODE) \
+	if ((g_io_error_persist && g_io_error_hit) || g_io_error_pending-- == 1) { local_ioerr(); CODE; }
+	__device__ static void local_ioerr() { OSTRACE("IOERR\n"); g_io_error_hit++; if (!g_io_error_benign) g_io_error_hardhit++; }
+#define SimulateDiskfullError(CODE) \
+	if (g_diskfull_pending) { if (g_diskfull_pending == 1) { \
+	local_ioerr(); g_diskfull = 1; g_io_error_hit = 1; CODE; \
+	} else g_diskfull_pending--; }
+#else
+#define SimulateIOErrorBenign(X)
+#define SimulateIOError(A)
+#define SimulateDiskfullError(A)
+#endif
+
+#ifdef _TESTX
+	__device__ static int _saved_cnt;
+	__device__ void DisableSimulatedIOErrors(int *pending, int *hit) { if (!pending) pending = &_saved_cnt; *pending = g_io_error_pending; g_io_error_pending = -1; if (hit) { *hit = g_io_error_hit; g_io_error_hit = 0; } }
+	__device__ void EnableSimulatedIOErrors(int *pending, int *hit) { if (!pending) pending = &_saved_cnt; g_io_error_pending = *pending; if (hit) g_io_error_hit = *hit; }
+#endif
+
+#if OS_WIN // This file is used for Windows only
+#define POWERSAFE_OVERWRITE 1
+
+	// When testing, keep a count of the number of open files.
+#ifdef _TEST
+	__device__ int g_open_file_count = 0;
+#define OpenCounter(X) g_open_file_count += (X)
+#else
+#define OpenCounter(X)
+#endif
+
+#if OS_WIN && !defined(OS_WINNT)
+#define OS_WINNT 1
+#endif
+#if defined(_WIN32_WCE)
+#define OS_WINCE 1
+#else
+#define OS_WINCE 0
+#endif
+#if !defined(OS_WINRT)
+#define OS_WINRT 0
+#endif
+
+#pragma endregion
+
+
 {
 	__device__ VFile *VSystem::_AttachFile(void *buffer) { return nullptr; }
 	__device__ RC VSystem::Open(const char *path, VFile *file, OPEN flags, OPEN *outFlags) { return RC_OK; }

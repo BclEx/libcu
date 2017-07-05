@@ -1,5 +1,4 @@
-﻿#include <stdlibcu.h>
-#include <ext/util.h>
+﻿#include <ext/util.h>
 #include <assert.h>
 
 /*
@@ -13,7 +12,7 @@
 #ifndef LIBCU_UNTESTABLE
 __host_device__ RC sqlite3FaultSim(int test) //: sqlite3FaultSim
 {
-	int (*callback)(int) = _runtimeStatics.testCallback;
+	int (*callback)(int) = _runtimeConfig.testCallback;
 	return callback ? callback(test) : RC_OK;
 }
 #endif
@@ -104,7 +103,7 @@ __host_device__ bool tagSafetyCheckOk(tagbase_t *tag) //: sqlite3SafetyCheckOk
 	//uint32_t magic = tag->magic;
 	//if (magic != LIBCU_MAGIC_OPEN) {
 	//	if (tagSafetyCheckSickOrOk(tag)) {
-	//		ASSERTCOVERAGE(_runtimeStatics.log);
+	//		ASSERTCOVERAGE(_runtimeConfig.log);
 	//		logBadConnection("unopened");
 	//	}
 	//	return false;
@@ -115,7 +114,7 @@ __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag) //: sqlite3SafetyChe
 {
 	//uint32_t magic = tag->magic;
 	//if (magic != LIBCU_MAGIC_SICK && magic != LIBCU_MAGIC_OPEN && magic != LIBCU_MAGIC_BUSY) {
-	//	ASSERTCOVERAGE(_runtimeStatics.log);
+	//	ASSERTCOVERAGE(_runtimeConfig.log);
 	//	logBadConnection("invalid");
 	//	return false;
 	//}

@@ -1,9 +1,8 @@
-#include <stdlibcu.h>
 #include <ext/mutex.h>
 #include <assert.h>
 #ifndef LIBCU_MUTEX_OMIT
 
-#if defined(DEBUG)
+#if defined(_DEBUG)
 /*
 ** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
 ** allocate a mutex while the system is uninitialized.
@@ -17,7 +16,7 @@ __host_device__ RC mutexInitialize()
 	// If the _.alloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
 	// systemInitialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
 	if (!__mutexsystem.alloc) {
-		mutex_methods const *from = (_runtimeStatics.coreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
+		mutex_methods const *from = (_runtimeConfig.coreMutex ? __mutexsystemDefault() : __mutexsystemNoop());
 		mutex_methods *to = &__mutexsystem;
 		to->initialize = from->initialize;
 		to->shutdown = from->shutdown;
@@ -32,7 +31,7 @@ __host_device__ RC mutexInitialize()
 	}
 	assert(__mutexsystem.initialize);
 	RC rc = __mutexsystem.initialize();
-#ifdef DEBUG
+#ifdef _DEBUG
 	_GLOBAL(bool, _mutexIsInit) = true;
 #endif
 	return rc;
@@ -44,7 +43,7 @@ __host_device__ RC mutexShutdown()
 	RC rc = 0;
 	if (__mutexsystem.shutdown)
 		rc = __mutexsystem.shutdown();
-#ifdef DEBUG
+#ifdef _DEBUG
 	_GLOBAL(bool, _mutexIsInit) = false;
 #endif
 	return rc;
@@ -62,7 +61,7 @@ __host_device__ mutex *mutex_alloc(MUTEX id)
 }
 __host_device__ mutex *mutexAlloc(MUTEX id)
 {
-	if (!_runtimeStatics.coreMutex)
+	if (!_runtimeConfig.coreMutex)
 		return nullptr;
 	assert(_GLOBAL(bool, _mutexIsInit));
 	return __mutexsystem.alloc(id);
@@ -108,17 +107,17 @@ __host_device__ void mutex_leave(mutex *m)
 	}
 }
 
-#ifdef DEBUG
+#ifdef _DEBUG
 /* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
 __host_device__ bool mutex_held(mutex *m)
 {
-	assert(!m || __mutexsystem.MutexHeld);
-	return !m || __mutexsystem.MutexHeld(p);
+	assert(!m || __mutexsystem.held);
+	return !m || __mutexsystem.held(m);
 }
 __host_device__ bool mutex_notheld(mutex *m)
 {
-	assert(!m || __mutexsystem.MutexNotheld);
-	return !m || __mutexsystem.MutexNotheld(m);
+	assert(!m || __mutexsystem.notheld);
+	return !m || __mutexsystem.notheld(m);
 }
 #endif
 

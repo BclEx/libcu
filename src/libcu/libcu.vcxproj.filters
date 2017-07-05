@@ -122,6 +122,12 @@
     <ClInclude Include="..\include\ext\util.h">
       <Filter>include\ext</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ext\vsystem.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ext\vsystemfile.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
@@ -154,6 +160,27 @@
     <CudaCompile Include="ext\util.cu">
       <Filter>ext</Filter>
     </CudaCompile>
+    <CudaCompile Include="ext\main.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystemfile.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem-gpu.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem-map.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem-unix.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem-win.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -184,10 +211,10 @@
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="host_functions.cpp" />
-    <ClCompile Include="ext\mutex-unix.c">
+    <ClCompile Include="ext\mutex-win.cpp">
       <Filter>ext</Filter>
     </ClCompile>
-    <ClCompile Include="ext\mutex-win.c">
+    <ClCompile Include="ext\mutex-unix.cpp">
       <Filter>ext</Filter>
     </ClCompile>
   </ItemGroup>

@@ -99,9 +99,9 @@ and the non-ANSI way under -traditional.  */
 #define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
 /* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
 #ifdef BYTEALIGNED4
-#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
+#define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
 #else
-#define HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
+#define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 /* Returns the length of an array at compile time (via math) */
 #define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
@@ -114,7 +114,7 @@ and the non-ANSI way under -traditional.  */
 //////////////////////
 // PTRSIZE
 #pragma region PTRSIZE
-// SKY ADD TEST
+// SKY ADD _TEST
 
 /* Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer */
 #ifndef _PTRSIZE
@@ -195,11 +195,12 @@ old code expects.  */
 // DEVICE/HOST
 #pragma region DEVICE/HOST
 
-#define __host_device__ __host__ __device__
 #ifndef __CUDA_ARCH__
+#define __host_device__ __host__
 #define __hostb_device__
 #define __host_constant__
 #else
+#define __host_device__ __device__
 #define __hostb_device__ __device__
 #define __host_constant__ __constant__
 #endif
@@ -229,16 +230,16 @@ template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p
 #pragma region ASSERT
 
 /*
-** NDEBUG and DEBUG are opposites.  It should always be true that defined(NDEBUG) == !defined(DEBUG).  If this is not currently true,
+** NDEBUG and _DEBUG are opposites.  It should always be true that defined(NDEBUG) == !defined(_DEBUG).  If this is not currently true,
 ** make it true by defining or undefining NDEBUG.
 **
 ** Setting NDEBUG makes the code smaller and faster by disabling the assert() statements in the code.  So we want the default action
-** to be for NDEBUG to be set and NDEBUG to be undefined only if DEBUG is set.  Thus NDEBUG becomes an opt-in rather than an opt-out feature.
+** to be for NDEBUG to be set and NDEBUG to be undefined only if _DEBUG is set.  Thus NDEBUG becomes an opt-in rather than an opt-out feature.
 */
-#if !defined(NDEBUG) && !defined(DEBUG)
+#if !defined(NDEBUG) && !defined(_DEBUG)
 #define NDEBUG 1
 #endif
-#if defined(NDEBUG) && defined(DEBUG)
+#if defined(NDEBUG) && defined(_DEBUG)
 #undef NDEBUG
 #endif
 

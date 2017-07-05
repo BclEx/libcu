@@ -1,7 +1,5 @@
-#include <stdlibcu.h>
-#include <stringcu.h>
 #include <ext/alloc.h>
-#include <stdint.h>
+#include <stringcu.h>
 #include <assert.h>
 
 /*
@@ -11,7 +9,7 @@
 __host_device__ int alloc_releasememory(int n) //: sqlite3_release_memory
 {
 #ifdef ENABLE_MEMORY_MANAGEMENT
-	return sqlite3PcacheReleaseMemory(n);
+	return alloc_cachereleasememory(n);
 #else
 	// IMPLEMENTATION-OF: R-34391-24921 The alloc_releasememory() routine is a no-op returning zero if Libcu is not compiled with ENABLE_MEMORY_MANAGEMENT.
 	UNUSED_SYMBOL(n);
@@ -42,6 +40,12 @@ static __hostb_device__ _WSD struct Mem0Global {
 __host_device__ mutex *allocMutex() //: sqlite3MallocMutex
 {
 	return mem0.mutex;
+}
+
+/* Pathway to pcacheMutex */
+__host_device__ mutex *allocCacheMutex() //: pathway:sqlite3Pcache1Mutex
+{
+	return nullptr;
 }
 
 /* Set the soft heap-size limit for the library. Passing a zero or negative value indicates no limit. */
@@ -79,11 +83,11 @@ __host_device__ RC allocInitialize() //: sqlite3MallocInit
 		__allocsystemSetDefault();
 	memset(&mem0, 0, sizeof(mem0));
 	mem0.mutex = mutex_alloc(MUTEX_STATIC_MEM);
-	if (_runtimeStatics.scratch && _runtimeStatics.scratchSize >= 100 && _runtimeStatics.scratchs > 0) {
-		int size = _ROUNDDOWN8(_runtimeStatics.scratchSize);
-		_runtimeStatics.scratchSize = size;
-		ScratchFreeslot *slot = (ScratchFreeslot *)_runtimeStatics.scratch;
-		int n = _runtimeStatics.scratchs;
+	if (_runtimeConfig.scratch && _runtimeConfig.scratchSize >= 100 && _runtimeConfig.scratchs > 0) {
+		int size = _ROUNDDOWN8(_runtimeConfig.scratchSize);
+		_runtimeConfig.scratchSize = size;
+		ScratchFreeslot *slot = (ScratchFreeslot *)_runtimeConfig.scratch;
+		int n = _runtimeConfig.scratchs;
 		mem0.scratchFree = slot;
 		mem0.scratchFreeLength = n;
 		for (int i = 0; i < n-1; i++) {
@@ -95,13 +99,13 @@ __host_device__ RC allocInitialize() //: sqlite3MallocInit
 	}
 	else {
 		mem0.scratchEnd = nullptr;
-		_runtimeStatics.scratch = nullptr;
-		_runtimeStatics.scratchSize = 0;
-		_runtimeStatics.scratchs = 0;
+		_runtimeConfig.scratch = nullptr;
+		_runtimeConfig.scratchSize = 0;
+		_runtimeConfig.scratchs = 0;
 	}
-	if (!_runtimeStatics.page || _runtimeStatics.pageSize < 512 || _runtimeStatics.pages <= 0) {
-		_runtimeStatics.page = nullptr;
-		_runtimeStatics.pageSize = 0;
+	if (!_runtimeConfig.page || _runtimeConfig.pageSize < 512 || _runtimeConfig.pages <= 0) {
+		_runtimeConfig.page = nullptr;
+		_runtimeConfig.pageSize = 0;
 	}
 	RC rc = __allocsystem.initialize(__allocsystem.appData);
 	if (rc) memset(&mem0, 0, sizeof(mem0));
@@ -199,7 +203,7 @@ __host_device__ void *alloc(uint64_t size) //: sqlite3Malloc
 		** _.alloc().  Hence we limit the maximum size to 0x7fffff00, giving 255 bytes of overhead.  Libcu itself will never use anything near
 		** this amount.  The only way to reach the limit is with alloc32() */
 		p = nullptr;
-	else if (_runtimeStatics.memstat) {
+	else if (_runtimeConfig.memstat) {
 		mutex_enter(mem0.mutex);
 		allocWithAlarm(size, &p);
 		mutex_leave(mem0.mutex);
@@ -244,7 +248,7 @@ __host_device__ void *scratchAlloc(int size) //: sqlite3ScratchMalloc
 	mutex_enter(mem0.mutex);
 	void *p;
 	status_max(STATUS_SCRATCH_SIZE, size);
-	if (mem0.scratchFreeLength && _runtimeStatics.scratchSize >= size) {
+	if (mem0.scratchFreeLength && _runtimeConfig.scratchSize >= size) {
 		p = mem0.scratchFree;
 		mem0.scratchFree = mem0.scratchFree->next;
 		mem0.scratchFreeLength--;
@@ -254,7 +258,7 @@ __host_device__ void *scratchAlloc(int size) //: sqlite3ScratchMalloc
 	else {
 		mutex_leave(mem0.mutex);
 		p = alloc(size);
-		if (_runtimeStatics.memstat && p) {
+		if (_runtimeConfig.memstat && p) {
 			mutex_enter(mem0.mutex);
 			status_inc(STATUS_SCRATCH_OVERFLOW, allocSize(p));
 			mutex_leave(mem0.mutex);
@@ -282,14 +286,14 @@ __device__ void scratchFree(void *p) //: sqlite3ScratchFree
 		assert(_scratchAllocOut >= 1 && _scratchAllocOut <= 2);
 		_scratchAllocOut--;
 #endif
-		if (_WITHIN(p, _runtimeStatics.scratch, mem0.scratchEnd)) {
+		if (_WITHIN(p, _runtimeConfig.scratch, mem0.scratchEnd)) {
 			// Release memory from the CONFIG_SCRATCH allocation
 			ScratchFreeslot *slot = (ScratchFreeslot *)p;
 			mutex_enter(mem0.mutex);
 			slot->next = mem0.scratchFree;
 			mem0.scratchFree = slot;
 			mem0.scratchFreeLength++;
-			assert(mem0.scratchFreeLength <= (uint32_t)_runtimeStatics.scratchs);
+			assert(mem0.scratchFreeLength <= (uint32_t)_runtimeConfig.scratchs);
 			status_dec(STATUS_SCRATCH_USED, 1);
 			mutex_leave(mem0.mutex);
 		}
@@ -298,7 +302,7 @@ __device__ void scratchFree(void *p) //: sqlite3ScratchFree
 			assert(memdbg_hastype(p, MEMTYPE_SCRATCH));
 			assert(memdbg_nottype(p, (uint8_t)~MEMTYPE_SCRATCH));
 			memdbg_settype(p, MEMTYPE_HEAP);
-			if (_runtimeStatics.memstat) {
+			if (_runtimeConfig.memstat) {
 				size_t size = allocSize(p);
 				mutex_enter(mem0.mutex);
 				status_dec(STATUS_SCRATCH_OVERFLOW, size);
@@ -330,7 +334,7 @@ __device__ int tagallocSize(tagbase_t *tag, void *p) //: sqlite3DbMallocSize
 {
 	assert(p);
 	if (!tag || !isLookaside(tag, p)) {
-#ifdef DEBUG
+#ifdef _DEBUG
 		if (!tag) {
 			assert(memdbg_nottype(p, (uint8_t)~MEMTYPE_HEAP));
 			assert(memdbg_hastype(p, MEMTYPE_HEAP));
@@ -350,18 +354,18 @@ __device__ int tagallocSize(tagbase_t *tag, void *p) //: sqlite3DbMallocSize
 
 __host_device__ uint64_t alloc_msize(void *p) //: sqlite3_msize
 {
-	assert(memdbg_notype(p, (uint8_t)~MEMTYPE_HEAP));
-	assert(memdbg_hasType(p, MEMTYPE_HEAP));
+	assert(memdbg_nottype(p, (uint8_t)~MEMTYPE_HEAP));
+	assert(memdbg_hastype(p, MEMTYPE_HEAP));
 	return p ? __allocsystem.size(p) : 0;
 }
 
 /* Free memory previously obtained from alloc(). */
-__device__ void alloc_free(void *p) //: sqlite3_free
+__host_device__ void mfree(void *p) //: sqlite3_free
 {
 	if (!p) return; // IMP: R-49053-54554
 	assert(memdbg_hastype(p, MEMTYPE_HEAP));
 	assert(memdbg_nottype(p, (uint8_t)~MEMTYPE_HEAP));
-	if (_runtimeStatics.memstat) {
+	if (_runtimeConfig.memstat) {
 		mutex_enter(mem0.mutex);
 		status_dec(STATUS_MEMORY_USED, allocSize(p));
 		status_dec(STATUS_MALLOC_COUNT, 1);
@@ -380,7 +384,7 @@ static __host_device__ void measureAllocationSize(tagbase_t *tag, void *p) { *ta
 */
 __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
 {
-	assert(!tag || mutex_held(tag->Mutex));
+	assert(!tag || mutex_held(tag->mutex));
 	assert(p);
 	if (tag) {
 		if (tag->bytesFreed) {
@@ -389,7 +393,7 @@ __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
 		}
 		if (isLookaside(tag, p)) {
 			LookasideSlot *b = (LookasideSlot *)p;
-#if DEBUG
+#if _DEBUG
 			// Trash all content in the buffer being freed
 			memset(p, 0xaa, tag->lookaside.size);
 #endif
@@ -403,7 +407,7 @@ __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
 	assert(memdbg_nottype(p, (uint8_t)~(MEMTYPE_LOOKASIDE|MEMTYPE_HEAP)));
 	assert(tag || memdbg_nottype(p, MEMTYPE_LOOKASIDE));
 	memdbg_settype(p, MEMTYPE_HEAP);
-	alloc_free(p);
+	mfree(p);
 }
 
 __host_device__ void tagfree(tagbase_t *tag, void *p) //: sqlite3DbFree
@@ -414,29 +418,29 @@ __host_device__ void tagfree(tagbase_t *tag, void *p) //: sqlite3DbFree
 
 
 /* Change the size of an existing memory allocation */
-__host_device__ void *allocRealloc(void *old, uint64_t newSize) //: sqlite3Realloc
+__host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Realloc
 {
-	assert(memdbg_hastype(old, MEMTYPE_HEAP));
-	assert(memdbg_nottype(old, (uint8_t)~MEMTYPE_HEAP));
-	if (!old) return alloc(newSize); // IMP: R-04300-56712
-	if (!newSize) { alloc_free(old); return nullptr; } // IMP: R-26507-47431
+	assert(memdbg_hastype(prior, MEMTYPE_HEAP));
+	assert(memdbg_nottype(prior, (uint8_t)~MEMTYPE_HEAP));
+	if (!prior) return alloc(newSize); // IMP: R-04300-56712
+	if (!newSize) { mfree(prior); return nullptr; } // IMP: R-26507-47431
 	if (newSize >= 0x7fffff00) return nullptr; // The 0x7ffff00 limit term is explained in comments on alloc()
-	size_t oldSize = allocSize(old);
+	size_t oldSize = allocSize(prior);
 	// IMPLEMENTATION-OF: R-46199-30249 Libcu guarantees that the second argument to _.xRealloc is always a value returned by a prior call to _.Roundup.
 	void *p;
 	size_t newSize2 = __allocsystem.roundup(newSize);
 	if (oldSize == newSize2)
-		p = old;
-	else if (_runtimeStatics.memstat) {
+		p = prior;
+	else if (_runtimeConfig.memstat) {
 		mutex_enter(mem0.mutex);
 		status_max(STATUS_MALLOC_SIZE, (int)newSize);
 		int sizeDiff = newSize2 - oldSize;
 		if (sizeDiff > 0 && status_now(STATUS_MEMORY_USED) >= mem0.alarmThreshold - sizeDiff)
 			allocAlarm(sizeDiff);
-		p = __allocsystem.realloc(old, newSize2);
+		p = __allocsystem.realloc(prior, newSize2);
 		if (!p && mem0.alarmThreshold > 0) {
 			allocAlarm(newSize);
-			p = __allocsystem.realloc(old, newSize2);
+			p = __allocsystem.realloc(prior, newSize2);
 		}
 		if (p) {
 			newSize2 = allocSize(p);
@@ -444,27 +448,27 @@ __host_device__ void *allocRealloc(void *old, uint64_t newSize) //: sqlite3Reall
 		}
 		mutex_leave(mem0.mutex);
 	}
-	else p = __allocsystem.realloc(old, newSize2);
-	assert(HASALIGNMENT8(p)); // IMP: R-11148-40995
+	else p = __allocsystem.realloc(prior, newSize2);
+	assert(_HASALIGNMENT8(p)); // IMP: R-11148-40995
 	return p;
 }
 
 /* The public interface to alloc_realloc_.  Make sure that the memory subsystem is initialized prior to invoking alloc_realloc_. */
-__host_device__ void *alloc_realloc32(void *old, int newSize) //: sqlite3_realloc
+__host_device__ void *alloc_realloc32(void *prior, int newSize) //: sqlite3_realloc
 {
 #ifndef OMIT_AUTOINIT
 	if (systemInitialize()) return nullptr;
 #endif
 	if (newSize < 0) newSize = 0;  // IMP: R-26507-47431
-	return allocRealloc(old, newSize);
+	return allocRealloc(prior, newSize);
 }
 
-__host_device__ void *alloc_realloc64(void *old, uint64_t newSize)
+__host_device__ void *alloc_realloc64(void *prior, uint64_t newSize)
 {
 #ifndef OMIT_AUTOINIT
 	if (systemInitialize()) return nullptr;
 #endif
-	return allocRealloc(old, newSize);
+	return allocRealloc(prior, newSize);
 }
 
 /* Allocate and zero memory. */
@@ -553,36 +557,36 @@ __host_device__ void *tagallocRawNN(tagbase_t *tag, uint64_t size) //: sqlite3Db
 }
 
 /* Forward declaration */
-static __host_device__ void *tagreallocFinish(tagbase_t *tag, void *old, uint64_t size);
+static __host_device__ void *tagreallocFinish(tagbase_t *tag, void *prior, uint64_t size);
 
 /* Resize the block of memory pointed to by p to n bytes. If the resize fails, set the MallocFailed flag in the tag object. */
-__host_device__ void *tagrealloc(tagbase_t *tag, void *old, uint64_t size) //: sqlite3DbRealloc
+__host_device__ void *tagrealloc(tagbase_t *tag, void *prior, uint64_t size) //: sqlite3DbRealloc
 {
 	assert(tag);
-	if (!old) return tagallocRawNN(tag, size);
+	if (!prior) return tagallocRawNN(tag, size);
 	assert(mutex_held(tag->mutex));
-	if (isLookaside(tag, old) && size <= tag->lookaside.size) return old;
-	return tagreallocFinish(tag, old, size);
+	if (isLookaside(tag, prior) && size <= tag->lookaside.size) return prior;
+	return tagreallocFinish(tag, prior, size);
 }
 
-static __host_device__ void *tagreallocFinish(tagbase_t *tag, void *old, uint64_t size)
+static __host_device__ void *tagreallocFinish(tagbase_t *tag, void *prior, uint64_t size)
 {
 	assert(tag);
-	assert(old);
+	assert(prior);
 	void *p = nullptr;
 	if (!tag->mallocFailed) {
-		if (isLookaside(tag, old)) {
+		if (isLookaside(tag, prior)) {
 			p = tagallocRawNN(tag, size);
 			if (p) {
-				memcpy(p, old, tag->lookaside.size);
-				tagfree(tag, old);
+				memcpy(p, prior, tag->lookaside.size);
+				tagfree(tag, prior);
 			}
 		}
 		else {
-			assert(memdbg_hastype(old, (MEMTYPE_LOOKASIDE|MEMTYPE_HEAP)) );
-			assert(memdbg_nottype(old, (uint8_t)~(MEMTYPE_LOOKASIDE|MEMTYPE_HEAP)) );
-			memdbg_settype(old, MEMTYPE_HEAP);
-			p = alloc_realloc64(old, size);
+			assert(memdbg_hastype(prior, (MEMTYPE_LOOKASIDE|MEMTYPE_HEAP)) );
+			assert(memdbg_nottype(prior, (uint8_t)~(MEMTYPE_LOOKASIDE|MEMTYPE_HEAP)) );
+			memdbg_settype(prior, MEMTYPE_HEAP);
+			p = alloc_realloc64(prior, size);
 			if (!p)
 				tagOomFault(tag);
 			memdbg_settype(p, (!tag->lookaside.disable ? MEMTYPE_LOOKASIDE : MEMTYPE_HEAP));
@@ -592,10 +596,10 @@ static __host_device__ void *tagreallocFinish(tagbase_t *tag, void *old, uint64_
 }
 
 /* Attempt to reallocate p.  If the reallocation fails, then free p and set the MallocFailed flag in the tag object. */
-__host_device__ void *tagreallocOrFree(tagbase_t *tag, void *old, uint64_t newSize) //: sqlite3DbReallocOrFree
+__host_device__ void *tagreallocOrFree(tagbase_t *tag, void *prior, uint64_t newSize) //: sqlite3DbReallocOrFree
 {
-	void *p = tagrealloc(tag, old, newSize);
-	if (!p) tagfree(tag, old);
+	void *p = tagrealloc(tag, prior, newSize);
+	if (!p) tagfree(tag, prior);
 	return p;
 }
 
@@ -685,51 +689,47 @@ __host_device__ RC tagApiExit(tagbase_t *tag, RC rc) //: sqlite3ApiExit
 	return rc & tag->errMask;
 }
 
+#pragma region from: fault.c
 
+#ifndef LIBCU_UNTESTABLE
 
-
-
-
-
-
-#pragma region From fault.c
-
-#ifndef OMIT_BUILTIN_TEST
-
-	typedef struct BenignMallocHooks BenignMallocHooks;
-__device__ static _WSD struct BenignMallocHooks
-{
-	void (*BenignBegin)();
-	void (*BenignEnd)();
-} BenignMallocHooks_ = { nullptr, nullptr };
-
+typedef struct BenignMallocHooks BenignMallocHooks;
+static __hostb_device__ _WSD struct BenignMallocHooks {
+	void (*benignBegin)();
+	void (*benignEnd)();
+} _benignMallocHooks = { nullptr, nullptr };
 #ifdef OMIT_WSD
-#define g_BenignMallocHooksInit BenignMallocHooks *x = &GLOBAL(BenignMallocHooks, BenignMallocHooks_)
-#define g_BenignMallocHooks x[0]
+#define _benignMallocHooksInit BenignMallocHooks *x = &GLOBAL(BenignMallocHooks, _benignMallocHooks)
+#define _benignMallocHooks x[0]
 #else
-#define g_BenignMallocHooksInit
-#define g_BenignMallocHooks BenignMallocHooks_
+#define _benignMallocHooksInit
+#define _benignMallocHooks _benignMallocHooks
 #endif
 
-__device__ void _benignalloc_hook(void (*benignBegin)(), void (*benignEnd)())
+/* Register hooks to call when allocBenignBbegin() and allocBenignEnd() are called, respectively */
+__host_device__ void allocBenignHook(void (*benignBegin)(), void (*benignEnd)())
 {
-	g_BenignMallocHooksInit;
-	g_BenignMallocHooks.BenignBegin = benignBegin;
-	g_BenignMallocHooks.BenignEnd = benignEnd;
+	_benignMallocHooksInit;
+	_benignMallocHooks.benignBegin = benignBegin;
+	_benignMallocHooks.benignEnd = benignEnd;
 }
 
-__device__ void _benignalloc_begin()
+/*
+** This (allocBenignEnd()) is called by Libcu code to indicate that subsequent malloc failures are benign. A call to allocBenignBegin()
+** indicates that subsequent malloc failures are non-benign.
+*/
+__host_device__ void allocBenignBegin()
 {
-	g_BenignMallocHooksInit;
-	if (g_BenignMallocHooks.BenignBegin)
-		g_BenignMallocHooks.BenignBegin();
+	_benignMallocHooksInit;
+	if (_benignMallocHooks.benignBegin)
+		_benignMallocHooks.benignBegin();
 }
 
-__device__ void _benignalloc_end()
+__host_device__ void allocBenignEnd()
 {
-	g_BenignMallocHooksInit;
-	if (g_BenignMallocHooks.BenignEnd)
-		g_BenignMallocHooks.BenignEnd();
+	_benignMallocHooksInit;
+	if (_benignMallocHooks.benignEnd)
+		_benignMallocHooks.benignEnd();
 }
 
 #endif

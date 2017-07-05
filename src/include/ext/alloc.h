@@ -75,7 +75,7 @@ extern "C" {
 		int (*shutdown)(void *);		// Deinitialize the memory allocator
 		void *appData;					// Argument to _.init() and _.shutdown()
 	};
-	#define __allocsystem _runtimeStatics.allocSystem
+#define __allocsystem _runtimeConfig.allocSystem
 
 	// CAPI3REF: Attempt To Free Heap Memory
 	__host_device__ int alloc_releasememory(int size);
@@ -89,9 +89,9 @@ extern "C" {
 	// CAPI3REF: Memory Allocation Subsystem
 	__host_device__ void *alloc32(int size);
 	__host_device__ void *alloc64(uint64_t size);
-	__host_device__ void *alloc_realloc32(void *old, int newSize);
-	__host_device__ void *alloc_realloc64(void *old, uint64_t newSize);
-	__host_device__ void alloc_free(void *p);
+	__host_device__ void *alloc_realloc32(void *prior, int newSize);
+	__host_device__ void *alloc_realloc64(void *prior, uint64_t newSize);
+	__host_device__ void mfree(void *p);
 	__host_device__ uint64_t alloc_msize(void *p);
 
 	// CAPI3REF: Memory Allocator Statistics
@@ -100,6 +100,7 @@ extern "C" {
 
 	/* Access to mutexes used by sqlite3_status() */
 	__host_device__ mutex *allocMutex();
+	__host_device__ mutex *allocCacheMutex();
 
 	__host_device__ RC allocInitialize();
 	__host_device__ RC allocShutdown();
@@ -110,9 +111,9 @@ extern "C" {
 	__host_device__ void *tagallocRawNN(tagbase_t *tag, uint64_t size);
 	__host_device__ char *tagstrdup(tagbase_t *tag, const char *z);
 	__host_device__ char *tagstrndup(tagbase_t *tag,const char *z, uint64_t size);
-	__host_device__ void *allocRealloc(void *old, uint64_t newSize);
-	__host_device__ void *tagreallocOrFree(tagbase_t *tag, void *old, uint64_t newSize);
-	__host_device__ void *tagrealloc(tagbase_t *tag, void *old, uint64_t newSize);
+	__host_device__ void *allocRealloc(void *prior, uint64_t newSize);
+	__host_device__ void *tagreallocOrFree(tagbase_t *tag, void *prior, uint64_t newSize);
+	__host_device__ void *tagrealloc(tagbase_t *tag, void *prior, uint64_t newSize);
 	__host_device__ void tagfree(tagbase_t *tag, void *p);
 	__host_device__ void tagfreeNN(tagbase_t *tag, void *p);
 	__host_device__ int allocSize(void *p);
@@ -123,7 +124,7 @@ extern "C" {
 	//__host_device__ void sqlite3PageFree(void*);
 	__host_device__ void __allocsystemSetDefault();
 #ifndef LIBCU_UNTESTABLE
-	//__host_device__ void sqlite3BenignMallocHooks(void (*)(void), void (*)(void));
+	__host_device__ void allocBenignHook(void (*)(void), void (*)(void));
 #endif
 	__host_device__ bool allocHeapNearlyFull();
 	__host_device__ void tagOomFault(tagbase_t *tag);
@@ -136,11 +137,11 @@ extern "C" {
 
 	/* The interface to the code in fault.c used for identifying "benign" malloc failures. This is only present if LIBCU_UNTESTABLE is not defined. */
 #ifndef LIBCU_UNTESTABLE
-	void sqlite3BeginBenignMalloc();
-	void sqlite3EndBenignMalloc();
+	__host_device__ void allocBenignBegin();
+	__host_device__ void allocBenignEnd();
 #else
-#define sqlite3BeginBenignMalloc()
-#define sqlite3EndBenignMalloc()
+#define allocBenignBegin()
+#define allocBenignEnd()
 #endif
 
 	/*
@@ -193,9 +194,9 @@ extern "C" {
 	int memdbg_hastype(void *, uint8_t);
 	int memdbg_nottype(void *, uint8_t);
 #else
-# define memdbg_settype(X, Y) /* no-op */
-# define memdbg_hastype(X, Y) 1
-# define memdbg_nottype(X, Y) 1
+#define memdbg_settype(X, Y) /* no-op */
+#define memdbg_hastype(X, Y) 1
+#define memdbg_nottype(X, Y) 1
 #endif
 #define MEMTYPE_HEAP       0x01  // General heap allocations
 #define MEMTYPE_LOOKASIDE  0x02  // Heap that might have been lookaside

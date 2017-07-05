@@ -365,10 +365,10 @@ __device__ static char GetDigit(long_double *val, int *cnt)
 }
 #endif
 
-__device__ void strbldInit(strbld_t *b, char *text, int capacity, int maxSize)
+__device__ void strbldInit(strbld_t *b, void *tag, char *text, int capacity, int maxSize)
 {
 	b->text = b->base = text; //: zText
-	b->tag = nullptr; //: db
+	b->tag = tag; //: db
 	b->index = 0; //: nChar
 	b->size = capacity; //: nAlloc
 	b->maxSize = maxSize; //: mxAlloc

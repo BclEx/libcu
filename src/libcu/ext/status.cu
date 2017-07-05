@@ -1,5 +1,4 @@
-﻿#include <stdlibcu.h>
-#include <ext/status.h>
+﻿#include <ext/status.h>
 #include <assert.h>
 
 /* Variables in which to record status information. */
@@ -43,9 +42,9 @@ static __host_constant__ const char MutexStatics[] = {
 __host_device__ int64_t status_now(STATUS op) //: sqlite3StatusValue
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.NowValue));
+	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? sqlite3Pcache1Mutex() : allocMutex()));
+	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	return _status.nowValue[op];
 }
 
@@ -60,9 +59,9 @@ __host_device__ int64_t status_now(STATUS op) //: sqlite3StatusValue
 __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.NowValue));
+	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? sqlite3Pcache1Mutex() : allocMutex()));
+	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	_status.nowValue[op] += n;
 	if (_status.nowValue[op] > _status.maxValue[op])
 		_status.maxValue[op] = _status.nowValue[op];
@@ -71,9 +70,9 @@ __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 __host_device__ void status_dec(STATUS op, int n) //: sqlite3StatusDown
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.NowValue));
+	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? sqlite3Pcache1Mutex() : allocMutex()));
+	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	_status.nowValue[op] -= n;
 }
 
@@ -81,9 +80,9 @@ __host_device__ void status_dec(STATUS op, int n) //: sqlite3StatusDown
 __host_device__ void status_max(STATUS op, int x)
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.NowValue));
+	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? sqlite3Pcache1Mutex() : allocMutex()));
+	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	assert(op == STATUS_MALLOC_SIZE || op == STATUS_PAGECACHE_SIZE || op == STATUS_SCRATCH_SIZE || op == STATUS_PARSER_STACK);
 	statusValue_t newValue = (statusValue_t)x;
 	if (newValue > _status.maxValue[op])
@@ -97,9 +96,9 @@ __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, boo
 	if (op < 0 || op >= _LENGTHOF(_status.nowValue))
 		return RC_MISUSE_BKPT;
 #ifdef ENABLE_API_ARMOR
-	if (!current || !highwater) return MISUSE_BKPT;
+	if (!current || !highwater) return RC_MISUSE_BKPT;
 #endif
-	mutex *mutex = MutexStatics[op] ? sqlite3Pcache1Mutex() : allocMutex();
+	mutex *mutex = MutexStatics[op] ? allocCacheMutex() : allocMutex();
 	mutex_enter(mutex);
 	*current = _status.nowValue[op];
 	*highwater = _status.maxValue[op];
@@ -125,7 +124,7 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 {
 	RC rc = 0;
 #ifdef ENABLE_API_ARMOR
-	if (!sqlite3SafetyCheckOk(db) || !current || !highwater)
+	if (!tagSafetyCheckOk(tag) || !current || !highwater)
 		return RC_MISUSE_BKPT;
 #endif
 	mutex_enter(tag->mutex);

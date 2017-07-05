@@ -13,6 +13,26 @@
 #define LIBCU_USEURI 0
 #endif
 
+/* EVIDENCE-OF: R-38720-18127 The default setting is determined by the SQLITE_ALLOW_COVERING_INDEX_SCAN compile-time option, or is "on" if
+** that compile-time option is omitted.
+*/
+#ifndef LIBCU_ALLOWCOVERINGINDEXSCAN
+#define LIBCU_ALLOWCOVERINGINDEXSCAN true
+#endif
+
+/* The minimum PMA size is set to this value multiplied by the database page size in bytes. */
+#ifndef LIBCU_SORTERPMASZ
+#define LIBCU_SORTERPMASZ 250
+#endif
+
+/* Statement journals spill to disk when their size exceeds the following threshold (in bytes). 0 means that statement journals are created and
+** written to disk immediately (the default behavior for SQLite versions before 3.12.0).  -1 means always keep the entire statement journal in
+** memory.  (The statement journal is also always held entirely in memory if journal_mode=MEMORY or if temp_store=MEMORY, regardless of this setting.)
+*/
+#ifndef LIBCU_STMTJRNLSPILL 
+#define LIBCU_STMTJRNLSPILL (64*1024)
+#endif
+
 /*
 ** The default lookaside-configuration, the format "SZ,N".  SZ is the number of bytes in each lookaside slot (should be a multiple of 8)
 ** and N is the number of slots.  The lookaside-configuration can be changed as start-time using sqlite3_config(SQLITE_CONFIG_LOOKASIDE)
@@ -33,17 +53,20 @@
 #endif
 
 /* The following singleton contains the global configuration for the Libcu library. */
-_WSD struct RuntimeStatics _runtimeStatics = {
-	//{nullptr, nullptr},			// appendFormat
+_WSD struct RuntimeConfig _runtimeConfig = {
+	{0,0},						// appendFormat
 	LIBCU_DEFAULTMEMSTATUS,		// memstat
 	true,						// coreMutex
 	LIBCU_THREADSAFE == 1,		// fullMutex
 	LIBCU_USEURI,				// openUri
+	LIBCU_ALLOWCOVERINGINDEXSCAN, // useCis
 	0x7ffffffe,					// maxStrlen
 	0,							// neverCorrupt
 	LIBCU_DEFAULTLOOKASIDE,		// lookasideSize, lookasides
+	LIBCU_STMTJRNLSPILL,		// stmtSpills
 	{0,0,0,0,0,0,0,0},			// allocSystem
 	{0,0,0,0,0,0,0,0,0},		// mutexSystem
+	{0,0,0,0,0,0,0,0,0,0,0,0,0},// pcache2System
 	(void *)nullptr,            // heap
 	0,							// heapSize
 	0, 0,						// minHeapSize, maxHeapSize
@@ -55,68 +78,30 @@ _WSD struct RuntimeStatics _runtimeStatics = {
 	(void *)nullptr,			// page
 	0,							// pageSize
 	LIBCU_DEFAULTPCACHEINITSZ,	// pages
+	0,							// maxParserStack
+	false,						// sharedCacheEnabled
+	LIBCU_SORTERPMASZ,			// szPma
 	/* All the rest should always be initialized to zero */
-	0,							// isInit
-	0,							// inProgress
-	0,							// isMutexInit
-	0,							// isMallocInit
+	false,						// isInit
+	false,						// inProgress
+	false,						// isMutexInit
+	false,						// isMallocInit
+	false,						// isPCacheInit
 	0,							// initMutexRefs
 	0,							// initMutex
 	nullptr,					// log
-	0,							// logArg
-#ifndef LIBCU_UNTESTABLE
-	0,							// xTestCallback
+	nullptr,					// logArg
+#ifdef LIBCU_ENABLE_SQLLOG
+	nullptr,					// sqllog
+	nullptr,					// sqllogArg
 #endif
+#ifdef LIBCU_VDBE_COVERAGE
+	nullptr,                    // vdbeBranch
+	nullptr,                    // vbeBranchArg
+#endif
+#ifndef LIBCU_UNTESTABLE
+	nullptr,					// testCallback
+#endif
+	0,							// localtimeFault
+	0x7ffffffe					// onceResetThreshold
 };
-
-//__device__ bool TagBase::SetupLookaside(void *buf, int size, int count)
-//{
-//	if (Lookaside.Outs)
-//		return false;
-//	// Free any existing lookaside buffer for this handle before allocating a new one so we don't have to have space for both at the same time.
-//	if (Lookaside.Malloced)
-//		_free(Lookaside.Start);
-//	// The size of a lookaside slot after ROUNDDOWN8 needs to be larger than a pointer to be useful.
-//	size = _ROUNDDOWN8(size); // IMP: R-33038-09382
-//	if (size <= (int)sizeof(TagBase::LookasideSlot *)) size = 0;
-//	if (count < 0) count = 0;
-//	void *start;
-//	if (size == 0 || count == 0)
-//	{
-//		size = 0;
-//		start = nullptr;
-//	}
-//	else if (!buf)
-//	{
-//		_benignalloc_begin();
-//		start = _alloc(size * count); // IMP: R-61949-35727
-//		_benignalloc_end();
-//		if (start) count = (int)_allocsize(start) / size;
-//	}
-//	else
-//		start = buf;
-//	Lookaside.Start = start;
-//	Lookaside.Free = nullptr;
-//	Lookaside.Size = (uint16)size;
-//	if (start)
-//	{
-//		_assert(size > (int)sizeof(TagBase::LookasideSlot *));
-//		TagBase::LookasideSlot *p = (TagBase::LookasideSlot *)start;
-//		for (int i = count - 1; i >= 0; i--)
-//		{
-//			p->Next = Lookaside.Free;
-//			Lookaside.Free = p;
-//			p = (TagBase::LookasideSlot *)&((uint8 *)p)[size];
-//		}
-//		Lookaside.End = p;
-//		Lookaside.Enabled = true;
-//		Lookaside.Malloced = (!buf);
-//	}
-//	else
-//	{
-//		Lookaside.End = nullptr;
-//		Lookaside.Enabled = false;
-//		Lookaside.Malloced = false;
-//	}
-//	return true;
-//}

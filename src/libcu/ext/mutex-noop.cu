@@ -1,9 +1,12 @@
+#include <ext/global.h>
+#include <assert.h>
+
 //////////////////////
 // MUTEX NOOP
 #pragma region MUTEX NOOP
-#ifdef LIBCU_MUTEX_NOOP
+#ifndef LIBCU_MUTEX_OMIT
 
-#ifndef DEBUG
+#ifndef _DEBUG
 
 /*
 ** Stub routines for all mutex methods.
@@ -37,42 +40,42 @@ __host_device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMe
 
 /* The mutex object */
 struct mutex {
-	MUTEX Id;	// The mutex type
-	int Refs;	// Number of entries without a matching leave
+	MUTEX id;	// The mutex type
+	int refs;	// Number of entries without a matching leave
 };
 
 /* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
-static __host_device__ bool noopMutexHeld(mutex *m) { return (!p || p->Refs); }
-static __host_device__ bool noopMutexNotheld(mutex *m) { return (!p || !p->Refs); }
+static __host_device__ bool noopMutexHeld(mutex *m) { return (!m || m->refs); }
+static __host_device__ bool noopMutexNotHeld(mutex *m) { return (!m || !m->refs); }
 
 /* Initialize and deinitialize the mutex subsystem. */
-static __host_device__ mutex *noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
+static __hostb_device__ mutex noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
 
 static __host_device__ int noopMutexInitialize() { return 0; }
-static __host_device__ int noopMutexEnd() { return 0; }
+static __host_device__ int noopMutexShutdown() { return 0; }
 
 /* The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL that means that a mutex could not be allocated. */
 static __host_device__ mutex *noopMutexAlloc(MUTEX id)
 {
-	mutex *m;
+	mutex *m = nullptr;
 	switch (id) {
 	case MUTEX_FAST:
 	case MUTEX_RECURSIVE: {
-		m = (mutex *)malloc(sizeof(*m));
+		m = (mutex *)alloc(sizeof(*m));
 		if (m) {
-			m->Id = id;
-			m->Refs = 0;
+			m->id = id;
+			m->refs = 0;
 		}
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= lengthof(noopMutexStatics)) {
-			(void)MISUSE_BKPT;
+		if (id-2 < 0 || id-2 >= _LENGTHOF(noopMutexStatics)) {
+			(void)RC_MISUSE_BKPT;
 			return 0;
 		}
 #endif
 		m = &noopMutexStatics[id-2];
-		m->Id = id;
+		m->id = id;
 		break; }
 	}
 	return m;
@@ -81,13 +84,12 @@ static __host_device__ mutex *noopMutexAlloc(MUTEX id)
 /* This routine deallocates a previously allocated mutex. */
 static __host_device__ void noopMutexFree(mutex *m)
 {
-	assert(!p->Refs);
-	if (p->Id == MUTEX_FAST || p->Id == MUTEX_RECURSIVE) {
-		free(m);
-	}
+	assert(!m->refs);
+	if (m->id == MUTEX_FAST || m->id == MUTEX_RECURSIVE)
+		mfree(m);
 	else {
 #ifdef ENABLE_API_ARMOR
-		(void)MISUSE_BKPT;
+		(void)RC_MISUSE_BKPT;
 #endif
 	}
 }
@@ -101,14 +103,14 @@ static __host_device__ void noopMutexFree(mutex *m)
 */
 static __host_device__ void noopMutexEnter(mutex *m)
 {
-	assert(m->Id == MUTEX_RECURSIVE || mutex_notheld(m));
-	m->Refs++;
+	assert(m->id == MUTEX_RECURSIVE || mutex_notheld(m));
+	m->refs++;
 }
 
 static __host_device__ bool noopMutexTryEnter(mutex *m)
 {
-	assert(m->Id == MUTEX_RECURSIVE || mutex_notheld(m));
-	m->Refs++;
+	assert(m->id == MUTEX_RECURSIVE || mutex_notheld(m));
+	m->refs++;
 	return true;
 }
 
@@ -119,11 +121,11 @@ static __host_device__ bool noopMutexTryEnter(mutex *m)
 static __host_device__ void noopMutexLeave(mutex *m)
 {
 	assert(mutex_held(m));
-	m->Refs--;
-	assert(m->Id == MUTEX_RECURSIVE || mutex_notheld(m));
+	m->refs--;
+	assert(m->id == MUTEX_RECURSIVE || mutex_notheld(m));
 }
 
-static __host__ __constant__ const mutex_methods noopDefaultMethods = {
+static __host_constant__ const mutex_methods noopDefaultMethods = {
 	noopMutexInitialize,
 	noopMutexShutdown,
 	noopMutexAlloc,
@@ -140,7 +142,7 @@ __host_device__ mutex_methods const *__mutexsystemNoop() { return &noopDefaultMe
 #endif
 
 /* If compiled with MUTEX_NOOP, then the no-op mutex implementation is used regardless of the run-time threadsafety setting. */
-#ifdef MUTEX_NOOP
+#ifdef LIBCU_MUTEX_NOOP
 __host_device__ mutex_methods const *__mutexsystemDefault() { return &noopDefaultMethods; }
 #endif
 

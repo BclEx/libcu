@@ -30,6 +30,8 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
+#define OS_WIN 1
+
 	/*
 	** The LIBCU_THREADSAFE macro must be defined as 0, 1, or 2. 0 means mutexes are permanently disable and the library is never
 	** threadsafe.  1 means the library is serialized which is the highest level of threadsafety.  2 means the library is multithreaded - multiple
@@ -108,7 +110,7 @@ extern "C" {
 	struct mutex_methods {
 		RC (*initialize)();
 		RC (*shutdown)();
-		mutex *(*alloc)(int);
+		mutex *(*alloc)(MUTEX);
 		void (*free)(mutex *);
 		void (*enter)(mutex *);
 		bool (*tryEnter)(mutex *);
@@ -116,7 +118,7 @@ extern "C" {
 		bool (*held)(mutex *);
 		bool (*notheld)(mutex *);
 	};
-#define __mutexsystem _runtimeStatics.mutexSystem
+#define __mutexsystem _runtimeConfig.mutexSystem
 
 	// CAPI3REF: Mutex Verification Routines
 #ifndef NDEBUG

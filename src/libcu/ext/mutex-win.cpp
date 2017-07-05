@@ -1,3 +1,18 @@
+#include <ext/global.h>
+#include <assert.h>
+
+#if LIBCU_OS_WIN
+/*
+** Include code that is common to all os_*.c files
+*/
+#include "os_common.h"
+
+/*
+** Include the header file for the Windows VFS.
+*/
+#include "os_win.h"
+#endif
+
 //////////////////////
 // MUTEX W32
 #pragma region MUTEX W32
@@ -7,17 +22,17 @@
 
 struct mutex {
 	CRITICAL_SECTION Mutex;		// Mutex controlling the lock
-	MUTEX Id;					// Mutex type
-#ifdef DEBUG
-	volatile int Refs;			// Number of enterances
-	volatile DWORD Owner;		// Thread holding this mutex
-	bool Trace;					// True to trace changes
+	MUTEX id;					// Mutex type
+#ifdef _DEBUG
+	volatile int refs;			// Number of enterances
+	volatile DWORD owner;		// Thread holding this mutex
+	bool trace;					// True to trace changes
 #endif
 };
 
 /* These are the initializer values used when declaring a "static" mutex on Win32.  It should be noted that all mutexes require initialization on the Win32 platform. */
 #define W32_MUTEX_INITIALIZER { 0 }
-#ifdef DEBUG
+#ifdef _DEBUG
 #define MUTEX_INITIALIZER { W32_MUTEX_INITIALIZER, 0, 0L, (DWORD)0, 0 }
 #else
 #define MUTEX_INITIALIZER { W32_MUTEX_INITIALIZER, 0 }
@@ -38,11 +53,11 @@ static mutex MutexStatics[] = {
 };
 #undef MUTEX_INITIALIZER
 
-#ifdef DEBUG
+#ifdef _DEBUG
 /* The mutex_held() and mutex_notheld() routine are intended for use only inside assert() statements. */
-static bool MutexHeld(mutex *m) { return m->Refs && m->Owner == GetCurrentThreadId(); }
-static bool MutexNotheld2(mutex *m, DWORD tid) { return p->Refs || p->Owner != tid; }
-static bool MutexNotheld(mutex *m) { DWORD tid = GetCurrentThreadId(); return mutex_notheld2(m, tid); }
+static bool mutexHeld(mutex *m) { return m->refs && m->owner == GetCurrentThreadId(); }
+static bool mutexNotheld2(mutex *m, DWORD tid) { return m->refs || m->owner != tid; }
+static bool mutexNotheld(mutex *m) { DWORD tid = GetCurrentThreadId(); return mutexNotheld2(m, tid); }
 #endif
 
 /* Try to provide a memory barrier operation, needed for initialization and also for the xShmBarrier method of the VFS in cases when Libcu is compiled without mutexes (THREADSAFE=0). */
@@ -60,46 +75,46 @@ void mutexMemoryBarrier()
 }
 
 /* Initialize and deinitialize the mutex subsystem. */
-static bool MutexIsInit = false;
-static int MutexIsNt = -1; // <0 means "need to query"
+static bool _mutexIsInit = false;
+static int _mutexIsNt = -1; // <0 means "need to query"
 
 /* As the winMutexInit() and winMutexEnd() functions are called as part of the sqlite3_initialize() and sqlite3_shutdown() processing, the "interlocked" magic used here is probably not strictly necessary. */
-static LONG WIN32_VOLATILE MutexLock = 0;
+static LONG WIN32_VOLATILE _mutexLock = 0;
 
 //int sqlite3_win32_is_nt(void); /* os_win.c */
 //void sqlite3_win32_sleep(DWORD milliseconds); /* os_win.c */
 
-int MutexInitialize()
+RC mutexInitialize()
 { 
 	// The first to increment to 1 does actual initialization
-	if (!InterlockedCompareExchange(&MutexLock, 1, 0)) {
-		for (int i = 0; i < lengthof(MutexStatics); i++) {
+	if (!InterlockedCompareExchange(&_mutexLock, 1, 0)) {
+		for (int i = 0; i < _LENGTHOF(MutexStatics); i++) {
 #if OS_WINRT
 			InitializeCriticalSectionEx(&MutexStatics[i].Mutex, 0, 0);
 #else
 			InitializeCriticalSection(&MutexStatics[i].Mutex);
 #endif
 		}
-		MutexIsInit = true;
+		_mutexIsInit = true;
 	}
 	else
 		// Another thread is (in the process of) initializing the static mutexes
-		while (!MutexIsInit)
+		while (!_mutexIsInit)
 			Sleep(1);
-	return 0; 
+	return RC_OK; 
 }
 
-int MutexShutdown()
+RC MutexShutdown()
 {
 	// The first to decrement to 0 does actual shutdown (which should be the last to shutdown.)
-	if (InterlockedCompareExchange(&MutexLock, 0, 1) == 1) {
-		if (MutexIsInit) {
-			for (int i =0 ; i < lengthof(MutexStatics); i++)
+	if (InterlockedCompareExchange(&_mutexLock, 0, 1) == 1) {
+		if (_mutexIsInit) {
+			for (int i =0 ; i < _LENGTHOF(MutexStatics); i++)
 				DeleteCriticalSection(&MutexStatics[i].Mutex);
-			MutexIsInit = false;
+			_mutexIsInit = false;
 		}
 	}
-	return 0;
+	return RC_OK;
 }
 
 /*
@@ -137,7 +152,7 @@ int MutexShutdown()
 ** Note that if one of the dynamic mutex parameters (MUTEX_FAST or MUTEX_RECURSIVE) is used then mutexAalloc() returns a different mutex on every call.  But for the static
 ** mutex types, the same mutex is returned on every call that has the same type number.
 */
-mutex *MutexAlloc(MUTEX id)
+mutex *mutexAlloc(MUTEX id)
 {
 	mutex *m;
 	switch (id) {
@@ -145,10 +160,10 @@ mutex *MutexAlloc(MUTEX id)
 	case MUTEX_RECURSIVE: {
 		m = (mutex *)allocZero(sizeof(*m));
 		if (m) {  
-			m->Id = id;
-#ifdef DEBUG
+			m->id = id;
+#ifdef _DEBUG
 #ifdef WIN32_MUTEX_TRACE_DYNAMIC
-			p->Trace = true;
+			p->trace = true;
 #endif
 #endif
 #if OS_WINRT
@@ -160,16 +175,16 @@ mutex *MutexAlloc(MUTEX id)
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= lengthof(MutexStatics)) {
-			(void)MISUSE_BKPT;
+		if (id-2 < 0 || id-2 >= _LENGTHOF(MutexStatics)) {
+			(void)RC_MISUSE_BKPT;
 			return 0;
 		}
 #endif
 		m = &MutexStatics[id-2];
-		m->Id = id;
-#ifdef DEBUG
+		m->id = id;
+#ifdef _DEBUG
 #ifdef WIN32_MUTEX_TRACE_STATIC
-		m->Trace = true;
+		m->trace = true;
 #endif
 #endif
 		break; }
@@ -178,17 +193,17 @@ mutex *MutexAlloc(MUTEX id)
 }
 
 /* This routine deallocates a previously allocated mutex.  SQLite is careful to deallocate every mutex that it allocates. */
-void MutexFree(mutex *m)
+void mutexFree(mutex *m)
 {
 	assert(m);
-	assert(!m->Refs && !m->Owner);
-	if (m->Id == MUTEX_FAST || m->Id == MUTEX_RECURSIVE) {
+	assert(!m->refs && !m->owner);
+	if (m->id == MUTEX_FAST || m->id == MUTEX_RECURSIVE) {
 		DeleteCriticalSection(&m->Mutex);
-		free(p);
+		mfree(m);
 	}
 	else {
 #ifdef ENABLE_API_ARMOR
-		(void)MISUSE_BKPT;
+		(void)RC_MISUSE_BKPT;
 #endif
 	}
 }
@@ -200,59 +215,59 @@ void MutexFree(mutex *m)
 ** mutex must be exited an equal number of times before another thread can enter.  If the same thread tries to enter any other kind of mutex
 ** more than once, the behavior is undefined.
 */
-void MutexEnter(mutex *m)
+void mutexEnter(mutex *m)
 {
-#if defined(DEBUG) || defined(TEST)
+#if defined(_DEBUG) || defined(_TEST)
 	DWORD tid = GetCurrentThreadId();
 #endif
-#ifdef DEBUG
+#ifdef _DEBUG
 	assert(m);
-	assert(m->Id == MUTEX_RECURSIVE || MutexNotheld2(m, tid));
+	assert(m->id == MUTEX_RECURSIVE || mutexNotheld2(m, tid));
 #else
 	assert(m);
 #endif
-	assert(MutexIsInit);
+	assert(_mutexIsInit);
 	EnterCriticalSection(&m->Mutex);
-#ifdef DEBUG
-	assert(m->Refs > 0 || !m->Owner);
-	m->Owner = tid;
-	m->Refs++;
-	if (m->Trace)
-		printf("ENTER-MUTEX tid=%lu, mutex(%d)=%p (%d), Refs=%d\n", tid, m->Id, m, m->Trace, p->Refs);
+#ifdef _DEBUG
+	assert(m->refs > 0 || !m->owner);
+	m->owner = tid;
+	m->refs++;
+	if (m->trace)
+		printf("ENTER-MUTEX tid=%lu, mutex(%d)=%p (%d), Refs=%d\n", tid, m->id, m, m->trace, m->refs);
 #endif
 }
 
-bool MutexTryEnter(mutex *m)
+bool mutexTryEnter(mutex *m)
 {
-#if defined(DEBUG) || defined(TEST)
+#if defined(_DEBUG) || defined(_TEST)
 	DWORD tid = GetCurrentThreadId();
 #endif
-	bool rc = true;
+	bool rc = false;
 	assert(m);
-	assert(m->Id == MUTEX_RECURSIVE || nMutexNotheld2(m, tid));
+	assert(m->id == MUTEX_RECURSIVE || mutexNotheld2(m, tid));
 	// The mutex_try() routine is very rarely used, and when it is used it is merely an optimization.  So it is OK for it to always fail.
 	//
 	// The TryEnterCriticalSection() interface is only available on WinNT. And some windows compilers complain if you try to use it without
 	// first doing some #defines that prevent SQLite from building on Win98. For that reason, we will omit this optimization for now.  See ticket #2685.
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0400
-	assert(MutexIsInit);
-	assert(MutexIsNt >= -1 && MutexIsNt <= 1);
-	if (MutexIsNt < 0)
-		MutexIsNt = sqlite3_win32_is_nt();
-	assert(MutexIsNt == 0 || MutexIsNt == 1);
-	if (MutexIsNt && TryEnterCriticalSection(&m->Mutex)) {
-#ifdef DEBUG
-		m->Owner = tid;
-		m->Refs++;
+	assert(_mutexIsInit);
+	assert(_mutexIsNt >= -1 && _mutexIsNt <= 1);
+	if (_mutexIsNt < 0)
+		_mutexIsNt = sqlite3_win32_is_nt();
+	assert(_mutexIsNt == 0 || _mutexIsNt == 1);
+	if (_mutexIsNt && TryEnterCriticalSection(&m->Mutex)) {
+#ifdef _DEBUG
+		m->owner = tid;
+		m->refs++;
 #endif
-		rc = false;
+		rc = true;
 	}
 #else
 	UNUSED_SYMBOL(m);
 #endif
-#ifdef DEBUG
-	if (m->Trace)
-		printf("TRY-MUTEX tid=%lu, mutex(%d)=%p (%d), owner=%lu, Refs=%d, rc=%s\n", tid, m->Id, m, m->Trace, m->Owner, m->Refs, sqlite3ErrName(rc));
+#ifdef _DEBUG
+	if (m->trace)
+		printf("TRY-MUTEX tid=%lu, mutex(%d)=%p (%d), owner=%lu, Refs=%d, rc=%s\n", tid, m->id, m, m->trace, m->owner, m->refs, rc?"OK":"BUSY");
 #endif
 	return rc;
 }
@@ -261,45 +276,45 @@ bool MutexTryEnter(mutex *m)
 ** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
 ** is undefined if the mutex is not currently entered or is not currently allocated.  Libcu will never do either.
 */
-void MutexLeave(mutex *m)
+void mutexLeave(mutex *m)
 {
-#if defined(DEBUG) || defined(TEST)
+#if defined(_DEBUG) || defined(_TEST)
 	DWORD tid = GetCurrentThreadId();
 #endif
 	assert(m);
-#ifdef DEBUG
-	assert(m->Refs > 0);
-	assert(m->Owner == tid);
-	m->Refs--;
-	if (!m->Refs) m->Owner = 0;
-	assert(!m->Refs || m->Id == MUTEX_RECURSIVE);
+#ifdef _DEBUG
+	assert(m->refs > 0);
+	assert(m->owner == tid);
+	m->refs--;
+	if (!m->refs) m->owner = 0;
+	assert(!m->refs || m->id == MUTEX_RECURSIVE);
 #endif
-	assert(MutexIsInit);
+	assert(_mutexIsInit);
 	LeaveCriticalSection(&m->Mutex);
-#ifdef DEBUG
-	if (m->Trace)
-		printf("LEAVE-MUTEX tid=%lu, mutex(%d)=%p (%d), Refs=%d\n", tid, m->Id, m, m->Trace, m->Refs);
+#ifdef _DEBUG
+	if (m->trace)
+		printf("LEAVE-MUTEX tid=%lu, mutex(%d)=%p (%d), Refs=%d\n", tid, m->id, m, m->trace, m->refs);
 #endif
 }
 
-static const mutex_methods DefaultMethods = {
-	MutexInit,
-	MutexEnd,
-	MutexAlloc,
-	MutexFree,
-	MutexEnter,
-	MutexTry,
-	MutexLeave,
-#ifdef DEBUG
-	MutexHeld,
-	MutexNotheld
+static const mutex_methods _defaultMethods = {
+	mutexInitialize,
+	mutexShutdown,
+	mutexAlloc,
+	mutexFree,
+	mutexEnter,
+	mutexTryEnter,
+	mutexLeave,
+#ifdef _DEBUG
+	mutexHeld,
+	mutexNotheld
 #else
 	nullptr,
 	nullptr
 #endif
 };
 
-__host_device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemDefault() { return &_defaultMethods; }
 
 #endif
 #pragma endregion

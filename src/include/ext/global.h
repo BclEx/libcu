@@ -23,9 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#define ENABLE_API_ARMOR 1
+#define LIBCU_ENABLE_SQLLOG
+
 #ifndef _EXT_GLOBAL_H
 #define _EXT_GLOBAL_H
-#include <stdint.h>
+#include <crtdefscu.h>
 __BEGIN_DECLS;
 
 // CAPI3REF: Result Codes
@@ -42,10 +45,10 @@ __BEGIN_DECLS;
 //#define RC_READONLY     8   // Attempt to write a readonly database
 //#define RC_INTERRUPT    9   // Operation terminated by sqlite3_interrupt()
 #define RC_IOERR       10   // Some kind of disk I/O error occurred
-//#define RC_CORRUPT     11   // The database disk image is malformed
+#define RC_CORRUPT     11   // The database disk image is malformed
 //#define RC_NOTFOUND    12   // Unknown opcode in sqlite3_file_control()
 //#define RC_FULL        13   // Insertion failed because database is full
-//#define RC_CANTOPEN    14   // Unable to open the database file
+#define RC_CANTOPEN    14   // Unable to open the database file
 //#define RC_PROTOCOL    15   // Database lock protocol error
 //#define RC_EMPTY       16   // Database is empty
 //#define RC_SCHEMA      17   // The database schema changed
@@ -202,32 +205,61 @@ struct tagbase_t {
 	int *bytesFreed;		// If not NULL, increment this in DbFree()
 };
 
-/* TEMP */
-__host_device__ mutex *sqlite3Pcache1Mutex();
-__host_device__ RC systemInitialize();
-
 #include "util.h"
 #include "mutex.h"
 #include "alloc.h"
 #include "status.h"
+
+// CAPI3REF: Configuration Options
+#define CONFIG int
+#define CONFIG_SINGLETHREAD  1  // nil
+#define CONFIG_MULTITHREAD   2  // nil
+#define CONFIG_SERIALIZED    3  // nil
+#define CONFIG_MALLOC        4  // alloc_methods*
+#define CONFIG_GETMALLOC     5  // alloc_methods*
+#define CONFIG_SCRATCH       6  // void*, int size, int n
+#define CONFIG_PAGECACHE     7  // void*, int size, int n
+#define CONFIG_HEAP          8  // void*, int nByte, int min
+#define CONFIG_MEMSTATUS     9  // boolean
+#define CONFIG_MUTEX        10  // mutex_methods*
+#define CONFIG_GETMUTEX     11  // mutex_methods*
+// previously CONFIG_CHUNKALLOC 12 which is now unused.
+#define CONFIG_LOOKASIDE    13  // int int
+#define CONFIG_PCACHE       14  // no-op
+#define CONFIG_GETPCACHE    15  // no-op
+#define CONFIG_LOG          16  // xFunc, void*
+#define CONFIG_URI          17  // int
+#define CONFIG_PCACHE2      18  // pcache_methods2*
+#define CONFIG_GETPCACHE2   19  // pcache_methods2*
+#define CONFIG_COVERING_INDEX_SCAN 20  // int
+#define CONFIG_SQLLOG       21  // xSqllog, void*
+#define CONFIG_MMAP_SIZE    22  // int64_t, int64_t
+#define CONFIG_WIN32_HEAPSIZE      23  // int nByte
+#define CONFIG_PCACHE_HDRSZ        24  // int *psz
+#define CONFIG_PMASZ               25  // unsigned int szPma
+#define CONFIG_STMTJRNL_SPILL      26  // int nByte
+
 
 /*
 ** Structure containing global configuration data for the Lib library.
 **
 ** This structure also contains some state information.
 */
-struct RuntimeStatics {
-	//void (*appendFormat[2])(strbld_t *b, va_list va); // Formatter
+struct RuntimeConfig {
+	void (*appendFormat[2])(void *b, va_list va); // Formatter
 	bool memstat;                   // True to enable memory status
 	bool coreMutex;                 // True to enable core mutexing
 	bool fullMutex;                 // True to enable full mutexing
 	bool openUri;                   // True to interpret filenames as URIs
+	bool useCis;                    // Use covering indices for full-scans
 	int maxStrlen;                  // Maximum string length
 	bool neverCorrupt;              // Database is always well-formed
 	int lookasideSize;              // Default lookaside buffer size
 	int lookasides;					// Default lookaside buffer count
+	int stmtSpills;                 // Stmt-journal spill-to-disk threshold
 	alloc_methods allocSystem;		// Low-level memory allocation interface
 	mutex_methods mutexSystem;		// Low-level mutex interface
+	pcache2_methods pcache2System;  // Low-level page-cache interface
 	void *heap;						// Heap storage space
 	int heapSize;                   // Size of heap[]
 	int minHeapSize, maxHeapSize;	// Min and max heap requests sizes
@@ -239,21 +271,36 @@ struct RuntimeStatics {
 	void *page;                     // Page cache memory
 	int pageSize;                   // Size of each page in page[]
 	int pages;                      // Number of pages in page[]
+	int maxParserStack;             // Maximum depth of the parser stack
+	bool sharedCacheEnabled;        // True if shared-cache mode enabled
+	uint32_t sizePma;               // Maximum Sorter PMA size
 	/* The above might be initialized to non-zero.  The following need to always initially be zero, however. */
-	int isInit;						// True after initialization has finished
-	int inProgress;					// True while initialization in progress
-	int isMutexInit;				// True after mutexes are initialized
-	int isMallocInit;				// True after malloc is initialized
+	bool isInit;					// True after initialization has finished
+	bool inProgress;				// True while initialization in progress
+	bool isMutexInit;				// True after mutexes are initialized
+	bool isMallocInit;				// True after malloc is initialized
+	bool isPCacheInit;              // True after malloc is initialized
 	int initMutexRefs;				// Number of users of initMutex
 	mutex *initMutex;				// Mutex used by systemInitialize()
 	void (*log)(void*,int,const char*); // Function for logging
 	void *logArg;					// First argument to xLog()
+#ifdef LIBCU_ENABLE_SQLLOG
+	void(*sqllog)(void*,tagbase_t*,const char*,int);
+	void *sqllogArg;
+#endif
+#ifdef LIBCU_VDBE_COVERAGE
+	// The following callback (if not NULL) is invoked on every VDBE branch operation.  Set the callback using SQLITE_TESTCTRL_VDBE_COVERAGE.
+	void (*vdbeBranch)(void*,int,uint8_t,uint8_t); // Callback
+	void *vdbeBranchArg;			// 1st argument
+#endif
 #ifndef LIBCU_UNTESTABLE
 	int (*testCallback)(int);       // Invoked by sqlite3FaultSim()
 #endif
+	int localtimeFault;				// True to fail localtime() calls
+	int onceResetThreshold;			// When to reset OP_Once counters
 };
-extern __hostb_device__ _WSD RuntimeStatics _runtimeStatics;
-#define _runtimeStatics _GLOBAL(RuntimeStatics, _runtimeStatics)
+extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
+#define _runtimeConfig _GLOBAL(RuntimeConfig, _runtimeConfig)
 /*
 ** This macro is used inside of assert() statements to indicate that the assert is only valid on a well-formed database.  Instead of:
 **
@@ -267,7 +314,7 @@ extern __hostb_device__ _WSD RuntimeStatics _runtimeStatics;
 ** For most test cases, CORRUPT_DB is set to false using a special sqlite3_test_control().  This enables assert() statements to prove
 ** things that are always true for well-formed databases.
 */
-#define CORRUPT_DB (!_runtimeStatics.neverCorrupt)
+#define CORRUPT_DB (!_runtimeConfig.neverCorrupt)
 
 /*
 ** The LIBCU_*_BKPT macros are substitutes for the error codes with the same name but without the _BKPT suffix.  These macros invoke
@@ -280,7 +327,7 @@ __host_device__ int systemCantopenError(int line);
 #define RC_CORRUPT_BKPT systemCorruptError(__LINE__)
 #define RC_MISUSE_BKPT systemMisuseError(__LINE__)
 #define RC_CANTOPEN_BKPT systemCantopenError(__LINE__)
-#ifdef DEBUG
+#ifdef _DEBUG
 __host_device__ int systemNomemError(int line);
 __host_device__ int systemIoerrnomemError(int line);
 #define RC_NOMEM_BKPT systemNomemError(__LINE__)

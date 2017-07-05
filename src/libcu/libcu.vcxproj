@@ -38,6 +38,8 @@
     <ClInclude Include="..\include\ext\status.h" />
     <ClInclude Include="..\include\ext\global.h" />
     <ClInclude Include="..\include\ext\util.h" />
+    <ClInclude Include="..\include\ext\vsystem.h" />
+    <ClInclude Include="..\include\ext\vsystemfile.h" />
     <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\grpcu.h" />
     <ClInclude Include="..\include\pwdcu.h" />
@@ -67,8 +69,10 @@
     <ClInclude Include="fsystem.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ext\mutex-unix.c" />
-    <ClCompile Include="ext\mutex-win.c" />
+    <ClCompile Include="ext\mutex-unix.cpp" />
+    <ClCompile Include="ext\mutex-win.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
@@ -82,18 +86,21 @@
     <None Include="grpcu.cu" />
     <None Include="crtdefscu.cu" />
     <CudaCompile Include="ext\alloc.cu" />
-    <CudaCompile Include="ext\allocmem0.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="ext\allocmem1.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
+    <CudaCompile Include="ext\allocmem0.cu" />
+    <CudaCompile Include="ext\allocmem1.cu" />
+    <CudaCompile Include="ext\main.cu" />
     <CudaCompile Include="ext\mutex-gpu.cu" />
     <CudaCompile Include="ext\mutex-noop.cu" />
     <CudaCompile Include="ext\mutex.cu" />
     <CudaCompile Include="ext\status.cu" />
     <CudaCompile Include="ext\global.cu" />
     <CudaCompile Include="ext\util.cu" />
+    <CudaCompile Include="ext\vsystem-gpu.cu" />
+    <CudaCompile Include="ext\vsystem-map.cu" />
+    <CudaCompile Include="ext\vsystem-unix.cu" />
+    <CudaCompile Include="ext\vsystem-win.cu" />
+    <CudaCompile Include="ext\vsystem.cu" />
+    <CudaCompile Include="ext\vsystemfile.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

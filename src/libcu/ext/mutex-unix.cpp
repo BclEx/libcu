@@ -1,3 +1,4 @@
+#include <ext/global.h>
 
 //////////////////////
 // MUTEX PTHREADS
@@ -10,7 +11,7 @@
 ** The mutex.Id, mutex.Refs, and mutex.Owner fields are necessary under two condidtions:  (1) Debug builds and (2) using
 ** home-grown mutexes.  Encapsulate these conditions into a single #define.
 */
-#if defined(DEBUG) || defined(HOMEGROWN_RECURSIVE_MUTEX)
+#if defined(_DEBUG) || defined(HOMEGROWN_RECURSIVE_MUTEX)
 #define MUTEX_NREF 1
 #else
 #define MUTEX_NREF 0
@@ -64,7 +65,7 @@ static mutex MutexStatics[] = {
 ** On those platforms where pthread_equal() is not atomic, Libcu should be compiled without -DDEBUG and with -DNDEBUG to
 ** make sure no assert() statements are evaluated and hence these routines are never called.
 */
-#if !defined(NDEBUG) || defined(DEBUG)
+#if !defined(NDEBUG) || defined(_DEBUG)
 static bool MutexHeld(mutex *m) { return m->Refs && pthread_equal(m->Owner, pthread_self()); }
 static bool MutexNotHeld(mutex *m) { return !m->Refs || !pthread_equal(m->Owner, pthread_self()); }
 #endif
@@ -223,7 +224,7 @@ static void MutexEnter(mutex *m)
 	m->Refs++;
 #endif
 #endif
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (m->Trace)
 		printf("enter mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
 #endif
@@ -265,7 +266,7 @@ static bool MutexTryEnter(mutex *m)
 	else rc = true;
 #endif
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (!rc && m->Trace)
 		printf("enter mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
 #endif
@@ -290,7 +291,7 @@ static void MutexLeave(mutex *m)
 #else
 	pthread_mutex_unlock(&m->Mutex);
 #endif
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (m->Trace)
 		printf("leave mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
 #endif
@@ -304,7 +305,7 @@ static const mutex_methods DefaultMethods = {
 	MutexEnter,
 	MutexTry,
 	MutexLeave,
-#ifdef DEBUG
+#ifdef _DEBUG
 	MutexHeld,
 	MutexNotheld
 #else
