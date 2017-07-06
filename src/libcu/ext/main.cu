@@ -53,7 +53,7 @@ bool _runtimeOSTrace = LIBCU_DEBUG_OSTRACE;
 **
 ** See also the "PRAGMA temp_store_directory" SQL command.
 */
-__hostb_device__ char *_tempDirectory = nullptr;
+__hostb_device__ char *libcu_tempDirectory = nullptr;
 
 /*
 ** If the following global variable points to a string which is the name of a directory, then that directory will be used to store
@@ -61,7 +61,7 @@ __hostb_device__ char *_tempDirectory = nullptr;
 **
 ** See also the "PRAGMA data_store_directory" SQL command.
 */
-__hostb_device__ char *_dataDirectory = nullptr;
+__hostb_device__ char *libcu_dataDirectory = nullptr;
 
 /*
 ** Initialize Libcu.  

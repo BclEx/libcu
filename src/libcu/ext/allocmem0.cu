@@ -28,7 +28,7 @@ static __host_constant__ const alloc_methods _defaultMethods = {
 	memoryShutdown,
 	nullptr
 };
-__device__ void __allocsystemSetDefault()
+__host_constant__ void __allocsystemSetDefault()
 {
 	//sqlite3_config(SQLITE_CONFIG_MALLOC, &defaultMethods);
 	__allocsystem = _defaultMethods;
