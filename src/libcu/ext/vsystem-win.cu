@@ -1636,6 +1636,8 @@ static void winLogIoerr(int retry, int lineno)
 
 #pragma endregion
 
+#pragma region VSystemFile
+
 #pragma region WinCE Only
 
 /* This #if does not rely on the LIBCU_OS_WINCE define because the corresponding section in "date.c" cannot use it. */
@@ -1755,9 +1757,7 @@ static int winceCreateLock(const char *filename, winFile *file)
 	return RC_OK;
 }
 
-/*
-** Destroy the part of winFile that deals with wince locks
-*/
+/* Destroy the part of winFile that deals with wince locks */
 static void winceDestroyLock(winFile *file)
 {
 	if (file->mutex) {
@@ -1946,7 +1946,7 @@ static BOOL winUnlockFile(LPHANDLE phFile, DWORD offsetLow, DWORD offsetHigh, DW
 #endif
 
 /*
-** Move the current position of the file handle passed as the first argument to offset iOffset within the file. If successful, return 0.
+** Move the current position of the file handle passed as the first argument to offset offset within the file. If successful, return 0.
 ** Otherwise, set pFile->lastErrno and return non-zero.
 */
 static int winSeekFile(winFile *file, int64_t offset)
@@ -2027,7 +2027,7 @@ static RC winClose(vsystemfile *id)
 		int cnt = 0;
 		while (!osDeleteFileW(file->deleteOnClose) && osGetFileAttributesW(file->deleteOnClose) != 0xffffffff && cnt++ < WINCE_DELETION_ATTEMPTS)
 			sqlite3_win32_sleep(100);  // Wait a little before trying again
-		sqlite3_free(pFile->zDeleteOnClose);
+		mfree(pFile->zDeleteOnClose);
 	}
 #endif
 	if (rc)
@@ -2204,13 +2204,12 @@ static RC winTruncate(vsystemfile *id, int64_t size)
 		rc = winLogError(RC_IOERR_TRUNCATE, file->lastErrno, "winTruncate2", file->path);
 	}
 #if LIBCU_MAXMMAPSIZE>0
-	/* If the file was truncated to a size smaller than the currently mapped region, reduce the effective mapping size as well. Libcu will
-	** use read() and write() to access data beyond this point from now on.
-	*/
+	// If the file was truncated to a size smaller than the currently mapped region, reduce the effective mapping size as well. Libcu will
+	// use read() and write() to access data beyond this point from now on.
 	if (file->mapRegion && size < file->mmapSize)
 		file->mmapSize = size;
 #endif
-	OSTRACE(("TRUNCATE pid=%lu, pFile=%p, file=%p, rc=%s\n", osGetCurrentProcessId(), file, file->h, sqlite3ErrName(rc)));
+	OSTRACE(("TRUNCATE pid=%lu, pFile=%p, file=%p, rc=%s\n", osGetCurrentProcessId(), file, file->h, runtimeErrName(rc)));
 	return rc;
 }
 
@@ -2307,7 +2306,7 @@ static RC winFileSize(vsystemfile *id, int64_t *size)
 		}
 	}
 #endif
-	OSTRACE(("SIZE file=%p, pSize=%p, *pSize=%lld, rc=%s\n", file->h, size, *size, sqlite3ErrName(rc)));
+	OSTRACE(("SIZE file=%p, pSize=%p, *pSize=%lld, rc=%s\n", file->h, size, *size, runtimeErrName(rc)));
 	return rc;
 }
 
@@ -2386,48 +2385,6 @@ static int winUnlockReadLock(winFile *file)
 	return res;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 ** Lock the file with the lock specified by parameter locktype - one of the following:
 **
@@ -2488,7 +2445,7 @@ static RC winLock(vsystemfile *id, int locktype)
 			if (lastErrno == ERROR_INVALID_HANDLE) {
 				file->lastErrno = lastErrno;
 				rc = RC_IOERR_LOCK;
-				OSTRACE(("LOCK-FAIL file=%p, count=%d, rc=%s\n", file->h, cnt, sqlite3ErrName(rc)));
+				OSTRACE(("LOCK-FAIL file=%p, count=%d, rc=%s\n", file->h, cnt, runtimeErrName(rc)));
 				return rc;
 			}
 			if (cnt) sqlite3_win32_sleep(1);
@@ -2542,7 +2499,7 @@ static RC winLock(vsystemfile *id, int locktype)
 		OSTRACE(("LOCK-FAIL file=%p, wanted=%d, got=%d\n", file->h, locktype, newLocktype));
 	}
 	file->locktype = (uint8_t)newLocktype;
-	OSTRACE(("LOCK file=%p, lock=%d, rc=%s\n", file->h, file->locktype, sqlite3ErrName(rc)));
+	OSTRACE(("LOCK file=%p, lock=%d, rc=%s\n", file->h, file->locktype, runtimeErrName(rc)));
 	return rc;
 }
 
@@ -2603,7 +2560,7 @@ static RC winUnlock(vsystemfile *id, int locktype)
 	if (type >= PENDING_LOCK)
 		winUnlockFile(&file->h, PENDING_BYTE, 0, 1, 0);
 	file->locktype = (uint8_t)locktype;
-	OSTRACE(("UNLOCK file=%p, lock=%d, rc=%s\n", file->h, file->locktype, sqlite3ErrName(rc)));
+	OSTRACE(("UNLOCK file=%p, lock=%d, rc=%s\n", file->h, file->locktype, runtimeErrName(rc)));
 	return rc;
 }
 
@@ -2690,7 +2647,7 @@ static int winFileControl(vsystemfile *id, FCNTL op, void *arg)
 					SimulateIOErrorBenign(0);
 				}
 			}
-			OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, sqlite3ErrName(rc)));
+			OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, runtimeErrName(rc)));
 			return rc;
 		}
 		OSTRACE(("FCNTL file=%p, rc=RC_OK\n", file->h));
@@ -2734,7 +2691,7 @@ static int winFileControl(vsystemfile *id, FCNTL op, void *arg)
 		RC rc = winGetTempname(file->system, &tfile);
 		if (rc == RC_OK)
 			*(char **)aArg = tfile;
-		OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, sqlite3ErrName(rc)));
+		OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, runtimeErrName(rc)));
 		return rc; }
 #if LIBCU_MAXMMAPSIZE>0
 	case FCNTL_MMAP_SIZE: {
@@ -2750,7 +2707,7 @@ static int winFileControl(vsystemfile *id, FCNTL op, void *arg)
 				rc = winMapfile(file, -1);
 			}
 		}
-		OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, sqlite3ErrName(rc)));
+		OSTRACE(("FCNTL file=%p, rc=%s\n", file->h, runtimeErrName(rc)));
 		return rc; }
 #endif
 	}
@@ -2784,6 +2741,9 @@ static int winDeviceCharacteristics(vsystemfile *id)
 */
 static SYSTEM_INFO winSysInfo;
 
+#pragma endregion
+
+#pragma region WAL
 #ifndef LIBCU_OMIT_WAL
 
 /*
@@ -2833,7 +2793,7 @@ struct winShmNode {
 	char *filename;        // Name of the file
 	winFile file;           // File handle from winOpen
 	int sizeRegion;         // Size of shared-memory regions
-	int regions;            // Size of array apRegion
+	int regionLength;       // Size of array apRegion
 	struct ShmRegion {
 		HANDLE hMap;        // File handle from CreateFileMapping
 		void *map;
@@ -2842,7 +2802,7 @@ struct winShmNode {
 	int refs;               // Number of winShm objects pointing to this
 	winShm *first;          // All winShm objects pointing to this
 	winShmNode *next;       // Next in list of all winShmNode objects
-#if defined(LIBCU_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
 	uint8_t nextShmId;      // Next available winShm.id value
 #endif
 };
@@ -2858,10 +2818,10 @@ static winShmNode *winShmNodeList = nullptr;
 ** Structure used internally by this VFS to record the state of an open shared memory connection.
 **
 ** The following fields are initialized when this object is created and are read-only thereafter:
-**    winShm.pShmNode
+**    winShm.shmNode
 **    winShm.id
 **
-** All other fields are read/write.  The winShm.pShmNode->mutex must be held while accessing any read/write fields.
+** All other fields are read/write.  The winShm.shmNode->mutex must be held while accessing any read/write fields.
 */
 struct winShm {
 	winShmNode *shmNode;		// The underlying winShmNode object
@@ -2869,7 +2829,7 @@ struct winShm {
 	uint8_t hasMutex;			// True if holding the winShmNode mutex
 	uint16_t sharedMask;		// Mask of shared locks held
 	uint16_t exclMask;			// Mask of exclusive locks held
-#if defined(LIBCU_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
 	uint8_t id;					// Id of this connection with its winShmNode
 #endif
 };
@@ -2878,28 +2838,28 @@ struct winShm {
 #define WIN_SHM_BASE   ((22+LIBCU_SHM_NLOCK)*4)        // first lock byte
 #define WIN_SHM_DMS    (WIN_SHM_BASE+LIBCU_SHM_NLOCK)  // deadman switch
 
-/* Apply advisory locks for all n bytes beginning at ofst. */
+/* Apply advisory locks for all n bytes beginning at offset. */
 #define WINSHM_UNLCK  1
 #define WINSHM_RDLCK  2
 #define WINSHM_WRLCK  3
-static int winShmSystemLock(winShmNode *file, int lockType, int ofst, int bytes)
+static int winShmSystemLock(winShmNode *file, int lockType, int offset, int bytes)
 {
 	RC rc = 0; // Result code form Lock/UnlockFileEx()
 	// Access to the winShmNode object is serialized by the caller
 	assert(mutex_held(file->mutex) || !file->refs);
-	OSTRACE(("SHM-LOCK file=%p, lock=%d, offset=%d, size=%d\n", file->file.h, lockType, ofst, bytes));
+	OSTRACE(("SHM-LOCK file=%p, lock=%d, offset=%d, size=%d\n", file->file.h, lockType, offset, bytes));
 	// Release/Acquire the system-level lock
 	if (lockType == WINSHM_UNLCK)
-		rc = winUnlockFile(&file->file.h, ofst, 0, bytes, 0);
+		rc = winUnlockFile(&file->file.h, offset, 0, bytes, 0);
 	else {
 		// Initialize the locking parameters
 		DWORD dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
 		if (lockType == WINSHM_WRLCK) dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
-		rc = winLockFile(&file->file.h, dwFlags, ofst, 0, bytes, 0);
+		rc = winLockFile(&file->file.h, dwFlags, offset, 0, bytes, 0);
 	}
 	if (rc) rc = RC_OK;
 	else { file->lastErrno = osGetLastError(); rc = RC_BUSY; }
-	OSTRACE(("SHM-LOCK file=%p, func=%s, errno=%lu, rc=%s\n", file->file.h, lockType == WINSHM_UNLCK ? "winUnlockFile" : "winLockFile", file->lastErrno, sqlite3ErrName(rc)));
+	OSTRACE(("SHM-LOCK file=%p, func=%s, errno=%lu, rc=%s\n", file->file.h, lockType == WINSHM_UNLCK ? "winUnlockFile" : "winLockFile", file->lastErrno, runtimeErrName(rc)));
 	return rc;
 }
 
@@ -2921,7 +2881,7 @@ static void winShmPurge(vsystem *system, int deleteFlag)
 	while ((p = *pp))
 		if (!p->refs) {
 			if (p->mutex) mutex_free(p->mutex);
-			for (int i = 0; i < p->regions; i++) {
+			for (int i = 0; i < p->regionLength; i++) {
 				BOOL rc = osUnmapViewOfFile(p->regions[i].map);
 				OSTRACE(("SHM-PURGE-UNMAP pid=%lu, region=%d, rc=%s\n", osGetCurrentProcessId(), i, rc ? "ok" : "failed"));
 				UNUSED_VARIABLE_VALUE(rc);
@@ -2948,687 +2908,512 @@ static void winShmPurge(vsystem *system, int deleteFlag)
 		else pp = &p->next;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
-** Open the shared-memory area associated with database file pDbFd.
+** Open the shared-memory area associated with database file file.
 **
 ** When opening a new shared-memory file, if no other instances of that file are currently open, in this process or in other processes, then
 ** the file must be truncated to zero length or have its header cleared.
 */
-static int winOpenSharedMemory(winFile *pDbFd)
+static int winOpenSharedMemory(winFile *file)
 {
-	struct winShm *p;                  /* The connection to be opened */
-	struct winShmNode *pShmNode = 0;   /* The underlying mmapped file */
-	int rc;                            /* Result code */
-	struct winShmNode *pNew;           /* Newly allocated winShmNode */
-	int nName;                         /* Size of zName in bytes */
+	assert(!file->shm); // Not previously opened
 
-	assert( pDbFd->pShm==0 );    /* Not previously opened */
-
-	/* Allocate space for the new sqlite3_shm object.  Also speculatively
-	** allocate space for a new winShmNode and filename.
-	*/
-	p = sqlite3MallocZero( sizeof(*p) );
-	if( p==0 ) return LIBCU_IOERR_NOMEM_BKPT;
-	nName = sqlite3Strlen30(pDbFd->zPath);
-	pNew = sqlite3MallocZero( sizeof(*pShmNode) + nName + 17 );
-	if( pNew==0 ){
-		sqlite3_free(p);
-		return LIBCU_IOERR_NOMEM_BKPT;
+	// Allocate space for the new sqlite3_shm object.  Also speculatively allocate space for a new winShmNode and filename.
+	struct winShm *p = allocZero(sizeof(*p)); // The connection to be opened
+	if (!p) return RC_IOERR_NOMEM_BKPT;
+	int nameLength = strlen(file->path); // Size of zName in bytes
+	struct winShmNode *shmNode; // The underlying mmapped file
+	struct winShmNode *newNode = allocZero(sizeof(*shmNode)+nameLength+17); //Newly allocated winShmNode
+	if (!newNode) {
+		mfree(p);
+		return RC_IOERR_NOMEM_BKPT;
 	}
-	pNew->zFilename = (char*)&pNew[1];
-	sqlite3_snprintf(nName+15, pNew->zFilename, "%s-shm", pDbFd->zPath);
-	sqlite3FileSuffix3(pDbFd->zPath, pNew->zFilename);
+	newNode->filename = (char*)&newNode[1];
+	snprintf(newNode->filename, nameSize+15, "%s-shm", file->path);
+	sqlite3FileSuffix3(file->fath, newNode->filename);
 
-	/* Look to see if there is an existing winShmNode that can be used.
-	** If no matching winShmNode currently exists, create a new one.
-	*/
+	// Look to see if there is an existing winShmNode that can be used. If no matching winShmNode currently exists, create a new one.
 	winShmEnterMutex();
-	for(pShmNode = winShmNodeList; pShmNode; pShmNode=pShmNode->pNext){
-		/* TBD need to come up with better match here.  Perhaps
-		** use FILE_ID_BOTH_DIR_INFO Structure.
-		*/
-		if( sqlite3StrICmp(pShmNode->zFilename, pNew->zFilename)==0 ) break;
-	}
-	if( pShmNode ){
-		sqlite3_free(pNew);
-	}else{
-		pShmNode = pNew;
-		pNew = 0;
-		((winFile*)(&pShmNode->hFile))->h = INVALID_HANDLE_VALUE;
-		pShmNode->pNext = winShmNodeList;
-		winShmNodeList = pShmNode;
+	for (shmNode = _winShmNodeList; shmNode; shmNode = shmNode->next)
+		// TBD need to come up with better match here.  Perhaps use FILE_ID_BOTH_DIR_INFO Structure.
+			if (!stricmp(shmNode->filename, newNode->filename)) break;
+	RC rc;
+	if (shmNode) 
+		mfree(newNode);
+	else {
+		shmNode = newNode;
+		newNode = nullptr;
+		((winFile *)(&shmNode->file))->h = INVALID_HANDLE_VALUE;
+		shmNode->next = winShmNodeList;
+		_winShmNodeList = shmNode;
 
-		if( sqlite3GlobalConfig.bCoreMutex ){
-			pShmNode->mutex = sqlite3_mutex_alloc(LIBCU_MUTEX_FAST);
-			if( pShmNode->mutex==0 ){
-				rc = LIBCU_IOERR_NOMEM_BKPT;
+		if (_runtimeConfig.coreMutex) {
+			shmNode->mutex = mutex_alloc(MUTEX_FAST);
+			if (!shmNode->mutex) {
+				rc = RC_IOERR_NOMEM_BKPT;
 				goto shm_open_err;
 			}
 		}
 
-		rc = winOpen(pDbFd->pVfs,
-			pShmNode->zFilename,             /* Name of the file (UTF-8) */
-			(vsystemfile*)&pShmNode->hFile,  /* File handle here */
-			LIBCU_OPEN_WAL | LIBCU_OPEN_READWRITE | LIBCU_OPEN_CREATE,
-			0);
-		if( RC_OK!=rc ){
+		rc = winOpen(file->vsystem, shmNode->filename, (vsystemfile *)&shmNode->file, VSYSTEM_OPEN_WAL|VSYSTEM_OPEN_READWRITE|VSYSTEM_OPEN_CREATE, nullptr);
+		if (rc != RC_OK)
 			goto shm_open_err;
-		}
 
-		/* Check to see if another process is holding the dead-man switch.
-		** If not, truncate the file to zero length.
-		*/
-		if( winShmSystemLock(pShmNode, WINSHM_WRLCK, WIN_SHM_DMS, 1)==RC_OK ){
-			rc = winTruncate((vsystemfile *)&pShmNode->hFile, 0);
-			if( rc!=RC_OK ){
-				rc = winLogError(LIBCU_IOERR_SHMOPEN, osGetLastError(),
-					"winOpenShm", pDbFd->zPath);
-			}
+		// Check to see if another process is holding the dead-man switch. If not, truncate the file to zero length.
+		if (winShmSystemLock(shmNode, WINSHM_WRLCK, WIN_SHM_DMS, 1) == RC_OK) {
+			rc = winTruncate((vsystemfile *)&shmNode->file, 0);
+			if (rc != RC_OK)
+				rc = winLogError(RC_IOERR_SHMOPEN, osGetLastError(), "winOpenShm", file->path);
 		}
-		if( rc==RC_OK ){
-			winShmSystemLock(pShmNode, WINSHM_UNLCK, WIN_SHM_DMS, 1);
-			rc = winShmSystemLock(pShmNode, WINSHM_RDLCK, WIN_SHM_DMS, 1);
+		if (rc == RC_OK) {
+			winShmSystemLock(shmNode, WINSHM_UNLCK, WIN_SHM_DMS, 1);
+			rc = winShmSystemLock(shmNode, WINSHM_RDLCK, WIN_SHM_DMS, 1);
 		}
-		if( rc ) goto shm_open_err;
+		if (rc) goto shm_open_err;
 	}
 
-	/* Make the new connection a child of the winShmNode */
-	p->pShmNode = pShmNode;
-#if defined(LIBCU_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-	p->id = pShmNode->nextShmId++;
+	// Make the new connection a child of the winShmNode
+	p->shmNode = shmNode;
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+	p->id = shmNode->nextShmId++;
 #endif
-	pShmNode->nRef++;
-	pDbFd->pShm = p;
+	shmNode->refs++;
+	file->shm = p;
 	winShmLeaveMutex();
 
-	/* The reference count on pShmNode has already been incremented under
-	** the cover of the winShmEnterMutex() mutex and the pointer from the
-	** new (struct winShm) object to the pShmNode has been set. All that is
-	** left to do is to link the new object into the linked list starting
-	** at pShmNode->pFirst. This must be done while holding the pShmNode->mutex
-	** mutex.
+	/* The reference count on shmNode has already been incremented under the cover of the winShmEnterMutex() mutex and the pointer from the
+	** new (struct winShm) object to the shmNode has been set. All that is left to do is to link the new object into the linked list starting
+	** at shmNode->pFirst. This must be done while holding the shmNode->mutex mutex.
 	*/
-	sqlite3_mutex_enter(pShmNode->mutex);
-	p->pNext = pShmNode->pFirst;
-	pShmNode->pFirst = p;
-	sqlite3_mutex_leave(pShmNode->mutex);
+	mutex_enter(shmNode->mutex);
+	p->next = shmNode->first;
+	shmNode->first = p;
+	mutex_leave(shmNode->mutex);
 	return RC_OK;
 
-	/* Jump here on any error */
+	// Jump here on any error
 shm_open_err:
-	winShmSystemLock(pShmNode, WINSHM_UNLCK, WIN_SHM_DMS, 1);
-	winShmPurge(pDbFd->pVfs, 0);      /* This call frees pShmNode if required */
-	sqlite3_free(p);
-	sqlite3_free(pNew);
+	winShmSystemLock(shmNode, WINSHM_UNLCK, WIN_SHM_DMS, 1);
+	winShmPurge(file->system, 0); // This call frees shmNode if required
+	mfree(p);
+	mfree(newNode);
 	winShmLeaveMutex();
 	return rc;
 }
 
-/*
-** Close a connection to shared-memory.  Delete the underlying
-** storage if deleteFlag is true.
-*/
-static int winShmUnmap(
-	vsystemfile *fd,          /* Database holding shared memory */
-	int deleteFlag             /* Delete after closing if true */
-	){
-		winFile *pDbFd;       /* Database holding shared-memory */
-		winShm *p;            /* The connection to be closed */
-		winShmNode *pShmNode; /* The underlying shared-memory file */
-		winShm **pp;          /* For looping over sibling connections */
+/* Close a connection to shared-memory.  Delete the underlying storage if deleteFlag is true. */
+static RC winShmUnmap(vsystemfile *fd, bool deleteFlag)
+{
+	winFile *file = (winFile *)fd; // Database holding shared-memory
+	winShm *p = file->shm; // The connection to be closed
+	if (!p) return RC_OK;
+	winShmNode *shmNode = p->shmNode; // The underlying shared-memory file
 
-		pDbFd = (winFile*)fd;
-		p = pDbFd->pShm;
-		if( p==0 ) return RC_OK;
-		pShmNode = p->pShmNode;
+	// Remove connection p from the set of connections associated with shmNode
+	mutex_enter(shmNode->mutex);
+	winShm **pp; // For looping over sibling connections
+	for (pp = &shmNode->first; (*pp) != p; pp = &(*pp)->next) { }
+	*pp = p->next;
 
-		/* Remove connection p from the set of connections associated
-		** with pShmNode */
-		sqlite3_mutex_enter(pShmNode->mutex);
-		for(pp=&pShmNode->pFirst; (*pp)!=p; pp = &(*pp)->pNext){}
-		*pp = p->pNext;
+	// Free the connection p
+	mfree(p);
+	file->shm = nullptr;
+	mutex_leave(shmNode->mutex);
 
-		/* Free the connection p */
-		sqlite3_free(p);
-		pDbFd->pShm = 0;
-		sqlite3_mutex_leave(pShmNode->mutex);
-
-		/* If pShmNode->nRef has reached 0, then close the underlying
-		** shared-memory file, too */
-		winShmEnterMutex();
-		assert( pShmNode->nRef>0 );
-		pShmNode->nRef--;
-		if( pShmNode->nRef==0 ){
-			winShmPurge(pDbFd->pVfs, deleteFlag);
-		}
-		winShmLeaveMutex();
-
-		return RC_OK;
+	// If shmNode->nRef has reached 0, then close the underlying shared-memory file, too
+	winShmEnterMutex();
+	assert(shmNode->refs > 0);
+	shmNode->refs--;
+	if (!shmNode->refs)
+		winShmPurge(file->system, deleteFlag);
+	winShmLeaveMutex();
+	return RC_OK;
 }
 
-/*
-** Change the lock state for a shared-memory segment.
-*/
-static int winShmLock(
-	vsystemfile *fd,          /* Database file holding the shared memory */
-	int ofst,                  /* First lock to acquire or release */
-	int n,                     /* Number of locks to acquire or release */
-	int flags                  /* What to do with the lock */
-	){
-		winFile *pDbFd = (winFile*)fd;        /* Connection holding shared memory */
-		winShm *p = pDbFd->pShm;              /* The shared memory being locked */
-		winShm *pX;                           /* For looping over all siblings */
-		winShmNode *pShmNode = p->pShmNode;
-		int rc = RC_OK;                   /* Result code */
-		u16 mask;                             /* Mask of locks to take or release */
+/* Change the lock state for a shared-memory segment. */
+static RC winShmLock(vsystemfile *fd, int offset, int count, int flags)
+{
+	winFile *file = (winFile *)fd; // Connection holding shared memory
+	winShm *p = file->shm; // The shared memory being locked
+	winShmNode *shmNode = p->shmNode;
+	int RC = RC_OK;
 
-		assert( ofst>=0 && ofst+n<=LIBCU_SHM_NLOCK );
-		assert( n>=1 );
-		assert( flags==(LIBCU_SHM_LOCK | LIBCU_SHM_SHARED)
-			|| flags==(LIBCU_SHM_LOCK | LIBCU_SHM_EXCLUSIVE)
-			|| flags==(LIBCU_SHM_UNLOCK | LIBCU_SHM_SHARED)
-			|| flags==(LIBCU_SHM_UNLOCK | LIBCU_SHM_EXCLUSIVE) );
-		assert( n==1 || (flags & LIBCU_SHM_EXCLUSIVE)!=0 );
+	assert(offset >= 0 && offset+count <= LIBCU_SHM_NLOCK);
+	assert(count >= 1);
+	assert(flags == (LIBCU_SHM_LOCK|LIBCU_SHM_SHARED) || flags == (LIBCU_SHM_LOCK|LIBCU_SHM_EXCLUSIVE)
+		|| flags == (LIBCU_SHM_UNLOCK|LIBCU_SHM_SHARED) || flags == (LIBCU_SHM_UNLOCK|LIBCU_SHM_EXCLUSIVE));
+	assert(count == 1 || (flags & LIBCU_SHM_EXCLUSIVE) != 0);
 
-		mask = (u16)((1U<<(ofst+n)) - (1U<<ofst));
-		assert( n>1 || mask==(1<<ofst) );
-		sqlite3_mutex_enter(pShmNode->mutex);
-		if( flags & LIBCU_SHM_UNLOCK ){
-			u16 allMask = 0; /* Mask of locks held by siblings */
+	uint16_t mask = (uint16_t)((1U<<(offset+count)) - (1U<<offset)); // Mask of locks to take or release
+	assert(count > 1 || mask == (1<<offset));
+	mutex_enter(shmNode->mutex);
+	winShm *x; // For looping over all siblings
+	if (flags & LIBCU_SHM_UNLOCK) {
+		uint16_t allMask = 0; // Mask of locks held by siblings
 
-			/* See if any siblings hold this same lock */
-			for(pX=pShmNode->pFirst; pX; pX=pX->pNext){
-				if( pX==p ) continue;
-				assert( (pX->exclMask & (p->exclMask|p->sharedMask))==0 );
-				allMask |= pX->sharedMask;
+		// See if any siblings hold this same lock
+		for (x = shmNode->first; x; x = x->next) {
+			if (x == p) continue;
+			assert((x->exclMask & (p->exclMask|p->sharedMask)) == 0);
+			allMask |= x->sharedMask;
+		}
+
+		// Unlock the system-level locks
+		if ((mask & allMask) == 0) rc = winShmSystemLock(shmNode, WINSHM_UNLCK, offset+WIN_SHM_BASE, count);
+		else rc = RC_OK;
+
+		// Undo the local locks
+		if (rc == RC_OK) {
+			p->exclMask &= ~mask;
+			p->sharedMask &= ~mask;
+		}
+	}
+	else if (flags & LIBCU_SHM_SHARED) {
+		uint16_t allShared = 0;  // Union of locks held by connections other than "p"
+
+		// Find out which shared locks are already held by sibling connections. If any sibling already holds an exclusive lock, go ahead and return LIBCU_BUSY.
+		for (x = shmNode->first; x; x = x->next) {
+			if ((x->exclMask & mask) != 0) {
+				rc = RC_BUSY;
+				break;
 			}
+			allShared |= x->sharedMask;
+		}
 
-			/* Unlock the system-level locks */
-			if( (mask & allMask)==0 ){
-				rc = winShmSystemLock(pShmNode, WINSHM_UNLCK, ofst+WIN_SHM_BASE, n);
-			}else{
-				rc = RC_OK;
-			}
+		// Get shared locks at the system level, if necessary
+		if (rc == RC_OK) {
+			if ((allShared & mask) == 0) rc = winShmSystemLock(shmNode, WINSHM_RDLCK, offset+WIN_SHM_BASE, count);
+			else rc = RC_OK;
+		}
 
-			/* Undo the local locks */
-			if( rc==RC_OK ){
-				p->exclMask &= ~mask;
-				p->sharedMask &= ~mask;
-			}
-		}else if( flags & LIBCU_SHM_SHARED ){
-			u16 allShared = 0;  /* Union of locks held by connections other than "p" */
-
-			/* Find out which shared locks are already held by sibling connections.
-			** If any sibling already holds an exclusive lock, go ahead and return
-			** LIBCU_BUSY.
-			*/
-			for(pX=pShmNode->pFirst; pX; pX=pX->pNext){
-				if( (pX->exclMask & mask)!=0 ){
-					rc = LIBCU_BUSY;
-					break;
-				}
-				allShared |= pX->sharedMask;
-			}
-
-			/* Get shared locks at the system level, if necessary */
-			if( rc==RC_OK ){
-				if( (allShared & mask)==0 ){
-					rc = winShmSystemLock(pShmNode, WINSHM_RDLCK, ofst+WIN_SHM_BASE, n);
-				}else{
-					rc = RC_OK;
-				}
-			}
-
-			/* Get the local shared locks */
-			if( rc==RC_OK ){
-				p->sharedMask |= mask;
-			}
-		}else{
-			/* Make sure no sibling connections hold locks that will block this
-			** lock.  If any do, return LIBCU_BUSY right away.
-			*/
-			for(pX=pShmNode->pFirst; pX; pX=pX->pNext){
-				if( (pX->exclMask & mask)!=0 || (pX->sharedMask & mask)!=0 ){
-					rc = LIBCU_BUSY;
-					break;
-				}
-			}
-
-			/* Get the exclusive locks at the system level.  Then if successful
-			** also mark the local connection as being locked.
-			*/
-			if( rc==RC_OK ){
-				rc = winShmSystemLock(pShmNode, WINSHM_WRLCK, ofst+WIN_SHM_BASE, n);
-				if( rc==RC_OK ){
-					assert( (p->sharedMask & mask)==0 );
-					p->exclMask |= mask;
-				}
+		// Get the local shared locks
+		if (rc == RC_OK)
+			p->sharedMask |= mask;
+	}
+	else {
+		// Make sure no sibling connections hold locks that will block this lock.  If any do, return LIBCU_BUSY right away.
+		for (x = shmNode->first; x; x = x->next) {
+			if ((x->exclMask & mask) != 0 || (x->sharedMask & mask) != 0) {
+				rc = RC_BUSY;
+				break;
 			}
 		}
-		sqlite3_mutex_leave(pShmNode->mutex);
-		OSTRACE(("SHM-LOCK pid=%lu, id=%d, sharedMask=%03x, exclMask=%03x, rc=%s\n",
-			osGetCurrentProcessId(), p->id, p->sharedMask, p->exclMask,
-			sqlite3ErrName(rc)));
-		return rc;
+
+		// Get the exclusive locks at the system level.  Then if successful also mark the local connection as being locked.
+		if (rc == RC_OK) {
+			rc = winShmSystemLock(shmNode, WINSHM_WRLCK, offset+WIN_SHM_BASE, n);
+			if (rc == RC_OK) {
+				assert((p->sharedMask & mask) == 0);
+				p->exclMask |= mask;
+			}
+		}
+	}
+	mutex_leave(shmNode->mutex);
+	OSTRACE(("SHM-LOCK pid=%lu, id=%d, sharedMask=%03x, exclMask=%03x, rc=%s\n", osGetCurrentProcessId(), p->id, p->sharedMask, p->exclMask, runtimeErrName(rc)));
+	return rc;
 }
 
 /*
 ** Implement a memory barrier or memory fence on shared memory.
 **
-** All loads and stores begun before the barrier must complete before
-** any load or store begun after the barrier.
+** All loads and stores begun before the barrier must complete before any load or store begun after the barrier.
 */
-static void winShmBarrier(
-	vsystemfile *fd          /* Database holding the shared memory */
-	){
-		UNUSED_SYMBOL(fd);
-		sqlite3MemoryBarrier();   /* compiler-defined memory barrier */
-		winShmEnterMutex();       /* Also mutex, for redundancy */
-		winShmLeaveMutex();
+static void winShmBarrier(vsystemfile *fd)
+{
+	UNUSED_SYMBOL(fd);
+	systemMemoryBarrier(); // compiler-defined memory barrier
+	winShmEnterMutex(); // Also mutex, for redundancy
+	winShmLeaveMutex();
 }
 
 /*
-** This function is called to obtain a pointer to region iRegion of the
-** shared-memory associated with the database file fd. Shared-memory regions
-** are numbered starting from zero. Each shared-memory region is szRegion
-** bytes in size.
+** This function is called to obtain a pointer to region of the shared-memory associated with the database file fd. Shared-memory regions
+** are numbered starting from zero. Each shared-memory region is sizeRegion bytes in size.
 **
 ** If an error occurs, an error code is returned and *pp is set to NULL.
 **
-** Otherwise, if the isWrite parameter is 0 and the requested shared-memory
-** region has not been allocated (by any client, including one running in a
-** separate process), then *pp is set to NULL and RC_OK returned. If
-** isWrite is non-zero and the requested shared-memory region has not yet
+** Otherwise, if the isWrite parameter is 0 and the requested shared-memory region has not been allocated (by any client, including one running in a
+** separate process), then *pp is set to NULL and RC_OK returned. If isWrite is non-zero and the requested shared-memory region has not yet
 ** been allocated, it is allocated by this function.
 **
-** If the shared-memory region has already been allocated or is allocated by
-** this call as described above, then it is mapped into this processes
-** address space (if it is not already), *pp is set to point to the mapped
-** memory and RC_OK returned.
+** If the shared-memory region has already been allocated or is allocated by this call as described above, then it is mapped into this processes
+** address space (if it is not already), *pp is set to point to the mapped memory and RC_OK returned.
 */
-static int winShmMap(
-	vsystemfile *fd,               /* Handle open on database file */
-	int iRegion,                    /* Region to retrieve */
-	int szRegion,                   /* Size of regions */
-	int isWrite,                    /* True to extend file if necessary */
-	void volatile **pp              /* OUT: Mapped memory */
-	){
-		winFile *pDbFd = (winFile*)fd;
-		winShm *pShm = pDbFd->pShm;
-		winShmNode *pShmNode;
-		int rc = RC_OK;
+static int winShmMap(vsystemfile *fd, int region, int sizeRegion, bool isWrite, void volatile **pp)
+{
+	winFile *file = (winFile *)fd;
+	winShm *shm = file->shm;
+	RC rc = RC_OK;
+	if (!shm) {
+		rc = winOpenSharedMemory(file);
+		if (rc != RC_OK) return rc;
+		shm = file->shm;
+	}
+	winShmNode *shmNode = shm->shmNode;
 
-		if( !pShm ){
-			rc = winOpenSharedMemory(pDbFd);
-			if( rc!=RC_OK ) return rc;
-			pShm = pDbFd->pShm;
+	mutex_enter(shmNode->mutex);
+	assert(sizeRegion == shmNode->sizeRegion || !shmNode->regionLength);
+
+	if (shmNode->regionLength <= region) {
+		newRegion; // New aRegion[] array
+		int bytes = (region+1)*sizeRegion; // Minimum required file size
+		shmNode->sizeRegion = sizeRegion;
+
+		// The requested region is not mapped into this processes address space. Check to see if it has been allocated (i.e. if the wal-index file is large enough to contain the requested region).
+		int64_t size; // Current size of wal-index file
+		rc = winFileSize((vsystemfile *)&shmNode->file, &size);
+		if (rc != RC_OK) {
+			rc = winLogError(RC_IOERR_SHMSIZE, osGetLastError(), "winShmMap1", file->path);
+			goto shmpage_out;
 		}
-		pShmNode = pShm->pShmNode;
 
-		sqlite3_mutex_enter(pShmNode->mutex);
-		assert( szRegion==pShmNode->szRegion || pShmNode->nRegion==0 );
-
-		if( pShmNode->nRegion<=iRegion ){
-			struct ShmRegion *apNew;           /* New aRegion[] array */
-			int nByte = (iRegion+1)*szRegion;  /* Minimum required file size */
-			sqlite3_int64 sz;                  /* Current size of wal-index file */
-
-			pShmNode->szRegion = szRegion;
-
-			/* The requested region is not mapped into this processes address space.
-			** Check to see if it has been allocated (i.e. if the wal-index file is
-			** large enough to contain the requested region).
-			*/
-			rc = winFileSize((vsystemfile *)&pShmNode->hFile, &sz);
-			if( rc!=RC_OK ){
-				rc = winLogError(LIBCU_IOERR_SHMSIZE, osGetLastError(),
-					"winShmMap1", pDbFd->zPath);
+		if (size < bytes) {
+			// The requested memory region does not exist. If isWrite is set to zero, exit early. *pp will be set to NULL and RC_OK returned.
+			//
+			// Alternatively, if isWrite is non-zero, use ftruncate() to allocate the requested memory region.
+			if (!isWrite) goto shmpage_out;
+			rc = winTruncate((vsystemfile *)&shmNode->file, bytes);
+			if (rc != RC_OK) {
+				rc = winLogError(LIBCU_IOERR_SHMSIZE, osGetLastError(), "winShmMap2", file->path);
 				goto shmpage_out;
 			}
+		}
 
-			if( sz<nByte ){
-				/* The requested memory region does not exist. If isWrite is set to
-				** zero, exit early. *pp will be set to NULL and RC_OK returned.
-				**
-				** Alternatively, if isWrite is non-zero, use ftruncate() to allocate
-				** the requested memory region.
-				*/
-				if( !isWrite ) goto shmpage_out;
-				rc = winTruncate((vsystemfile *)&pShmNode->hFile, nByte);
-				if( rc!=RC_OK ){
-					rc = winLogError(LIBCU_IOERR_SHMSIZE, osGetLastError(),
-						"winShmMap2", pDbFd->zPath);
-					goto shmpage_out;
-				}
-			}
+		// Map the requested memory region into this processes address space.
+		struct ShmRegion *newRegions = (struct ShmRegion *)realloc64(shmNode->regions, (region+1)*sizeof(newRegions[0]));
+		if (!newRegions) {
+			rc = RC_IOERR_NOMEM_BKPT;
+			goto shmpage_out;
+		}
+		shmNode->regions = newRegions;
 
-			/* Map the requested memory region into this processes address space. */
-			apNew = (struct ShmRegion *)sqlite3_realloc64(
-				pShmNode->aRegion, (iRegion+1)*sizeof(apNew[0])
-				);
-			if( !apNew ){
-				rc = LIBCU_IOERR_NOMEM_BKPT;
-				goto shmpage_out;
-			}
-			pShmNode->aRegion = apNew;
-
-			while( pShmNode->nRegion<=iRegion ){
-				HANDLE hMap = NULL;         /* file-mapping handle */
-				void *pMap = 0;             /* Mapped memory region */
-
+		while (shmNode->regionLength <= region) {
+			HANDLE hMap = NULL; // file-mapping handle
 #if LIBCU_OS_WINRT
-				hMap = osCreateFileMappingFromApp(pShmNode->hFile.h,
-					NULL, PAGE_READWRITE, nByte, NULL
-					);
+			hMap = osCreateFileMappingFromApp(shmNode->file.h, NULL, PAGE_READWRITE, bytes, NULL);
 #elif defined(LIBCU_WIN32_HAS_WIDE)
-				hMap = osCreateFileMappingW(pShmNode->hFile.h,
-					NULL, PAGE_READWRITE, 0, nByte, NULL
-					);
+			hMap = osCreateFileMappingW(shmNode->file.h, NULL, PAGE_READWRITE, 0, bytes, NULL);
 #elif defined(LIBCU_WIN32_HAS_ANSI) && LIBCU_WIN32_CREATEFILEMAPPINGA
-				hMap = osCreateFileMappingA(pShmNode->hFile.h,
-					NULL, PAGE_READWRITE, 0, nByte, NULL
-					);
+			hMap = osCreateFileMappingA(shmNode->file.h, NULL, PAGE_READWRITE, 0, bytes, NULL);
 #endif
-				OSTRACE(("SHM-MAP-CREATE pid=%lu, region=%d, size=%d, rc=%s\n",
-					osGetCurrentProcessId(), pShmNode->nRegion, nByte,
-					hMap ? "ok" : "failed"));
-				if( hMap ){
-					int iOffset = pShmNode->nRegion*szRegion;
-					int iOffsetShift = iOffset % winSysInfo.dwAllocationGranularity;
+			OSTRACE(("SHM-MAP-CREATE pid=%lu, region=%d, size=%d, rc=%s\n", osGetCurrentProcessId(), shmNode->regionLength, bytes, hMap ? "ok" : "failed"));
+			void *map = nullptr; // Mapped memory region
+			if (hMap) {
+				int offset = shmNode->regionLength*regionSizeregionSize;
+				int offsetShift = offset % winSysInfo.dwAllocationGranularity;
 #if LIBCU_OS_WINRT
-					pMap = osMapViewOfFileFromApp(hMap, FILE_MAP_WRITE | FILE_MAP_READ,
-						iOffset - iOffsetShift, szRegion + iOffsetShift
-						);
+				map = osMapViewOfFileFromApp(hMap, FILE_MAP_WRITE|FILE_MAP_READ, offset - offsetShift, sizeRegion + offsetShift);
 #else
-					pMap = osMapViewOfFile(hMap, FILE_MAP_WRITE | FILE_MAP_READ,
-						0, iOffset - iOffsetShift, szRegion + iOffsetShift
-						);
+				map = osMapViewOfFile(hMap, FILE_MAP_WRITE|FILE_MAP_READ, 0, offset - offsetShift, sizeRegion + offsetShift);
 #endif
-					OSTRACE(("SHM-MAP-MAP pid=%lu, region=%d, offset=%d, size=%d, rc=%s\n",
-						osGetCurrentProcessId(), pShmNode->nRegion, iOffset,
-						szRegion, pMap ? "ok" : "failed"));
-				}
-				if( !pMap ){
-					pShmNode->lastErrno = osGetLastError();
-					rc = winLogError(LIBCU_IOERR_SHMMAP, pShmNode->lastErrno,
-						"winShmMap3", pDbFd->zPath);
-					if( hMap ) osCloseHandle(hMap);
-					goto shmpage_out;
-				}
-
-				pShmNode->aRegion[pShmNode->nRegion].pMap = pMap;
-				pShmNode->aRegion[pShmNode->nRegion].hMap = hMap;
-				pShmNode->nRegion++;
+				OSTRACE(("SHM-MAP-MAP pid=%lu, region=%d, offset=%d, size=%d, rc=%s\n", osGetCurrentProcessId(), shmNode->regionLength, offset, sizeRegion, map ? "ok" : "failed"));
 			}
+			if (!map) {
+				shmNode->lastErrno = osGetLastError();
+				rc = winLogError(RC_IOERR_SHMMAP, shmNode->lastErrno, "winShmMap3", file->path);
+				if (hMap) osCloseHandle(hMap);
+				goto shmpage_out;
+			}
+
+			shmNode->regions[shmNode->regionLength].pMap = pMap;
+			shmNode->regions[shmNode->regionLength].hMap = hMap;
+			shmNode->regionLength++;
 		}
+	}
 
 shmpage_out:
-		if( pShmNode->nRegion>iRegion ){
-			int iOffset = iRegion*szRegion;
-			int iOffsetShift = iOffset % winSysInfo.dwAllocationGranularity;
-			char *p = (char *)pShmNode->aRegion[iRegion].pMap;
-			*pp = (void *)&p[iOffsetShift];
-		}else{
-			*pp = 0;
-		}
-		sqlite3_mutex_leave(pShmNode->mutex);
-		return rc;
+	if (shmNode->regionLength > region) {
+		int offset = region*sizeRegion;
+		int offsetShift = offset % winSysInfo.dwAllocationGranularity;
+		char *p = (char *)shmNode->regions[region].map;
+		*pp = (void *)&p[offsetShift];
+	}
+	else *pp = nullptr;
+	mutex_leave(shmNode->mutex);
+	return rc;
 }
 
 #else
-# define winShmMap     0
-# define winShmLock    0
-# define winShmBarrier 0
-# define winShmUnmap   0
+#define winShmMap     RC_OK
+#define winShmLock    RC_OK
+#define winShmBarrier RC_OK
+#define winShmUnmap   RC_OK
 #endif /* #ifndef LIBCU_OMIT_WAL */
+#pragma endregion
 
-/*
-** Cleans up the mapped region of the specified file, if any.
-*/
-#if LIBCU_MAXMMAPSIZE>0
-static int winUnmapfile(winFile *pFile){
-	assert( pFile!=0 );
-	OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, hMap=%p, pMapRegion=%p, "
-		"mmapSize=%lld, mmapSizeActual=%lld, mmapSizeMax=%lld\n",
-		osGetCurrentProcessId(), pFile, pFile->hMap, pFile->pMapRegion,
-		pFile->mmapSize, pFile->mmapSizeActual, pFile->mmapSizeMax));
-	if( pFile->pMapRegion ){
-		if( !osUnmapViewOfFile(pFile->pMapRegion) ){
-			pFile->lastErrno = osGetLastError();
-			OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, pMapRegion=%p, "
-				"rc=LIBCU_IOERR_MMAP\n", osGetCurrentProcessId(), pFile,
-				pFile->pMapRegion));
-			return winLogError(LIBCU_IOERR_MMAP, pFile->lastErrno,
-				"winUnmapfile1", pFile->zPath);
+#pragma region Mapping
+
+/* Cleans up the mapped region of the specified file, if any. */
+#if LIBCU_MAXMMAPSIZE > 0
+static int winUnmapfile(winFile *file)
+{
+	assert(file);
+	OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, hMap=%p, pMapRegion=%p, mmapSize=%lld, mmapSizeActual=%lld, mmapSizeMax=%lld\n", osGetCurrentProcessId(), file, file->hMap, file->mapRegion, file->mmapSize, file->mmapSizeActual, file->mmapSizeMax));
+	if (file->mapRegion) {
+		if (!osUnmapViewOfFile(file->mapRegion)) {
+			file->lastErrno = osGetLastError();
+			OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, pMapRegion=%p, " "rc=LIBCU_IOERR_MMAP\n", osGetCurrentProcessId(), file, file->mapRegion));
+			return winLogError(RC_IOERR_MMAP, file->lastErrno, "winUnmapfile1", file->path);
 		}
-		pFile->pMapRegion = 0;
-		pFile->mmapSize = 0;
-		pFile->mmapSizeActual = 0;
+		file->mapRegion = nullptr;
+		file->mmapSize = 0;
+		file->mmapSizeActual = 0;
 	}
-	if( pFile->hMap!=NULL ){
-		if( !osCloseHandle(pFile->hMap) ){
-			pFile->lastErrno = osGetLastError();
-			OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, hMap=%p, rc=LIBCU_IOERR_MMAP\n",
-				osGetCurrentProcessId(), pFile, pFile->hMap));
-			return winLogError(LIBCU_IOERR_MMAP, pFile->lastErrno,
-				"winUnmapfile2", pFile->zPath);
+	if (file->hMap != NULL) {
+		if (!osCloseHandle(file->hMap)) {
+			file->lastErrno = osGetLastError();
+			OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, hMap=%p, rc=LIBCU_IOERR_MMAP\n", osGetCurrentProcessId(), file, file->hMap));
+			return winLogError(RC_IOERR_MMAP, file->lastErrno, "winUnmapfile2", file->path);
 		}
-		pFile->hMap = NULL;
+		file->hMap = NULL;
 	}
-	OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, rc=RC_OK\n",
-		osGetCurrentProcessId(), pFile));
+	OSTRACE(("UNMAP-FILE pid=%lu, pFile=%p, rc=RC_OK\n", osGetCurrentProcessId(), file));
 	return RC_OK;
 }
 
 /*
-** Memory map or remap the file opened by file-descriptor pFd (if the file
-** is already mapped, the existing mapping is replaced by the new). Or, if
-** there already exists a mapping for this file, and there are still
-** outstanding xFetch() references to it, this function is a no-op.
+** Memory map or remap the file opened by file-descriptor file (if the file is already mapped, the existing mapping is replaced by the new). Or, if
+** there already exists a mapping for this file, and there are still outstanding xFetch() references to it, this function is a no-op.
 **
-** If parameter nByte is non-negative, then it is the requested size of
-** the mapping to create. Otherwise, if nByte is less than zero, then the
-** requested size is the size of the file on disk. The actual size of the
-** created mapping is either the requested size or the value configured
+** If parameter bytes is non-negative, then it is the requested size of the mapping to create. Otherwise, if bytes is less than zero, then the
+** requested size is the size of the file on disk. The actual size of the created mapping is either the requested size or the value configured
 ** using LIBCU_FCNTL_MMAP_SIZE, whichever is smaller.
 **
-** RC_OK is returned if no error occurs (even if the mapping is not
-** recreated as a result of outstanding references) or an Libcu error
+** RC_OK is returned if no error occurs (even if the mapping is not recreated as a result of outstanding references) or an Libcu error
 ** code otherwise.
 */
-static int winMapfile(winFile *pFd, sqlite3_int64 nByte){
-	sqlite3_int64 nMap = nByte;
-	int rc;
+static int winMapfile(winFile *file, int64_t bytes)
+{
+	int64_t mapSize = bytes;
+	assert(mapSize >= 0 || !file->fetchOuts);
+	OSTRACE(("MAP-FILE pid=%lu, pFile=%p, size=%lld\n", osGetCurrentProcessId(), file, bytes));
+	if (file->fetchOuts > 0) return RC_OK;
 
-	assert( nMap>=0 || pFd->nFetchOut==0 );
-	OSTRACE(("MAP-FILE pid=%lu, pFile=%p, size=%lld\n",
-		osGetCurrentProcessId(), pFd, nByte));
-
-	if( pFd->nFetchOut>0 ) return RC_OK;
-
-	if( nMap<0 ){
-		rc = winFileSize((vsystemfile*)pFd, &nMap);
-		if( rc ){
-			OSTRACE(("MAP-FILE pid=%lu, pFile=%p, rc=LIBCU_IOERR_FSTAT\n",
-				osGetCurrentProcessId(), pFd));
-			return LIBCU_IOERR_FSTAT;
+	RC rc;
+	if (mapSize < 0) {
+		rc = winFileSize((vsystemfile *)file, &mapSize);
+		if (rc) {
+			OSTRACE(("MAP-FILE pid=%lu, pFile=%p, rc=LIBCU_IOERR_FSTAT\n", osGetCurrentProcessId(), file));
+			return RC_IOERR_FSTAT;
 		}
 	}
-	if( nMap>pFd->mmapSizeMax ){
-		nMap = pFd->mmapSizeMax;
-	}
-	nMap &= ~(sqlite3_int64)(winSysInfo.dwPageSize - 1);
+	if (mapSize > file->mmapSizeMax)
+		mapSize = file->mmapSizeMax;
+	mapSize &= ~(int64_t)(winSysInfo.dwPageSize - 1);
 
-	if( nMap==0 && pFd->mmapSize>0 ){
-		winUnmapfile(pFd);
-	}
-	if( nMap!=pFd->mmapSize ){
-		void *pNew = 0;
+	if (!mapSize && file->mmapSize > 0)
+		winUnmapfile(file);
+	if (mapSize != file->mmapSize) {
 		DWORD protect = PAGE_READONLY;
 		DWORD flags = FILE_MAP_READ;
-
-		winUnmapfile(pFd);
+		winUnmapfile(file);
 #ifdef LIBCU_MMAP_READWRITE
-		if( (pFd->ctrlFlags & WINFILE_RDONLY)==0 ){
+		if ((file->ctrlFlags & WINFILE_RDONLY) == 0) {
 			protect = PAGE_READWRITE;
 			flags |= FILE_MAP_WRITE;
 		}
 #endif
 #if LIBCU_OS_WINRT
-		pFd->hMap = osCreateFileMappingFromApp(pFd->h, NULL, protect, nMap, NULL);
+		file->hMap = osCreateFileMappingFromApp(file->h, NULL, protect, mapSize, NULL);
 #elif defined(LIBCU_WIN32_HAS_WIDE)
-		pFd->hMap = osCreateFileMappingW(pFd->h, NULL, protect,
-			(DWORD)((nMap>>32) & 0xffffffff),
-			(DWORD)(nMap & 0xffffffff), NULL);
+		file->hMap = osCreateFileMappingW(file->h, NULL, protect, (DWORD)((mapSize>>32) & 0xffffffff), (DWORD)(mapSize & 0xffffffff), NULL);
 #elif defined(LIBCU_WIN32_HAS_ANSI) && LIBCU_WIN32_CREATEFILEMAPPINGA
-		pFd->hMap = osCreateFileMappingA(pFd->h, NULL, protect,
-			(DWORD)((nMap>>32) & 0xffffffff),
-			(DWORD)(nMap & 0xffffffff), NULL);
+		file->hMap = osCreateFileMappingA(file->h, NULL, protect, (DWORD)((mapSize>>32) & 0xffffffff), (DWORD)(mapSize & 0xffffffff), NULL);
 #endif
-		if( pFd->hMap==NULL ){
-			pFd->lastErrno = osGetLastError();
-			rc = winLogError(LIBCU_IOERR_MMAP, pFd->lastErrno,
-				"winMapfile1", pFd->zPath);
-			/* Log the error, but continue normal operation using xRead/xWrite */
-			OSTRACE(("MAP-FILE-CREATE pid=%lu, pFile=%p, rc=%s\n",
-				osGetCurrentProcessId(), pFd, sqlite3ErrName(rc)));
+		if (file->hMap == NULL) {
+			file->lastErrno = osGetLastError();
+			rc = winLogError(LIBCU_IOERR_MMAP, file->lastErrno, "winMapfile1", file->path);
+			// Log the error, but continue normal operation using xRead/xWrite
+			OSTRACE(("MAP-FILE-CREATE pid=%lu, pFile=%p, rc=%s\n", osGetCurrentProcessId(), file, runtimeErrName(rc)));
 			return RC_OK;
 		}
-		assert( (nMap % winSysInfo.dwPageSize)==0 );
-		assert( sizeof(SIZE_T)==sizeof(sqlite3_int64) || nMap<=0xffffffff );
+		assert((mapSize % winSysInfo.dwPageSize) == 0);
+		assert(sizeof(SIZE_T) == sizeof(int64_t) || mapSize <= 0xffffffff);
+		void *newMap;
 #if LIBCU_OS_WINRT
-		pNew = osMapViewOfFileFromApp(pFd->hMap, flags, 0, (SIZE_T)nMap);
+		newMap = osMapViewOfFileFromApp(file->hMap, flags, 0, (SIZE_T)mapSize);
 #else
-		pNew = osMapViewOfFile(pFd->hMap, flags, 0, 0, (SIZE_T)nMap);
+		newMap = osMapViewOfFile(file->hMap, flags, 0, 0, (SIZE_T)mapSize);
 #endif
-		if( pNew==NULL ){
-			osCloseHandle(pFd->hMap);
-			pFd->hMap = NULL;
-			pFd->lastErrno = osGetLastError();
-			rc = winLogError(LIBCU_IOERR_MMAP, pFd->lastErrno,
-				"winMapfile2", pFd->zPath);
-			/* Log the error, but continue normal operation using xRead/xWrite */
-			OSTRACE(("MAP-FILE-MAP pid=%lu, pFile=%p, rc=%s\n",
-				osGetCurrentProcessId(), pFd, sqlite3ErrName(rc)));
+		if (newMap == NULL) {
+			osCloseHandle(file->hMap);
+			file->hMap = NULL;
+			file->lastErrno = osGetLastError();
+			rc = winLogError(RC_IOERR_MMAP, file->lastErrno, "winMapfile2", file->path);
+			// Log the error, but continue normal operation using xRead/xWrite
+			OSTRACE(("MAP-FILE-MAP pid=%lu, pFile=%p, rc=%s\n", osGetCurrentProcessId(), file, runtimeErrName(rc)));
 			return RC_OK;
 		}
-		pFd->pMapRegion = pNew;
-		pFd->mmapSize = nMap;
-		pFd->mmapSizeActual = nMap;
+		file->mapRegion = newMap;
+		file->mmapSize = mapSize;
+		file->mmapSizeActual = mapSize;
 	}
 
-	OSTRACE(("MAP-FILE pid=%lu, pFile=%p, rc=RC_OK\n",
-		osGetCurrentProcessId(), pFd));
+	OSTRACE(("MAP-FILE pid=%lu, pFile=%p, rc=RC_OK\n", osGetCurrentProcessId(), file));
 	return RC_OK;
 }
-#endif /* LIBCU_MAXMMAPSIZE>0 */
+#endif /* LIBCU_MAXMMAPSIZE > 0 */
 
 /*
-** If possible, return a pointer to a mapping of file fd starting at offset
-** iOff. The mapping must be valid for at least nAmt bytes.
+** If possible, return a pointer to a mapping of file fd starting at offset. The mapping must be valid for at least amount bytes.
 **
-** If such a pointer can be obtained, store it in *pp and return RC_OK.
-** Or, if one cannot but no error occurs, set *pp to 0 and return RC_OK.
-** Finally, if an error does occur, return an Libcu error code. The final
-** value of *pp is undefined in this case.
+** If such a pointer can be obtained, store it in *pp and return RC_OK. Or, if one cannot but no error occurs, set *pp to 0 and return RC_OK.
+** Finally, if an error does occur, return an Libcu error code. The final value of *pp is undefined in this case.
 **
-** If this function does return a pointer, the caller must eventually
-** release the reference by calling winUnfetch().
+** If this function does return a pointer, the caller must eventually release the reference by calling winUnfetch().
 */
-static int winFetch(vsystemfile *fd, i64 iOff, int nAmt, void **pp){
-#if LIBCU_MAXMMAPSIZE>0
-	winFile *pFd = (winFile*)fd;   /* The underlying database file */
-#endif
-	*pp = 0;
-
-	OSTRACE(("FETCH pid=%lu, pFile=%p, offset=%lld, amount=%d, pp=%p\n",
-		osGetCurrentProcessId(), fd, iOff, nAmt, pp));
-
-#if LIBCU_MAXMMAPSIZE>0
-	if( pFd->mmapSizeMax>0 ){
-		if( pFd->pMapRegion==0 ){
-			int rc = winMapfile(pFd, -1);
-			if( rc!=RC_OK ){
-				OSTRACE(("FETCH pid=%lu, pFile=%p, rc=%s\n",
-					osGetCurrentProcessId(), pFd, sqlite3ErrName(rc)));
+static int winFetch(vsystemfile *fd, int64_t offset, int amount, void **pp)
+{
+	*pp = nullptr;
+	OSTRACE(("FETCH pid=%lu, pFile=%p, offset=%lld, amount=%d, pp=%p\n", osGetCurrentProcessId(), fd, offset, amount, pp));
+#if LIBCU_MAXMMAPSIZE > 0
+	winFile *file = (winFile *)fd; // The underlying database file
+	if (file->mmapSizeMax > 0) {
+		if (!file->mapRegion) {
+			int rc = winMapfile(file, -1);
+			if (rc != RC_OK) {
+				OSTRACE(("FETCH pid=%lu, pFile=%p, rc=%s\n", osGetCurrentProcessId(), file, runtimeErrName(rc)));
 				return rc;
 			}
 		}
-		if( pFd->mmapSize >= iOff+nAmt ){
-			*pp = &((u8 *)pFd->pMapRegion)[iOff];
-			pFd->nFetchOut++;
+		if (file->mmapSize >= offset+amount) {
+			*pp = &((uint8_t *)file->pMapRegion)[offset];
+			file->fetchOuts++;
 		}
 	}
 #endif
-
-	OSTRACE(("FETCH pid=%lu, pFile=%p, pp=%p, *pp=%p, rc=RC_OK\n",
-		osGetCurrentProcessId(), fd, pp, *pp));
+	OSTRACE(("FETCH pid=%lu, pFile=%p, pp=%p, *pp=%p, rc=RC_OK\n", osGetCurrentProcessId(), fd, pp, *pp));
 	return RC_OK;
 }
 
 /*
-** If the third argument is non-NULL, then this function releases a
-** reference obtained by an earlier call to winFetch(). The second
-** argument passed to this function must be the same as the corresponding
-** argument that was passed to the winFetch() invocation.
+** If the third argument is non-NULL, then this function releases a reference obtained by an earlier call to winFetch(). The second
+** argument passed to this function must be the same as the corresponding argument that was passed to the winFetch() invocation.
 **
-** Or, if the third argument is NULL, then this function is being called
-** to inform the VFS layer that, according to POSIX, any existing mapping
+** Or, if the third argument is NULL, then this function is being called to inform the VFS layer that, according to POSIX, any existing mapping
 ** may now be invalid and should be unmapped.
 */
-static int winUnfetch(vsystemfile *fd, i64 iOff, void *p){
-#if LIBCU_MAXMMAPSIZE>0
-	winFile *pFd = (winFile*)fd;   /* The underlying database file */
-
-	/* If p==0 (unmap the entire file) then there must be no outstanding
-	** xFetch references. Or, if p!=0 (meaning it is an xFetch reference),
-	** then there must be at least one outstanding.  */
-	assert( (p==0)==(pFd->nFetchOut==0) );
-
-	/* If p!=0, it must match the iOff value. */
-	assert( p==0 || p==&((u8 *)pFd->pMapRegion)[iOff] );
-
-	OSTRACE(("UNFETCH pid=%lu, pFile=%p, offset=%lld, p=%p\n",
-		osGetCurrentProcessId(), pFd, iOff, p));
-
-	if( p ){
-		pFd->nFetchOut--;
-	}else{
-		/* FIXME:  If Windows truly always prevents truncating or deleting a
-		** file while a mapping is held, then the following winUnmapfile() call
-		** is unnecessary can be omitted - potentially improving
-		** performance.  */
-		winUnmapfile(pFd);
-	}
-
-	assert( pFd->nFetchOut>=0 );
+static int winUnfetch(vsystemfile *fd, int64_t offset, void *p)
+{
+#if LIBCU_MAXMMAPSIZE > 0
+	winFile *file = (winFile *)fd; // The underlying database file
+	// If p==0 (unmap the entire file) then there must be no outstanding xFetch references. Or, if p!=0 (meaning it is an xFetch reference),
+	// then there must be at least one outstanding.
+	assert((!p) == (!file->fetchOuts));
+	// If p!=0, it must match the offset value.
+	assert(!p || p == &((uint8_t *)file->pMapRegion)[offset] );
+	OSTRACE(("UNFETCH pid=%lu, pFile=%p, offset=%lld, p=%p\n", osGetCurrentProcessId(), file, offset, p));
+	if (p)  file->fetchOuts--;
+	// FIXME:  If Windows truly always prevents truncating or deleting a file while a mapping is held, then the following winUnmapfile() call
+	// is unnecessary can be omitted - potentially improving performance.  */
+	else winUnmapfile(file); 
+	assert(file->fetchOuts >= 0);
 #endif
-
-	OSTRACE(("UNFETCH pid=%lu, pFile=%p, rc=RC_OK\n",
-		osGetCurrentProcessId(), fd));
+	OSTRACE(("UNFETCH pid=%lu, pFile=%p, rc=RC_OK\n", osGetCurrentProcessId(), fd));
 	return RC_OK;
 }
+
+#pragma endregion
 
 /*
 ** Here ends the implementation of all vsystemfile methods.
@@ -3636,68 +3421,62 @@ static int winUnfetch(vsystemfile *fd, i64 iOff, void *p){
 ********************** End vsystemfile Methods *******************************
 ******************************************************************************/
 
-/*
-** This vector defines all the methods that can operate on an
-** vsystemfile for win32.
-*/
-static const sqlite3_io_methods winIoMethod = {
-	3,                              /* iVersion */
-	winClose,                       /* xClose */
-	winRead,                        /* xRead */
-	winWrite,                       /* xWrite */
-	winTruncate,                    /* xTruncate */
-	winSync,                        /* xSync */
-	winFileSize,                    /* xFileSize */
-	winLock,                        /* xLock */
-	winUnlock,                      /* xUnlock */
-	winCheckReservedLock,           /* xCheckReservedLock */
-	winFileControl,                 /* xFileControl */
-	winSectorSize,                  /* xSectorSize */
-	winDeviceCharacteristics,       /* xDeviceCharacteristics */
-	winShmMap,                      /* xShmMap */
-	winShmLock,                     /* xShmLock */
-	winShmBarrier,                  /* xShmBarrier */
-	winShmUnmap,                    /* xShmUnmap */
-	winFetch,                       /* xFetch */
-	winUnfetch                      /* xUnfetch */
+/* This vector defines all the methods that can operate on an vsystemfile for win32. */
+static const vsystemfile_methods _winIoMethod = {
+	3,                              // iVersion
+	winClose,                       // xClose
+	winRead,                        // xRead
+	winWrite,                       // xWrite
+	winTruncate,                    // xTruncate
+	winSync,                        // xSync
+	winFileSize,                    // xFileSize
+	winLock,                        // xLock
+	winUnlock,                      // xUnlock
+	winCheckReservedLock,           // xCheckReservedLock
+	winFileControl,                 // xFileControl
+	winSectorSize,                  // xSectorSize
+	winDeviceCharacteristics,       // xDeviceCharacteristics
+	winShmMap,                      // xShmMap
+	winShmLock,                     // xShmLock
+	winShmBarrier,                  // xShmBarrier
+	winShmUnmap,                    // xShmUnmap
+	winFetch,                       // xFetch
+	winUnfetch                      // xUnfetch
 };
 
-/*
-** This vector defines all the methods that can operate on an
-** vsystemfile for win32 without performing any locking.
-*/
-static const sqlite3_io_methods winIoNolockMethod = {
-	3,                              /* iVersion */
-	winClose,                       /* xClose */
-	winRead,                        /* xRead */
-	winWrite,                       /* xWrite */
-	winTruncate,                    /* xTruncate */
-	winSync,                        /* xSync */
-	winFileSize,                    /* xFileSize */
-	winNolockLock,                  /* xLock */
-	winNolockUnlock,                /* xUnlock */
-	winNolockCheckReservedLock,     /* xCheckReservedLock */
-	winFileControl,                 /* xFileControl */
-	winSectorSize,                  /* xSectorSize */
-	winDeviceCharacteristics,       /* xDeviceCharacteristics */
-	winShmMap,                      /* xShmMap */
-	winShmLock,                     /* xShmLock */
-	winShmBarrier,                  /* xShmBarrier */
-	winShmUnmap,                    /* xShmUnmap */
-	winFetch,                       /* xFetch */
-	winUnfetch                      /* xUnfetch */
+/* This vector defines all the methods that can operate on an vsystemfile for win32 without performing any locking. */
+static const vsystemfile_methods _winIoNolockMethod = {
+	3,                              // iVersion
+	winClose,                       // xClose
+	winRead,                        // xRead
+	winWrite,                       // xWrite
+	winTruncate,                    // xTruncate
+	winSync,                        // xSync
+	winFileSize,                    // xFileSize
+	winNolockLock,                  // xLock
+	winNolockUnlock,                // xUnlock
+	winNolockCheckReservedLock,     // xCheckReservedLock
+	winFileControl,                 // xFileControl
+	winSectorSize,                  // xSectorSize
+	winDeviceCharacteristics,       // xDeviceCharacteristics
+	winShmMap,                      // xShmMap
+	winShmLock,                     // xShmLock
+	winShmBarrier,                  // xShmBarrier
+	winShmUnmap,                    // xShmUnmap
+	winFetch,                       // xFetch
+	winUnfetch                      // xUnfetch
 };
 
-static winVfsAppData winAppData = {
-	&winIoMethod,       /* pMethod */
-	0,                  /* pAppData */
-	0                   /* bNoLock */
+static winVfsAppData _winAppData = {
+	&_winIoMethod,      // pMethod
+	nullptr,            // pAppData
+	false               // bNoLock
 };
 
-static winVfsAppData winNolockAppData = {
-	&winIoNolockMethod, /* pMethod */
-	0,                  /* pAppData */
-	1                   /* bNoLock */
+static winVfsAppData _winNolockAppData = {
+	&_winIoNolockMethod, // pMethod
+	nullptr,					// pAppData
+	true                // bNoLock
 };
 
 #pragma endregion
@@ -3707,859 +3486,643 @@ static winVfsAppData winNolockAppData = {
 /****************************************************************************
 **************************** vsystem methods ****************************
 **
-** This division contains the implementation of methods on the
-** vsystem object.
+** This division contains the implementation of methods on the vsystem object.
 */
 
 #if defined(__CYGWIN__)
 /*
-** Convert a filename from whatever the underlying operating system
-** supports for filenames into UTF-8.  Space to hold the result is
+** Convert a filename from whatever the underlying operating system supports for filenames into UTF-8.  Space to hold the result is
 ** obtained from malloc and must be freed by the calling function.
 */
-static char *winConvertToUtf8Filename(const void *zFilename){
-	char *zConverted = 0;
-	if( osIsNT() ){
-		zConverted = winUnicodeToUtf8(zFilename);
-	}
+static char *winConvertToUtf8Filename(const void *filename)
+{
+	char *converted = nullpt;
+	if (osIsNT()) converted = winUnicodeToUtf8(filename);
 #ifdef LIBCU_WIN32_HAS_ANSI
-	else{
-		zConverted = winMbcsToUtf8(zFilename, osAreFileApisANSI());
-	}
+	else converted = winMbcsToUtf8(filename, osAreFileApisANSI());
 #endif
-	/* caller will handle out of memory */
-	return zConverted;
+	// caller will handle out of memory
+	return converted;
 }
 #endif
 
 /*
-** Convert a UTF-8 filename into whatever form the underlying
-** operating system wants filenames in.  Space to hold the result
-** is obtained from malloc and must be freed by the calling
-** function.
+** Convert a UTF-8 filename into whatever form the underlying operating system wants filenames in.  Space to hold the result
+** is obtained from malloc and must be freed by the calling function.
 */
-static void *winConvertFromUtf8Filename(const char *zFilename){
-	void *zConverted = 0;
-	if( osIsNT() ){
-		zConverted = winUtf8ToUnicode(zFilename);
-	}
+static void *winConvertFromUtf8Filename(const char *filename)
+{
+	void *converted = nullptr;
+	if (osIsNT()) converted = winUtf8ToUnicode(filename);
 #ifdef LIBCU_WIN32_HAS_ANSI
-	else{
-		zConverted = winUtf8ToMbcs(zFilename, osAreFileApisANSI());
-	}
+	else converted = winUtf8ToMbcs(filename, osAreFileApisANSI());
 #endif
-	/* caller will handle out of memory */
-	return zConverted;
+	// caller will handle out of memory
+	return converted;
 }
 
-/*
-** This function returns non-zero if the specified UTF-8 string buffer
-** ends with a directory separator character or one was successfully
-** added to it.
-*/
-static int winMakeEndInDirSep(int nBuf, char *zBuf){
-	if( zBuf ){
-		int nLen = sqlite3Strlen30(zBuf);
-		if( nLen>0 ){
-			if( winIsDirSep(zBuf[nLen-1]) ){
-				return 1;
-			}else if( nLen+1<nBuf ){
-				zBuf[nLen] = winGetDirSep();
-				zBuf[nLen+1] = '\0';
-				return 1;
+/* This function returns non-zero if the specified UTF-8 string buffer ends with a directory separator character or one was successfully added to it. */
+static bool winMakeEndInDirSep(int bufLength, char *buf)
+{
+	if (buf) {
+		int length = strlen(buf);
+		if (length > 0) {
+			if (winIsDirSep(buf[length-1]))
+				return true;
+			else if (length+1 < bufLength) {
+				buf[length] = winGetDirSep();
+				buf[length+1] = '\0';
+				return true;
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
-/*
-** Create a temporary file name and store the resulting pointer into pzBuf.
-** The pointer returned in pzBuf must be freed via sqlite3_free().
-*/
-static int winGetTempname(vsystem *pVfs, char **pzBuf){
-	static char zChars[] =
+/* Create a temporary file name and store the resulting pointer into pBuf. The pointer returned in pzBuf must be freed via mfree(). */
+static int winGetTempname(vsystem *sys, char **pBuf)
+{
+	static char chars[] =
 		"abcdefghijklmnopqrstuvwxyz"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"0123456789";
-	size_t i, j;
-	int nPre = sqlite3Strlen30(LIBCU_TEMP_FILE_PREFIX);
-	int nMax, nBuf, nDir, nLen;
-	char *zBuf;
 
-	/* It's odd to simulate an io-error here, but really this is just
-	** using the io-error infrastructure to test that Libcu handles this
-	** function failing.
-	*/
-	SimulateIOError( return LIBCU_IOERR );
+	// It's odd to simulate an io-error here, but really this is just using the io-error infrastructure to test that Libcu handles this function failing.
+	SimulateIOError(return RC_IOERR);
 
-	/* Allocate a temporary buffer to store the fully qualified file
-	** name for the temporary file.  If this fails, we cannot continue.
-	*/
-	nMax = pVfs->mxPathname; nBuf = nMax + 2;
-	zBuf = sqlite3MallocZero( nBuf );
-	if( !zBuf ){
+	// Allocate a temporary buffer to store the fully qualified file name for the temporary file.  If this fails, we cannot continue.
+	int max = sys->maxPathname; int bufLength = max + 2;
+	char *buf = allocZero(bufLength);
+	if (!buf) {
 		OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-		return LIBCU_IOERR_NOMEM_BKPT;
+		return RC_IOERR_NOMEM_BKPT;
 	}
 
-	/* Figure out the effective temporary directory.  First, check if one
-	** has been explicitly set by the application; otherwise, use the one
-	** configured by the operating system.
-	*/
-	nDir = nMax - (nPre + 15);
-	assert( nDir>0 );
-	if( sqlite3_temp_directory ){
-		int nDirLen = sqlite3Strlen30(sqlite3_temp_directory);
-		if( nDirLen>0 ){
-			if( !winIsDirSep(sqlite3_temp_directory[nDirLen-1]) ){
-				nDirLen++;
-			}
-			if( nDirLen>nDir ){
-				sqlite3_free(zBuf);
+	// Figure out the effective temporary directory.  First, check if one has been explicitly set by the application; otherwise, use the one
+	// configured by the operating system.
+	int preLength = strlen(LIBCU_TEMP_FILE_PREFIX);
+	int dirLength = max - (preLength+15);
+	assert(dirLength > 0);
+
+	if (_libcu_temp_directory) {
+		int dirLength2 = strlen(_libcu_temp_directory);
+		if (dirLength2 > 0) {
+			if (!winIsDirSep(_libcu_temp_directory[dirLength2-1]))
+				dirLength2++;
+			if (dirLength2 > dirLength) {
+				mfree(buf);
 				OSTRACE(("TEMP-FILENAME rc=LIBCU_ERROR\n"));
-				return winLogError(LIBCU_ERROR, 0, "winGetTempname1", 0);
+				return winLogError(RC_ERROR, 0, "winGetTempname1", 0);
 			}
-			sqlite3_snprintf(nMax, zBuf, "%s", sqlite3_temp_directory);
+			snprintf(buf, max, "%s", _libcu_temp_directory);
 		}
 	}
 #if defined(__CYGWIN__)
-	else{
-		static const char *azDirs[] = {
-			0, /* getenv("LIBCU_TMPDIR") */
-			0, /* getenv("TMPDIR") */
-			0, /* getenv("TMP") */
-			0, /* getenv("TEMP") */
-			0, /* getenv("USERPROFILE") */
+	else {
+		static const char *dirs[] = {
+			nullptr, // getenv("LIBCU_TMPDIR")
+			nullptr, // getenv("TMPDIR")
+			nullptr, // getenv("TMP")
+			nullptr, // getenv("TEMP")
+			nullptr, // getenv("USERPROFILE")
 			"/var/tmp",
 			"/usr/tmp",
 			"/tmp",
 			".",
-			0        /* List terminator */
+			nullptr // List terminator
 		};
-		unsigned int i;
-		const char *zDir = 0;
-
-		if( !azDirs[0] ) azDirs[0] = getenv("LIBCU_TMPDIR");
-		if( !azDirs[1] ) azDirs[1] = getenv("TMPDIR");
-		if( !azDirs[2] ) azDirs[2] = getenv("TMP");
-		if( !azDirs[3] ) azDirs[3] = getenv("TEMP");
-		if( !azDirs[4] ) azDirs[4] = getenv("USERPROFILE");
-		for(i=0; i<sizeof(azDirs)/sizeof(azDirs[0]); zDir=azDirs[i++]){
-			void *zConverted;
-			if( zDir==0 ) continue;
-			/* If the path starts with a drive letter followed by the colon
-			** character, assume it is already a native Win32 path; otherwise,
-			** it must be converted to a native Win32 path via the Cygwin API
-			** prior to using it.
-			*/
-			if( winIsDriveLetterAndColon(zDir) ){
-				zConverted = winConvertFromUtf8Filename(zDir);
-				if( !zConverted ){
-					sqlite3_free(zBuf);
+		const char *dir = nullptr;
+		if (!dirs[0]) dirs[0] = getenv("LIBCU_TMPDIR");
+		if (!dirs[1]) dirs[1] = getenv("TMPDIR");
+		if (!dirs[2]) dirs[2] = getenv("TMP");
+		if (!dirs[3]) dirs[3] = getenv("TEMP");
+		if (!dirs[4]) dirs[4] = getenv("USERPROFILE");
+		for (unsigned int i = 0; i < _LENGTHOF(dirs); dir = dirs[i++]) {
+			void *converted;
+			if (!dir) continue;
+			// If the path starts with a drive letter followed by the colon character, assume it is already a native Win32 path; otherwise,
+			// it must be converted to a native Win32 path via the Cygwin API prior to using it.
+			if (winIsDriveLetterAndColon(dir)) {
+				converted = winConvertFromUtf8Filename(zDir);
+				if (!converted) {
+					mfree(buf);
 					OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-					return LIBCU_IOERR_NOMEM_BKPT;
+					return RC_IOERR_NOMEM_BKPT;
 				}
-				if( winIsDir(zConverted) ){
-					sqlite3_snprintf(nMax, zBuf, "%s", zDir);
-					sqlite3_free(zConverted);
+				if (winIsDir(converted)) {
+					snprintf(buf, max, "%s", dir);
+					mfree(converted);
 					break;
 				}
-				sqlite3_free(zConverted);
-			}else{
-				zConverted = sqlite3MallocZero( nMax+1 );
-				if( !zConverted ){
-					sqlite3_free(zBuf);
+				mfree(converted);
+			}
+			else {
+				converted = allocZero(max+1);
+				if (!converted) {
+					mfree(buf);
 					OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-					return LIBCU_IOERR_NOMEM_BKPT;
+					return RC_IOERR_NOMEM_BKPT;
 				}
-				if( cygwin_conv_path(
-					osIsNT() ? CCP_POSIX_TO_WIN_W : CCP_POSIX_TO_WIN_A, zDir,
-					zConverted, nMax+1)<0 ){
-						sqlite3_free(zConverted);
-						sqlite3_free(zBuf);
-						OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_CONVPATH\n"));
-						return winLogError(LIBCU_IOERR_CONVPATH, (DWORD)errno,
-							"winGetTempname2", zDir);
+				if (cygwin_conv_path(osIsNT() ? CCP_POSIX_TO_WIN_W : CCP_POSIX_TO_WIN_A, dir, converted, max+1) < 0) {
+					mfree(converted);
+					mfree(buf);
+					OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_CONVPATH\n"));
+					return winLogError(RC_IOERR_CONVPATH, (DWORD)errno, "winGetTempname2", dir);
 				}
-				if( winIsDir(zConverted) ){
-					/* At this point, we know the candidate directory exists and should
-					** be used.  However, we may need to convert the string containing
-					** its name into UTF-8 (i.e. if it is UTF-16 right now).
-					*/
-					char *zUtf8 = winConvertToUtf8Filename(zConverted);
-					if( !zUtf8 ){
-						sqlite3_free(zConverted);
-						sqlite3_free(zBuf);
+				if (winIsDir(converted)) {
+					// At this point, we know the candidate directory exists and should be used.  However, we may need to convert the string containing
+					// its name into UTF-8 (i.e. if it is UTF-16 right now).
+					char *utf8 = winConvertToUtf8Filename(converted);
+					if (!utf8) {
+						mfree(converted);
+						mfree(buf);
 						OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-						return LIBCU_IOERR_NOMEM_BKPT;
+						return RC_IOERR_NOMEM_BKPT;
 					}
-					sqlite3_snprintf(nMax, zBuf, "%s", zUtf8);
-					sqlite3_free(zUtf8);
-					sqlite3_free(zConverted);
+					snprintf(buf, max, "%s", utf8);
+					mfree(utf8);
+					mfree(converted);
 					break;
 				}
-				sqlite3_free(zConverted);
+				mfree(zConverted);
 			}
 		}
 	}
 #elif !LIBCU_OS_WINRT && !defined(__CYGWIN__)
-	else if( osIsNT() ){
-		char *zMulti;
-		LPWSTR zWidePath = sqlite3MallocZero( nMax*sizeof(WCHAR) );
-		if( !zWidePath ){
-			sqlite3_free(zBuf);
+	else if (osIsNT()) {
+		LPWSTR widePath = allocZero(max * sizeof(WCHAR));
+		if (!widePath) {
+			mfree(buf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-			return LIBCU_IOERR_NOMEM_BKPT;
+			return RC_IOERR_NOMEM_BKPT;
 		}
-		if( osGetTempPathW(nMax, zWidePath)==0 ){
-			sqlite3_free(zWidePath);
-			sqlite3_free(zBuf);
+		if (!osGetTempPathW(max, widePath)) {
+			mfree(widePath);
+			mfree(buf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_GETTEMPPATH\n"));
-			return winLogError(LIBCU_IOERR_GETTEMPPATH, osGetLastError(),
-				"winGetTempname2", 0);
+			return winLogError(RC_IOERR_GETTEMPPATH, osGetLastError(), "winGetTempname2", 0);
 		}
-		zMulti = winUnicodeToUtf8(zWidePath);
-		if( zMulti ){
-			sqlite3_snprintf(nMax, zBuf, "%s", zMulti);
-			sqlite3_free(zMulti);
-			sqlite3_free(zWidePath);
-		}else{
-			sqlite3_free(zWidePath);
-			sqlite3_free(zBuf);
+		char *multi = winUnicodeToUtf8(widePath);
+		if (multi) {
+			snprintf(buf, max, "%s", multi);
+			mfree(multi);
+			mfree(widePath);
+		}
+		else {
+			mfree(widePath);
+			mfree(buf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-			return LIBCU_IOERR_NOMEM_BKPT;
+			return RC_IOERR_NOMEM_BKPT;
 		}
 	}
 #ifdef LIBCU_WIN32_HAS_ANSI
-	else{
-		char *zUtf8;
-		char *zMbcsPath = sqlite3MallocZero( nMax );
-		if( !zMbcsPath ){
-			sqlite3_free(zBuf);
+	else {
+		char *mbcsPath = allocZero(max);
+		if (!mbcsPath) {
+			mfree(buf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-			return LIBCU_IOERR_NOMEM_BKPT;
+			return RC_IOERR_NOMEM_BKPT;
 		}
-		if( osGetTempPathA(nMax, zMbcsPath)==0 ){
-			sqlite3_free(zBuf);
+		if (!osGetTempPathA(max, mbcsPath)) {
+			mfree(zBuf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_GETTEMPPATH\n"));
-			return winLogError(LIBCU_IOERR_GETTEMPPATH, osGetLastError(),
-				"winGetTempname3", 0);
+			return winLogError(RC_IOERR_GETTEMPPATH, osGetLastError(), "winGetTempname3", 0);
 		}
-		zUtf8 = winMbcsToUtf8(zMbcsPath, osAreFileApisANSI());
-		if( zUtf8 ){
-			sqlite3_snprintf(nMax, zBuf, "%s", zUtf8);
-			sqlite3_free(zUtf8);
-		}else{
-			sqlite3_free(zBuf);
+		char *utf8 = winMbcsToUtf8(zMbcsPath, osAreFileApisANSI());
+		if (utf8) {
+			snprintf(buf, max, "%s", utf8);
+			mfree(utf8);
+		}
+		else {
+			mfree(buf);
 			OSTRACE(("TEMP-FILENAME rc=LIBCU_IOERR_NOMEM\n"));
-			return LIBCU_IOERR_NOMEM_BKPT;
+			return RC_IOERR_NOMEM_BKPT;
 		}
 	}
 #endif /* LIBCU_WIN32_HAS_ANSI */
 #endif /* !LIBCU_OS_WINRT */
 
-	/*
-	** Check to make sure the temporary directory ends with an appropriate
-	** separator.  If it does not and there is not enough space left to add
-	** one, fail.
-	*/
-	if( !winMakeEndInDirSep(nDir+1, zBuf) ){
-		sqlite3_free(zBuf);
+	// Check to make sure the temporary directory ends with an appropriate separator.  If it does not and there is not enough space left to add one, fail.
+	if (!winMakeEndInDirSep(dirLength+1, buf)) {
+		mfree(buf);
 		OSTRACE(("TEMP-FILENAME rc=LIBCU_ERROR\n"));
-		return winLogError(LIBCU_ERROR, 0, "winGetTempname4", 0);
+		return winLogError(RC_ERROR, 0, "winGetTempname4", 0);
 	}
 
-	/*
-	** Check that the output buffer is large enough for the temporary file
-	** name in the following format:
-	**
-	**   "<temporary_directory>/etilqs_XXXXXXXXXXXXXXX\0\0"
-	**
-	** If not, return LIBCU_ERROR.  The number 17 is used here in order to
-	** account for the space used by the 15 character random suffix and the
-	** two trailing NUL characters.  The final directory separator character
-	** has already added if it was not already present.
-	*/
-	nLen = sqlite3Strlen30(zBuf);
-	if( (nLen + nPre + 17) > nBuf ){
-		sqlite3_free(zBuf);
+	// Check that the output buffer is large enough for the temporary file name in the following format:
+	//   "<temporary_directory>/etilqs_XXXXXXXXXXXXXXX\0\0"
+	//
+	// If not, return LIBCU_ERROR.  The number 17 is used here in order to account for the space used by the 15 character random suffix and the
+	// two trailing NUL characters.  The final directory separator character has already added if it was not already present.
+	int length = strlen(buf);
+	if ((length + preLength + 17) > bufLength) {
+		mfree(buf);
 		OSTRACE(("TEMP-FILENAME rc=LIBCU_ERROR\n"));
-		return winLogError(LIBCU_ERROR, 0, "winGetTempname5", 0);
+		return winLogError(RC_ERROR, 0, "winGetTempname5", 0);
 	}
+	snprintf(buf+length, bufLength-16-length, LIBCU_TEMP_FILE_PREFIX);
 
-	sqlite3_snprintf(nBuf-16-nLen, zBuf+nLen, LIBCU_TEMP_FILE_PREFIX);
-
-	j = sqlite3Strlen30(zBuf);
-	sqlite3_randomness(15, &zBuf[j]);
-	for(i=0; i<15; i++, j++){
-		zBuf[j] = (char)zChars[ ((unsigned char)zBuf[j])%(sizeof(zChars)-1) ];
-	}
-	zBuf[j] = 0;
-	zBuf[j+1] = 0;
-	*pzBuf = zBuf;
-
-	OSTRACE(("TEMP-FILENAME name=%s, rc=RC_OK\n", zBuf));
+	size_t i, j = strlen(buf);
+	sqlite3_randomness(15, &buf[j]);
+	for (i = 0; i < 15; i++, j++)
+		buf[j] = (char)chars[((unsigned char)buf[j])%(sizeof(chars)-1)];
+	buf[j] = 0;
+	buf[j+1] = 0;
+	*pBuf = buf;
+	OSTRACE(("TEMP-FILENAME name=%s, rc=RC_OK\n", buf));
 	return RC_OK;
 }
 
 /*
-** Return TRUE if the named file is really a directory.  Return false if
-** it is something other than a directory, or if there is any kind of memory
+** Return TRUE if the named file is really a directory.  Return false if it is something other than a directory, or if there is any kind of memory
 ** allocation failure.
 */
-static int winIsDir(const void *zConverted){
+static bool winIsDir(const void *converted)
+{
 	DWORD attr;
-	int rc = 0;
-	DWORD lastErrno;
-
-	if( osIsNT() ){
+	if (osIsNT()) {
 		int cnt = 0;
 		WIN32_FILE_ATTRIBUTE_DATA sAttrData;
 		memset(&sAttrData, 0, sizeof(sAttrData));
-		while( !(rc = osGetFileAttributesExW((LPCWSTR)zConverted,
-			GetFileExInfoStandard,
-			&sAttrData)) && winRetryIoerr(&cnt, &lastErrno) ){}
-		if( !rc ){
-			return 0; /* Invalid name? */
-		}
+		int rc = 0;
+		DWORD lastErrno;
+		while (!(rc = osGetFileAttributesExW((LPCWSTR)converted, GetFileExInfoStandard, &sAttrData)) && winRetryIoerr(&cnt, &lastErrno)) { }
+		if (!rc)
+			return false; // Invalid name?
 		attr = sAttrData.dwFileAttributes;
-#if LIBCU_OS_WINCE==0
-	}else{
-		attr = osGetFileAttributesA((char*)zConverted);
-#endif
 	}
-	return (attr!=INVALID_FILE_ATTRIBUTES) && (attr&FILE_ATTRIBUTE_DIRECTORY);
+#if LIBCU_OS_WINCE == 0
+	else attr = osGetFileAttributesA((char *)converted);
+#endif
+	return (attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-/*
-** Open a file.
-*/
-static int winOpen(
-	vsystem *pVfs,        /* Used to get maximum path length and AppData */
-	const char *zName,        /* Name of the file (UTF-8) */
-	vsystemfile *id,         /* Write the Libcu file handle here */
-	int flags,                /* Open mode flags */
-	int *pOutFlags            /* Status return flags */
-	){
-		HANDLE h;
-		DWORD lastErrno = 0;
-		DWORD dwDesiredAccess;
-		DWORD dwShareMode;
-		DWORD dwCreationDisposition;
-		DWORD dwFlagsAndAttributes = 0;
-#if LIBCU_OS_WINCE
-		int isTemp = 0;
-#endif
-		winVfsAppData *pAppData;
-		winFile *pFile = (winFile*)id;
-		void *zConverted;              /* Filename in OS encoding */
-		const char *zUtf8Name = zName; /* Filename in UTF-8 encoding */
-		int cnt = 0;
-
-		/* If argument zPath is a NULL pointer, this function is required to open
-		** a temporary file. Use this buffer to store the file name in.
-		*/
-		char *zTmpname = 0; /* For temporary filename, if necessary. */
-
-		int rc = RC_OK;            /* Function Return Code */
+/* Open a file. */
+static RC winOpen(vsystem *sys, const char *name, vsystemfile *id, int flags, int *outFlags)
+{
+	RC rc = RC_OK;
 #if !defined(NDEBUG) || LIBCU_OS_WINCE
-		int eType = flags&0xFFFFFF00;  /* Type of file to open */
+	int type = flags & 0xFFFFFF00; // Type of file to open
 #endif
-
-		int isExclusive  = (flags & LIBCU_OPEN_EXCLUSIVE);
-		int isDelete     = (flags & LIBCU_OPEN_DELETEONCLOSE);
-		int isCreate     = (flags & LIBCU_OPEN_CREATE);
-		int isReadonly   = (flags & LIBCU_OPEN_READONLY);
-		int isReadWrite  = (flags & LIBCU_OPEN_READWRITE);
-
+	bool isExclusive  = (flags & SYSTEM_OPEN_EXCLUSIVE);
+	bool isDelete     = (flags & SYSTEM_OPEN_DELETEONCLOSE);
+	bool isCreate     = (flags & SYSTEM_OPEN_CREATE);
+	bool isReadonly   = (flags & SYSTEM_OPEN_READONLY);
+	bool isReadWrite  = (flags & SYSTEM_OPEN_READWRITE);
 #ifndef NDEBUG
-		int isOpenJournal = (isCreate && (
-			eType==LIBCU_OPEN_MASTER_JOURNAL
-			|| eType==LIBCU_OPEN_MAIN_JOURNAL
-			|| eType==LIBCU_OPEN_WAL
-			));
+	bool isOpenJournal = (isCreate && (type == SYSTEM_OPEN_MASTER_JOURNAL || type == SYSTEM_OPEN_MAIN_JOURNAL || type == SYSTEM_OPEN_WAL));
 #endif
+	const char *utf8Name = name; // Filename in UTF-8 encoding
+	OSTRACE(("OPEN name=%s, pFile=%p, flags=%x, pOutFlags=%p\n", utf8Name, id, flags, outFlags));
 
-		OSTRACE(("OPEN name=%s, pFile=%p, flags=%x, pOutFlags=%p\n",
-			zUtf8Name, id, flags, pOutFlags));
-
-		/* Check the following statements are true:
-		**
-		**   (a) Exactly one of the READWRITE and READONLY flags must be set, and
-		**   (b) if CREATE is set, then READWRITE must also be set, and
-		**   (c) if EXCLUSIVE is set, then CREATE must also be set.
-		**   (d) if DELETEONCLOSE is set, then CREATE must also be set.
-		*/
-		assert((isReadonly==0 || isReadWrite==0) && (isReadWrite || isReadonly));
-		assert(isCreate==0 || isReadWrite);
-		assert(isExclusive==0 || isCreate);
-		assert(isDelete==0 || isCreate);
-
-		/* The main DB, main journal, WAL file and master journal are never
-		** automatically deleted. Nor are they ever temporary files.  */
-		assert( (!isDelete && zName) || eType!=LIBCU_OPEN_MAIN_DB );
-		assert( (!isDelete && zName) || eType!=LIBCU_OPEN_MAIN_JOURNAL );
-		assert( (!isDelete && zName) || eType!=LIBCU_OPEN_MASTER_JOURNAL );
-		assert( (!isDelete && zName) || eType!=LIBCU_OPEN_WAL );
-
-		/* Assert that the upper layer has set one of the "file-type" flags. */
-		assert( eType==LIBCU_OPEN_MAIN_DB      || eType==LIBCU_OPEN_TEMP_DB
-			|| eType==LIBCU_OPEN_MAIN_JOURNAL || eType==LIBCU_OPEN_TEMP_JOURNAL
-			|| eType==LIBCU_OPEN_SUBJOURNAL   || eType==LIBCU_OPEN_MASTER_JOURNAL
-			|| eType==LIBCU_OPEN_TRANSIENT_DB || eType==LIBCU_OPEN_WAL
-			);
-
-		assert( pFile!=0 );
-		memset(pFile, 0, sizeof(winFile));
-		file->h = INVALID_HANDLE_VALUE;
-
+	// Check the following statements are true:
+	//
+	//   (a) Exactly one of the READWRITE and READONLY flags must be set, and
+	//   (b) if CREATE is set, then READWRITE must also be set, and
+	//   (c) if EXCLUSIVE is set, then CREATE must also be set.
+	//   (d) if DELETEONCLOSE is set, then CREATE must also be set.
+	assert((!isReadonly || !isReadWrite) && (isReadWrite || isReadonly));
+	assert(!isCreate || isReadWrite);
+	assert(!isExclusive || isCreate);
+	assert(!isDelete || isCreate);
+	// The main DB, main journal, WAL file and master journal are never automatically deleted. Nor are they ever temporary files.
+	assert((!isDelete && name) || type != SYSTEM_OPEN_MAIN_DB);
+	assert((!isDelete && name) || type != SYSTEM_OPEN_MAIN_JOURNAL);
+	assert((!isDelete && name) || type != SYSTEM_OPEN_MASTER_JOURNAL);
+	assert((!isDelete && name) || type != SYSTEM_OPEN_WAL);
+	// Assert that the upper layer has set one of the "file-type" flags.
+	assert(type == SYSTEM_OPEN_MAIN_DB      || type == LIBCU_OPEN_TEMP_DB
+		|| type == SYSTEM_OPEN_MAIN_JOURNAL || type == LIBCU_OPEN_TEMP_JOURNAL
+		|| type == SYSTEM_OPEN_SUBJOURNAL   || type == LIBCU_OPEN_MASTER_JOURNAL
+		|| type == SYSTEM_OPEN_TRANSIENT_DB || type == LIBCU_OPEN_WAL);
+	winFile *file = (winFile *)id;
+	assert(file);
+	memset(file, 0, sizeof(winFile));
+	file->h = INVALID_HANDLE_VALUE;
 #if LIBCU_OS_WINRT
-		if( !zUtf8Name && !sqlite3_temp_directory ){
-			runtimeLog(LIBCU_ERROR,
-				"sqlite3_temp_directory variable should be set for WinRT");
-		}
+	if (!utf8Name && !_libcu_temp_directory)
+		runtimeLog(RC_ERROR, "sqlite3_temp_directory variable should be set for WinRT");
 #endif
 
-		/* If the second argument to this function is NULL, generate a
-		** temporary file name to use
-		*/
-		if( !zUtf8Name ){
-			assert( isDelete && !isOpenJournal );
-			rc = winGetTempname(pVfs, &zTmpname);
-			if( rc!=RC_OK ){
-				OSTRACE(("OPEN name=%s, rc=%s", zUtf8Name, sqlite3ErrName(rc)));
-				return rc;
-			}
-			zUtf8Name = zTmpname;
+	// If argument zPath is a NULL pointer, this function is required to open a temporary file. Use this buffer to store the file name in.
+	char *tmpname = nullptr; // For temporary filename, if necessary.
+
+	// If the second argument to this function is NULL, generate a temporary file name to use
+	if (!utf8Name) {
+		assert(isDelete && !isOpenJournal);
+		rc = winGetTempname(pVfs, &zTmpname);
+		if (rc != RC_OK) {
+			OSTRACE(("OPEN name=%s, rc=%s", utf8Name, runtimeErrName(rc)));
+			return rc;
 		}
+		utf8Name = tmpname;
+	}
 
-		/* Database filenames are double-zero terminated if they are not
-		** URIs with parameters.  Hence, they can always be passed into
-		** sqlite3_uri_parameter().
-		*/
-		assert( (eType!=LIBCU_OPEN_MAIN_DB) || (flags & LIBCU_OPEN_URI) ||
-			zUtf8Name[sqlite3Strlen30(zUtf8Name)+1]==0 );
+	// Database filenames are double-zero terminated if they are not URIs with parameters.  Hence, they can always be passed into sqlite3_uri_parameter().
+	assert((type != SYSTEM_OPEN_MAIN_DB) || (flags & SYSTEM_OPEN_URI) || !utf8Name[strlen(utf8Name)+1]);
 
-		/* Convert the filename to the system encoding. */
-		zConverted = winConvertFromUtf8Filename(zUtf8Name);
-		if( zConverted==0 ){
-			sqlite3_free(zTmpname);
-			OSTRACE(("OPEN name=%s, rc=LIBCU_IOERR_NOMEM", zUtf8Name));
-			return LIBCU_IOERR_NOMEM_BKPT;
-		}
+	// Convert the filename to the system encoding.
+	void *converted = winConvertFromUtf8Filename(utf8Name); // Filename in OS encoding
+	if (!converted) {
+		mfree(tmpname);
+		OSTRACE(("OPEN name=%s, rc=LIBCU_IOERR_NOMEM", utf8Name));
+		return RC_IOERR_NOMEM_BKPT;
+	}
+	if (winIsDir(converted)) {
+		mfree(converted);
+		mfree(tmpname);
+		OSTRACE(("OPEN name=%s, rc=LIBCU_CANTOPEN_ISDIR", zUtf8Name));
+		return RC_CANTOPEN_ISDIR;
+	}
 
-		if( winIsDir(zConverted) ){
-			sqlite3_free(zConverted);
-			sqlite3_free(zTmpname);
-			OSTRACE(("OPEN name=%s, rc=LIBCU_CANTOPEN_ISDIR", zUtf8Name));
-			return LIBCU_CANTOPEN_ISDIR;
-		}
-
-		if( isReadWrite ){
-			dwDesiredAccess = GENERIC_READ | GENERIC_WRITE;
-		}else{
-			dwDesiredAccess = GENERIC_READ;
-		}
-
-		/* LIBCU_OPEN_EXCLUSIVE is used to make sure that a new file is
-		** created. Libcu doesn't use it to indicate "exclusive access"
-		** as it is usually understood.
-		*/
-		if( isExclusive ){
-			/* Creates a new file, only if it does not already exist. */
-			/* If the file exists, it fails. */
-			dwCreationDisposition = CREATE_NEW;
-		}else if( isCreate ){
-			/* Open existing file, or create if it doesn't exist */
-			dwCreationDisposition = OPEN_ALWAYS;
-		}else{
-			/* Opens a file, only if it exists. */
-			dwCreationDisposition = OPEN_EXISTING;
-		}
-
-		dwShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-
-		if( isDelete ){
+	DWORD dwDesiredAccess = isReadWrite ? GENERIC_READ|GENERIC_WRITE : GENERIC_READ;
+	// LIBCU_OPEN_EXCLUSIVE is used to make sure that a new file is created. Libcu doesn't use it to indicate "exclusive access" as it is usually understood.
+	DWORD dwCreationDisposition;
+	if (isExclusive) dwCreationDisposition = CREATE_NEW; // Creates a new file, only if it does not already exist. If the file exists, it fails.
+	else if (isCreate) dwCreationDisposition = OPEN_ALWAYS; // Open existing file, or create if it doesn't exist
+	else dwCreationDisposition = OPEN_EXISTING; // Opens a file, only if it exists.
+	DWORD dwShareMode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+	DWORD dwFlagsAndAttributes = 0;
 #if LIBCU_OS_WINCE
-			dwFlagsAndAttributes = FILE_ATTRIBUTE_HIDDEN;
-			isTemp = 1;
+	bool isTemp = false;
+#endif
+	if (isDelete) {
+#if LIBCU_OS_WINCE
+		dwFlagsAndAttributes = FILE_ATTRIBUTE_HIDDEN;
+		isTemp = true;
 #else
-			dwFlagsAndAttributes = FILE_ATTRIBUTE_TEMPORARY
-				| FILE_ATTRIBUTE_HIDDEN
-				| FILE_FLAG_DELETE_ON_CLOSE;
+		dwFlagsAndAttributes = FILE_ATTRIBUTE_TEMPORARY|FILE_ATTRIBUTE_HIDDEN|FILE_FLAG_DELETE_ON_CLOSE;
 #endif
-		}else{
-			dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
-		}
-		/* Reports from the internet are that performance is always
-		** better if FILE_FLAG_RANDOM_ACCESS is used.  Ticket #2699. */
+	}
+	else dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
+	// Reports from the internet are that performance is always better if FILE_FLAG_RANDOM_ACCESS is used.  Ticket #2699.
 #if LIBCU_OS_WINCE
-		dwFlagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
+	dwFlagsAndAttributes |= FILE_FLAG_RANDOM_ACCESS;
 #endif
 
-		if( osIsNT() ){
+	HANDLE h;
+	int cnt = 0;
+	DWORD lastErrno = 0;
+	if (osIsNT()) {
 #if LIBCU_OS_WINRT
-			CREATEFILE2_EXTENDED_PARAMETERS extendedParameters;
-			extendedParameters.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);
-			extendedParameters.dwFileAttributes =
-				dwFlagsAndAttributes & FILE_ATTRIBUTE_MASK;
-			extendedParameters.dwFileFlags = dwFlagsAndAttributes & FILE_FLAG_MASK;
-			extendedParameters.dwSecurityQosFlags = SECURITY_ANONYMOUS;
-			extendedParameters.lpSecurityAttributes = NULL;
-			extendedParameters.hTemplateFile = NULL;
-			while( (h = osCreateFile2((LPCWSTR)zConverted,
-				dwDesiredAccess,
-				dwShareMode,
-				dwCreationDisposition,
-				&extendedParameters))==INVALID_HANDLE_VALUE &&
-				winRetryIoerr(&cnt, &lastErrno) ){
-					/* Noop */
-			}
+		CREATEFILE2_EXTENDED_PARAMETERS extendedParameters;
+		extendedParameters.dwSize = sizeof(CREATEFILE2_EXTENDED_PARAMETERS);
+		extendedParameters.dwFileAttributes = dwFlagsAndAttributes & FILE_ATTRIBUTE_MASK;
+		extendedParameters.dwFileFlags = dwFlagsAndAttributes & FILE_FLAG_MASK;
+		extendedParameters.dwSecurityQosFlags = SECURITY_ANONYMOUS;
+		extendedParameters.lpSecurityAttributes = NULL;
+		extendedParameters.hTemplateFile = NULL;
+		while ((h = osCreateFile2((LPCWSTR)converted, dwDesiredAccess, dwShareMode, dwCreationDisposition, &extendedParameters)) == INVALID_HANDLE_VALUE && winRetryIoerr(&cnt, &lastErrno)) { } // Noop
 #else
-			while( (h = osCreateFileW((LPCWSTR)zConverted,
-				dwDesiredAccess,
-				dwShareMode, NULL,
-				dwCreationDisposition,
-				dwFlagsAndAttributes,
-				NULL))==INVALID_HANDLE_VALUE &&
-				winRetryIoerr(&cnt, &lastErrno) ){
-					/* Noop */
-			}
+		while ((h = osCreateFileW((LPCWSTR)converted, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL)) == INVALID_HANDLE_VALUE && winRetryIoerr(&cnt, &lastErrno)) { } // Noop
 #endif
-		}
+	}
 #ifdef LIBCU_WIN32_HAS_ANSI
-		else{
-			while( (h = osCreateFileA((LPCSTR)zConverted,
-				dwDesiredAccess,
-				dwShareMode, NULL,
-				dwCreationDisposition,
-				dwFlagsAndAttributes,
-				NULL))==INVALID_HANDLE_VALUE &&
-				winRetryIoerr(&cnt, &lastErrno) ){
-					/* Noop */
-			}
-		}
+	else while ((h = osCreateFileA((LPCSTR)converted, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, dwFlagsAndAttributes, NULL)) == INVALID_HANDLE_VALUE && winRetryIoerr(&cnt, &lastErrno)) { } // Noop
 #endif
-		winLogIoerr(cnt, __LINE__);
+	winLogIoerr(cnt, __LINE__);
 
-		OSTRACE(("OPEN file=%p, name=%s, access=%lx, rc=%s\n", h, zUtf8Name,
-			dwDesiredAccess, (h==INVALID_HANDLE_VALUE) ? "failed" : "ok"));
+	OSTRACE(("OPEN file=%p, name=%s, access=%lx, rc=%s\n", h, utf8Name, dwDesiredAccess, h == INVALID_HANDLE_VALUE ? "failed" : "ok"));
 
-		if( h==INVALID_HANDLE_VALUE ){
-			pFile->lastErrno = lastErrno;
-			winLogError(LIBCU_CANTOPEN, pFile->lastErrno, "winOpen", zUtf8Name);
-			sqlite3_free(zConverted);
-			sqlite3_free(zTmpname);
-			if( isReadWrite && !isExclusive ){
-				return winOpen(pVfs, zName, id,
-					((flags|LIBCU_OPEN_READONLY) &
-					~(LIBCU_OPEN_CREATE|LIBCU_OPEN_READWRITE)),
-					pOutFlags);
-			}else{
-				return LIBCU_CANTOPEN_BKPT;
-			}
-		}
+	if (h == INVALID_HANDLE_VALUE) {
+		pFile->lastErrno = lastErrno;
+		winLogError(RC_CANTOPEN, file->lastErrno, "winOpen", utf8Name);
+		mfree(converted);
+		mfree(tmpname);
+		if (isReadWrite && !isExclusive) return winOpen(pVfs, name, id, ((flags|SYSTEM_OPEN_READONLY) & ~(SYSTEM_OPEN_CREATE|SYSTEM_OPEN_READWRITE)), outFlags);
+		else return RC_CANTOPEN_BKPT;
+	}
 
-		if( pOutFlags ){
-			if( isReadWrite ){
-				*pOutFlags = LIBCU_OPEN_READWRITE;
-			}else{
-				*pOutFlags = LIBCU_OPEN_READONLY;
-			}
-		}
+	if (outFlags) {
+		if (isReadWrite) *outFlags = SYSTEM_OPEN_READWRITE;
+		else *outFlags = SYSTEM_OPEN_READONLY;
+	}
 
-		OSTRACE(("OPEN file=%p, name=%s, access=%lx, pOutFlags=%p, *pOutFlags=%d, "
-			"rc=%s\n", h, zUtf8Name, dwDesiredAccess, pOutFlags, pOutFlags ?
-			*pOutFlags : 0, (h==INVALID_HANDLE_VALUE) ? "failed" : "ok"));
+	OSTRACE(("OPEN file=%p, name=%s, access=%lx, pOutFlags=%p, *pOutFlags=%d, rc=%s\n", h, utf8Name, dwDesiredAccess, outFlags, outFlags ? *outFlags : 0, h == INVALID_HANDLE_VALUE ? "failed" : "ok"));
 
-		pAppData = (winVfsAppData*)pVfs->pAppData;
+	winVfsAppData *appData = (winVfsAppData *)sys->appData;
 
 #if LIBCU_OS_WINCE
-		{
-			if( isReadWrite && eType==LIBCU_OPEN_MAIN_DB
-				&& ((pAppData==NULL) || !pAppData->bNoLock)
-				&& (rc = winceCreateLock(zName, pFile))!=RC_OK
-				){
-					osCloseHandle(h);
-					sqlite3_free(zConverted);
-					sqlite3_free(zTmpname);
-					OSTRACE(("OPEN-CE-LOCK name=%s, rc=%s\n", zName, sqlite3ErrName(rc)));
-					return rc;
-			}
+	{
+		if (isReadWrite && type == SYSTEM_OPEN_MAIN_DB && (appData == NULL || !appData->noLock) && (rc = winceCreateLock(name, file)) != RC_OK) {
+			osCloseHandle(h);
+			mfree(converted);
+			mfree(tmpname);
+			OSTRACE(("OPEN-CE-LOCK name=%s, rc=%s\n", name, runtimeErrName(rc)));
+			return rc;
 		}
-		if( isTemp ){
-			pFile->zDeleteOnClose = zConverted;
-		}else
+	}
+	if (isTemp) 
+		file->deleteOnClose = converted;
+	else
 #endif
-		{
-			sqlite3_free(zConverted);
-		}
+	{
+		mfree(converted);
+	}
 
-		sqlite3_free(zTmpname);
-		pFile->pMethod = pAppData ? pAppData->pMethod : &winIoMethod;
-		pFile->pVfs = pVfs;
-		file->h = h;
-		if( isReadonly ){
-			pFile->ctrlFlags |= WINFILE_RDONLY;
-		}
-		if( sqlite3_uri_boolean(zName, "psow", LIBCU_POWERSAFE_OVERWRITE) ){
-			pFile->ctrlFlags |= WINFILE_PSOW;
-		}
-		pFile->lastErrno = NO_ERROR;
-		pFile->zPath = zName;
+	mfree(tmpname);
+	file->method = appData ? appData->method : &_winIoMethod;
+	file->sys = sys;
+	file->h = h;
+	if (isReadonly)
+		file->ctrlFlags |= WINFILE_RDONLY;
+	if (convert_uriboolean(name, "psow", LIBCU_POWERSAFE_OVERWRITE))
+		file->ctrlFlags |= WINFILE_PSOW;
+	file->lastErrno = NO_ERROR;
+	file->path = name;
 #if LIBCU_MAXMMAPSIZE>0
-		pFile->hMap = NULL;
-		pFile->pMapRegion = 0;
-		pFile->mmapSize = 0;
-		pFile->mmapSizeActual = 0;
-		pFile->mmapSizeMax = sqlite3GlobalConfig.szMmap;
+	file->hMap = NULL;
+	file->mapRegion = 0;
+	file->mmapSize = 0;
+	file->mmapSizeActual = 0;
+	file->mmapSizeMax = _runtimeConfig.sizeMmap;
 #endif
 
-		OpenCounter(+1);
-		return rc;
+	OpenCounter(+1);
+	return rc;
 }
 
 /*
 ** Delete the named file.
 **
-** Note that Windows does not allow a file to be deleted if some other
-** process has it open.  Sometimes a virus scanner or indexing program
-** will open a journal file shortly after it is created in order to do
-** whatever it does.  While this other process is holding the
-** file open, we will be unable to delete it.  To work around this
-** problem, we delay 100 milliseconds and try to delete again.  Up
-** to MX_DELETION_ATTEMPTs deletion attempts are run before giving
-** up and returning an error.
+** Note that Windows does not allow a file to be deleted if some other process has it open.  Sometimes a virus scanner or indexing program
+** will open a journal file shortly after it is created in order to do whatever it does.  While this other process is holding the
+** file open, we will be unable to delete it.  To work around this problem, we delay 100 milliseconds and try to delete again.  Up
+** to MX_DELETION_ATTEMPTs deletion attempts are run before giving up and returning an error.
 */
-static int winDelete(
-	vsystem *pVfs,          /* Not used on win32 */
-	const char *zFilename,      /* Name of file to delete */
-	int syncDir                 /* Not used on win32 */
-	){
-		int cnt = 0;
-		int rc;
-		DWORD attr;
-		DWORD lastErrno = 0;
-		void *zConverted;
-		UNUSED_SYMBOL(pVfs);
-		UNUSED_SYMBOL(syncDir);
+static RC winDelete(vsystem *sys, const char *filename, int syncDir)
+{
+	UNUSED_SYMBOL(sys);
+	UNUSED_SYMBOL(syncDir);
+	SimulateIOError(return RC_IOERR_DELETE);
+	OSTRACE(("DELETE name=%s, syncDir=%d\n", filename, syncDir));
 
-		SimulateIOError(return LIBCU_IOERR_DELETE);
-		OSTRACE(("DELETE name=%s, syncDir=%d\n", zFilename, syncDir));
+	void *converted = winConvertFromUtf8Filename(filename);
+	if (!converted) {
+		OSTRACE(("DELETE name=%s, rc=LIBCU_IOERR_NOMEM\n", filename));
+		return RC_IOERR_NOMEM_BKPT;
+	}
 
-		zConverted = winConvertFromUtf8Filename(zFilename);
-		if( zConverted==0 ){
-			OSTRACE(("DELETE name=%s, rc=LIBCU_IOERR_NOMEM\n", zFilename));
-			return LIBCU_IOERR_NOMEM_BKPT;
-		}
-		if( osIsNT() ){
-			do {
+	RC rc;
+	DWORD attr;
+	DWORD lastErrno = 0;
+	int cnt = 0;
+	if (osIsNT()) {
+		do {
 #if LIBCU_OS_WINRT
-				WIN32_FILE_ATTRIBUTE_DATA sAttrData;
-				memset(&sAttrData, 0, sizeof(sAttrData));
-				if ( osGetFileAttributesExW(zConverted, GetFileExInfoStandard,
-					&sAttrData) ){
-						attr = sAttrData.dwFileAttributes;
-				}else{
-					lastErrno = osGetLastError();
-					if( lastErrno==ERROR_FILE_NOT_FOUND
-						|| lastErrno==ERROR_PATH_NOT_FOUND ){
-							rc = LIBCU_IOERR_DELETE_NOENT; /* Already gone? */
-					}else{
-						rc = LIBCU_ERROR;
-					}
-					break;
-				}
-#else
-				attr = osGetFileAttributesW(zConverted);
-#endif
-				if ( attr==INVALID_FILE_ATTRIBUTES ){
-					lastErrno = osGetLastError();
-					if( lastErrno==ERROR_FILE_NOT_FOUND
-						|| lastErrno==ERROR_PATH_NOT_FOUND ){
-							rc = LIBCU_IOERR_DELETE_NOENT; /* Already gone? */
-					}else{
-						rc = LIBCU_ERROR;
-					}
-					break;
-				}
-				if ( attr&FILE_ATTRIBUTE_DIRECTORY ){
-					rc = LIBCU_ERROR; /* Files only. */
-					break;
-				}
-				if ( osDeleteFileW(zConverted) ){
-					rc = RC_OK; /* Deleted OK. */
-					break;
-				}
-				if ( !winRetryIoerr(&cnt, &lastErrno) ){
-					rc = LIBCU_ERROR; /* No more retries. */
-					break;
-				}
-			} while(1);
-		}
-#ifdef LIBCU_WIN32_HAS_ANSI
-		else{
-			do {
-				attr = osGetFileAttributesA(zConverted);
-				if ( attr==INVALID_FILE_ATTRIBUTES ){
-					lastErrno = osGetLastError();
-					if( lastErrno==ERROR_FILE_NOT_FOUND
-						|| lastErrno==ERROR_PATH_NOT_FOUND ){
-							rc = LIBCU_IOERR_DELETE_NOENT; /* Already gone? */
-					}else{
-						rc = LIBCU_ERROR;
-					}
-					break;
-				}
-				if ( attr&FILE_ATTRIBUTE_DIRECTORY ){
-					rc = LIBCU_ERROR; /* Files only. */
-					break;
-				}
-				if ( osDeleteFileA(zConverted) ){
-					rc = RC_OK; /* Deleted OK. */
-					break;
-				}
-				if ( !winRetryIoerr(&cnt, &lastErrno) ){
-					rc = LIBCU_ERROR; /* No more retries. */
-					break;
-				}
-			} while(1);
-		}
-#endif
-		if( rc && rc!=LIBCU_IOERR_DELETE_NOENT ){
-			rc = winLogError(LIBCU_IOERR_DELETE, lastErrno, "winDelete", zFilename);
-		}else{
-			winLogIoerr(cnt, __LINE__);
-		}
-		sqlite3_free(zConverted);
-		OSTRACE(("DELETE name=%s, rc=%s\n", zFilename, sqlite3ErrName(rc)));
-		return rc;
-}
-
-/*
-** Check the existence and status of a file.
-*/
-static int winAccess(
-	vsystem *pVfs,         /* Not used on win32 */
-	const char *zFilename,     /* Name of file to check */
-	int flags,                 /* Type of test to make on this file */
-	int *pResOut               /* OUT: Result */
-	){
-		DWORD attr;
-		int rc = 0;
-		DWORD lastErrno = 0;
-		void *zConverted;
-		UNUSED_SYMBOL(pVfs);
-
-		SimulateIOError( return LIBCU_IOERR_ACCESS; );
-		OSTRACE(("ACCESS name=%s, flags=%x, pResOut=%p\n",
-			zFilename, flags, pResOut));
-
-		zConverted = winConvertFromUtf8Filename(zFilename);
-		if( zConverted==0 ){
-			OSTRACE(("ACCESS name=%s, rc=LIBCU_IOERR_NOMEM\n", zFilename));
-			return LIBCU_IOERR_NOMEM_BKPT;
-		}
-		if( osIsNT() ){
-			int cnt = 0;
 			WIN32_FILE_ATTRIBUTE_DATA sAttrData;
 			memset(&sAttrData, 0, sizeof(sAttrData));
-			while( !(rc = osGetFileAttributesExW((LPCWSTR)zConverted,
-				GetFileExInfoStandard,
-				&sAttrData)) && winRetryIoerr(&cnt, &lastErrno) ){}
-			if( rc ){
-				/* For an LIBCU_ACCESS_EXISTS query, treat a zero-length file
-				** as if it does not exist.
-				*/
-				if(    flags==LIBCU_ACCESS_EXISTS
-					&& sAttrData.nFileSizeHigh==0
-					&& sAttrData.nFileSizeLow==0 ){
-						attr = INVALID_FILE_ATTRIBUTES;
-				}else{
-					attr = sAttrData.dwFileAttributes;
-				}
-			}else{
-				winLogIoerr(cnt, __LINE__);
-				if( lastErrno!=ERROR_FILE_NOT_FOUND && lastErrno!=ERROR_PATH_NOT_FOUND ){
-					sqlite3_free(zConverted);
-					return winLogError(LIBCU_IOERR_ACCESS, lastErrno, "winAccess",
-						zFilename);
-				}else{
-					attr = INVALID_FILE_ATTRIBUTES;
-				}
+			if (osGetFileAttributesExW(converted, GetFileExInfoStandard, &sAttrData))
+				attr = sAttrData.dwFileAttributes;
+			else {
+				lastErrno = osGetLastError();
+				if (lastErrno == ERROR_FILE_NOT_FOUND || lastErrno == ERROR_PATH_NOT_FOUND) rc = RC_IOERR_DELETE_NOENT; // Already gone?
+				else rc = RC_ERROR;
+				break;
 			}
-		}
-#ifdef LIBCU_WIN32_HAS_ANSI
-		else{
-			attr = osGetFileAttributesA((char*)zConverted);
-		}
+#else
+			attr = osGetFileAttributesW(converted);
 #endif
-		sqlite3_free(zConverted);
-		switch( flags ){
-		case LIBCU_ACCESS_READ:
-		case LIBCU_ACCESS_EXISTS:
-			rc = attr!=INVALID_FILE_ATTRIBUTES;
-			break;
-		case LIBCU_ACCESS_READWRITE:
-			rc = attr!=INVALID_FILE_ATTRIBUTES &&
-				(attr & FILE_ATTRIBUTE_READONLY)==0;
-			break;
-		default:
-			assert(!"Invalid flags argument");
+			if (attr == INVALID_FILE_ATTRIBUTES) {
+				lastErrno = osGetLastError();
+				if (lastErrno == ERROR_FILE_NOT_FOUND || lastErrno == ERROR_PATH_NOT_FOUND) rc = RC_IOERR_DELETE_NOENT; // Already gone?
+				else rc = RC_ERROR;
+				break;
+			}
+			if (attr&FILE_ATTRIBUTE_DIRECTORY) {
+				rc = RC_ERROR; // Files only.
+				break;
+			}
+			if (osDeleteFileW(converted)) {
+				rc = RC_OK; // Deleted OK.
+				break;
+			}
+			if (!winRetryIoerr(&cnt, &lastErrno)) {
+				rc = RC_ERROR; // No more retries.
+				break;
+			}
+		} while(1);
+	}
+#ifdef LIBCU_WIN32_HAS_ANSI
+	else {
+		do {
+			attr = osGetFileAttributesA(converted);
+			if (attr == INVALID_FILE_ATTRIBUTES) {
+				lastErrno = osGetLastError();
+				if (lastErrno==ERROR_FILE_NOT_FOUND || lastErrno==ERROR_PATH_NOT_FOUND) rc = RC_IOERR_DELETE_NOENT; // Already gone?
+				else rc = RC_ERROR;
+				break;
+			}
+			if (attr&FILE_ATTRIBUTE_DIRECTORY) {
+				rc = RC_ERROR; // Files only.
+				break;
+			}
+			if (osDeleteFileA(converted)) {
+				rc = RC_OK; // Deleted OK.
+				break;
+			}
+			if (!winRetryIoerr(&cnt, &lastErrno)) {
+				rc = RC_ERROR; // No more retries.
+				break;
+			}
+		} while(1);
+	}
+#endif
+	if (rc && rc != RC_IOERR_DELETE_NOENT)
+		rc = winLogError(RC_IOERR_DELETE, lastErrno, "winDelete", filename);
+	else
+		winLogIoerr(cnt, __LINE__);
+	mfree(converted);
+	OSTRACE(("DELETE name=%s, rc=%s\n", filename, runtimeErrName(rc)));
+	return rc;
+}
+
+/* Check the existence and status of a file. */
+static RC winAccess(vsystem *sys, const char *filename, int flags, int *resOut)
+{
+	UNUSED_SYMBOL(sys);
+	SimulateIOError(return RC_IOERR_ACCESS;);
+	OSTRACE(("ACCESS name=%s, flags=%x, pResOut=%p\n", filename, flags, resOut));
+
+	void *converted = winConvertFromUtf8Filename(filename);
+	if (!converted) {
+		OSTRACE(("ACCESS name=%s, rc=LIBCU_IOERR_NOMEM\n", filename));
+		return RC_IOERR_NOMEM_BKPT;
+	}
+	DWORD attr;
+	RC rc = 0;
+	DWORD lastErrno = 0;
+	if (osIsNT()) {
+		int cnt = 0;
+		WIN32_FILE_ATTRIBUTE_DATA sAttrData;
+		memset(&sAttrData, 0, sizeof(sAttrData));
+		while (!(rc = osGetFileAttributesExW((LPCWSTR)converted, GetFileExInfoStandard, &sAttrData)) && winRetryIoerr(&cnt, &lastErrno)) { }
+		if (rc) {
+			// For an SYSTEM_ACCESS_EXISTS query, treat a zero-length file as if it does not exist.
+			if (flags == SYSTEM_ACCESS_EXISTS && !sAttrData.nFileSizeHigh && !sAttrData.nFileSizeLow) attr = INVALID_FILE_ATTRIBUTES;
+			else attr = sAttrData.dwFileAttributes;
 		}
-		*pResOut = rc;
-		OSTRACE(("ACCESS name=%s, pResOut=%p, *pResOut=%d, rc=RC_OK\n",
-			zFilename, pResOut, *pResOut));
-		return RC_OK;
+		else {
+			winLogIoerr(cnt, __LINE__);
+			if (lastErrno != ERROR_FILE_NOT_FOUND && lastErrno != ERROR_PATH_NOT_FOUND) {
+				mfree(converted);
+				return winLogError(RC_IOERR_ACCESS, lastErrno, "winAccess", filename);
+			}
+			else attr = INVALID_FILE_ATTRIBUTES;
+		}
+	}
+#ifdef LIBCU_WIN32_HAS_ANSI
+	else attr = osGetFileAttributesA((char *)converted);
+#endif
+	mfree(converted);
+	switch (flags) {
+	case SYSTEM_ACCESS_READ:
+	case SYSTEM_ACCESS_EXISTS:
+		rc = attr != INVALID_FILE_ATTRIBUTES;
+		break;
+	case SYSTEM_ACCESS_READWRITE:
+		rc = attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_READONLY) == 0;
+		break;
+	default:
+		assert(!"Invalid flags argument");
+	}
+	*resOut = rc;
+	OSTRACE(("ACCESS name=%s, pResOut=%p, *pResOut=%d, rc=RC_OK\n", filename, resOut, *resOut));
+	return RC_OK;
+}
+
+/* Returns non-zero if the specified path name starts with a drive letter followed by a colon character. */
+static BOOL winIsDriveLetterAndColon(const char *pathname)
+{
+	return (isalpha(pathname[0]) && pathname[1]==':');
 }
 
 /*
-** Returns non-zero if the specified path name starts with a drive letter
-** followed by a colon character.
+** Returns non-zero if the specified path name should be used verbatim.  If non-zero is returned from this function, the calling function must simply
+** use the provided path name verbatim -OR- resolve it into a full path name using the GetFullPathName Win32 API function (if available).
 */
-static BOOL winIsDriveLetterAndColon(
-	const char *zPathname
-	){
-		return ( sqlite3Isalpha(zPathname[0]) && zPathname[1]==':' );
+static BOOL winIsVerbatimPathname(const char *pathname)
+{
+	// If the path name starts with a forward slash or a backslash, it is either a legal UNC name, a volume relative path, or an absolute path name in the
+	// "Unix" format on Windows.  There is no easy way to differentiate between the final two cases; therefore, we return the safer return value of TRUE
+	// so that callers of this function will simply use it verbatim.
+	if (winIsDirSep(pathname[0]))
+		return TRUE;
+	// If the path name starts with a letter and a colon it is either a volume relative path or an absolute path.  Callers of this function must not
+	// attempt to treat it as a relative path name (i.e. they should simply use it verbatim).
+	if (winIsDriveLetterAndColon(pathname))
+		return TRUE;
+	// If we get to this point, the path name should almost certainly be a purely relative one (i.e. not a UNC name, not absolute, and not volume relative).
+	return FALSE;
 }
 
-/*
-** Returns non-zero if the specified path name should be used verbatim.  If
-** non-zero is returned from this function, the calling function must simply
-** use the provided path name verbatim -OR- resolve it into a full path name
-** using the GetFullPathName Win32 API function (if available).
-*/
-static BOOL winIsVerbatimPathname(
-	const char *zPathname
-	){
-		/*
-		** If the path name starts with a forward slash or a backslash, it is either
-		** a legal UNC name, a volume relative path, or an absolute path name in the
-		** "Unix" format on Windows.  There is no easy way to differentiate between
-		** the final two cases; therefore, we return the safer return value of TRUE
-		** so that callers of this function will simply use it verbatim.
-		*/
-		if ( winIsDirSep(zPathname[0]) ){
-			return TRUE;
-		}
 
-		/*
-		** If the path name starts with a letter and a colon it is either a volume
-		** relative path or an absolute path.  Callers of this function must not
-		** attempt to treat it as a relative path name (i.e. they should simply use
-		** it verbatim).
-		*/
-		if ( winIsDriveLetterAndColon(zPathname) ){
-			return TRUE;
-		}
 
-		/*
-		** If we get to this point, the path name should almost certainly be a purely
-		** relative one (i.e. not a UNC name, not absolute, and not volume relative).
-		*/
-		return FALSE;
-}
+
+
+
+
+
 
 /*
 ** Turn a relative pathname into a full pathname.  Write the full
@@ -4573,7 +4136,7 @@ static int winFullPathname(
 	char *zFull                   /* Output buffer */
 	){
 #if !LIBCU_OS_WINCE && !LIBCU_OS_WINRT && !defined(__CYGWIN__)
-		DWORD nByte;
+		DWORD bytes;
 		void *zConverted;
 		char *zOut;
 #endif
@@ -4603,19 +4166,19 @@ static int winFullPathname(
 			if( cygwin_conv_path(
 				(osIsNT() ? CCP_POSIX_TO_WIN_W : CCP_POSIX_TO_WIN_A) |
 				CCP_RELATIVE, zRelative, zOut, pVfs->mxPathname+1)<0 ){
-					sqlite3_free(zOut);
+					mfree(zOut);
 					return winLogError(LIBCU_CANTOPEN_CONVPATH, (DWORD)errno,
 						"winFullPathname1", zRelative);
 			}else{
 				char *zUtf8 = winConvertToUtf8Filename(zOut);
 				if( !zUtf8 ){
-					sqlite3_free(zOut);
+					mfree(zOut);
 					return LIBCU_IOERR_NOMEM_BKPT;
 				}
 				sqlite3_snprintf(MIN(nFull, pVfs->mxPathname), zFull, "%s%c%s",
 					sqlite3_data_directory, winGetDirSep(), zUtf8);
-				sqlite3_free(zUtf8);
-				sqlite3_free(zOut);
+				mfree(zUtf8);
+				mfree(zOut);
 			}
 		}else{
 			char *zOut = sqlite3MallocZero( pVfs->mxPathname+1 );
@@ -4625,18 +4188,18 @@ static int winFullPathname(
 			if( cygwin_conv_path(
 				(osIsNT() ? CCP_POSIX_TO_WIN_W : CCP_POSIX_TO_WIN_A),
 				zRelative, zOut, pVfs->mxPathname+1)<0 ){
-					sqlite3_free(zOut);
+					mfree(zOut);
 					return winLogError(LIBCU_CANTOPEN_CONVPATH, (DWORD)errno,
 						"winFullPathname2", zRelative);
 			}else{
 				char *zUtf8 = winConvertToUtf8Filename(zOut);
 				if( !zUtf8 ){
-					sqlite3_free(zOut);
+					mfree(zOut);
 					return LIBCU_IOERR_NOMEM_BKPT;
 				}
 				sqlite3_snprintf(MIN(nFull, pVfs->mxPathname), zFull, "%s", zUtf8);
-				sqlite3_free(zUtf8);
-				sqlite3_free(zOut);
+				mfree(zUtf8);
+				mfree(zOut);
 			}
 		}
 		return RC_OK;
@@ -4685,59 +4248,59 @@ static int winFullPathname(
 		}
 		if( osIsNT() ){
 			LPWSTR zTemp;
-			nByte = osGetFullPathNameW((LPCWSTR)zConverted, 0, 0, 0);
-			if( nByte==0 ){
-				sqlite3_free(zConverted);
+			bytes = osGetFullPathNameW((LPCWSTR)zConverted, 0, 0, 0);
+			if( bytes==0 ){
+				mfree(zConverted);
 				return winLogError(LIBCU_CANTOPEN_FULLPATH, osGetLastError(),
 					"winFullPathname1", zRelative);
 			}
-			nByte += 3;
-			zTemp = sqlite3MallocZero( nByte*sizeof(zTemp[0]) );
+			bytes += 3;
+			zTemp = sqlite3MallocZero( bytes*sizeof(zTemp[0]) );
 			if( zTemp==0 ){
-				sqlite3_free(zConverted);
+				mfree(zConverted);
 				return LIBCU_IOERR_NOMEM_BKPT;
 			}
-			nByte = osGetFullPathNameW((LPCWSTR)zConverted, nByte, zTemp, 0);
-			if( nByte==0 ){
-				sqlite3_free(zConverted);
-				sqlite3_free(zTemp);
+			bytes = osGetFullPathNameW((LPCWSTR)zConverted, bytes, zTemp, 0);
+			if( bytes==0 ){
+				mfree(zConverted);
+				mfree(zTemp);
 				return winLogError(LIBCU_CANTOPEN_FULLPATH, osGetLastError(),
 					"winFullPathname2", zRelative);
 			}
-			sqlite3_free(zConverted);
+			mfree(zConverted);
 			zOut = winUnicodeToUtf8(zTemp);
-			sqlite3_free(zTemp);
+			mfree(zTemp);
 		}
 #ifdef LIBCU_WIN32_HAS_ANSI
 		else{
 			char *zTemp;
-			nByte = osGetFullPathNameA((char*)zConverted, 0, 0, 0);
-			if( nByte==0 ){
-				sqlite3_free(zConverted);
+			bytes = osGetFullPathNameA((char*)zConverted, 0, 0, 0);
+			if( bytes==0 ){
+				mfree(zConverted);
 				return winLogError(LIBCU_CANTOPEN_FULLPATH, osGetLastError(),
 					"winFullPathname3", zRelative);
 			}
-			nByte += 3;
-			zTemp = sqlite3MallocZero( nByte*sizeof(zTemp[0]) );
+			bytes += 3;
+			zTemp = sqlite3MallocZero( bytes*sizeof(zTemp[0]) );
 			if( zTemp==0 ){
-				sqlite3_free(zConverted);
+				mfree(zConverted);
 				return LIBCU_IOERR_NOMEM_BKPT;
 			}
-			nByte = osGetFullPathNameA((char*)zConverted, nByte, zTemp, 0);
-			if( nByte==0 ){
-				sqlite3_free(zConverted);
-				sqlite3_free(zTemp);
+			bytes = osGetFullPathNameA((char*)zConverted, bytes, zTemp, 0);
+			if( bytes==0 ){
+				mfree(zConverted);
+				mfree(zTemp);
 				return winLogError(LIBCU_CANTOPEN_FULLPATH, osGetLastError(),
 					"winFullPathname4", zRelative);
 			}
-			sqlite3_free(zConverted);
+			mfree(zConverted);
 			zOut = winMbcsToUtf8(zTemp, osAreFileApisANSI());
-			sqlite3_free(zTemp);
+			mfree(zTemp);
 		}
 #endif
 		if( zOut ){
 			sqlite3_snprintf(MIN(nFull, pVfs->mxPathname), zFull, "%s", zOut);
-			sqlite3_free(zOut);
+			mfree(zOut);
 			return RC_OK;
 		}else{
 			return LIBCU_IOERR_NOMEM_BKPT;
@@ -4761,12 +4324,12 @@ static void *winDlOpen(vsystem *pVfs, const char *zFilename){
 		return 0;
 	}
 	if( winFullPathname(pVfs, zFilename, nFull, zFull)!=RC_OK ){
-		sqlite3_free(zFull);
+		mfree(zFull);
 		OSTRACE(("DLOPEN name=%s, handle=%p\n", zFilename, (void*)0));
 		return 0;
 	}
 	zConverted = winConvertFromUtf8Filename(zFull);
-	sqlite3_free(zFull);
+	mfree(zFull);
 #else
 	void *zConverted = winConvertFromUtf8Filename(zFilename);
 	UNUSED_SYMBOL(pVfs);
@@ -4788,7 +4351,7 @@ static void *winDlOpen(vsystem *pVfs, const char *zFilename){
 	}
 #endif
 	OSTRACE(("DLOPEN name=%s, handle=%p\n", zFilename, (void*)h));
-	sqlite3_free(zConverted);
+	mfree(zConverted);
 	return (void*)h;
 }
 static void winDlError(vsystem *pVfs, int nBuf, char *zBufOut){
@@ -4825,15 +4388,15 @@ struct EntropyGatherer {
 };
 
 #if !defined(LIBCU_TEST) && !defined(LIBCU_OMIT_RANDOMNESS)
-/* Mix sz bytes of entropy into p. */
-static void xorMemory(EntropyGatherer *p, unsigned char *x, int sz){
+/* Mix size bytes of entropy into p. */
+static void xorMemory(EntropyGatherer *p, unsigned char *x, int size){
 	int j, k;
-	for(j=0, k=p->i; j<sz; j++){
+	for(j=0, k=p->i; j<size; j++){
 		p->a[k++] ^= x[j];
 		if( k>=p->na ) k = 0;
 	}
 	p->i = k;
-	p->nXor += sz;
+	p->nXor += size;
 }
 #endif /* !defined(LIBCU_TEST) && !defined(LIBCU_OMIT_RANDOMNESS) */
 
@@ -4925,19 +4488,19 @@ int sqlite3_current_time = 0;  /* Fake system time in seconds since 1970. */
 ** On success, return RC_OK.  Return LIBCU_ERROR if the time and date
 ** cannot be found.
 */
-static int winCurrentTimeInt64(vsystem *pVfs, sqlite3_int64 *piNow){
+static int winCurrentTimeInt64(vsystem *pVfs, int64_t *piNow){
 	/* FILETIME structure is a 64-bit value representing the number of
 	100-nanosecond intervals since January 1, 1601 (= JD 2305813.5).
 	*/
 	FILETIME ft;
-	static const sqlite3_int64 winFiletimeEpoch = 23058135*(sqlite3_int64)8640000;
+	static const int64_t winFiletimeEpoch = 23058135*(int64_t)8640000;
 #ifdef LIBCU_TEST
-	static const sqlite3_int64 unixEpoch = 24405875*(sqlite3_int64)8640000;
+	static const int64_t unixEpoch = 24405875*(int64_t)8640000;
 #endif
 	/* 2^32 - to avoid use of LL and warnings in gcc */
-	static const sqlite3_int64 max32BitValue =
-		(sqlite3_int64)2000000000 + (sqlite3_int64)2000000000 +
-		(sqlite3_int64)294967296;
+	static const int64_t max32BitValue =
+		(int64_t)2000000000 + (int64_t)2000000000 +
+		(int64_t)294967296;
 
 #if LIBCU_OS_WINCE
 	SYSTEMTIME time;
@@ -4951,12 +4514,12 @@ static int winCurrentTimeInt64(vsystem *pVfs, sqlite3_int64 *piNow){
 #endif
 
 	*piNow = winFiletimeEpoch +
-		((((sqlite3_int64)ft.dwHighDateTime)*max32BitValue) +
-		(sqlite3_int64)ft.dwLowDateTime)/(sqlite3_int64)10000;
+		((((int64_t)ft.dwHighDateTime)*max32BitValue) +
+		(int64_t)ft.dwLowDateTime)/(int64_t)10000;
 
 #ifdef LIBCU_TEST
 	if( sqlite3_current_time ){
-		*piNow = 1000*(sqlite3_int64)sqlite3_current_time + unixEpoch;
+		*piNow = 1000*(int64_t)sqlite3_current_time + unixEpoch;
 	}
 #endif
 	UNUSED_SYMBOL(pVfs);
@@ -4970,7 +4533,7 @@ static int winCurrentTimeInt64(vsystem *pVfs, sqlite3_int64 *piNow){
 */
 static int winCurrentTime(vsystem *pVfs, double *prNow){
 	int rc;
-	sqlite3_int64 i;
+	int64_t i;
 	rc = winCurrentTimeInt64(pVfs, &i);
 	if( !rc ){
 		*prNow = i/86400000.0;
