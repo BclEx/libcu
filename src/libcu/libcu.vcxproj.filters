@@ -125,8 +125,26 @@
     <ClInclude Include="..\include\ext\vsystem.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\ext\vsystemfile.h">
-      <Filter>include\ext</Filter>
+    <ClInclude Include="ext\sqlite\libcu.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\os.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\os_common.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\os_setup.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\os_win.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\sqlite3.h">
+      <Filter>ext\sqlite</Filter>
+    </ClInclude>
+    <ClInclude Include="ext\sqlite\sqliteInt.h">
+      <Filter>ext\sqlite</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -166,19 +184,10 @@
     <CudaCompile Include="ext\vsystem.cu">
       <Filter>ext</Filter>
     </CudaCompile>
-    <CudaCompile Include="ext\vsystemfile.cu">
-      <Filter>ext</Filter>
-    </CudaCompile>
     <CudaCompile Include="ext\vsystem-gpu.cu">
       <Filter>ext</Filter>
     </CudaCompile>
     <CudaCompile Include="ext\vsystem-map.cu">
-      <Filter>ext</Filter>
-    </CudaCompile>
-    <CudaCompile Include="ext\vsystem-unix.cu">
-      <Filter>ext</Filter>
-    </CudaCompile>
-    <CudaCompile Include="ext\vsystem-win.cu">
       <Filter>ext</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -205,6 +214,9 @@
     <Filter Include="include\ext">
       <UniqueIdentifier>{5bf5eda0-9971-4bbc-83ad-483b240b540c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ext\sqlite">
+      <UniqueIdentifier>{cb31184e-dc82-4c28-ac52-52f646ba7f99}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sentinel-msg.cpp" />
@@ -216,6 +228,24 @@
     </ClCompile>
     <ClCompile Include="ext\mutex-unix.cpp">
       <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\vsystem-win.cpp">
+      <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\vsystem-unix.cpp">
+      <Filter>ext</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\sqlite\os_unix.c">
+      <Filter>ext\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\sqlite\os_win.c">
+      <Filter>ext\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\sqlite\mutex_unix.c">
+      <Filter>ext\sqlite</Filter>
+    </ClCompile>
+    <ClCompile Include="ext\sqlite\mutex_w32.c">
+      <Filter>ext\sqlite</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

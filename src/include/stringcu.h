@@ -186,7 +186,7 @@ typedef struct strbld_t {
 	bool overflowed;    // Becomes true if string size exceeds limits
 } strbld_t;
 
-extern __device__ void strbldInit(strbld_t *b, char *text = nullptr, int capacity = -1, int maxAlloc = -1);
+extern __device__ void strbldInit(strbld_t *b, void *tag = nullptr, char *text = nullptr, int capacity = -1, int maxAlloc = -1);
 extern __device__ void strbldAppendSpace(strbld_t *b, int length);
 extern __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list va);
 extern __device__ void strbldAppend(strbld_t *b, const char *str, int length);

@@ -1,3 +1,4 @@
+#include <stdlibcu.h>
 #include <ext/alloc.h>
 #include <assert.h>
 
@@ -69,7 +70,7 @@ static __host_device__ void *memoryMalloc(int size)
 	void *p = LIBCU_MALLOC(size);
 	if (!p) {
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		sqlite3_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
+		runtimeLog(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return p;
 #else
@@ -82,7 +83,7 @@ static __host_device__ void *memoryMalloc(int size)
 	}
 	else {
 		ASSERTCOVERAGE( _runtimeConfig.log);
-		sqlite3_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
+		runtimeLog(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return (void *)p;
 #endif
@@ -133,7 +134,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 	void *p = LIBCU_REALLOC(prior, size);
 	if (!p){
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		sqlite3_log(RC_NOMEM, "failed memory resize %u to %u bytes", LIBCU_MALLOCSIZE(prior), size);
+		runtimeLog(RC_NOMEM, "failed memory resize %u to %u bytes", LIBCU_MALLOCSIZE(prior), size);
 	}
 	return p;
 #else
@@ -148,7 +149,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 	}
 	else {
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		sqlite3_log(RC_NOMEM, "failed memory resize %u to %u bytes", memorySize(prior), size);
+		runtimeLog(RC_NOMEM, "failed memory resize %u to %u bytes", memorySize(prior), size);
 	}
 	return (void *)p;
 #endif

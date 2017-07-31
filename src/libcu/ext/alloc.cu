@@ -52,7 +52,7 @@ __host_device__ mutex *allocCacheMutex() //: pathway:sqlite3Pcache1Mutex
 __host_device__ int64_t alloc_softheaplimit64(int64_t size) //: sqlite3_soft_heap_limit64
 {
 #ifndef OMIT_AUTOINIT
-	RC rc = systemInitialize();
+	RC rc = runtimeInitialize();
 	if (rc) return -1;
 #endif
 	mutex_enter(mem0.mutex);
@@ -205,10 +205,10 @@ __host_device__ void *alloc(uint64_t size) //: sqlite3Malloc
 		p = nullptr;
 	else if (_runtimeConfig.memstat) {
 		mutex_enter(mem0.mutex);
-		allocWithAlarm(size, &p);
+		allocWithAlarm((int)size, &p);
 		mutex_leave(mem0.mutex);
 	}
-	else p = __allocsystem.alloc(size);
+	else p = __allocsystem.alloc((int)size);
 	assert(_HASALIGNMENT8(p)); // IMP: R-04675-44850
 	return p;
 }
@@ -217,14 +217,14 @@ __host_device__ void *alloc(uint64_t size) //: sqlite3Malloc
 __host_device__ void *alloc32(int n) //: sqlite3_malloc
 {
 #ifndef OMIT_AUTOINIT
-	if (systemInitialize()) return nullptr;
+	if (runtimeInitialize()) return nullptr;
 #endif
 	return n <= 0 ? nullptr : alloc(n);
 }
 __host_device__ void *alloc64(uint64_t n) //: sqlite3_malloc64
 {
 #ifndef OMIT_AUTOINIT
-	if (systemInitialize()) return nullptr;
+	if (runtimeInitialize()) return nullptr;
 #endif
 	return alloc(n);
 }
@@ -277,7 +277,7 @@ __host_device__ void *scratchAlloc(int size) //: sqlite3ScratchMalloc
 	return p;
 }
 
-__device__ void scratchFree(void *p) //: sqlite3ScratchFree
+__host_device__ void scratchFree(void *p) //: sqlite3ScratchFree
 {
 	if (p) {
 #if LIBCU_THREADSAFE == 0 && !defined(NDEBUG)
@@ -330,7 +330,7 @@ __host_device__ int allocSize(void *p) //: sqlite3MallocSize
 	return __allocsystem.size(p);
 }
 
-__device__ int tagallocSize(tagbase_t *tag, void *p) //: sqlite3DbMallocSize
+__host_device__ int tagallocSize(tagbase_t *tag, void *p) //: sqlite3DbMallocSize
 {
 	assert(p);
 	if (!tag || !isLookaside(tag, p)) {
@@ -428,7 +428,7 @@ __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Rea
 	size_t oldSize = allocSize(prior);
 	// IMPLEMENTATION-OF: R-46199-30249 Libcu guarantees that the second argument to _.xRealloc is always a value returned by a prior call to _.Roundup.
 	void *p;
-	size_t newSize2 = __allocsystem.roundup(newSize);
+	size_t newSize2 = __allocsystem.roundup((int)newSize);
 	if (oldSize == newSize2)
 		p = prior;
 	else if (_runtimeConfig.memstat) {
@@ -439,7 +439,7 @@ __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Rea
 			allocAlarm(sizeDiff);
 		p = __allocsystem.realloc(prior, newSize2);
 		if (!p && mem0.alarmThreshold > 0) {
-			allocAlarm(newSize);
+			allocAlarm((int)newSize);
 			p = __allocsystem.realloc(prior, newSize2);
 		}
 		if (p) {
@@ -457,7 +457,7 @@ __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Rea
 __host_device__ void *alloc_realloc32(void *prior, int newSize) //: sqlite3_realloc
 {
 #ifndef OMIT_AUTOINIT
-	if (systemInitialize()) return nullptr;
+	if (runtimeInitialize()) return nullptr;
 #endif
 	if (newSize < 0) newSize = 0;  // IMP: R-26507-47431
 	return allocRealloc(prior, newSize);
@@ -466,7 +466,7 @@ __host_device__ void *alloc_realloc32(void *prior, int newSize) //: sqlite3_real
 __host_device__ void *alloc_realloc64(void *prior, uint64_t newSize)
 {
 #ifndef OMIT_AUTOINIT
-	if (systemInitialize()) return nullptr;
+	if (runtimeInitialize()) return nullptr;
 #endif
 	return allocRealloc(prior, newSize);
 }
@@ -480,7 +480,7 @@ __host_device__ void *allocZero(uint64_t size) //: sqlite3MallocZero
 }
 
 /* Allocate and zero memory.  If the allocation fails, make the mallocFailed flag in the connection pointer. */
-__device__ void *tagallocZero(tagbase_t *tag, uint64_t size) //: sqlite3DbMallocZero
+__host_device__ void *tagallocZero(tagbase_t *tag, uint64_t size) //: sqlite3DbMallocZero
 {
 	ASSERTCOVERAGE(tag);
 	void *p = tagallocRaw(tag, size);
@@ -763,7 +763,7 @@ __host_device__ void allocBenignEnd()
 //	return newZ;
 //}
 //
-//__device__ char *_strndupG(const char *z, int n)
+//__host_device__ char *_strndupG(const char *z, int n)
 //{
 //	if (!z) return nullptr;
 //	_assert((n & 0x7fffffff) == n);

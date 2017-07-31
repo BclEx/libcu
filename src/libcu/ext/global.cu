@@ -66,7 +66,7 @@ _WSD struct RuntimeConfig _runtimeConfig = {
 	LIBCU_STMTJRNLSPILL,		// stmtSpills
 	{0,0,0,0,0,0,0,0},			// allocSystem
 	{0,0,0,0,0,0,0,0,0},		// mutexSystem
-	{0,0,0,0,0,0,0,0,0,0,0,0,0},// pcache2System
+	nullptr, //{0,0,0,0,0,0,0,0,0,0,0,0,0},// pcache2System
 	(void *)nullptr,            // heap
 	0,							// heapSize
 	0, 0,						// minHeapSize, maxHeapSize

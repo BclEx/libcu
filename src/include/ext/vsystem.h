@@ -1,146 +1,166 @@
-﻿// sqlite.h
-#pragma once
-namespace CORE_NAME
-{
-	// The default size of a disk sector
-#ifndef DEFAULT_SECTOR_SIZE
-#define DEFAULT_SECTOR_SIZE 4096
-#endif
+﻿
+// CAPI3REF: Flags For File Open Operations
+#define VSYS_OPEN_READONLY         0x00000001  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_READWRITE        0x00000002  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_CREATE           0x00000004  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_DELETEONCLOSE    0x00000008  // VFS only
+#define VSYS_OPEN_EXCLUSIVE        0x00000010  // VFS only
+#define VSYS_OPEN_AUTOPROXY        0x00000020  // VFS only
+#define VSYS_OPEN_URI              0x00000040  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_MEMORY           0x00000080  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_MAIN_DB          0x00000100  // VFS only
+#define VSYS_OPEN_TEMP_DB          0x00000200  // VFS only
+#define VSYS_OPEN_TRANSIENT_DB     0x00000400  // VFS only
+#define VSYS_OPEN_MAIN_JOURNAL     0x00000800  // VFS only
+#define VSYS_OPEN_TEMP_JOURNAL     0x00001000  // VFS only
+#define VSYS_OPEN_SUBJOURNAL       0x00002000  // VFS only
+#define VSYS_OPEN_MASTER_JOURNAL   0x00004000  // VFS only
+#define VSYS_OPEN_NOMUTEX          0x00008000  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_FULLMUTEX        0x00010000  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_SHAREDCACHE      0x00020000  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_PRIVATECACHE     0x00040000  // Ok for sqlite3_open_v2()
+#define VSYS_OPEN_WAL              0x00080000  // VFS only
+/* Reserved:                       0x00F00000 */
 
-	// Temporary files are named starting with this prefix followed by 16 random alphanumeric characters, and no file extension. They are stored in the
-	// OS's standard temporary file directory, and are deleted prior to exit. If sqlite is being embedded in another program, you may wish to change the
-	// prefix to reflect your program's name, so that if your program exits prematurely, old temporary files can be easily identified. This can be done
-	// using -DSQLITE_TEMP_FILE_PREFIX=myprefix_ on the compiler command line.
-	//
-	// 2006-10-31:  The default prefix used to be "sqlite_".  But then Mcafee started using SQLite in their anti-virus product and it
-	// started putting files with the "sqlite" name in the c:/temp folder. This annoyed many windows users.  Those users would then do a 
-	// Google search for "sqlite", find the telephone numbers of the developers and call to wake them up at night and complain.
-	// For this reason, the default name prefix is changed to be "sqlite" spelled backwards.  So the temp files are still identified, but
-	// anybody smart enough to figure out the code is also likely smart enough to know that calling the developer will not help get rid
-	// of the file.
-#ifndef TEMP_FILE_PREFIX
-#define TEMP_FILE_PREFIX "etilqs_"
-#endif
+// CAPI3REF: Device Characteristics
+#define VSYS_IOCAP_ATOMIC                 0x00000001
+#define VSYS_IOCAP_ATOMIC512              0x00000002
+#define VSYS_IOCAP_ATOMIC1K               0x00000004
+#define VSYS_IOCAP_ATOMIC2K               0x00000008
+#define VSYS_IOCAP_ATOMIC4K               0x00000010
+#define VSYS_IOCAP_ATOMIC8K               0x00000020
+#define VSYS_IOCAP_ATOMIC16K              0x00000040
+#define VSYS_IOCAP_ATOMIC32K              0x00000080
+#define VSYS_IOCAP_ATOMIC64K              0x00000100
+#define VSYS_IOCAP_SAFE_APPEND            0x00000200
+#define VSYS_IOCAP_SEQUENTIAL             0x00000400
+#define VSYS_IOCAP_UNDELETABLE_WHEN_OPEN  0x00000800
+#define VSYS_IOCAP_POWERSAFE_OVERWRITE    0x00001000
+#define VSYS_IOCAP_IMMUTABLE              0x00002000
 
-#ifdef _TESTX
-	__device__ void DisableSimulatedIOErrors(int *pending = nullptr, int *hit = nullptr);
-	__device__ void EnableSimulatedIOErrors(int *pending = nullptr, int *hit = nullptr);
-#else
-#define DisableSimulatedIOErrors(...)
-#define EnableSimulatedIOErrors(...)
-#endif
+// CAPI3REF: File Locking Levels
+#define VSYS_LOCK_NONE          0
+#define VSYS_LOCK_SHARED        1
+#define VSYS_LOCK_RESERVED      2
+#define VSYS_LOCK_PENDING       3
+#define VSYS_LOCK_EXCLUSIVE     4
 
-	typedef void (*syscall_ptr)();
+// CAPI3REF: Synchronization Type Flags
+#define VSYS_SYNC_NORMAL        0x00002
+#define VSYS_SYNC_FULL          0x00003
+#define VSYS_SYNC_DATAONLY      0x00010
 
-	class VFile;
-	class VSystem
-	{
-	public:
-		class VAlloc
-		{
-		public:
-			__device__ virtual void *Alloc(int bytes);			// Memory allocation function
-			__device__ virtual void Free(void *prior);			// Free a prior allocation
-			__device__ virtual void *Realloc(void *prior, int bytes);	// Resize an allocation
-			__device__ virtual int Size(void *p);				// Return the size of an allocation
-			__device__ virtual int Roundup(int bytes);			// Round up request size to allocation size
-			__device__ virtual RC Init(void *appData);			// Initialize the memory allocator
-			__device__ virtual void Shutdown(void *appData);	// Deinitialize the memory allocator
-			void *AppData;										// Argument to xInit() and xShutdown()
-		};
+// CAPI3REF: OS Interface Open File Handle
+typedef struct vsystemfile vsystemfile;
+struct vsystemfile {
+	const struct vsystemfile_methods *methods;  // Methods for an open file
+};
 
-		enum OPEN : int
-		{
-			OPEN_READONLY = 0x00000001,          // Ok for sqlite3_open_v2() 
-			OPEN_READWRITE = 0x00000002,        // Ok for sqlite3_open_v2() 
-			OPEN_CREATE = 0x00000004,            // Ok for sqlite3_open_v2() 
-			OPEN_DELETEONCLOSE = 0x00000008,     // VFS only 
-			OPEN_EXCLUSIVE = 0x00000010,         // VFS only 
-			OPEN_AUTOPROXY = 0x00000020,         // VFS only 
-			OPEN_URI = 0x00000040,               // Ok for sqlite3_open_v2() 
-			OPEN_MEMORY = 0x00000080,            // Ok for sqlite3_open_v2()
-			OPEN_MAIN_DB = 0x00000100,           // VFS only 
-			OPEN_TEMP_DB = 0x00000200,           // VFS only 
-			OPEN_TRANSIENT_DB = 0x00000400,      // VFS only 
-			OPEN_MAIN_JOURNAL = 0x00000800,      // VFS only 
-			OPEN_TEMP_JOURNAL = 0x00001000,      // VFS only 
-			OPEN_SUBJOURNAL = 0x00002000,        // VFS only 
-			OPEN_MASTER_JOURNAL = 0x00004000,    // VFS only 
-			OPEN_NOMUTEX = 0x00008000,           // Ok for sqlite3_open_v2() 
-			OPEN_FULLMUTEX = 0x00010000,         // Ok for sqlite3_open_v2() 
-			OPEN_SHAREDCACHE = 0x00020000,       // Ok for sqlite3_open_v2() 
-			OPEN_PRIVATECACHE = 0x00040000,      // Ok for sqlite3_open_v2() 
-			OPEN_WAL = 0x00080000,               // VFS only 
-		};
+// CAPI3REF: OS Interface File Virtual Methods Object
+typedef struct vsystemfile_methods vsystemfile_methods;
+struct vsystemfile_methods {
+	int version;
+	int (*close)(vsystemfile *);
+	int (*read)(vsystemfile *, void *, int amount, int64_t offset);
+	int (*write)(vsystemfile *, const void *, int amount, int64_t offset);
+	int (*truncate)(vsystemfile *, int64_t size);
+	int (*sync)(vsystemfile *, int flags);
+	int (*fileSize)(vsystemfile *, int64_t *size);
+	int (*lock)(vsystemfile *, int);
+	int (*unlock)(vsystemfile *, int);
+	int (*checkReservedLock)(vsystemfile *, int *resOut);
+	int (*fileControl)(vsystemfile *, int op, void *args);
+	int (*sectorSize)(vsystemfile *);
+	int (*deviceCharacteristics)(vsystemfile *);
+	int (*shmMap)(vsystemfile *, int page, int pageSize, int, void volatile**);
+	int (*shmLock)(vsystemfile *, int offset, int n, int flags);
+	void (*shmBarrier)(vsystemfile *);
+	int (*shmUnmap)(vsystemfile *, int deleteFlag);
+	int (*fetch)(vsystemfile *, int64_t offset, int amount, void **p);
+	int (*unfetch)(vsystemfile *, int64_t offset, void *p);
+};
 
-		enum ACCESS
-		{
-			ACCESS_EXISTS = 0,
-			ACCESS_READWRITE = 1,	// Used by PRAGMA temp_store_directory
-			ACCESS_READ = 2,		// Unused
-		};
+// CAPI3REF: Standard File Control Opcodes
+#define VSYS_FCNTL_LOCKSTATE               1
+#define VSYS_FCNTL_GET_LOCKPROXYFILE       2
+#define VSYS_FCNTL_SET_LOCKPROXYFILE       3
+#define VSYS_FCNTL_LAST_ERRNO              4
+#define VSYS_FCNTL_SIZE_HINT               5
+#define VSYS_FCNTL_CHUNK_SIZE              6
+#define VSYS_FCNTL_FILE_POINTER            7
+#define VSYS_FCNTL_SYNC_OMITTED            8
+#define VSYS_FCNTL_WIN32_AV_RETRY          9
+#define VSYS_FCNTL_PERSIST_WAL            10
+#define VSYS_FCNTL_OVERWRITE              11
+#define VSYS_FCNTL_VFSNAME                12
+#define VSYS_FCNTL_POWERSAFE_OVERWRITE    13
+#define VSYS_FCNTL_PRAGMA                 14
+#define VSYS_FCNTL_BUSYHANDLER            15
+#define VSYS_FCNTL_TEMPFILENAME           16
+#define VSYS_FCNTL_MMAP_SIZE              18
+#define VSYS_FCNTL_TRACE                  19
+#define VSYS_FCNTL_HAS_MOVED              20
+#define VSYS_FCNTL_SYNC                   21
+#define VSYS_FCNTL_COMMIT_PHASETWO        22
+#define VSYS_FCNTL_WIN32_SET_HANDLE       23
+#define VSYS_FCNTL_WAL_BLOCK              24
+#define VSYS_FCNTL_ZIPVFS                 25
+#define VSYS_FCNTL_RBU                    26
+#define VSYS_FCNTL_VFS_POINTER            27
+#define VSYS_FCNTL_JOURNAL_POINTER        28
+#define VSYS_FCNTL_WIN32_GET_HANDLE       29
+#define VSYS_FCNTL_PDB                    30
 
-		VSystem *Next;	// Next registered VFS
-		const char *Name;	// Name of this virtual file system
-		void *Tag;			// Pointer to application-specific data
-		int SizeOsFile;     // Size of subclassed VirtualFile
-		int MaxPathname;	// Maximum file pathname length
+// CAPI3REF: Mutex Handle
+typedef struct mutex mutex;
+//
+//// CAPI3REF: Loadable Extension Thunk
+//typedef struct sqlite3_api_routines sqlite3_api_routines;
 
-		__device__ static RC Initialize();
-		__device__ static void Shutdown();
+// CAPI3REF: OS Interface Object
+typedef struct vsystem vsystem;
+typedef void (*vsystemcall_ptr)();
+struct vsystem {
+	int version;			// Structure version number (currently 3)
+	int sizeOsFile;			// Size of subclassed vsystemfile
+	int maxPathname;		// Maximum file pathname length
+	vsystem *next;			// Next registered VFS
+	const char *name;		// Name of this virtual file system
+	void *appData;			// Pointer to application-specific data
+	int (*open)(vsystem *, const char *name, vsystemfile *, int flags, int *outFlags);
+	int (*delete_)(vsystem *, const char *name, int syncDir);
+	int (*access)(vsystem *, const char *name, int flags, int *resOut);
+	int (*fullPathname)(vsystem *, const char *name, int outLength, char *out);
+	void *(*dlOpen)(vsystem *, const char *filename);
+	void (*dlError)(vsystem *, int bytes, char *errMsg);
+	void (*(*dlSym)(vsystem *, void *, const char *symbol))();
+	void (*dlClose)(vsystem *, void *);
+	int (*randomness)(vsystem *, int bytes, char *out);
+	int (*sleep)(vsystem *, int microseconds);
+	int (*currentTime)(vsystem *, double *);
+	int (*getLastError)(vsystem *, int, char *);
+	int (*currentTimeInt64)(vsystem *, int64_t *);
+	int (*setSystemCall)(vsystem *, const char *name, vsystemcall_ptr);
+	vsystemcall_ptr (*getSystemCall)(vsystem *, const char *name);
+	const char *(*nextSystemCall)(vsystem *, const char *name);
+};
 
-		__device__ static VSystem *FindVfs(const char *name);
-		__device__ static RC RegisterVfs(VSystem *vfs, bool _default);
-		__device__ static RC UnregisterVfs(VSystem *vfs);
+// CAPI3REF: Flags for the xAccess VFS method
+#define VSYS_ACCESS_EXISTS    0
+#define VSYS_ACCESS_READWRITE 1   // Used by PRAGMA temp_store_directory
+#define VSYS_ACCESS_READ      2   // Unused
 
-		__device__ virtual VFile *_AttachFile(void *buffer);
-		__device__ virtual RC Open(const char *path, VFile *file, OPEN flags, OPEN *outFlags);
-		__device__ virtual RC Delete(const char *path, bool syncDirectory);
-		__device__ virtual RC Access(const char *path, ACCESS flags, int *outRC);
-		__device__ virtual RC FullPathname(const char *path, int pathOutLength, char *pathOut);
+// CAPI3REF: Flags for the xShmLock VFS method
+#define VSYS_SHM_UNLOCK       1
+#define VSYS_SHM_LOCK         2
+#define VSYS_SHM_SHARED       4
+#define VSYS_SHM_EXCLUSIVE    8
 
-		__device__ virtual void *DlOpen(const char *filename);
-		__device__ virtual void DlError(int bufLength, char *buf);
-		__device__ virtual void (*DlSym(void *handle, const char *symbol))();
-		__device__ virtual void DlClose(void *handle);
+// CAPI3REF: Maximum xShmLock index
+#define VSYS_SHM_NLOCK        8
 
-		__device__ virtual int Randomness(int bufLength, char *buf);
-		__device__ virtual int Sleep(int microseconds);
-		__device__ virtual RC CurrentTimeInt64(int64 *now);
-		__device__ virtual RC CurrentTime(double *now);
-		__device__ virtual RC GetLastError(int bufLength, char *buf);
-
-		__device__ virtual RC SetSystemCall(const char *name, syscall_ptr newFunc);
-		__device__ virtual syscall_ptr GetSystemCall(const char *name);
-		__device__ virtual const char *NextSystemCall(const char *name);
-
-		__device__ inline RC OpenAndAlloc(const char *path, VFile **file, OPEN flags, OPEN *outFlags)
-		{
-			VFile *file2 = (VFile *)_alloc(SizeOsFile);
-			if (!file2)
-				return RC_NOMEM;
-			RC rc = Open(path, file2, flags, outFlags);
-			if (rc != RC_OK)
-				_free(file2);
-			else
-				*file = file2;
-			return rc;
-		}
-
-#pragma region File
-#ifdef ENABLE_8_3_NAMES
-		__device__ static void FileSuffix3(const char *baseFilename, char *z)
-#else
-		__device__ inline static void FileSuffix3(const char *baseFilename, char *z) { }
-#endif
-		__device__ static RC ParseUri(const char *defaultVfsName, const char *uri, VSystem::OPEN *flagsRef, VSystem **vfsOut, char **fileNameOut, char **errMsgOut);
-		__device__ static const char *UriParameter(const char *filename, const char *param);
-		__device__ static bool UriBoolean(const char *filename, const char *param, bool dflt);
-		__device__ static int64 UriInt64(const char *filename, const char *param, int64 dflt);
-
-#pragma endregion
-	};
-
-	__device__ __forceinline void operator|=(VSystem::OPEN &a, int b) { a = (VSystem::OPEN)(a | b); }
-	__device__ __forceinline void operator&=(VSystem::OPEN &a, int b) { a = (VSystem::OPEN)(a & b); }
-}
+// CAPI3REF: Initialize The SQLite Library
+int sqlite3_initialize();
+int sqlite3_shutdown();
+int sqlite3_os_init();
+int sqlite3_os_end();

@@ -203,7 +203,7 @@ __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restr
 {
 	if (maxlen <= 0) return -1;
 	strbld_t b;
-	strbldInit(&b, (char *)s, (int)maxlen, 0); b.allocType = 0;
+	strbldInit(&b, nullptr, (char *)s, (int)maxlen, 0); b.allocType = 0;
 	strbldAppendFormat(&b, false, format, va);
 	strbldToString(&b);
 	return b.index;
@@ -216,7 +216,7 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
 	strbldAppendFormat(&b, false, format, va);
 	const char *v = strbldToString(&b);
 	int size = b.index + 1;
@@ -822,7 +822,7 @@ __device__ char *vmtagprintf_(void *tag, const char *format, va_list va)
 	assert(tag != nullptr);
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
 	b.tag = tag;
 	strbldAppendFormat(&b, true, format, va);
 	char *str = strbldToString(&b);
@@ -836,7 +836,7 @@ __device__ char *vmprintf_(const char *format, va_list va)
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
 	b.allocType = 2;
 	strbldAppendFormat(&b, false, format, va);
 	return strbldToString(&b);
@@ -848,7 +848,7 @@ __device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *form
 {
 	if (maxlen <= 0) return (char *)s;
 	strbld_t b;
-	strbldInit(&b, (char *)s, (int)maxlen, 0); b.allocType = 0;
+	strbldInit(&b, nullptr, (char *)s, (int)maxlen, 0); b.allocType = 0;
 	strbldAppendFormat(&b, false, format, va);
 	return strbldToString(&b);
 }

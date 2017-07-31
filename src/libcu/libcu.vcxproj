@@ -39,7 +39,6 @@
     <ClInclude Include="..\include\ext\global.h" />
     <ClInclude Include="..\include\ext\util.h" />
     <ClInclude Include="..\include\ext\vsystem.h" />
-    <ClInclude Include="..\include\ext\vsystemfile.h" />
     <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\grpcu.h" />
     <ClInclude Include="..\include\pwdcu.h" />
@@ -66,6 +65,13 @@
     <ClInclude Include="..\include\sys\statcu.h" />
     <ClInclude Include="..\include\_unistd.h" />
     <ClInclude Include="..\include\unistdcu.h" />
+    <ClInclude Include="ext\sqlite\libcu.h" />
+    <ClInclude Include="ext\sqlite\os.h" />
+    <ClInclude Include="ext\sqlite\os_common.h" />
+    <ClInclude Include="ext\sqlite\os_setup.h" />
+    <ClInclude Include="ext\sqlite\os_win.h" />
+    <ClInclude Include="ext\sqlite\sqlite3.h" />
+    <ClInclude Include="ext\sqlite\sqliteInt.h" />
     <ClInclude Include="fsystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +79,10 @@
     <ClCompile Include="ext\mutex-win.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="ext\sqlite\mutex_unix.c" />
+    <ClCompile Include="ext\sqlite\mutex_w32.c" />
+    <ClCompile Include="ext\sqlite\os_unix.c" />
+    <ClCompile Include="ext\sqlite\os_win.c" />
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
@@ -95,12 +105,23 @@
     <CudaCompile Include="ext\status.cu" />
     <CudaCompile Include="ext\global.cu" />
     <CudaCompile Include="ext\util.cu" />
-    <CudaCompile Include="ext\vsystem-gpu.cu" />
-    <CudaCompile Include="ext\vsystem-map.cu" />
-    <CudaCompile Include="ext\vsystem-unix.cu" />
-    <CudaCompile Include="ext\vsystem-win.cu" />
-    <CudaCompile Include="ext\vsystem.cu" />
-    <CudaCompile Include="ext\vsystemfile.cu" />
+    <CudaCompile Include="ext\vsystem-gpu.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="ext\vsystem-map.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <ClCompile Include="ext\vsystem-unix.cpp">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="ext\vsystem-win.cpp">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <CudaCompile Include="ext\vsystem.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />

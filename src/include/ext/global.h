@@ -29,6 +29,7 @@ THE SOFTWARE.
 #ifndef _EXT_GLOBAL_H
 #define _EXT_GLOBAL_H
 #include <crtdefscu.h>
+#include <stdargcu.h>
 __BEGIN_DECLS;
 
 // CAPI3REF: Result Codes
@@ -36,93 +37,95 @@ __BEGIN_DECLS;
 #define RC_OK           0   // Successful result
 /* beginning-of-error-codes */
 #define RC_ERROR        1   // SQL error or missing database
-//#define RC_INTERNAL     2   // Internal logic error in SQLite
-//#define RC_PERM         3   // Access permission denied
-//#define RC_ABORT        4   // Callback routine requested an abort
-//#define RC_BUSY         5   // The database file is locked
-//#define RC_LOCKED       6   // A table in the database is locked
+#define RC_INTERNAL     2   // Internal logic error in SQLite
+#define RC_PERM         3   // Access permission denied
+#define RC_ABORT        4   // Callback routine requested an abort
+#define RC_BUSY         5   // The database file is locked
+#define RC_LOCKED       6   // A table in the database is locked
 #define RC_NOMEM        7   // A malloc() failed
-//#define RC_READONLY     8   // Attempt to write a readonly database
-//#define RC_INTERRUPT    9   // Operation terminated by sqlite3_interrupt()
+#define RC_READONLY     8   // Attempt to write a readonly database
+#define RC_INTERRUPT    9   // Operation terminated by sqlite3_interrupt()
 #define RC_IOERR       10   // Some kind of disk I/O error occurred
 #define RC_CORRUPT     11   // The database disk image is malformed
-//#define RC_NOTFOUND    12   // Unknown opcode in sqlite3_file_control()
-//#define RC_FULL        13   // Insertion failed because database is full
+#define RC_NOTFOUND    12   // Unknown opcode in sqlite3_file_control()
+#define RC_FULL        13   // Insertion failed because database is full
 #define RC_CANTOPEN    14   // Unable to open the database file
-//#define RC_PROTOCOL    15   // Database lock protocol error
-//#define RC_EMPTY       16   // Database is empty
-//#define RC_SCHEMA      17   // The database schema changed
-//#define RC_TOOBIG      18   // String or BLOB exceeds size limit
-//#define RC_CONSTRAINT  19   // Abort due to constraint violation
-//#define RC_MISMATCH    20   // Data type mismatch
+#define RC_PROTOCOL    15   // Database lock protocol error
+#define RC_EMPTY       16   // Database is empty
+#define RC_SCHEMA      17   // The database schema changed
+#define RC_TOOBIG      18   // String or BLOB exceeds size limit
+#define RC_CONSTRAINT  19   // Abort due to constraint violation
+#define RC_MISMATCH    20   // Data type mismatch
 #define RC_MISUSE      21   // Library used incorrectly
-//#define RC_NOLFS       22   // Uses OS features not supported on host
-//#define RC_AUTH        23   // Authorization denied
-//#define RC_FORMAT      24   // Auxiliary database format error
-//#define RC_RANGE       25   // 2nd parameter to sqlite3_bind out of range
-//#define RC_NOTADB      26   // File opened that is not a database file
-//#define RC_NOTICE      27   // Notifications from sqlite3_log()
-//#define RC_WARNING     28   // Warnings from sqlite3_log()
-//#define RC_ROW         100  // sqlite3_step() has another row ready
-//#define RC_DONE        101  // sqlite3_step() has finished executing
+#define RC_NOLFS       22   // Uses OS features not supported on host
+#define RC_AUTH        23   // Authorization denied
+#define RC_FORMAT      24   // Auxiliary database format error
+#define RC_RANGE       25   // 2nd parameter to sqlite3_bind out of range
+#define RC_NOTADB      26   // File opened that is not a database file
+#define RC_NOTICE      27   // Notifications from sqlite3_log()
+#define RC_WARNING     28   // Warnings from sqlite3_log()
+#define RC_ROW         100  // sqlite3_step() has another row ready
+#define RC_DONE        101  // sqlite3_step() has finished executing
 
 // CAPI3REF: Extended Result Codes
-//#define RC_IOERR_READ              (RC_IOERR | (1<<8))
-//#define RC_IOERR_SHORT_READ        (RC_IOERR | (2<<8))
-//#define RC_IOERR_WRITE             (RC_IOERR | (3<<8))
-//#define RC_IOERR_FSYNC             (RC_IOERR | (4<<8))
-//#define RC_IOERR_DIR_FSYNC         (RC_IOERR | (5<<8))
-//#define RC_IOERR_TRUNCATE          (RC_IOERR | (6<<8))
-//#define RC_IOERR_FSTAT             (RC_IOERR | (7<<8))
-//#define RC_IOERR_UNLOCK            (RC_IOERR | (8<<8))
-//#define RC_IOERR_RDLOCK            (RC_IOERR | (9<<8))
-//#define RC_IOERR_DELETE            (RC_IOERR | (10<<8))
-//#define RC_IOERR_BLOCKED           (RC_IOERR | (11<<8))
+#define RC_IOERR_READ              (RC_IOERR | (1<<8))
+#define RC_IOERR_SHORT_READ        (RC_IOERR | (2<<8))
+#define RC_IOERR_WRITE             (RC_IOERR | (3<<8))
+#define RC_IOERR_FSYNC             (RC_IOERR | (4<<8))
+#define RC_IOERR_DIR_FSYNC         (RC_IOERR | (5<<8))
+#define RC_IOERR_TRUNCATE          (RC_IOERR | (6<<8))
+#define RC_IOERR_FSTAT             (RC_IOERR | (7<<8))
+#define RC_IOERR_UNLOCK            (RC_IOERR | (8<<8))
+#define RC_IOERR_RDLOCK            (RC_IOERR | (9<<8))
+#define RC_IOERR_DELETE            (RC_IOERR | (10<<8))
+#define RC_IOERR_BLOCKED           (RC_IOERR | (11<<8))
 #define RC_IOERR_NOMEM             (RC_IOERR | (12<<8))
-//#define RC_IOERR_ACCESS            (RC_IOERR | (13<<8))
-//#define RC_IOERR_CHECKRESERVEDLOCK (RC_IOERR | (14<<8))
-//#define RC_IOERR_LOCK              (RC_IOERR | (15<<8))
-//#define RC_IOERR_CLOSE             (RC_IOERR | (16<<8))
-//#define RC_IOERR_DIR_CLOSE         (RC_IOERR | (17<<8))
-//#define RC_IOERR_SHMOPEN           (RC_IOERR | (18<<8))
-//#define RC_IOERR_SHMSIZE           (RC_IOERR | (19<<8))
-//#define RC_IOERR_SHMLOCK           (RC_IOERR | (20<<8))
-//#define RC_IOERR_SHMMAP            (RC_IOERR | (21<<8))
-//#define RC_IOERR_SEEK              (RC_IOERR | (22<<8))
-//#define RC_IOERR_DELETE_NOENT      (RC_IOERR | (23<<8))
-//#define RC_IOERR_MMAP              (RC_IOERR | (24<<8))
-//#define RC_IOERR_GETTEMPPATH       (RC_IOERR | (25<<8))
-//#define RC_IOERR_CONVPATH          (RC_IOERR | (26<<8))
-//#define RC_IOERR_VNODE             (RC_IOERR | (27<<8))
-//#define RC_IOERR_AUTH              (RC_IOERR | (28<<8))
-//#define RC_LOCKED_SHAREDCACHE      (RC_LOCKED |  (1<<8))
-//#define RC_BUSY_RECOVERY           (RC_BUSY   |  (1<<8))
-//#define RC_BUSY_SNAPSHOT           (RC_BUSY   |  (2<<8))
-//#define RC_CANTOPEN_NOTEMPDIR      (RC_CANTOPEN | (1<<8))
-//#define RC_CANTOPEN_ISDIR          (RC_CANTOPEN | (2<<8))
-//#define RC_CANTOPEN_FULLPATH       (RC_CANTOPEN | (3<<8))
-//#define RC_CANTOPEN_CONVPATH       (RC_CANTOPEN | (4<<8))
-//#define RC_CORRUPT_VTAB            (RC_CORRUPT | (1<<8))
-//#define RC_READONLY_RECOVERY       (RC_READONLY | (1<<8))
-//#define RC_READONLY_CANTLOCK       (RC_READONLY | (2<<8))
-//#define RC_READONLY_ROLLBACK       (RC_READONLY | (3<<8))
-//#define RC_READONLY_DBMOVED        (RC_READONLY | (4<<8))
-//#define RC_ABORT_ROLLBACK          (RC_ABORT | (2<<8))
-//#define RC_CONSTRAINT_CHECK        (RC_CONSTRAINT | (1<<8))
-//#define RC_CONSTRAINT_COMMITHOOK   (RC_CONSTRAINT | (2<<8))
-//#define RC_CONSTRAINT_FOREIGNKEY   (RC_CONSTRAINT | (3<<8))
-//#define RC_CONSTRAINT_FUNCTION     (RC_CONSTRAINT | (4<<8))
-//#define RC_CONSTRAINT_NOTNULL      (RC_CONSTRAINT | (5<<8))
-//#define RC_CONSTRAINT_PRIMARYKEY   (RC_CONSTRAINT | (6<<8))
-//#define RC_CONSTRAINT_TRIGGER      (RC_CONSTRAINT | (7<<8))
-//#define RC_CONSTRAINT_UNIQUE       (RC_CONSTRAINT | (8<<8))
-//#define RC_CONSTRAINT_VTAB         (RC_CONSTRAINT | (9<<8))
-//#define RC_CONSTRAINT_ROWID        (RC_CONSTRAINT |(10<<8))
-//#define RC_NOTICE_RECOVER_WAL      (RC_NOTICE | (1<<8))
-//#define RC_NOTICE_RECOVER_ROLLBACK (RC_NOTICE | (2<<8))
-//#define RC_WARNING_AUTOINDEX       (RC_WARNING | (1<<8))
-//#define RC_AUTH_USER               (RC_AUTH | (1<<8))
-//#define RC_OK_LOAD_PERMANENTLY     (RC_OK | (1<<8))
+#define RC_IOERR_ACCESS            (RC_IOERR | (13<<8))
+#define RC_IOERR_CHECKRESERVEDLOCK (RC_IOERR | (14<<8))
+#define RC_IOERR_LOCK              (RC_IOERR | (15<<8))
+#define RC_IOERR_CLOSE             (RC_IOERR | (16<<8))
+#define RC_IOERR_DIR_CLOSE         (RC_IOERR | (17<<8))
+#define RC_IOERR_SHMOPEN           (RC_IOERR | (18<<8))
+#define RC_IOERR_SHMSIZE           (RC_IOERR | (19<<8))
+#define RC_IOERR_SHMLOCK           (RC_IOERR | (20<<8))
+#define RC_IOERR_SHMMAP            (RC_IOERR | (21<<8))
+#define RC_IOERR_SEEK              (RC_IOERR | (22<<8))
+#define RC_IOERR_DELETE_NOENT      (RC_IOERR | (23<<8))
+#define RC_IOERR_MMAP              (RC_IOERR | (24<<8))
+#define RC_IOERR_GETTEMPPATH       (RC_IOERR | (25<<8))
+#define RC_IOERR_CONVPATH          (RC_IOERR | (26<<8))
+#define RC_IOERR_VNODE             (RC_IOERR | (27<<8))
+#define RC_IOERR_AUTH              (RC_IOERR | (28<<8))
+#define RC_LOCKED_SHAREDCACHE      (RC_LOCKED |  (1<<8))
+#define RC_BUSY_RECOVERY           (RC_BUSY   |  (1<<8))
+#define RC_BUSY_SNAPSHOT           (RC_BUSY   |  (2<<8))
+#define RC_CANTOPEN_NOTEMPDIR      (RC_CANTOPEN | (1<<8))
+#define RC_CANTOPEN_ISDIR          (RC_CANTOPEN | (2<<8))
+#define RC_CANTOPEN_FULLPATH       (RC_CANTOPEN | (3<<8))
+#define RC_CANTOPEN_CONVPATH       (RC_CANTOPEN | (4<<8))
+#define RC_CORRUPT_VTAB            (RC_CORRUPT | (1<<8))
+#define RC_READONLY_RECOVERY       (RC_READONLY | (1<<8))
+#define RC_READONLY_CANTLOCK       (RC_READONLY | (2<<8))
+#define RC_READONLY_ROLLBACK       (RC_READONLY | (3<<8))
+#define RC_READONLY_DBMOVED        (RC_READONLY | (4<<8))
+#define RC_ABORT_ROLLBACK          (RC_ABORT | (2<<8))
+#define RC_CONSTRAINT_CHECK        (RC_CONSTRAINT | (1<<8))
+#define RC_CONSTRAINT_COMMITHOOK   (RC_CONSTRAINT | (2<<8))
+#define RC_CONSTRAINT_FOREIGNKEY   (RC_CONSTRAINT | (3<<8))
+#define RC_CONSTRAINT_FUNCTION     (RC_CONSTRAINT | (4<<8))
+#define RC_CONSTRAINT_NOTNULL      (RC_CONSTRAINT | (5<<8))
+#define RC_CONSTRAINT_PRIMARYKEY   (RC_CONSTRAINT | (6<<8))
+#define RC_CONSTRAINT_TRIGGER      (RC_CONSTRAINT | (7<<8))
+#define RC_CONSTRAINT_UNIQUE       (RC_CONSTRAINT | (8<<8))
+#define RC_CONSTRAINT_VTAB         (RC_CONSTRAINT | (9<<8))
+#define RC_CONSTRAINT_ROWID        (RC_CONSTRAINT |(10<<8))
+#define RC_NOTICE_RECOVER_WAL      (RC_NOTICE | (1<<8))
+#define RC_NOTICE_RECOVER_ROLLBACK (RC_NOTICE | (2<<8))
+#define RC_WARNING_AUTOINDEX       (RC_WARNING | (1<<8))
+#define RC_AUTH_USER               (RC_AUTH | (1<<8))
+#define RC_OK_LOAD_PERMANENTLY     (RC_OK | (1<<8))
+
+extern __host_device__ RC runtimeInitialize();
 
 /* Forward references to structures */
 typedef struct mutex mutex;
@@ -205,6 +208,7 @@ struct tagbase_t {
 	int *bytesFreed;		// If not NULL, increment this in DbFree()
 };
 
+#include "vsystem.h"
 #include "util.h"
 #include "mutex.h"
 #include "alloc.h"
@@ -239,7 +243,6 @@ struct tagbase_t {
 #define CONFIG_PMASZ               25  // unsigned int szPma
 #define CONFIG_STMTJRNL_SPILL      26  // int nByte
 
-
 /*
 ** Structure containing global configuration data for the Lib library.
 **
@@ -259,7 +262,7 @@ struct RuntimeConfig {
 	int stmtSpills;                 // Stmt-journal spill-to-disk threshold
 	alloc_methods allocSystem;		// Low-level memory allocation interface
 	mutex_methods mutexSystem;		// Low-level mutex interface
-	pcache2_methods pcache2System;  // Low-level page-cache interface
+	void *pcache2System;			// Low-level page-cache interface
 	void *heap;						// Heap storage space
 	int heapSize;                   // Size of heap[]
 	int minHeapSize, maxHeapSize;	// Min and max heap requests sizes
@@ -281,7 +284,7 @@ struct RuntimeConfig {
 	bool isMallocInit;				// True after malloc is initialized
 	bool isPCacheInit;              // True after malloc is initialized
 	int initMutexRefs;				// Number of users of initMutex
-	mutex *initMutex;				// Mutex used by systemInitialize()
+	mutex *initMutex;				// Mutex used by runtimeInitialize()
 	void (*log)(void*,int,const char*); // Function for logging
 	void *logArg;					// First argument to xLog()
 #ifdef LIBCU_ENABLE_SQLLOG
@@ -321,23 +324,33 @@ extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
 ** routines that report the line-number on which the error originated using sqlite3_log().  The routines also provide a convenient place
 ** to set a debugger breakpoint.
 */
-__host_device__ int systemCorruptError(int line);
-__host_device__ int systemMisuseError(int line);
-__host_device__ int systemCantopenError(int line);
-#define RC_CORRUPT_BKPT systemCorruptError(__LINE__)
-#define RC_MISUSE_BKPT systemMisuseError(__LINE__)
-#define RC_CANTOPEN_BKPT systemCantopenError(__LINE__)
+__host_device__ int runtimeCorruptError(int line);
+__host_device__ int runtimeMisuseError(int line);
+__host_device__ int runtimeCantopenError(int line);
+#define RC_CORRUPT_BKPT runtimeCorruptError(__LINE__)
+#define RC_MISUSE_BKPT runtimeMisuseError(__LINE__)
+#define RC_CANTOPEN_BKPT runtimeCantopenError(__LINE__)
 #ifdef _DEBUG
-__host_device__ int systemNomemError(int line);
-__host_device__ int systemIoerrnomemError(int line);
-#define RC_NOMEM_BKPT systemNomemError(__LINE__)
-#define RC_IOERR_NOMEM_BKPT systemIoerrnomemError(__LINE__)
+__host_device__ int runtimeNomemError(int line);
+__host_device__ int runtimeIoerrnomemError(int line);
+#define RC_NOMEM_BKPT runtimeNomemError(__LINE__)
+#define RC_IOERR_NOMEM_BKPT runtimeIoerrnomemError(__LINE__)
 #else
 #define RC_NOMEM_BKPT RC_NOMEM
 #define RC_IOERR_NOMEM_BKPT RC_IOERR_NOMEM
 #endif
 
-//__forceinline __device__ void *allocaZero(size_t size) { void *p = alloca(size); if (p) memset(p, 0, size); return p; }
+// CAPI3REF: Error Logging Interface
+/* Format and write a message to the log if logging is enabled. */
+__host_device__ void runtimeLogv(int errCode, const char *format, va_list va);
 
 __END_DECLS;
+
+#ifndef __CUDA_ARCH__
+__host_device__ __forceinline void runtimeLog(int errCode, const char *format, ...) { va_list va; va_start(va, format); runtimeLogv(errCode, format, va); va_end(va); }
+#else
+STDARG1void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
+STDARG2void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
+STDARG3void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
+#endif
 #endif  /* _EXT_GLOBAL_H */

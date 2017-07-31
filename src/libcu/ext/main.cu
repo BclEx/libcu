@@ -9,7 +9,7 @@
 
 #ifndef LIBCU_AMALGAMATION
 /* IMPLEMENTATION-OF: R-46656-45156 The runtime_version[] string constant contains the text of LIBCU_VERSION macro. */
-const char libcu_version[] = LIBCU_VERSION;
+__host_constant__ const char libcu_version[] = LIBCU_VERSION;
 #endif
 
 /* IMPLEMENTATION-OF: R-53536-42575 The sqlite3_libversion() function returns a pointer to the to the sqlite3_version[] string constant.  */
@@ -154,20 +154,20 @@ __host_device__ RC runtimeInitialize()
 		_runtimeConfig.inProgress = true;
 #ifdef LIBCU_ENABLE_SQLLOG
 		{
-			extern void sqlite3_init_sqllog();
-			sqlite3_init_sqllog();
+			//extern void sqlite3_init_sqllog();
+			//sqlite3_init_sqllog();
 		}
 #endif
 		//memset(&sqlite3BuiltinFunctions, 0, sizeof(sqlite3BuiltinFunctions));
 		//sqlite3RegisterBuiltinFunctions();
 		if (!_runtimeConfig.isPCacheInit)
-			rc = allocCacheInitialize();
+			//rc = allocCacheInitialize();
 		if (rc == RC_OK) {
 			_runtimeConfig.isPCacheInit = true;
-			rc = vsystemInitialize();
+			//rc = vsystemInitialize();
 		}
 		if (rc == RC_OK) {
-			allocCacheBufferSetup(_runtimeConfig.page, _runtimeConfig.pageSize, _runtimeConfig.pages);
+			//allocCacheBufferSetup(_runtimeConfig.page, _runtimeConfig.pageSize, _runtimeConfig.pages);
 			_runtimeConfig.isInit = true;
 #ifdef LIBCU_EXTRAINIT
 			runExtraInit = true;
@@ -230,12 +230,12 @@ __host_device__ RC runtimeShutdown()
 		void LIBCU_EXTRASHUTDOWN();
 		LIBCU_EXTRASHUTDOWN();
 #endif
-		vsystemShutdown();
+		//vsystemShutdown();
 		//sqlite3_reset_auto_extension();
 		_runtimeConfig.isInit = false;
 	}
 	if (_runtimeConfig.isPCacheInit) {
-		allocCacheShutdown();
+		//allocCacheShutdown();
 		_runtimeConfig.isPCacheInit = false;
 	}
 	if (_runtimeConfig.isMallocInit) {
@@ -245,8 +245,8 @@ __host_device__ RC runtimeShutdown()
 		// The heap subsystem has now been shutdown and these values are supposed to be NULL or point to memory that was obtained from sqlite3_malloc(),
 		// which would rely on that heap subsystem; therefore, make sure these values cannot refer to heap memory that was just invalidated when the
 		// heap subsystem was shutdown.  This is only done if the current call to this function resulted in the heap subsystem actually being shutdown.
-		_dataDirectory = nullptr;
-		_tempDirectory = nullptr;
+		libcu_dataDirectory = nullptr;
+		libcu_tempDirectory = nullptr;
 #endif
 	}
 	if (_runtimeConfig.isMutexInit) {
@@ -345,18 +345,18 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		/* now an error */
 		rc = RC_ERROR;
 		break; }
-	case CONFIG_PCACHE2: {
-		/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-		** object. This object specifies the interface to a custom page cache implementation. */
-		_runtimeConfig.pcache2System = *va_arg(va, pcache_methods2 *);
-		break; }
-	case CONFIG_GETPCACHE2: {
-		/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-		** object. Libcu copies of the current page cache implementation into that object. */
-		if (!_runtimeConfig.pcache2System.initialize)
-			sqlite3PCacheSetDefault();
-		*va_arg(va, pcache_methods2 *) = _runtimeConfig.pcache2System;
-		break; }
+	//case CONFIG_PCACHE2: {
+	//	/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+	//	** object. This object specifies the interface to a custom page cache implementation. */
+	//	_runtimeConfig.pcache2System = *va_arg(va, pcache_methods2 *);
+	//	break; }
+	//case CONFIG_GETPCACHE2: {
+	//	/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+	//	** object. Libcu copies of the current page cache implementation into that object. */
+	//	if (!_runtimeConfig.pcache2System.initialize)
+	//		sqlite3PCacheSetDefault();
+	//	*va_arg(va, pcache_methods2 *) = _runtimeConfig.pcache2System;
+	//	break; }
 							/* EVIDENCE-OF: R-06626-12911 The SQLITE_CONFIG_HEAP option is only available if Libcu is compiled with either SQLITE_ENABLE_MEMSYS3 or
 							** SQLITE_ENABLE_MEMSYS5 and returns SQLITE_ERROR if invoked otherwise. */
 #if defined(LIBCU_ENABLE_MEMSYS3) || defined(LIBCU_ENABLE_MEMSYS5)
@@ -548,13 +548,7 @@ __host_device__ void runtimeLogv(int errCode, const char *format, va_list va)
 	if (_runtimeConfig.log)
 		renderLogMsg(errCode, format, va);
 }
-#ifndef __CUDA_ARCH__
-__host_device__ void runtimeLog(int errCode, const char *format, ...) { va_list va; va_start(va, format); runtimeLogv(errCode, format, va); va_end(va); }
-#else
-STDARG1void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
-STDARG2void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
-STDARG3void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
-#endif
+
 
 #if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
 /*

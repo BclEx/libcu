@@ -53,7 +53,7 @@ __host_device__ RC mutexShutdown()
 __host_device__ mutex *mutex_alloc(MUTEX id)
 {
 #ifndef OMIT_AUTOINIT
-	if (id <= MUTEX_RECURSIVE && systemInitialize()) return nullptr;
+	if (id <= MUTEX_RECURSIVE && runtimeInitialize()) return nullptr;
 	if (id > MUTEX_RECURSIVE && mutexInitialize()) return nullptr;
 #endif
 	assert(__mutexsystem.alloc);
