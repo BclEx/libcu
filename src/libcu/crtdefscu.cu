@@ -51,4 +51,11 @@ __device__ void __hostptrFree(hostptr_t *p)
 
 #pragma endregion
 
+// EXT-METHODS
+#pragma region EXT-METHODS
+
+__device__ ext_methods __extsystem = { nullptr, nullptr, nullptr };
+
+#pragma endregion
+
 __END_DECLS;

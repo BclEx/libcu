@@ -61,7 +61,7 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define CORE_MAXHOSTPTR 10
 #endif
 
-_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+//_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
 #if defined(__CUDA_ARCH__)
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
 #else
@@ -144,7 +144,7 @@ typedef uint64_t uintptr_t;
 */
 #define _WITHIN(P,S,E) (((uintptr_t)(P)>=(uintptr_t)(S))&&((uintptr_t)(P)<(uintptr_t)(E)))
 
-#pragma endregion
+#pragma endregion	
 
 //////////////////////
 // NAMESPACE
@@ -282,5 +282,19 @@ void *__wsdfind(void *k, int l);
 #endif
 
 #pragma endregion
+
+//////////////////////
+// EXT METHODS
+#pragma region EXT-METHODS
+
+typedef struct ext_methods ext_methods;
+struct ext_methods {
+	void *(*tagallocRaw)(void *tag, uint64_t size);
+	void *(*tagrealloc)(void *tag, void *old, uint64_t newSize);
+	void (*tagfree)(void *tag, void *p);
+};
+extern "C" __device__ ext_methods __extsystem;
+
+#pragma endregion	
 
 #endif  /* _CRTDEFSCU_H */

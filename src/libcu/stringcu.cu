@@ -791,11 +791,6 @@ __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fm
 	}
 }
 
-struct tagbase_t;
-__host_device__ void *tagallocRaw(tagbase_t *tag, uint64_t size);
-__host_device__ void *tagrealloc(tagbase_t *tag, void *old, uint64_t newSize);
-__host_device__ void tagfree(tagbase_t *tag, void *p);
-
 __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 {
 	assert(str != nullptr || length == 0);
@@ -828,7 +823,7 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length)
 			}
 			else
 				b->size = (int)newSize;
-			newText = (char *)(b->allocType == 1 ? tagrealloc((tagbase_t *)b->tag, oldText, b->size) : realloc(oldText, b->size));
+			newText = (char *)(b->allocType == 1 ? __extsystem.tagrealloc(b->tag, oldText, b->size) : realloc(oldText, b->size));
 			if (newText) {
 				if (!oldText && b->index > 0) memcpy(newText, b->text, b->index);
 				b->text = newText;
@@ -851,7 +846,7 @@ __device__ char *strbldToString(strbld_t *b)
 	if (b->text) {
 		b->text[b->index] = 0;
 		if (b->allocType && b->text == b->base) {
-			b->text = (char *)(b->allocType == 1 ? tagallocRaw((tagbase_t *)b->tag, b->index + 1) : malloc(b->index + 1));
+			b->text = (char *)(b->allocType == 1 ? __extsystem.tagallocRaw(b->tag, b->index + 1) : malloc(b->index + 1));
 			if (b->text) memcpy(b->text, b->base, b->index + 1);
 			else b->allocFailed = true;
 		}
@@ -863,7 +858,7 @@ __device__ void strbldReset(strbld_t *b)
 {
 	if (b->text != b->base) {
 		if (b->allocType == 1)
-			tagfree((tagbase_t *)b->tag, b->text);
+			__extsystem.tagfree(b->tag, b->text);
 		else
 			free(b->text);
 	}

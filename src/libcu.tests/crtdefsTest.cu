@@ -22,7 +22,7 @@ static __global__ void g_crtdefs_test1()
 	int b1a = _ROUNDDOWNN(3, 4); int b1b = _ROUNDDOWNN(4, 4); int b1c = _ROUNDDOWNN(5, 4); int b1d = _ROUNDDOWNN(-5, 4); assert(b1a == 0 && b1b == 4 && b1c == 4 && b1d == -8);
 	
 	/* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
-	int c0a = HASALIGNMENT8(3); int c0b = HASALIGNMENT8(8); int c0c = HASALIGNMENT8(9); int c0d = HASALIGNMENT8(-3); assert(!c0a && c0b && !c0c && !c0d);
+	int c0a = _HASALIGNMENT8(3); int c0b = _HASALIGNMENT8(8); int c0c = _HASALIGNMENT8(9); int c0d = _HASALIGNMENT8(-3); assert(!c0a && c0b && !c0c && !c0d);
 	/* Returns the length of an array at compile time (via math) */
 	int integerArrayOfSixElements[6]; int d0a = _LENGTHOF(integerArrayOfSixElements); assert(d0a == 6);
 

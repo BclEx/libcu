@@ -24,23 +24,36 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <CudaCompile Include="vfile.cu">
+    <CudaCompile Include="random.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="sentinel-vsystem.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="status.cu" />
+    <CudaCompile Include="utf.cu">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </CudaCompile>
+    <CudaCompile Include="util.cu" />
+    <CudaCompile Include="vsystem-gpu.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="vsystem-map.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="vsystem-unix.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </CudaCompile>
-    <CudaCompile Include="vsystem-win.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="vsystem.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
     <None Include="bitvec.cu" />
+    <CudaCompile Include="alloc.cu" />
+    <CudaCompile Include="allocmem0.cu" />
+    <CudaCompile Include="allocmem1.cu" />
     <CudaCompile Include="convert.cu" />
+    <CudaCompile Include="global.cu" />
+    <CudaCompile Include="main.cu" />
+    <CudaCompile Include="mutex-gpu.cu" />
+    <CudaCompile Include="mutex-noop.cu" />
+    <CudaCompile Include="mutex.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
   </ItemGroup>
@@ -49,10 +62,43 @@
     <None Include="libcu.ext.native.targets" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\ext\alloc.h" />
     <ClInclude Include="..\include\ext\bitvec.h" />
     <ClInclude Include="..\include\ext\convert.h" />
+    <ClInclude Include="..\include\ext\global.h" />
     <ClInclude Include="..\include\ext\math.h" />
+    <ClInclude Include="..\include\ext\mutex.h" />
+    <ClInclude Include="..\include\ext\status.h" />
     <ClInclude Include="..\include\ext\utf.h" />
+    <ClInclude Include="..\include\ext\util.h" />
+    <ClInclude Include="..\include\ext\vsystem.h" />
+    <ClInclude Include="sentinel-vsystem.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="sqlite\libcu.h" />
+    <ClInclude Include="sqlite\os.h" />
+    <ClInclude Include="sqlite\os_common.h" />
+    <ClInclude Include="sqlite\os_setup.h" />
+    <ClInclude Include="sqlite\sqlite3.h" />
+    <ClInclude Include="sqlite\sqliteInt.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mutex-unix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="mutex-win.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="sqlite\mutex_unix.c" />
+    <ClCompile Include="sqlite\mutex_w32.c" />
+    <ClCompile Include="sqlite\os_unix.c" />
+    <ClCompile Include="sqlite\os_win.c" />
+    <ClCompile Include="vsystem-unix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="vsystem-win.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}</ProjectGuid>
