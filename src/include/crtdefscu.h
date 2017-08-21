@@ -69,6 +69,11 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); exit(1); }
 #endif  /* __CUDA_ARCH__ */
 
+/* GCC does not define the offsetof() macro so we'll have to do it ourselves. */
+#ifndef offsetof
+#define offsetof(STRUCTURE,FIELD) ((int)((char*)&((STRUCTURE*)0)->FIELD))
+#endif
+
 //////////////////////
 // UTILITY
 #pragma region UTILITY
@@ -108,6 +113,16 @@ and the non-ANSI way under -traditional.  */
 /* Removes compiler warning for unused parameter(s) */
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
+
+/* Macros to compute minimum and maximum of two numbers. */
+#ifndef _MIN
+#define _MIN(A,B) ((A)<(B)?(A):(B))
+#endif
+#ifndef _MAX
+#define _MAX(A,B) ((A)>(B)?(A):(B))
+#endif
+/* Swap two objects of type TYPE. */
+#define _SWAP(TYPE,A,B) { TYPE t=A; A=B; B=t; }
 
 #pragma endregion
 
@@ -287,11 +302,17 @@ void *__wsdfind(void *k, int l);
 // EXT METHODS
 #pragma region EXT-METHODS
 
+struct strbld_t;
 typedef struct ext_methods ext_methods;
 struct ext_methods {
 	void *(*tagallocRaw)(void *tag, uint64_t size);
 	void *(*tagrealloc)(void *tag, void *old, uint64_t newSize);
+	int *(*tagallocSize)(void *tag, void *p);
 	void (*tagfree)(void *tag, void *p);
+	void (*appendFormat[2])(strbld_t *b, void *va);
+	int64_t (*getIntegerArg)(void *args);
+	double (*getDoubleArg)(void *args);
+	char *(*getStringArg)(void *args);
 };
 extern "C" __device__ ext_methods __extsystem;
 

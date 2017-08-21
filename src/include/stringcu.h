@@ -170,26 +170,34 @@ __END_DECLS;
 #endif  /* __CUDA_ARCH__ */
 __BEGIN_DECLS;
 
+/* On machines with a small stack size, you can redefine the PRINT_BUF_SIZE to be something smaller, if desired. */
 #ifndef PRINT_BUF_SIZE
-#define PRINT_BUF_SIZE 100
+#define PRINT_BUF_SIZE 70
 #endif
 
 typedef struct strbld_t {
-	void *tag;			// Optional database for lookaside.  Can be NULL
-	char *base;			// A base allocation.  Not from malloc.
-	char *text;			// The string collected so far
-	int index;			// Length of the string so far
-	size_t size;		// Amount of space allocated in zText
-	int maxSize;		// Maximum allowed string length
-	bool allocFailed;	// Becomes true if any memory allocation fails
-	unsigned char allocType; // 0: none,  1: _tagalloc,  2: _alloc
-	bool overflowed;    // Becomes true if string size exceeds limits
+	void *tag;			// Optional database for lookaside.  Can be NULL //: db
+	char *base;			// A base allocation.  Not from malloc. //: zBase
+	char *text;			// The string collected so far //: zText
+	int index;			// Length of the string so far //: nChar
+	size_t size;		// Amount of space allocated in zText //: nAlloc
+	int maxSize;		// Maximum allowed string length //: mxAlloc
+	unsigned char error; // Becomes true if any memory allocation fails //: accError
+	unsigned char flags; // SQLITE_PRINTF flags below //: printfFlags
 } strbld_t;
 
-extern __device__ void strbldInit(strbld_t *b, void *tag = nullptr, char *text = nullptr, int capacity = -1, int maxAlloc = -1);
-extern __device__ void strbldAppendSpace(strbld_t *b, int length);
-extern __device__ void strbldAppendFormat(strbld_t *b, bool useExtended, const char *fmt, va_list va);
+#define STRACCUM_NOMEM   1
+#define STRACCUM_TOOBIG  2
+#define PRINTF_INTERNAL 0x01  // Internal-use-only converters allowed
+#define PRINTF_SQLFUNC  0x02  // SQL function arguments to VXPrintf
+#define PRINTF_MALLOCED 0x04  // True if xText is allocated space
+#define PRINTF_ISMALLOCED(X)  (((X)->flags & PRINTF_MALLOCED)!=0)
+
+extern __device__ void strbldInit(strbld_t *b, void *tag = nullptr, char *base = nullptr, int capacity = -1, int maxSize = -1);
+extern __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va);
+extern __device__ void strbldAppendChar(strbld_t *b, int n, int c);
 extern __device__ void strbldAppend(strbld_t *b, const char *str, int length);
+extern __device__ void strbldAppendAll(strbld_t *b, const char *str);
 extern __forceinline __device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
 extern __device__ char *strbldToString(strbld_t *b);
 extern __device__ void strbldReset(strbld_t *b);

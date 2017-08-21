@@ -38,12 +38,6 @@
     <ClCompile Include="ext\ext_memfileTest.cpp">
       <Filter>ext</Filter>
     </ClCompile>
-    <ClCompile Include="ext\ext_bitvecTest.cpp">
-      <Filter>ext</Filter>
-    </ClCompile>
-    <ClCompile Include="ext\ext_convertTest.cpp">
-      <Filter>ext</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -61,6 +55,7 @@
     <CudaCompile Include="ext\ext_libcu.tests.cu">
       <Filter>ext</Filter>
     </CudaCompile>
+    <CudaCompile Include="program.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Properties">
@@ -113,12 +108,6 @@
       <Filter>ext</Filter>
     </None>
     <None Include="ext\ext_hashTest.cu">
-      <Filter>ext</Filter>
-    </None>
-    <None Include="ext\ext_bitvecTest.cu">
-      <Filter>ext</Filter>
-    </None>
-    <None Include="ext\ext_convertTest.cu">
       <Filter>ext</Filter>
     </None>
   </ItemGroup>

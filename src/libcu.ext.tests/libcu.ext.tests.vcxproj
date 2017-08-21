@@ -24,13 +24,13 @@
   <PropertyGroup Label="Globals">
     <TargetName>libcu.tests</TargetName>
     <ProjectTypes>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}</ProjectTypes>
-    <ProjectGUID>{8BE5F46B-95F0-4B9C-9279-EAAFBFB1BF61}</ProjectGUID>
+    <ProjectGUID>{DA288617-FD66-42D5-B27E-9190E9F3DF93}</ProjectGUID>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>libcutests</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v110</PlatformToolset>
     <CLRSupport>true</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
@@ -94,7 +94,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
@@ -113,7 +113,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
@@ -132,7 +132,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
@@ -150,7 +150,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;libcu.falloc.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <CudaCompile>
@@ -169,35 +169,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="crtdefsTest.cpp" />
-    <ClCompile Include="direntTest.cpp" />
-    <ClCompile Include="ext\ext_hashTest.cpp" />
-    <ClCompile Include="ext\ext_memfileTest.cpp" />
-    <ClCompile Include="fallocTest.cpp" />
-    <ClCompile Include="fcntlTest.cpp" />
-    <ClCompile Include="fsystemTest.cpp" />
-    <ClCompile Include="grpTest.cpp" />
-    <ClCompile Include="pwdTest.cpp" />
-    <ClCompile Include="regexTest.cpp" />
-    <ClCompile Include="sentinelTest.cpp" />
-    <ClCompile Include="setjmpTest.cpp" />
+    <ClCompile Include="bitvecTest.cpp" />
+    <ClCompile Include="convertTest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ctypeTest.cpp" />
-    <ClCompile Include="errnoTest.cpp" />
-    <ClCompile Include="stdargTest.cpp" />
-    <ClCompile Include="stddefTest.cpp" />
-    <ClCompile Include="stdioTest.cpp" />
-    <ClCompile Include="stdlibTest.cpp" />
-    <ClCompile Include="stringTest.cpp" />
-    <ClCompile Include="sys\sys_statTest.cpp" />
-    <ClCompile Include="sys\sys_timeTest.cpp" />
-    <ClCompile Include="timeTest.cpp" />
-    <ClCompile Include="unistdTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -210,41 +189,13 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ext\ext_hashTest.cu">
+    <None Include="bitvecTest.cu">
       <FileType>Document</FileType>
     </None>
-    <None Include="ext\ext_memfileTest.cu">
+    <None Include="convertTest.cu">
       <FileType>Document</FileType>
     </None>
-    <CudaCompile Include="ext\ext_libcu.tests.cu" />
-    <CudaCompile Include="program.cu" />
-    <CudaCompile Include="sys\sys_libcu.tests.cu" />
-    <None Include="sys\sys_statTest.cu">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="sys\sys_timeTest.cu">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="crtdefsTest.cu" />
-    <None Include="ctypeTest.cu" />
-    <None Include="direntTest.cu" />
-    <None Include="errnoTest.cu" />
-    <None Include="fallocTest.cu" />
-    <None Include="fcntlTest.cu" />
-    <None Include="fsystemTest.cu" />
-    <None Include="grpTest.cu" />
-    <CudaCompile Include="libcu.tests.cu" />
-    <None Include="pwdTest.cu" />
-    <None Include="regexTest.cu" />
-    <None Include="sentinelTest.cu" />
-    <None Include="setjmpTest.cu" />
-    <None Include="stdargTest.cu" />
-    <None Include="stddefTest.cu" />
-    <None Include="stdioTest.cu" />
-    <None Include="stdlibTest.cu" />
-    <None Include="stringTest.cu" />
-    <None Include="timeTest.cu" />
-    <None Include="unistdTest.cu" />
+    <CudaCompile Include="libcu.ext.tests.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
