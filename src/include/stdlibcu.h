@@ -37,7 +37,6 @@ typedef int (*__compar_fn_t)(const void *, const void *);
 #include <stdlib.h>
 #if defined(__CUDA_ARCH__)
 #include <stddefcu.h>
-#include <sentinel-stdlibmsg.h>
 __BEGIN_DECLS;
 
 extern __device__ unsigned long __strtol(register const char *__restrict str, char **__restrict endptr, int base, int sflag);
@@ -202,13 +201,13 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Call all functions registered with `atexit' and `on_exit', in the reverse of the order in which they were registered, perform stdio cleanup, and terminate program execution with STATUS.  */
-__forceinline __device__ void exit_(int status) { stdlib_exit msg(true, status); }
+extern __device__ void exit_(int status);
 #define exit exit_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_C99;
 /* Terminate the program with STATUS without calling any of the functions registered with `atexit' or `on_exit'.  */
-__forceinline __device__ void _Exit_(int status) { stdlib_exit msg(false, status); }
+extern __device__ void _Exit_(int status);
 #define _Exit _Exit_
 __END_NAMESPACE_C99;
 
@@ -246,7 +245,7 @@ extern __device__ int mkstemp64_(char *template_);
 
 __BEGIN_NAMESPACE_STD;
 /* Execute the given line as a shell command.  */
-__forceinline __device__ int system_(const char *command) { stdlib_system msg(command); return msg.RC; }
+extern __device__ int system_(const char *command);
 #define system system_
 __END_NAMESPACE_STD;
 

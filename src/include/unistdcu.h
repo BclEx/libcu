@@ -35,7 +35,6 @@ typedef short gid_t;
 typedef short uid_t;
 
 #if defined(__CUDA_ARCH__)
-#include <sentinel-unistdmsg.h>
 __BEGIN_DECLS;
 
 #undef access
@@ -51,39 +50,33 @@ __BEGIN_DECLS;
 #undef sleep
 
 /* Test for access to NAME using the real UID and real GID.  */
-extern __device__ int access_device(const char *name, int type);
-__forceinline __device__ int access_(const char *name, int type) { if (ISDEVICEPATH(name)) return access_device(name, type); unistd_access msg(name, type); return msg.RC; }
+extern __device__ int access_(const char *name, int type);
 #define access access_
 
 /* Move FD's file position to OFFSET bytes from the beginning of the file (if WHENCE is SEEK_SET),
 the current position (if WHENCE is SEEK_CUR), or the end of the file (if WHENCE is SEEK_END).
 Return the new file position.  */
 #ifndef __USE_FILE_OFFSET64
-extern __device__ off_t lseek_device(int fd, off_t offset, int whence);
-__forceinline __device__ off_t lseek_(int fd, off_t offset, int whence) { if (ISDEVICEHANDLE(fd)) return lseek_device(fd, offset, whence); unistd_lseek msg(fd, offset, whence); return msg.RC; }
+extern __device__ off_t lseek_(int fd, off_t offset, int whence);
 #define lseek lseek_
 #else
 #define lseek lseek64
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ off64_t lseek64_device(int fd, off64_t offset, int whence);
-__forceinline __device__ off64_t lseek64_(int fd, off64_t offset, int whence) { if (ISDEVICEHANDLE(fd)) return lseek64_device(fd, offset, whence); unistd_lseek64 msg(fd, offset, whence); return msg.RC; }
+extern __device__ off64_t lseek64_(int fd, off64_t offset, int whence);
 #define lseek64 lseek64_
 #endif
 
 /* Close the file descriptor FD.  */
-extern __device__ int close_device(int fd);
-__forceinline __device__ int close_(int fd) { if (ISDEVICEHANDLE(fd)) return close_device(fd); unistd_close msg(fd); return msg.RC; }
+extern __device__ int close_(int fd);
 #define close close_
 
 /* Read NBYTES into BUF from FD.  Return the number read, -1 for errors or 0 for EOF.  */
-extern __device__ size_t read_device(int fd, void *buf, size_t nbytes);
-__forceinline __device__ size_t read_(int fd, void *buf, size_t nbytes, bool wait = true) { if (ISDEVICEHANDLE(fd)) return read_device(fd, buf, nbytes); unistd_read msg(wait, fd, buf, nbytes); return msg.RC; }
+extern __device__ size_t read_(int fd, void *buf, size_t nbytes, bool wait = true);
 #define read read_
 
 /* Write N bytes of BUF to FD.  Return the number written, or -1.  */
-extern __device__ size_t write_device(int fd, const void *buf, size_t nbytes);
-__forceinline __device__ size_t write_(int fd, void *buf, size_t nbytes, bool wait = true) { if (ISDEVICEHANDLE(fd)) return write_device(fd, buf, nbytes); unistd_write msg(wait, fd, buf, nbytes); return msg.RC; }
+extern __device__ size_t write_(int fd, const void *buf, size_t nbytes, bool wait = true);
 #define write write_
 
 /* Create a one-way communication channel (pipe). If successful, two file descriptors are stored in PIPEDES;
@@ -112,30 +105,26 @@ __forceinline __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1
 //#define pause pause_
 
 /* Change the owner and group of FILE.  */
-extern __device__ int chown_device(const char *file, uid_t owner, gid_t group);
-__forceinline __device__ int chown_(const char *file, uid_t owner, gid_t group) { if (ISDEVICEPATH(file)) return chown_device(file, owner, group); __cwd[0] = 0; unistd_chown msg(file, owner, group); return msg.RC; }
+extern __device__ int chown_(const char *file, uid_t owner, gid_t group);
 #define chown chown_
 
 /* Change the process's working directory to PATH.  */
-extern __device__ int chdir_device(const char *path);
-__forceinline __device__ int chdir_(const char *path) { if (ISDEVICEPATH(path)) return chdir_device(path); __cwd[0] = 0; unistd_chdir msg(path); return msg.RC; }
+extern __device__ int chdir_(const char *path);
 #define chdir chdir_
 
 /* Get the pathname of the current working directory, and put it in SIZE bytes of BUF.  Returns NULL if the
 directory couldn't be determined or SIZE was too small. If successful, returns BUF.  In GNU, if BUF is NULL,
 an array is allocated with `malloc'; the array is SIZE bytes long, unless SIZE == 0, in which case it is as
 big as necessary.  */
-extern __device__ char *getcwd_device(char *buf, size_t size);
-__forceinline __device__ char *getcwd_(char *buf, size_t size) { if (__cwd[0]) return getcwd_device(buf, size); unistd_getcwd msg(buf, size); return msg.RC; }
+extern __device__ char *getcwd_(char *buf, size_t size);
 #define getcwd getcwd_
 
 /* Duplicate FD, returning a new file descriptor on the same file.  */
-extern __device__ int dup_device(int fd, int fd2, bool dup1);
-__forceinline __device__ int dup_(int fd) { if (ISDEVICEHANDLE(fd)) return dup_device(fd, -1, true); unistd_dup msg(fd, -1, true); return msg.RC; }
+extern __device__ int dup_(int fd, int fd2 = -1, bool dup1 = true);
 #define dup dup_
 
 /* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-__forceinline __device__ int dup2_(int fd, int fd2) { if (ISDEVICEHANDLE(fd)) return dup_device(fd, fd2, false); unistd_dup msg(fd, fd2, false); return msg.RC; }
+extern __device__ int dup2_(int fd, int fd2);
 #define dup2 dup2_
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
@@ -155,13 +144,11 @@ extern __device__ char **__environ_;
 //#define fpathconf fpathconf_
 
 /* Remove the link FILENAME.  */
-extern __device__ int unlink_device(const char *filename);
-__forceinline __device__ int unlink_(const char *filename) { if (ISDEVICEPATH(filename)) return unlink_device(filename); unistd_unlink msg(filename); return msg.RC; }
+extern __device__ int unlink_(const char *filename);
 #define unlink unlink_
 
 /* Remove the directory PATH.  */
-extern __device__ int rmdir_device(const char *path);
-__forceinline __device__ int rmdir_(const char *path) { if (ISDEVICEPATH(path)) return rmdir_device(path); unistd_rmdir msg(path); return msg.RC; }
+extern __device__ int rmdir_(const char *path);
 #define rmdir rmdir_
 
 __END_DECLS;

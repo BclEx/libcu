@@ -31,7 +31,6 @@ THE SOFTWARE.
 #include <time.h>
 #if defined(__CUDA_ARCH__)
 #include <stddefcu.h>
-#include <sentinel-timemsg.h>
 __BEGIN_DECLS;
 
 //#ifndef _WIN64
@@ -53,11 +52,11 @@ extern __device__ double difftime_(time_t time1, time_t time0);
 #define difftime difftime_
 
 /* Return the `time_t' representation of TP and normalize TP.  */
-__forceinline __device__ time_t mktime_(struct tm *tp) { time_mktime msg(tp); return msg.RC; }
+extern __device__ time_t mktime_(struct tm *tp);
 #define mktime mktime_
 
 /* Format TP into S according to FORMAT. no more than MAXSIZE characters and return the number of characters written, or 0 if it would exceed MAXSIZE.  */
-__forceinline __device__ size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp) { time_strftime msg(s, maxsize, format, tp); return msg.RC; }
+extern __device__ size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp);
 #define strftime strftime_
 __END_NAMESPACE_STD;
 

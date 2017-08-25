@@ -129,7 +129,6 @@ and the non-ANSI way under -traditional.  */
 //////////////////////
 // PTRSIZE
 #pragma region PTRSIZE
-// SKY ADD _TEST
 
 /* Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer */
 #ifndef _PTRSIZE
@@ -226,9 +225,9 @@ typedef struct hostptr_t {
 
 /* IsDevice support.  */
 extern "C" __device__ char __cwd[];
-#define ISDEVICEPATH(path) (((path)[1] != ':') && ((path)[0] == ':' || __cwd[0] != 0))
-#define ISDEVICEHANDLE(handle) (handle >= INT_MAX-CORE_MAXFILESTREAM)
-#define ISDEVICEPTR(ptr) ((hostptr_t *)(ptr) < __iob_hostptrs || (hostptr_t *)(ptr) > __iob_hostptrs + CORE_MAXHOSTPTR)
+#define ISHOSTPATH(path) ((path)[1] == ':' || ((path)[0] != ':' && __cwd[0] == 0))
+#define ISHOSTHANDLE(handle) (handle < INT_MAX-CORE_MAXFILESTREAM)
+#define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+CORE_MAXHOSTPTR)
 extern "C" __constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
 
 /* Host pointer support.  */

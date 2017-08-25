@@ -1,4 +1,5 @@
 #include <timecu.h>
+#include <sentinel-timemsg.h>
 #include <stdiocu.h>
 
 __BEGIN_DECLS;
@@ -21,6 +22,18 @@ __device__ time_t time_(time_t *timer)
 __device__ double difftime_(time_t time1, time_t time0)
 {
 	return (double)time1 - (double)time0;
+}
+
+/* Return the `time_t' representation of TP and normalize TP.  */
+__device__ time_t mktime_(struct tm *tp)
+{
+	time_mktime msg(tp); return msg.RC;
+}
+
+/* Format TP into S according to FORMAT. no more than MAXSIZE characters and return the number of characters written, or 0 if it would exceed MAXSIZE.  */
+__device__ size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp)
+{
+	time_strftime msg(s, maxsize, format, tp); return msg.RC;
 }
 
 /* Return the `struct tm' representation of *TIMER in Universal Coordinated Time (aka Greenwich Mean Time).  */

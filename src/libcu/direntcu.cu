@@ -1,8 +1,9 @@
 #include <direntcu.h>
+#include <sentinel-direntmsg.h>
 #include "fsystem.h"
 
 struct cuDIR {
-    struct DIR dir;
+	struct DIR dir;
 	void *listIdx; void *list;
 	int fakeIdx; int fake;
 };
@@ -10,8 +11,9 @@ struct cuDIR {
 __constant__ struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
 
 /* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
-__device__ DIR *opendir_device(const char *name)
+__device__ DIR *opendir_(const char *name)
 {
+	if (ISHOSTPATH(name)) { dirent_opendir msg(name); return newhostptr<DIR>(msg.RC); }
 	dirEnt_t *ent = fsystemOpendir(name);
 	if (!ent) return nullptr;
 	cuDIR *dirp = (cuDIR *)malloc(sizeof(cuDIR));
@@ -23,8 +25,9 @@ __device__ DIR *opendir_device(const char *name)
 }
 
 /* Close the directory stream DIRP. Return 0 if successful, -1 if not.  */
-__device__ int closedir_device(DIR *dirp)
+__device__ int closedir_(DIR *dirp)
 {
+	if (ISHOSTPTR(dirp)) { dirent_closedir msg(hostptr<DIR>(dirp)); freehostptr<DIR>(dirp); return msg.RC; }
 	if (!dirp) return -1;
 	free(dirp);
 	return 0;
@@ -34,8 +37,9 @@ __device__ int closedir_device(DIR *dirp)
 storage returned may be overwritten by a later readdir call on the same DIR stream.
 
 If the Large File Support API is selected we have to use the appropriate interface.  */
-__device__ struct dirent *readdir_device(DIR *dirp)
+__device__ struct dirent *readdir_(DIR *dirp)
 {
+	if (ISHOSTPTR(dirp)) { dirent_readdir msg(hostptr<DIR>(dirp)); return msg.RC; }
 	cuDIR *p = (cuDIR *)dirp;
 	if (!p || !p->listIdx) return nullptr;
 	if (p->fakeIdx)
@@ -46,8 +50,9 @@ __device__ struct dirent *readdir_device(DIR *dirp)
 }
 
 #ifdef __USE_LARGEFILE64
-__device__ struct dirent64 *readdir64_device(DIR *dirp)
+__device__ struct dirent64 *readdir64_(DIR *dirp)
 {
+	if (ISHOSTPTR(dirp)) { dirent_readdir64 msg(hostptr<DIR>(dirp)); return msg.RC; }
 	cuDIR *p = (cuDIR *)dirp;
 	if (!p || !p->listIdx) return nullptr;
 	if (p->fakeIdx)
@@ -59,8 +64,9 @@ __device__ struct dirent64 *readdir64_device(DIR *dirp)
 #endif
 
 /* Rewind DIRP to the beginning of the directory.  */
-__device__ void rewinddir_device(DIR *dirp)
+__device__ void rewinddir_(DIR *dirp)
 {
+	if (ISHOSTPTR(dirp)) { dirent_rewinddir msg(hostptr<DIR>(dirp)); return; }
 	cuDIR *p = (cuDIR *)dirp;
 	memcpy(p, p->list, sizeof(dirent));
 	p->listIdx = (dirEnt_t *)p->list;

@@ -1,10 +1,10 @@
 #include <stdiocu.h>
+#include <sentinel-stdiomsg.h>
 #include <stdlibcu.h>
 #include <stddefcu.h>
 #include <stdargcu.h>
 #include <ctypecu.h>
 #include <assert.h>
-#include <sentinel-stdiomsg.h>
 #include <unistdcu.h>
 #include <fcntlcu.h>
 #include "fsystem.h"
@@ -65,8 +65,9 @@ static __device__ void streamFree(FILE *s)
 #pragma endregion
 
 /* Remove file FILENAME.  */
-__device__ int remove_device(const char *filename)
+__device__ int remove_(const char *filename)
 {
+	if (ISHOSTPATH(filename)) { stdio_remove msg(filename); return msg.RC; }
 	int saved_errno = errno;
 	int rv = rmdir(filename);
 	if (rv < 0 && errno == ENOTDIR) {
@@ -77,8 +78,9 @@ __device__ int remove_device(const char *filename)
 }
 
 /* Rename file OLD to NEW.  */
-__device__ int rename_device(const char *old, const char *new_)
+__device__ int rename_(const char *old, const char *new_)
 {
+	if (ISHOSTPATH(old)) { stdio_rename msg(old, new_); return msg.RC; }
 	return fsystemRename(old, new_);
 }
 
@@ -92,8 +94,9 @@ __device__ FILE *tmpfile_(void)
 #endif
 
 /* Close STREAM. */
-__device__ int fclose_device(FILE *stream)
+__device__ int fclose_(FILE *stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_fclose msg(wait, stream); return msg.RC; }
 	dirEnt_t *f; UNUSED_SYMBOL(f);
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fclose: !stream");
@@ -104,14 +107,16 @@ __device__ int fclose_device(FILE *stream)
 }
 
 /* Flush STREAM, or all streams if STREAM is NULL. */
-__device__ int fflush_device(FILE *stream)
+__device__ int fflush_(FILE *stream)
 { 
+	if (ISHOSTFILE(stream)) { stdio_fflush msg(false, stream); return msg.RC; }
 	return 0; 
 }
 
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *freopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
+	if (ISHOSTPATH(filename)) { stdio_freopen msg(filename, modes, stream); return msg.RC; }
 	if (stream)
 		streamFree(stream);
 	// Parse the specified mode.
@@ -151,12 +156,20 @@ __device__ FILE *freopen_device(const char *__restrict filename, const char *__r
 	return stream;
 }
 
+/* Open a file and create a new stream for it. */
+__device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes)
+{
+	if (ISHOSTPATH(filename)) { stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
+	return freopen_(filename, modes, nullptr); 
+}
+
 #ifdef __USE_LARGEFILE64
 /* Open a file, replacing an existing stream with it. */
-__device__ FILE *freopen64_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
+__device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream)
 {
+	if (ISHOSTPATH(filename)) { stdio_freopen msg(filename, modes, stream); return msg.RC; }
 	if (stream)
-		fclose_device(stream);
+		fclose_(stream);
 	// Parse the specified mode.
 	unsigned short openMode = O_RDONLY;
 	if (*modes != 'r') { // Not read...
@@ -188,13 +201,28 @@ __device__ FILE *freopen64_device(const char *__restrict filename, const char *_
 	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file, &r);
 	return stream;
 }
+
+/* Open a file and create a new stream for it. */
+__device__ FILE *fopen64_(const char *__restrict filename, const char *__restrict modes)
+{
+	if (ISHOSTPATH(filename)) { stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
+	return freopen64_(filename, modes, nullptr); 
+}
 #endif
 
 /* Make STREAM use buffering mode MODE. If BUF is not NULL, use N bytes of it for buffering; else allocate an internal buffer N bytes long.  */
-__device__ int setvbuf_device(FILE *__restrict stream, char *__restrict buf, int modes, size_t n)
+__device__ int setvbuf_(FILE *__restrict stream, char *__restrict buf, int modes, size_t n)
 {
+	if (ISHOSTFILE(stream)) { stdio_setvbuf msg(stream, buf, modes, n); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
+}
+
+/* If BUF is NULL, make STREAM unbuffered. Else make it use buffer BUF, of size BUFSIZ.  */
+__device__ void setbuf_(FILE *__restrict stream, char *__restrict buf)
+{
+	if (ISHOSTFILE(stream)) { stdio_setvbuf msg(stream, buf, -1, 0); return; }
+	setvbuf_(stream, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
 }
 
 /* Write formatted output to S from argument list ARG.  */
@@ -222,7 +250,7 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	int size = b.index + 1;
 	// chunk results
 	int offset = 0; int rc = 0;
-	if (ISDEVICEFILE(s)) while (size > 0 && !rc) { rc = fwrite_device(v + offset, (size > 1024 ? 1024 : size), 1, s); size -= 1024; }
+	if (!ISHOSTFILE(s)) while (size > 0 && !rc) { rc = fwrite_(v + offset, (size > 1024 ? 1024 : size), 1, s); size -= 1024; }
 	else while (size > 0 && !rc) { stdio_fwrite msg(true, v + offset, (size > 1024 ? 1024 : size), 1, s); rc = msg.RC; size -= 1024; }
 	free((void *)v);
 	return rc; 
@@ -244,45 +272,51 @@ __device__ int vsscanf_(const char *__restrict s, const char *__restrict format,
 }
 
 /* Read a character from STREAM.  */
-__device__ int fgetc_device(FILE *stream)
+__device__ int fgetc_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_fgetc msg(stream); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Write a character to STREAM.  */
-__device__ int fputc_device(int c, FILE *stream)
+__device__ int fputc_(int c, FILE *stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_fputc msg(wait, c, stream); return msg.RC; }
 	if (stream == stdout || stream == stderr)
 		printf("%c", c);
 	return 0;
 }
 
 /* Get a newline-terminated string of finite length from STREAM.  */
-__device__ char *fgets_device(char *__restrict s, int n, FILE *__restrict stream)
+__device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_fgets msg(s, n, stream); return msg.RC; }
 	panic("Not Implemented");
 	return nullptr;
 }
 
 /* Write a string to STREAM.  */
-__device__ int fputs_device(const char *__restrict s, FILE *__restrict stream)
+__device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_fputs msg(wait, s, stream); return msg.RC; }
 	if (stream == stdout || stream == stderr)
 		printf(s);
 	return 0;
 }
 
 /* Push a character back onto the input buffer of STREAM.  */
-__device__ int ungetc_device(int c, FILE *stream)
+__device__ int ungetc_(int c, FILE *stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_ungetc msg(wait, c, stream); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Read chunks of generic data from STREAM.  */
-__device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
+__device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_fread msg(wait, size, n, stream); memcpy(ptr, msg.Ptr, msg.RC); return msg.RC; }
 	dirEnt_t *f;
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
@@ -294,8 +328,9 @@ __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE
 }
 
 /* Write chunks of generic data to STREAM.  */
-__device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream)
+__device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait)
 {
+	if (ISHOSTFILE(stream)) { stdio_fwrite msg(wait, ptr, size, n, stream); return msg.RC; }
 	dirEnt_t *f;
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
@@ -307,56 +342,64 @@ __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t 
 }
 
 /* Seek to a certain position on STREAM.  */
-__device__ int fseek_device(FILE *stream, long int off, int whence)
+__device__ int fseek_(FILE *stream, long int off, int whence)
 {
+	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, off, whence); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Return the current position of STREAM.  */
-__device__ long int ftell_device(FILE *stream)
+__device__ long int ftell_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Rewind to the beginning of STREAM.  */
-__device__ void rewind_device(FILE *stream)
+__device__ void rewind_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_rewind msg(stream); return; }
 	panic("Not Implemented");
 	return;
 }
 
 /* Get STREAM's position.  */
-__device__ int fgetpos_device(FILE *__restrict stream, fpos_t *__restrict pos)
+__device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos)
 {
+	if (ISHOSTFILE(stream)) { stdio_fgetpos msg(stream, pos); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Set STREAM's position.  */
-__device__ int fsetpos_device(FILE *stream, const fpos_t *pos)
+__device__ int fsetpos_(FILE *stream, const fpos_t *pos)
 {
+	if (ISHOSTFILE(stream)) { stdio_fsetpos msg(stream, pos); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Clear the error and EOF indicators for STREAM.  */
-__device__ void clearerr_device(FILE *stream)
+__device__ void clearerr_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_clearerr msg(stream); return; }
 	panic("Not Implemented");
 }
 
 /* Return the EOF indicator for STREAM.  */
-__device__ int feof_device(FILE *stream)
+__device__ int feof_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_feof msg(stream); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 
 /* Return the error indicator for STREAM.  */
-__device__ int ferror_device(FILE *stream)
+__device__ int ferror_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_ferror msg(stream); return msg.RC; }
 	if (stream == stdout || stream == stderr)
 		return 0; 
 	return 0;
@@ -369,8 +412,9 @@ __device__ void perror_(const char *s)
 }
 
 /* Return the system file descriptor for STREAM.  */
-__device__ int fileno_device(FILE *stream)
+__device__ int fileno_(FILE *stream)
 {
+	if (ISHOSTFILE(stream)) { stdio_fileno msg(stream); return msg.RC; }
 	return (stream == stdin ? 0 : stream == stdout ? 1 : stream == stderr ? 2 : stream->_file); 
 }
 

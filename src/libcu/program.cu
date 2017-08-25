@@ -19,20 +19,6 @@ cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 #define DeviceDir ":\\"
 #include "fsystem.h"
 #include <fcntlcu.h>
-static __device__ void makeAFile(char *file)
-{
-	FILE *fp = fopen(file, "w");
-	//fprintf_(fp, "test");
-	fclose(fp);
-}
-
-__device__ void testBed()
-{
-	makeAFile(DeviceDir"test.txt");
-	int b1a = open(DeviceDir"test.txt", O_RDONLY);
-	int b1b = close(b1a);
-	assert(b1a && !b1b);
-}
 
 __global__ void addKernel(int *c, const int *a, const int *b)
 {
@@ -41,25 +27,23 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	if (i != 1)
 		return;
 
-	testBed();
-
 	////strchr("Me", 'M');
-	//printf("%d %s\n", 2, "sky morey");
+	printf("%d %s\n", 2, "sky morey");
 
-	////mkdir(":\\T_", 0);
-	//FILE *f = fopen("C:\\T_\\fopen.txt", "w");
-	//if (f) {
-	//	//fprintf(f, "The quick brown fox jumps over the lazy dog");
-	//	fwrite("test", 4, 1, f);
-	//	fflush(f);
-	//	fclose(f);
-	//}
+	//mkdir(":\\T_", 0);
+	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
+	if (f) {
+		fprintf_(f, "The quick brown fox jumps over the lazy dog");
+		//fwrite("test", 4, 1, f);
+		fflush(f);
+		fclose(f);
+	}
 
-	//char buf[100] = {0};
-	//snprintf(buf, 100, "test");
-	//printf("%s\n", buf);
-	//printf("%d\n", atoi("51236"));
-	//printf("%f\n", atof("1.2"));
+	char buf[100] = {0};
+	snprintf(buf, 100, "test");
+	printf("%s\n", buf);
+	printf("%d\n", atoi("51236"));
+	printf("%f\n", atof("1.2"));
 
 	libcuReset();
 }

@@ -1,4 +1,5 @@
 #include <stdlibcu.h>
+#include <sentinel-stdlibmsg.h>
 #include <stddefcu.h>
 #include <bits/libcu_fpmax.h>
 #include <ctypecu.h>
@@ -596,10 +597,13 @@ __device__ unsigned long long __strtoll(register const Wchar * __restrict str, W
 #pragma endregion
 
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
+// https://stackoverflow.com/questions/9492581/c-random-number-generation-pure-c-code-no-libraries-or-functions
+// https://sites.google.com/site/murmurhash/
+// cuRAND
 __device__ int rand_(void)
 {
 	panic("Not Implemented");
-	return 0;
+	return RAND_MAX;
 }
 
 /* Seed the random number generator with the given number.  */
@@ -660,6 +664,18 @@ __device__ void *realloc_(void *ptr, size_t size)
 #define free free_
 */
 
+/* Call all functions registered with `atexit' and `on_exit', in the reverse of the order in which they were registered, perform stdio cleanup, and terminate program execution with STATUS.  */
+__device__ void exit_(int status)
+{
+	stdlib_exit msg(true, status);
+}
+
+/* Terminate the program with STATUS without calling any of the functions registered with `atexit' or `on_exit'.  */
+__device__ void _Exit_(int status)
+{
+	stdlib_exit msg(false, status);
+}
+
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
 __device__ char *getenv_(const char *name)
 {
@@ -683,15 +699,23 @@ __device__ int unsetenv_(const char *name)
 	return 0;
 }
 
+/* Generate a unique temporary file name from TEMPLATE. */
 __device__ char *mktemp_(char *template_)
 {
 	panic("Not Implemented");
 	return nullptr;
 }
 
+/* Generate a unique temporary file name from TEMPLATE. */
 __device__ int mkstemp_(char *template_)
 {
 	return open(mktemp_(template_), 0);
+}
+
+/* Execute the given line as a shell command.  */
+__device__ int system_(const char *command)
+{
+	stdlib_system msg(command); return msg.RC;
 }
 
 /* Do a binary search for KEY in BASE, which consists of NMEMB elements of SIZE bytes each, using COMPAR to perform the comparisons.  */

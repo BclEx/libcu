@@ -1,12 +1,17 @@
 #include <stddefcu.h>
 #include <stdargcu.h>
 #include <fcntlcu.h>
+#include <sentinel-fcntlmsg.h>
+#include <sentinel-unistdmsg.h>
 #include "fsystem.h"
 
 __BEGIN_DECLS;
 
-__device__ int fcntlv_device(int fd, int cmd, va_list va)
+__device__ int fcntlv_(int fd, int cmd, va_list va)
 {
+#ifdef __CUDA_ARCH__
+	if (ISHOSTHANDLE(fd)) { fcntl_fcntl msg(fd, cmd, va.i?va_arg(va, int):0); return msg.RC; }
+#endif
 	panic("Not Implemented");
 	// (int fd, unsigned int cmd, unsigned long arg, struct file *filp)
 	//	long err = -EINVAL;
@@ -24,15 +29,37 @@ __device__ int fcntlv_device(int fd, int cmd, va_list va)
 	//	return err;
 	return 0;
 }
-
-__device__ int openv_device(const char *file, int oflag, va_list va)
+#ifdef __USE_LARGEFILE64
+__device__ int fcntl64v_(int fd, int cmd, va_list va)
 {
+#ifdef __CUDA_ARCH__
+	if (ISHOSTHANDLE(fd)) { fcntl_fcntl msg(fd, cmd, va.i?va_arg(va, int):0); return msg.RC; }
+#endif
+	panic("Not Implemented");
+}
+#endif
+
+__device__ int openv_(const char *file, int oflag, va_list va)
+{
+#ifdef __CUDA_ARCH__
+	if (ISHOSTPATH(file)) { fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
+#endif
 	int fd; fsystemOpen(file, oflag, &fd); return fd;
 }
+#ifdef __USE_LARGEFILE64
+__device__ int openv64_(const char *file, int oflag, va_list va)
+{
+#ifdef __CUDA_ARCH__
+	if (ISHOSTPATH(file)) { fcntl_open msg(file, oflag, va.i?va_arg(va, int):0); return msg.RC; }
+#endif
+	int fd; fsystemOpen(file, oflag, &fd); return fd;
+}
+#endif
 
 /* Close the file descriptor FD.  */
-__device__ int close_device(int fd)
+__device__ int close_(int fd)
 {
+	if (ISHOSTHANDLE(fd)) { unistd_close msg(fd); return msg.RC; }
 	fileFree(fd);
 	return 0;
 }

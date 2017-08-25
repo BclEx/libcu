@@ -82,7 +82,6 @@
     <ClInclude Include="..\include\ext\memfile.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="fsystem.h" />
     <ClInclude Include="..\include\sentinel-unistdmsg.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -107,6 +106,7 @@
     <ClInclude Include="..\include\sentinel-direntmsg.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="fsystem.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />

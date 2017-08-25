@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <stdlibcu.h>
+#include <stringcu.h>
 #include <ctypecu.h>
 #include <regexcu.h>
 

@@ -79,7 +79,7 @@ __BEGIN_DECLS;
 ///* Default path prefix for `mkstemp'.  */
 //#define P_tmpdir "/tmp"
 
-#define ISDEVICEFILE(stream) ((stream) >= __iob_streams && (stream) <= __iob_streams + CORE_MAXFILESTREAM+3)
+#define ISHOSTFILE(stream) ((stream) < __iob_streams || (stream) > __iob_streams + CORE_MAXFILESTREAM+3)
 extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
 #undef stdin
 #undef stdout
@@ -88,18 +88,12 @@ extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
 #define stdout (&__iob_streams[1]) /* Standard output stream.  */
 #define stderr (&__iob_streams[2]) /* Standard error output stream.  */
 
-__END_DECLS;
-#include <sentinel-stdiomsg.h>
-__BEGIN_DECLS;
-
 __BEGIN_NAMESPACE_STD;
 /* Remove file FILENAME.  */
-extern __device__ int remove_device(const char *filename);
-__forceinline __device__ int remove_(const char *filename) { if (ISDEVICEPATH(filename)) return remove_device(filename); stdio_remove msg(filename); return msg.RC; }
+extern __device__ int remove_(const char *filename);
 #define remove remove_
 /* Rename file OLD to NEW.  */
-extern  __device__ int rename_device(const char *old, const char *new_);
-__forceinline __device__ int rename_(const char *old, const char *new_) { if (ISDEVICEPATH(old)) return rename_device(old, new_); stdio_rename msg(old, new_); return msg.RC; }
+extern  __device__ int rename_(const char *old, const char *new_);
 #define rename rename_
 __END_NAMESPACE_STD;
 
@@ -116,23 +110,20 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Close STREAM. */
-extern __device__ int fclose_device(FILE *stream);
-__forceinline __device__ int fclose_(FILE *stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fclose_device(stream); stdio_fclose msg(wait, stream); return msg.RC; }
+extern __device__ int fclose_(FILE *stream, bool wait = true);
 #define fclose fclose_
 /* Flush STREAM, or all streams if STREAM is NULL. */
-extern __device__ int fflush_device(FILE *stream);
-__forceinline __device__ int fflush_(FILE *stream) { if (ISDEVICEFILE(stream)) return fflush_device(stream); stdio_fflush msg(false, stream); return msg.RC; }
+extern __device__ int fflush_(FILE *stream);
 #define fflush fflush_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 #ifndef __USE_FILE_OFFSET64
 /* Open a file, replacing an existing stream with it. */
-extern __device__ FILE *freopen_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
-__forceinline __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { if (ISDEVICEPATH(filename)) return freopen_device(filename, modes, stream); stdio_freopen msg(filename, modes, stream); return msg.RC; }
+extern __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
 #define freopen freopen_
 /* Open a file and create a new stream for it. */
-__forceinline __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes) { if (ISDEVICEPATH(filename)) return freopen_device(filename, modes, nullptr); stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
+extern __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes);
 #define fopen fopen_
 #else
 #define fopen fopen64
@@ -141,21 +132,19 @@ __forceinline __device__ FILE *fopen_(const char *__restrict filename, const cha
 __END_NAMESPACE_STD;
 #ifdef __USE_LARGEFILE64
 /* Open a file, replacing an existing stream with it. */
-extern __device__ FILE *freopen64_device(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
-__forceinline __device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) { if (ISDEVICEPATH(filename)) return freopen64_device(filename, modes, stream); stdio_freopen msg(filename, modes, stream); return msg.RC; }
+extern __device__ FILE *freopen64_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream);
 #define freopen64 freopen64_
 /* Open a file and create a new stream for it. */
-__forceinline __device__ FILE *fopen64_(const char *__restrict filename, const char *__restrict modes) { if (ISDEVICEPATH(filename)) return freopen64_device(filename, modes, nullptr); stdio_freopen msg(filename, modes, nullptr); return msg.RC; }
+extern __device__ FILE *fopen64_(const char *__restrict filename, const char *__restrict modes);
 #define fopen64 fopen64_
 #endif
 
 __BEGIN_NAMESPACE_STD;
 /* Make STREAM use buffering mode MODE. If BUF is not NULL, use N bytes of it for buffering; else allocate an internal buffer N bytes long.  */
-extern __device__ int setvbuf_device(FILE *__restrict stream, char *__restrict buf, int modes, size_t n);
-__forceinline __device__ int setvbuf_(FILE *__restrict stream, char *__restrict buf, int modes, size_t n) { if (ISDEVICEFILE(stream)) return setvbuf_device(stream, buf, modes, n); stdio_setvbuf msg(stream, buf, modes, n); return msg.RC; }
+extern __device__ int setvbuf_(FILE *__restrict stream, char *__restrict buf, int modes, size_t n);
 #define setvbuf setvbuf_
 /* If BUF is NULL, make STREAM unbuffered. Else make it use buffer BUF, of size BUFSIZ.  */
-__forceinline __device__ void setbuf_(FILE *__restrict stream, char *__restrict buf) { if (ISDEVICEFILE(stream)) setvbuf_device(stream, buf, buf ? _IOFBF : _IONBF, BUFSIZ); else stdio_setvbuf msg(stream, buf, -1, 0); }
+extern __device__ void setbuf_(FILE *__restrict stream, char *__restrict buf);
 #define setbuf setbuf_
 __END_NAMESPACE_STD;
 
@@ -208,8 +197,7 @@ __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Read a character from STREAM.  */
-extern __device__ int fgetc_device(FILE *stream);
-__forceinline __device__ int fgetc_(FILE *stream) { if (ISDEVICEFILE(stream)) return fgetc_device(stream); stdio_fgetc msg(stream); return msg.RC; }
+extern __device__ int fgetc_(FILE *stream);
 #define fgetc fgetc_
 #define getc(stream) fgetc(stream)
 /* Read a character from stdin.  */
@@ -222,8 +210,7 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Write a character to STREAM.  */
-extern __device__ int fputc_device(int c, FILE *stream);
-__forceinline __device__ int fputc_(int c, FILE *stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fputc_device(c, stream); stdio_fputc msg(wait, c, stream); return msg.RC; }
+extern __device__ int fputc_(int c, FILE *stream, bool wait = true);
 #define fputc fputc_
 #define putc(c, stream) fputc(c, stream)
 /* Write a character to stdout.  */
@@ -236,15 +223,13 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Get a newline-terminated string of finite length from STREAM.  */
-extern __device__ char *fgets_device(char *__restrict s, int n, FILE *__restrict stream);
-__forceinline __device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream) { if (ISDEVICEFILE(stream)) return fgets_device(s, n, stream); stdio_fgets msg(s, n, stream); return msg.RC; }
+extern __device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream);
 #define fgets fgets_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Write a string to STREAM.  */
-extern __device__ int fputs_device(const char *__restrict s, FILE *__restrict stream);
-__forceinline __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fputs_device(s, stream); stdio_fputs msg(wait, s, stream); return msg.RC; }
+extern __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait = true);
 #define fputs fputs_
 
 /* Write a string, followed by a newline, to stdout.  */
@@ -253,32 +238,26 @@ __forceinline __device__ int puts_(const char *s) { fputs(s, stdout); return fpu
 #define puts puts_
 
 /* Push a character back onto the input buffer of STREAM.  */
-extern __device__ int ungetc_device(int c, FILE *stream);
-__forceinline __device__ int ungetc_(int c, FILE *stream, bool wait = true) { if (ISDEVICEFILE(stream)) return ungetc_device(c, stream); stdio_ungetc msg(wait, c, stream); return msg.RC; }
+extern __device__ int ungetc_(int c, FILE *stream, bool wait = true);
 #define ungetc ungetc_
 
 /* Read chunks of generic data from STREAM.  */
-extern __device__ size_t fread_device(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream);
-__forceinline __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fread_device(ptr, size, n, stream); stdio_fread msg(wait, size, n, stream); memcpy(ptr, msg.Ptr, msg.RC); return msg.RC; }
+extern __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true);
 #define fread fread_
 /* Write chunks of generic data to STREAM.  */
-extern __device__ size_t fwrite_device(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream);
-__forceinline __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true) { if (ISDEVICEFILE(stream)) return fwrite_device(ptr, size, n, stream); stdio_fwrite msg(wait, ptr, size, n, stream); return msg.RC; }
+extern __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true);
 #define fwrite fwrite_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Seek to a certain position on STREAM.  */
-extern __device__ int fseek_device(FILE *stream, long int off, int whence);
-__forceinline __device__ int fseek_(FILE *stream, long int off, int whence) { if (ISDEVICEFILE(stream)) return fseek_device(stream, off, whence); stdio_fseek msg(true, stream, off, whence); return msg.RC; }
+extern __device__ int fseek_(FILE *stream, long int off, int whence);
 #define fseek fseek_
 /* Return the current position of STREAM.  */
-extern __device__ long int ftell_device(FILE *stream);
-__forceinline __device__ long int ftell_(FILE *stream) { if (ISDEVICEFILE(stream)) return ftell_device(stream); stdio_ftell msg(stream); return msg.RC; }
+extern __device__ long int ftell_(FILE *stream);
 #define ftell ftell_
 /* Rewind to the beginning of STREAM.  */
-extern __device__ void rewind_device(FILE *stream);
-__forceinline __device__ void rewind_(FILE *stream) { if (ISDEVICEFILE(stream)) rewind_device(stream); else stdio_rewind msg(stream); }
+extern __device__ void rewind_(FILE *stream);
 #define rewind rewind_
 __END_NAMESPACE_STD;
 
@@ -303,12 +282,10 @@ extern __device__ __off_t ftello_(FILE *stream);
 __BEGIN_NAMESPACE_STD;
 #ifndef __USE_FILE_OFFSET64
 /* Get STREAM's position.  */
-extern __device__ int fgetpos_device(FILE *__restrict stream, fpos_t *__restrict pos);
-__forceinline __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos) { if (ISDEVICEFILE(stream)) return fgetpos_device(stream, pos); stdio_fgetpos msg(stream, pos); return msg.RC; }
+extern __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos);
 #define fgetpos fgetpos_
 /* Set STREAM's position.  */
-extern __device__ int fsetpos_device(FILE *stream, const fpos_t *pos);
-__forceinline __device__ int fsetpos_(FILE *stream, const fpos_t *pos) { if (ISDEVICEFILE(stream)) return fsetpos_device(stream, pos); stdio_fsetpos msg(stream, pos); return msg.RC; }
+extern __device__ int fsetpos_(FILE *stream, const fpos_t *pos);
 #define fsetpos fsetpos_
 #else
 #define fgetpos fgetpos64
@@ -329,16 +306,13 @@ extern __device__ int fsetpos64_(FILE *stream, const fpos64_t *pos);
 
 __BEGIN_NAMESPACE_STD;
 /* Clear the error and EOF indicators for STREAM.  */
-extern __device__ void clearerr_device(FILE *stream);
-__forceinline __device__ void clearerr_(FILE *stream) { if (ISDEVICEFILE(stream)) clearerr_device(stream); else stdio_clearerr msg(stream); }
+extern __device__ void clearerr_(FILE *stream);
 #define clearerr clearerr_
 /* Return the EOF indicator for STREAM.  */
-extern __device__ int feof_device(FILE *stream);
-__forceinline __device__ int feof_(FILE *stream) { if (ISDEVICEFILE(stream)) return feof_device(stream); stdio_feof msg(stream); return msg.RC; }
+extern __device__ int feof_(FILE *stream);
 #define feof feof_
 /* Return the error indicator for STREAM.  */
-extern __device__ int ferror_device(FILE *stream);
-__forceinline __device__ int ferror_(FILE *stream) { if (ISDEVICEFILE(stream)) return ferror_device(stream); stdio_ferror msg(stream); return msg.RC; }
+extern __device__ int ferror_(FILE *stream);
 #define ferror ferror_
 __END_NAMESPACE_STD;
 
@@ -350,8 +324,7 @@ extern __device__ void perror_(const char *s);
 __END_NAMESPACE_STD;
 
 /* Return the system file descriptor for STREAM.  */
-extern __device__ int fileno_device(FILE *stream);
-__forceinline __device__ int fileno_(FILE *stream) { if (ISDEVICEFILE(stream)) return fileno_device(stream); stdio_fileno msg(stream); return msg.RC; }
+extern __device__ int fileno_(FILE *stream);
 #define fileno fileno_
 
 /* If we are compiling with optimizing read this file.  It contains
@@ -435,6 +408,7 @@ STDARG3(char *, msnprintf, vmsnprintf_(s, maxlen, format, va), char *__restrict 
 __END_NAMESPACE_EXT;
 
 #else
+#define ISHOSTFILE(stream) false
 #define snprintf _snprintf
 #define fprintf_ fprintf
 // EXT
