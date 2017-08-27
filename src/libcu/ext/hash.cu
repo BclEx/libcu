@@ -33,9 +33,7 @@ __device__ void hashClear(hash_t *h)
 	h->count = 0;
 }
 
-/*
-** The hashing function.
-*/
+/* The hashing function.  */
 __device__ static unsigned int getHashCode(const char *key)
 {
 	/* Knuth multiplicative hashing.  (Sorting & Searching, p. 510). 0x9e3779b1 is 2654435761 which is the closest prime number to (2**32)*golden_ratio, where golden_ratio = (sqrt(5) - 1)/2. */
@@ -45,13 +43,12 @@ __device__ static unsigned int getHashCode(const char *key)
 	return h;
 }
 
-/* Link "newElem" element into the hash table "h".  If "entry!=0" then also insert "newElem" into the "entry" hash bucket.
-*/
+/* Link "newElem" element into the hash table "h".  If "entry!=0" then also insert "newElem" into the "entry" hash bucket. */
 static __device__ void insertElement(hash_t *h, hash_t::htable_t *entry, hashElem_t *newElem)
 {
 	hashElem_t *headElem; // First element already in entry
 	if (entry) {
-		headElem = (entry->count ? entry->chain : nullptr);
+		headElem = entry->count ? entry->chain : nullptr;
 		entry->count++;
 		entry->chain = newElem;
 	}
@@ -129,8 +126,7 @@ static __device__ hashElem_t *findElementWithHash(const hash_t *h, const char *k
 	return nullptr;
 }
 
-/* Remove a single entry from the hash table given a pointer to that element and a hash on the element's key.
-*/
+/* Remove a single entry from the hash table given a pointer to that element and a hash on the element's key. */
 static __device__ void removeElementGivenHash(hash_t *h, hashElem_t *elem, unsigned int hash)
 {
 	if (elem->prev)
@@ -165,7 +161,7 @@ __device__ void *hashFind(hash_t *h, const char *key)
 	assert(key);
 	unsigned int hash; // A hash on key
 	hashElem_t *elem = findElementWithHash(h, key, &hash);
-	return (elem ? elem->data : nullptr);
+	return elem ? elem->data : nullptr;
 }
 
 /* Insert an element into the hash table "h".  The key is "key" and the data is "data".
@@ -207,6 +203,6 @@ __device__ void *hashInsert(hash_t *h, const char *key, void *data)
 			hash = getHashCode(key) % h->tableSize;
 		}
 	}
-	insertElement(h, (h->table ? &h->table[hash] : nullptr), newElem);
+	insertElement(h, h->table ? &h->table[hash] : nullptr, newElem);
 	return nullptr;
 }

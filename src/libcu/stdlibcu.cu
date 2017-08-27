@@ -582,9 +582,9 @@ __device__ unsigned long long __strtoll(register const Wchar * __restrict str, W
 #endif
 
 	{
-		unsigned long long tmp = ((negative)
+		unsigned long long tmp = (negative)
 			? ((unsigned long long)(-(1+LLONG_MIN)))+1
-			: LLONG_MAX);
+			: LLONG_MAX;
 		if (sflag && (number > tmp)) {
 			number = tmp;
 			SET_ERRNO(ERANGE);
@@ -748,7 +748,7 @@ __forceinline __device__ void swapfunc(char *a, char *b, int n, int swaptype)
 
 __forceinline __device__ char *med3(char *a, char *b, char *c, __compar_fn_t compar)
 {
-	return (compar(a, b)<0 ? (compar(b, c)<0?b:(compar(a, c)<0?c:a)) : (compar(b, c)>0?b:(compar(a, c)<0?a:c)));
+	return compar(a, b)<0 ? (compar(b, c)<0?b:(compar(a, c)<0?c:a)) : (compar(b, c)>0?b:(compar(a, c)<0?a:c));
 }
 
 __device__ void qsort_(void *base, size_t nmemb, size_t size, __compar_fn_t compar)

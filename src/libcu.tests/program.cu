@@ -31,7 +31,7 @@ cudaError_t string_test1();
 cudaError_t time_test1();
 cudaError_t unistd_test1();
 
-#define test stdlib_test1
+#define test stdio_test1
 
 int main()
 {

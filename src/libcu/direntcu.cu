@@ -20,7 +20,7 @@ __device__ DIR *opendir_(const char *name)
 	memcpy(dirp, ent, sizeof(dirEnt_t));
 	// set first file
 	dirp->list = dirp->listIdx = ent->u.list;
-	dirp->fake = dirp->fakeIdx = (ent != &__iob_root ? 2 : 0);
+	dirp->fake = dirp->fakeIdx = ent != &__iob_root ? 2 : 0;
 	return (DIR *)dirp;
 }
 
@@ -81,7 +81,7 @@ DIR *opendir(const char *name)
 	DIR *dir = nullptr;
 	if (name && name[0]) {
 		size_t base_length = strlen(name);
-		const char *all = (strchr("/\\", name[base_length - 1]) ? "*" : "/*"); // search pattern must end with suitable wildcard
+		const char *all = strchr("/\\", name[base_length - 1]) ? "*" : "/*"; // search pattern must end with suitable wildcard
 		if ((dir = (DIR *)malloc(sizeof(*dir))) != 0 && (dir->name = (char *)malloc((int)(base_length + strlen(all) + 1))) != 0) {
 			strcat(strcpy(dir->name, name), all);
 			if ((dir->handle = (long)_findfirst(dir->name, &dir->info)) != -1)

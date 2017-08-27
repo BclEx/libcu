@@ -28,24 +28,24 @@ static __global__ void g_stdio_test1()
 	/* Host Absolute */
 	int a0a = remove(HostDir"missing.txt"); assert(a0a < 0);
 	makeAFile(HostDir"test.txt");
-	int a1a = remove(HostDir"test.txt"); assert(a1a);
+	int a1a = remove(HostDir"test.txt"); assert(!a1a);
 
 	/* Device Absolute */
 	int b0a = remove(DeviceDir"missing.txt"); assert(b0a < 0);
 	makeAFile(DeviceDir"test.txt");
-	int b1a = remove(DeviceDir"test.txt"); assert(b1a);
+	int b1a = remove(DeviceDir"test.txt"); assert(!b1a);
 
 	/* Host Relative */
 	chdir(HostDir);
 	int c0a = remove("missing.txt"); assert(c0a < 0);
 	makeAFile("test.txt");
-	int c1a = remove("test.txt"); assert(c1a);
+	int c1a = remove("test.txt"); assert(!c1a);
 
 	/* Device Relative */
 	chdir(DeviceDir);
 	int d0a = remove("missing.txt"); assert(d0a < 0);
 	makeAFile("test.txt");
-	int d1a = remove("test.txt"); assert(d1a);
+	int d1a = remove("test.txt"); assert(!d1a);
 
 	//// RENAME FILE ////
 	//__forceinline __device__ int rename_(const char *old, const char *new_); #sentinel-branch

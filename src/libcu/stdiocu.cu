@@ -69,10 +69,10 @@ __device__ int remove_(const char *filename)
 {
 	if (ISHOSTPATH(filename)) { stdio_remove msg(filename); return msg.RC; }
 	int saved_errno = errno;
-	int rv = rmdir(filename);
+	int rv = fsystemUnlink(filename, true); //: rmdir(filename);
 	if (rv < 0 && errno == ENOTDIR) {
 		_set_errno(saved_errno); // Need to restore errno.
-		rv = unlink(filename);
+		rv = fsystemUnlink(filename, false); //: unlink(filename);
 	}
 	return rv;
 }
@@ -250,8 +250,8 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	int size = b.index + 1;
 	// chunk results
 	int offset = 0; int rc = 0;
-	if (!ISHOSTFILE(s)) while (size > 0 && !rc) { rc = fwrite_(v + offset, (size > 1024 ? 1024 : size), 1, s); size -= 1024; }
-	else while (size > 0 && !rc) { stdio_fwrite msg(true, v + offset, (size > 1024 ? 1024 : size), 1, s); rc = msg.RC; size -= 1024; }
+	if (!ISHOSTFILE(s)) while (size > 0 && !rc) { rc = fwrite_(v + offset, size > 1024 ? 1024 : size, 1, s); size -= 1024; }
+	else while (size > 0 && !rc) { stdio_fwrite msg(true, v + offset, size > 1024 ? 1024 : size, 1, s); rc = msg.RC; size -= 1024; }
 	free((void *)v);
 	return rc; 
 }
@@ -415,7 +415,7 @@ __device__ void perror_(const char *s)
 __device__ int fileno_(FILE *stream)
 {
 	if (ISHOSTFILE(stream)) { stdio_fileno msg(stream); return msg.RC; }
-	return (stream == stdin ? 0 : stream == stdout ? 1 : stream == stderr ? 2 : stream->_file); 
+	return stream == stdin ? 0 : stream == stdout ? 1 : stream == stderr ? 2 : stream->_file;
 }
 
 // sscanf
@@ -853,7 +853,7 @@ ok:
 		}
 	}
 input_failure:
-	return (nconversions != 0 ? nassigned : -1);
+	return nconversions != 0 ? nassigned : -1;
 match_failure:
 	return nassigned;
 }

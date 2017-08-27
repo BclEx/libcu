@@ -174,10 +174,11 @@ __device__ int fsystemRename(const char *old, const char *new_)
 		_set_errno(ENOENT);
 		return -1;
 	}
+	// todo: rename
 	return 0;
 }
 
-__device__ int fsystemUnlink(const char *path)
+__device__ int fsystemUnlink(const char *path, bool enotdir)
 {
 	char newPath[MAX_PATH]; expandPath(path, newPath);
 	dirEnt_t *ent = (dirEnt_t *)hashFind(&__iob_dir, newPath);
@@ -192,11 +193,17 @@ __device__ int fsystemUnlink(const char *path)
 		return -1;
 	}
 
-	//// directory not empty
-	//if (ent->dir.d_type == 1 && ent->list) {
-	//	_set_errno(ENOENT);
-	//	return -1;
-	//}
+	// error if not directory
+	if (enotdir && ent->dir.d_type != 1) {
+		_set_errno(ENOTDIR);
+		return -1;
+	}
+
+	// directory not empty
+	if (ent->dir.d_type == 1 && ent->u.list) {
+		_set_errno(ENOENT);
+		return -1;
+	}
 
 	// remove from directory
 	dirEnt_t *list = parentEnt->u.list;

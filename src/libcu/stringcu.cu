@@ -76,8 +76,8 @@ __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, siz
 __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 {
 	register unsigned char *d = (unsigned char *)dest;
-	while (*d) d++;
 	register unsigned char *s = (unsigned char *)src;
+	while (*d) d++;
 	while (*s) { *d++ = *s++; } *d = *s;
 	return (char *)d;
 }
@@ -86,8 +86,8 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 __device__ char *strncat_(char *__restrict dest, const char *__restrict src, size_t n)
 {
 	register unsigned char *d = (unsigned char *)dest;
-	while (*d) d++;
 	register unsigned char *s = (unsigned char *)src;
+	while (*d) d++;
 	while (*s && !--n) { *d++ = *s++; } *d = *s;
 	return (char *)d;
 }
@@ -115,7 +115,7 @@ __device__ int strncmp_(const char *s1, const char *s2, size_t n)
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (n-- > 0 && *a && *a == *b) { a++; b++; }
-	return (!n ? 0 : *a - *b);
+	return !n ? 0 : *a - *b;
 }
 /* Compare N characters of S1 and S2. Case insensitive.  */
 __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
@@ -123,7 +123,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (n-- > 0 && *a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
-	return (!n ? 0 : __curtUpperToLower[*a] - __curtUpperToLower[*b]);
+	return !n ? 0 : __curtUpperToLower[*a] - __curtUpperToLower[*b];
 }
 
 /* Compare the collated forms of S1 and S2.  */

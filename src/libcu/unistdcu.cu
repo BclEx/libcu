@@ -61,7 +61,7 @@ __device__ void usleep_(unsigned long milliseconds)
 	clock_t end = milliseconds * 10;
 	for (;;) {
 		clock_t now = clock();
-		clock_t cycles = (now > start ? now - start : now + (0xffffffff - start));
+		clock_t cycles = now > start ? now - start : now + (0xffffffff - start);
 		if (cycles >= end) break;
 	}
 }
@@ -88,7 +88,7 @@ __device__ char *getcwd_(char *buf, size_t size)
 {
 	if (!__cwd[0]) { unistd_getcwd msg(buf, size); return msg.RC; }
 	int pathLength = strlen(__cwd);
-	return (size > pathLength ? strncpy(buf, __cwd, size) : nullptr);
+	return size > pathLength ? strncpy(buf, __cwd, size) : nullptr;
 }
 
 /* dup1:true - Duplicate FD, returning a new file descriptor on the same file.  */
@@ -115,15 +115,14 @@ extern __device__ char **__environ_ = (char **)__environ_device;
 __device__ int unlink_(const char *filename)
 {
 	if (ISHOSTPATH(filename)) { unistd_unlink msg(filename); return msg.RC; }
-	return fsystemUnlink(filename);
+	return fsystemUnlink(filename, false);
 }
 
 /* Remove the directory PATH.  */
 __device__ int rmdir_(const char *path)
 {
 	if (ISHOSTPATH(path)) { unistd_rmdir msg(path); return msg.RC; }
-	panic("Not Implemented");
-	return 0;
+	return fsystemUnlink(path, true);
 }
 
 __END_DECLS;

@@ -52,7 +52,7 @@ static __global__ void g_fsystem_test1()
 	//assert(h0a);
 
 	// UNLINK
-	int i0a = fsystemUnlink(":\\"); int i0b = !strcmp(__cwd, ":\\");
+	int i0a = fsystemUnlink(":\\", false); int i0b = !strcmp(__cwd, ":\\");
 	//assert(i0a);
 
 	// MKDIR

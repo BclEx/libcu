@@ -227,7 +227,7 @@ static __device__ int reg(regex_t *preg, int paren, int *flagp)
 	}
 
 	// Make a closing node, and hook it on the end
-	int ender = regnode(preg, (paren ? OP_CLOSE+parno : OP_END));
+	int ender = regnode(preg, paren ? OP_CLOSE+parno : OP_END);
 	regtail(preg, ret, ender);
 
 	// Hook the tails of the branches to the closing node
@@ -303,8 +303,8 @@ static __device__ int regpiece(regex_t *preg, int *flagp)
 		preg->regparse = strchr(preg->regparse, '}');
 	}
 	else {
-		min = (op == '+');
-		max = (op == '?' ? 1 : MAX_REP_COUNT);
+		min = op == '+';
+		max = op == '?' ? 1 : MAX_REP_COUNT;
 	}
 
 	int next;
@@ -318,7 +318,7 @@ static __device__ int regpiece(regex_t *preg, int *flagp)
 	preg->program[ret + 3] = min;
 	preg->program[ret + 4] = 0;
 
-	*flagp = (min) ? (WORST|HASWIDTH) : (WORST|SPSTART);
+	*flagp = min ? WORST|HASWIDTH : WORST|SPSTART;
 
 	if (!(flags & SIMPLE)) {
 		int back = regnode(preg, OP_BACK);
@@ -665,7 +665,7 @@ static __device__ void regtail(regex_t *preg, int p, int val)
 			break;
 		scan = temp;
 	}
-	int offset = (OP(preg, scan) == OP_BACK ? scan - val : val - scan);
+	int offset = OP(preg, scan) == OP_BACK ? scan - val : val - scan;
 	preg->program[scan + 1] = offset;
 }
 
@@ -802,7 +802,7 @@ static __device__ int prefix_cmp(const int *prog, int proglen, const char *strin
 		s += n;
 		proglen--;
 	}
-	return (!proglen ? (int)(s - string) : -1);
+	return !proglen ? (int)(s - string) : -1;
 }
 
 // Searchs for 'c' in the range 'range'.
@@ -839,7 +839,7 @@ static __device__ const char *str_find(const char *string, int c, int nocase)
 // In REG_NEWLINE mode, \n is considered EOL in addition to \0
 static __device__ int reg_iseol(regex_t *preg, int ch)
 {
-	return (preg->cflags & REG_NEWLINE ? ch == '\0' || ch == '\n' : ch == '\0');
+	return preg->cflags & REG_NEWLINE ? ch == '\0' || ch == '\n' : ch == '\0';
 }
 
 static __device__ int regmatchsimplerepeat(regex_t *preg, int scan, int matchmin)
@@ -1111,7 +1111,7 @@ static __device__ int regnext(regex_t *preg, int p)
 {
 	int offset = NEXT(preg, p);
 	if (offset == 0) return 0;
-	return (OP(preg, p) == OP_BACK ? p - offset : p + offset);
+	return OP(preg, p) == OP_BACK ? p - offset : p + offset;
 }
 
 // regopsize - returns the size of opcode + operands at 'p' in words

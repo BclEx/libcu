@@ -58,7 +58,7 @@ int gpuGetMaxGflopsDevice()
 		cudaGetDeviceProperties(&deviceProp, i);
 		// If this GPU is not running on Compute Mode prohibited, then we can add it to the list
 		if (deviceProp.computeMode != cudaComputeModeProhibited && deviceProp.major > 0 && deviceProp.major < 9999)
-			bestMajor = (bestMajor > deviceProp.major ? bestMajor : deviceProp.major);
+			bestMajor = bestMajor > deviceProp.major ? bestMajor : deviceProp.major;
 	}
 	// Find the best CUDA capable GPU device
 	int bestDevice = 0;
@@ -67,7 +67,7 @@ int gpuGetMaxGflopsDevice()
 		cudaGetDeviceProperties(&deviceProp, i);
 		// If this GPU is not running on Compute Mode prohibited, then we can add it to the list
 		if (deviceProp.computeMode != cudaComputeModeProhibited) {
-			int sm_per_multiproc = (deviceProp.major == 9999 && deviceProp.minor == 9999 ? 1 : __convertSMVer2Cores(deviceProp.major, deviceProp.minor));
+			int sm_per_multiproc = deviceProp.major == 9999 && deviceProp.minor == 9999 ? 1 : __convertSMVer2Cores(deviceProp.major, deviceProp.minor);
 			unsigned long long performace = (deviceProp.multiProcessorCount * sm_per_multiproc * deviceProp.clockRate);
 			if (performace > basePerformace) {
 				basePerformace = performace;

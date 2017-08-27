@@ -49,7 +49,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 		char *(*hostPrepare)(void*,char*,char*,intptr_t) = nullptr;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length, &hostPrepare); exec = exec->Next) { }
 		//printf(".");
-		*status = (msg->Wait ? 4 : 0);
+		*status = msg->Wait ? 4 : 0;
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;
@@ -89,7 +89,7 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("msg too long");
 			exit(0);
 		}
-		*status = (msg->Wait ? 4 : 0);
+		*status = msg->Wait ? 4 : 0;
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;
@@ -213,7 +213,7 @@ void sentinelClientShutdown()
 
 sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice)
 {
-	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
+	sentinelExecutor *list = forDevice ? _ctx.DeviceList : _ctx.HostList;
 	sentinelExecutor *exec = nullptr;
 	for (exec = list; exec && name && strcmp(name, exec->Name); exec = exec->Next) { }
 	return exec;
@@ -221,7 +221,7 @@ sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice)
 
 static void sentinelUnlinkExecutor(sentinelExecutor *exec, bool forDevice)
 {
-	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
+	sentinelExecutor *list = forDevice ? _ctx.DeviceList : _ctx.HostList;
 	if (!exec) { }
 	else if (list == exec)
 		if (forDevice) _ctx.DeviceList = exec->Next;
@@ -238,7 +238,7 @@ static void sentinelUnlinkExecutor(sentinelExecutor *exec, bool forDevice)
 void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault, bool forDevice)
 {
 	sentinelUnlinkExecutor(exec, forDevice);
-	sentinelExecutor *list = (forDevice ? _ctx.DeviceList : _ctx.HostList);
+	sentinelExecutor *list = forDevice ? _ctx.DeviceList : _ctx.HostList;
 	if (makeDefault || !list) {
 		exec->Next = list;
 		if (forDevice) _ctx.DeviceList = exec;

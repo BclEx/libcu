@@ -14,7 +14,7 @@ __device__ int gettimeofday_(struct timeval *tp, void *tz)
 	//if (tz)
 	//	_abort();
 	//tp->tv_usec = 0;
-	//return (_time(&tp->tv_sec) == (time_t)-1 ? -1 : 0);
+	//return _time(&tp->tv_sec) == (time_t)-1 ? -1 : 0;
 }
 
 #else
