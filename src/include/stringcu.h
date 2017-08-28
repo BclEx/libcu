@@ -135,13 +135,6 @@ __BEGIN_NAMESPACE_STD;
 /* Return the length of S.  */
 extern __device__ size_t strlen_(const char *s);
 #define strlen strlen_
-//__forceinline __device__ size_t strlen_(const char *s)
-//{
-//	if (!s) return 0;
-//	register const char *s2 = s;
-//	while (*s2) { s2++; }
-//	return 0x3fffffff & (int)(s2 - s);
-//}
 
 /* Return the length of S.  */
 //extern __device__ size_t strlen16(const char *s);

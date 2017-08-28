@@ -66,6 +66,7 @@
     <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="host_functions.cpp" />
+    <None Include="program.full.cu" />
     <None Include="sys\timecu.cu" />
     <None Include="pwdcu.cu" />
     <None Include="ext\hash.cu" />
@@ -178,6 +179,7 @@
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+      <Keep>true</Keep>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -200,6 +202,7 @@
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <TargetMachinePlatform>64</TargetMachinePlatform>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+      <Keep>true</Keep>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -225,6 +228,7 @@
       <Include>$(SolutionDir)include;%(Include)</Include>
       <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
       <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+      <Keep>true</Keep>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -83,6 +83,17 @@ and the non-ANSI way under -traditional.  */
 #define __CONCAT(x,y) x ## y
 #define __STRING(x) #x
 
+/* PTX conditionals */
+#ifdef _WIN64
+#define _UX ".u64"
+#define _BX ".b64"
+#define __R "l"
+#else
+#define _UX ".u32"
+#define _BX ".b32"
+#define __R "r"
+#endif
+
 /* This is not a typedef so `const __ptr_t' does the right thing.  */
 #define __ptr_t void *
 //#define __long_double_t long double

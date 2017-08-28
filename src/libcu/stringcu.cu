@@ -237,16 +237,47 @@ __device__ char *strtok_(char *__restrict s, const char *__restrict delim)
 	return nullptr;
 }
 
-/* inline: Return the length of S.  */
+/* Return the length of S.  */
 __device__ size_t strlen_(const char *s)
 {
+#ifndef OMIT_PTX
+	size_t r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg "_UX" s2, s2m;\n\t"
+		".reg "_BX" r;\n\t"
+		".reg .b16 c;\n\t"
+		"setp.eq"_UX"	p1, %1, 0;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
+		"bra.uni _End;\n\t"
+
+		"_Start:\n\t"
+		"mov"_UX"		s2, %1;\n\t"
+		
+		"_While:\n\t"
+		"ld.u8			c, [s2];\n\t"
+		//"and.b16		c, c, 255;\n\t"
+		"setp.ne.u16	p2, c, 0;\n\t"
+		"@!p2 bra _Value;\n\t"
+		"add"_UX"		s2, s2, 1;\n\t"
+		"bra.uni _While;\n\t"
+
+		"_Value:\n\t"
+		"sub"_UX"		r, s2, %1;\n\t"
+		"and"_BX"		%0, r, 0x3fffffff;\n\t"
+		"_End:"
+		: "="__R(r) : __R(s));
+	return r;
+#else
 	if (!s) return 0;
 	register const char *s2 = s;
 	while (*s2) { s2++; }
 	return 0x3fffffff & (int)(s2 - s);
+#endif
 }
 
-/* inline: Return the length of S.  */
+/* Return the length of S.  */
 //__device__ size_t strlen16(const void *s)
 //{
 //	if (!s) return 0;
@@ -258,11 +289,44 @@ __device__ size_t strlen_(const char *s)
 /* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
 __device__ size_t strnlen_(const char *s, size_t maxlen)
 {
+#ifndef OMIT_PTX
+	size_t r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg "_UX" s2, s2m;\n\t"
+		".reg "_BX" r;\n\t"
+		".reg .b16 c;\n\t"
+		"setp.eq"_UX"	p1, %1, 0;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX" 		%0, 0;\n\t"
+		"bra.uni _End;\n\t"
+		
+		"_Start:\n\t"
+		"mov"_UX"		s2, %1;\n\t"
+		"add"_UX"		s2m, %1, %2;\n\t"
+		
+		"_While:\n\t"
+		"ld.u8 			c, [s2];\n\t"
+		//"and.b16  	c, c, 255;\n\t"
+		"setp.ne.u16	p1, c, 0;\n\t"
+		"setp.lt.and"_UX" p1, s2, s2m, p1;\n\t"
+		"@!p1 bra _Value;\n\t"
+		"add"_UX" 		s2, s2, 1;\n\t"
+		"bra.uni _While;\n\t"
+		
+		"_Value:\n\t"
+		"sub"_UX"		r, s2, %1;\n\t"
+		"and"_BX"		%0, r, 0x3fffffff;\n\t"
+		"_End:"
+		: "="__R(r) : __R(s), __R(maxlen));
+	return r;
+#else
 	if (!s) return 0;
 	register const char *s2 = s;
 	register const char *s2m = s + maxlen;
-	while (*s2 && s2 <= s2m) { s2++; }
+	while (*s2 && s2 < s2m) { s2++; }
 	return 0x3fffffff & (int)(s2 - s);
+#endif
 }
 
 __device__ void *mempcpy_(void *__restrict dest, const void *__restrict src, size_t n)

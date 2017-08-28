@@ -180,5 +180,6 @@
     </None>
     <None Include="pwdcu.cu" />
     <None Include="crtdefscu.cu" />
+    <None Include="program.full.cu" />
   </ItemGroup>
 </Project>
