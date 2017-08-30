@@ -1,6 +1,6 @@
 #include <stdlibcu.h>
+#include <stdiocu.h>
 #include <sentinel-stdlibmsg.h>
-#include <stddefcu.h>
 #include <bits/libcu_fpmax.h>
 #include <ctypecu.h>
 #include <errnocu.h>

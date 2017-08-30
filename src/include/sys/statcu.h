@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 
 #include <sys/stat.h>
+//#include <corecrt_io.h>
 //#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 //#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 

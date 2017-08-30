@@ -27,6 +27,7 @@ THE SOFTWARE.
 #define _CRTDEFSCU_H
 
 #include <crtdefs.h>
+//#include <corecrt_io.h>
 #include <cuda_runtime.h>
 #include <stdint.h>
 #define __LIBCU__

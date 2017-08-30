@@ -22,9 +22,6 @@
     <ClInclude Include="..\include\stdargcu.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\stddefcu.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\stringcu.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -33,9 +30,6 @@
     </ClInclude>
     <ClInclude Include="..\include\stdiocu.h">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\bits\libcu_stdio.h">
-      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\sentinel-stdiomsg.h">
       <Filter>include</Filter>
@@ -51,12 +45,6 @@
     </ClInclude>
     <ClInclude Include="..\include\sys\statcu.h">
       <Filter>include\sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\bits\libcu_dirent.h">
-      <Filter>include\bits</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\bits\libcu_stat.h">
-      <Filter>include\bits</Filter>
     </ClInclude>
     <ClInclude Include="..\include\unistdcu.h">
       <Filter>include</Filter>
@@ -107,6 +95,18 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="fsystem.h" />
+    <ClInclude Include="..\include\_stddefcu.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\_libcu_dirent.h">
+      <Filter>include\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\_libcu_stat.h">
+      <Filter>include\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bits\_libcu_stdio.h">
+      <Filter>include\bits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />

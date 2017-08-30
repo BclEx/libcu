@@ -1,7 +1,6 @@
 #include <stdiocu.h>
 #include <sentinel-stdiomsg.h>
 #include <stdlibcu.h>
-#include <stddefcu.h>
 #include <stdargcu.h>
 #include <ctypecu.h>
 #include <assert.h>

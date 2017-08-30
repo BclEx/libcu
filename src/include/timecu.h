@@ -30,7 +30,6 @@ THE SOFTWARE.
 
 #include <time.h>
 #if defined(__CUDA_ARCH__)
-#include <stddefcu.h>
 __BEGIN_DECLS;
 
 //#ifndef _WIN64

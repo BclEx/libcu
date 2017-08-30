@@ -28,6 +28,7 @@ __device__ int fsystemRename(const char *old, const char *new_);
 __device__ int fsystemUnlink(const char *path, bool enotdir);
 __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r);
 __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd);
+__device__ void fsystemClose(int fd);
 __device__ void fsystemReset();
 
 extern __device__ dirEnt_t __iob_root;

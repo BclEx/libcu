@@ -1,10 +1,10 @@
-#include <stdiocu.h>
+#include "fsystem.h"
 #include <stdlibcu.h>
-#include <stddefcu.h>
-#include <assert.h>
+#include <stdiocu.h>
+#include <stringcu.h>
 #include <ext/hash.h>
 #include <errnocu.h>
-#include "fsystem.h"
+#include <assert.h>
 
 __BEGIN_DECLS;
 
@@ -272,6 +272,11 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 	file_t *f; *fd = fileGet(&f);
 	f->base = (char *)fileEnt;
 	return fileEnt;
+}
+
+__device__ void fsystemClose(int fd)
+{
+	fileFree(fd);
 }
 
 __device__ void fsystemReset()

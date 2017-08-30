@@ -1,11 +1,12 @@
+#include <stdiocu.h>
+#include <stdargcu.h>
 #include <stringcu.h>
 #include <stdlibcu.h>
-#include <stdargcu.h>
-#include <stddefcu.h>
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
 
+#define OMIT_PTX 1
 __BEGIN_DECLS;
 
 /* Copy N bytes of SRC to DEST.  */

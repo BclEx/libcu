@@ -1,9 +1,9 @@
-#include <stddefcu.h>
+#include "fsystem.h"
+#include <sys/statcu.h>
 #include <stdargcu.h>
 #include <fcntlcu.h>
 #include <sentinel-fcntlmsg.h>
 #include <sentinel-unistdmsg.h>
-#include "fsystem.h"
 
 __BEGIN_DECLS;
 
@@ -60,7 +60,7 @@ __device__ int openv64_(const char *file, int oflag, va_list va)
 __device__ int close_(int fd)
 {
 	if (ISHOSTHANDLE(fd)) { unistd_close msg(fd); return msg.RC; }
-	fileFree(fd);
+	fsystemClose(fd);
 	return 0;
 }
 

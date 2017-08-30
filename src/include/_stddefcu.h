@@ -25,16 +25,8 @@ THE SOFTWARE.
 
 #ifndef _STDDEFCU_H
 #define _STDDEFCU_H
-
-#include <stddef.h>
 #include <crtdefscu.h>
 
-//_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
-//#if defined(__CUDA_ARCH__)
-//#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
-//#else
-////__forceinline void Coverage(int line) { }
-//#define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); exit(1); }
-//#endif  /* __CUDA_ARCH__ */
+#include <stddef.h>
 
 #endif  /* _STDDEFCU_H */

@@ -24,10 +24,10 @@
     <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
   </PropertyGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\bits\libcu_dirent.h" />
+    <ClInclude Include="..\include\bits\_libcu_dirent.h" />
     <ClInclude Include="..\include\bits\libcu_fpmax.h" />
-    <ClInclude Include="..\include\bits\libcu_stat.h" />
-    <ClInclude Include="..\include\bits\libcu_stdio.h" />
+    <ClInclude Include="..\include\bits\_libcu_stat.h" />
+    <ClInclude Include="..\include\bits\_libcu_stdio.h" />
     <ClInclude Include="..\include\crtdefscu.h" />
     <ClInclude Include="..\include\ctypecu.h" />
     <ClInclude Include="..\include\cuda_runtimecu.h" />
@@ -52,7 +52,7 @@
     <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
     <ClInclude Include="..\include\sentinel.h" />
     <ClInclude Include="..\include\stdargcu.h" />
-    <ClInclude Include="..\include\stddefcu.h" />
+    <ClInclude Include="..\include\_stddefcu.h" />
     <ClInclude Include="..\include\stdiocu.h" />
     <ClInclude Include="..\include\stdlibcu.h" />
     <ClInclude Include="..\include\stringcu.h" />
