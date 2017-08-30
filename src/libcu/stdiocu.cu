@@ -1,3 +1,4 @@
+#include "fsystem.h"
 #include <stdiocu.h>
 #include <sentinel-stdiomsg.h>
 #include <stdlibcu.h>
@@ -6,7 +7,7 @@
 #include <assert.h>
 #include <unistdcu.h>
 #include <fcntlcu.h>
-#include "fsystem.h"
+#include <errnocu.h>
 
 #define CORE_MAXLENGTH 1000000000
 

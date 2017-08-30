@@ -9,7 +9,28 @@ add_library(libcu STATIC
   libcu/sentinel.cpp
   libcu/sentinel-host.cpp
   libcu/host_functions.cpp
-  libcu/libcu.cu
+
+  libcu/crtdefscu.cu
+  libcu/ctypecu.cu
+  libcu/errnocu.cu
+  libcu/regexcu.cu
+  libcu/sentinel-gpu.cu
+  libcu/setjmpcu.cu
+  libcu/stdiocu.cu
+  libcu/stdlibcu.cu
+  libcu/stringcu.cu
+  libcu/timecu.cu
+  libcu/unistdcu.cu
+  libcu/direntcu.cu
+  libcu/sys/statcu.cu
+  libcu/sys/timecu.cu
+  libcu/ext/hash.cu
+  libcu/ext/memfile.cu
+  libcu/grpcu.cu
+  libcu/pwdcu.cu
+  libcu/fsystem.cu
+  libcu/fcntlcu.cu
+
   libcu/libcu.stdlib.cu
   )
 
