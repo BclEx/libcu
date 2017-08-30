@@ -1,13 +1,37 @@
+# https://devblogs.nvidia.com/parallelforall/building-cuda-applications-cmake
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(libcu LANGUAGES CXX CUDA)
 
+include_directories(include)
+
 add_library(libcu STATIC
-  sentinel-msg.cpp
-  sentinel.cpp
-  sentinel-host.cpp
-  host_functions.cpp
-  libcu.cu
-  libcu.stdlib.cu
+  libcu/sentinel-msg.cpp
+  libcu/sentinel.cpp
+  libcu/sentinel-host.cpp
+  libcu/host_functions.cpp
+
+  libcu/crtdefscu.cu
+  libcu/ctypecu.cu
+  libcu/errnocu.cu
+  libcu/regexcu.cu
+  libcu/sentinel-gpu.cu
+  libcu/setjmpcu.cu
+  libcu/stdiocu.cu
+  libcu/stdlibcu.cu
+  libcu/stringcu.cu
+  libcu/timecu.cu
+  libcu/unistdcu.cu
+  libcu/direntcu.cu
+  libcu/sys/statcu.cu
+  libcu/sys/timecu.cu
+  libcu/ext/hash.cu
+  libcu/ext/memfile.cu
+  libcu/grpcu.cu
+  libcu/pwdcu.cu
+  libcu/fsystem.cu
+  libcu/fcntlcu.cu
+
+  libcu/libcu.stdlib.cu
   )
 
 # Request that libcu be built with -std=c++11

@@ -1,5 +1,6 @@
 ﻿#include <ext/hash.h>
 #include <stdlibcu.h>
+#include <stringcu.h>
 #include <ctypecu.h>
 #include <assert.h>
 

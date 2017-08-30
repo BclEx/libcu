@@ -1,6 +1,5 @@
-#include <cuda_runtimecu.h>
 #include <crtdefscu.h>
-#include <stddefcu.h>
+#include <stdiocu.h>
 #include <stdlibcu.h>
 #include <sentinel.h>
 
