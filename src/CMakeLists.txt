@@ -1,4 +1,5 @@
 # https://devblogs.nvidia.com/parallelforall/building-cuda-applications-cmake
+# https://cmake.org/cmake/help/v3.9/manual/cmake-buildsystem.7.html
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(libcu LANGUAGES CXX CUDA)
 

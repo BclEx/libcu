@@ -599,17 +599,36 @@ __device__ unsigned long long __strtoll(register const Wchar * __restrict str, W
 /* Return a random integer between 0 and RAND_MAX inclusive.  */
 // https://stackoverflow.com/questions/9492581/c-random-number-generation-pure-c-code-no-libraries-or-functions
 // https://sites.google.com/site/murmurhash/
+// http://fabiensanglard.net/fizzlefade/index.php
 // cuRAND
-__device__ int rand_(void)
+__device__ uint32_t _rand_value = 0;
+__device__ int rand_()
 {
-	panic("Not Implemented");
-	return RAND_MAX;
+#if 0 //#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .u32 value;\n\t"
+		"ld.u32		value, [_rand_value];\n\t"
+		"and.u32	%0, value, "RAND_MAX";\n\t"
+		// advance to next random element
+		"shr.b32	value, value, 1;\n\t"
+		"xor.b32	value, value, 0x00012000;\n\t"
+		: "="__R(r));
+	return r;
+#else
+	int x = _rand_value & RAND_MAX;		// X = low 8 bits
+	unsigned lsb = _rand_value & 1;		// Get the output bit
+	_rand_value >>= 1;					// Shift register
+
+	if (lsb) _rand_value ^= 0x00012000; // If the output is 0, the xor can be skipped
+	return x;
+#endif
 }
 
 /* Seed the random number generator with the given number.  */
 __device__ void srand_(unsigned int seed)
 {
-	panic("Not Implemented");
+	_rand_value = seed ? seed : 1;
 }
 
 /*
@@ -622,43 +641,43 @@ __device__ void srand_(unsigned int seed)
 #endif
 __device__ void *malloc_(size_t size)
 {
-	assert(size > 0);
-	size = _ROUND8(size);
-	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
-	if (p)
-		p[0] = size;
-	else panic("failed to allocate %u bytes of memory", size);
-	return (void *)(p+1);
+assert(size > 0);
+size = _ROUND8(size);
+MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
+if (p)
+p[0] = size;
+else panic("failed to allocate %u bytes of memory", size);
+return (void *)(p+1);
 }
 
 __device__ void *calloc_(size_t nmemb, size_t size)
 {
-	return malloc(size);
+return malloc(size);
 }
 
 __device__ void free_(void *ptr)
 {
-	assert(ptr);
-	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)ptr;
-	free(p-1);
+assert(ptr);
+MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)ptr;
+free(p-1);
 }
 
 __device__ void *realloc_(void *ptr, size_t size)
 {
-	assert(size > 0);
-	size = _ROUND8(size);
-	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
-	if (p)
-		p[0] = size;
-	else panic("failed to allocate %u bytes of memory", size);
-	if (ptr)
-	{ 
-		MALLOCSIZETYPE *p2 = (MALLOCSIZETYPE *)ptr;
-		size_t ptrSize = (size_t)p2[0];
-		if (ptrSize) memcpy(p+1, p2+1, ptrSize);
-		free(p2-1);
-	}
-	return (void *)(p+1);
+assert(size > 0);
+size = _ROUND8(size);
+MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
+if (p)
+p[0] = size;
+else panic("failed to allocate %u bytes of memory", size);
+if (ptr)
+{ 
+MALLOCSIZETYPE *p2 = (MALLOCSIZETYPE *)ptr;
+size_t ptrSize = (size_t)p2[0];
+if (ptrSize) memcpy(p+1, p2+1, ptrSize);
+free(p2-1);
+}
+return (void *)(p+1);
 }
 #define malloc malloc_
 #define free free_
