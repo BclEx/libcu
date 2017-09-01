@@ -1,5 +1,6 @@
 #include <cuda_runtimecu.h>
 #include <sentinel.h>
+#include <stdlibcu.h>
 #include <stdiocu.h>
 
 cudaError_t crtdefs_test1();
@@ -31,10 +32,9 @@ cudaError_t string_test1();
 cudaError_t time_test1();
 cudaError_t unistd_test1();
 
-#define test stdio_test1
-
-int main()
+int main(int argc, char ** argv)
 {
+	int testId = atoi(argv[1]);
 	sentinelServerInitialize();
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
@@ -46,16 +46,47 @@ int main()
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 
 	// Launch test
-	cudaStatus = test();
+	switch (testId)
+	{
+	case 1: cudaStatus = crtdefs_test1(); break;
+	case 2: cudaStatus = ctype_test1(); break;
+	case 3: cudaStatus = dirent_test1(); break;
+	case 4: cudaStatus = errno_test1(); break;
+	case 5: cudaStatus = falloc_lauched_cuda_kernel(); break;
+	case 6: cudaStatus = falloc_alloc_with_getchunk(); break;
+	case 7: cudaStatus = falloc_alloc_with_getchunks(); break;
+	case 8: cudaStatus = falloc_alloc_with_context(); break;
+	case 9: cudaStatus = fcntl_test1(); break;
+	case 10: cudaStatus = grp_test1(); break;
+	case 11: cudaStatus = pwd_test1(); break;
+	case 12: cudaStatus = regex_test1(); break;
+	case 13: cudaStatus = sentinel_test1(); break;
+	case 14: cudaStatus = setjmp_test1(); break;
+	case 15: cudaStatus = stdarg_parse(); break;
+	case 16: cudaStatus = stdarg_call(); break;
+	case 17: cudaStatus = stddef_test1(); break;
+	case 18: cudaStatus = stdio_test1(); break;
+	case 19: cudaStatus = stdio_64bit(); break;
+	case 20: cudaStatus = stdio_ganging(); break;
+	case 21: cudaStatus = stdio_scanf(); break;
+	case 22: cudaStatus = stdlib_test1(); break;
+	case 23: cudaStatus = stdlib_strtol(); break;
+	case 24: cudaStatus = stdlib_strtoq(); break;
+	case 25: cudaStatus = string_test1(); break;
+	case 26: cudaStatus = time_test1(); break;
+	case 27: cudaStatus = unistd_test1(); break;
+		// default
+	default: cudaStatus = crtdefs_test1(); break;
+	}
 	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "test failed! %s\n", cudaGetErrorString(cudaStatus));
+		fprintf(stderr, "failed! %s\n", cudaGetErrorString(cudaStatus));
 		goto Error;
 	}
 
 	// Check for any errors launching the kernel
 	cudaStatus = cudaGetLastError();
 	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "test launch failed: %s\n", cudaGetErrorString(cudaStatus));
+		fprintf(stderr, "launch failed: %s\n", cudaGetErrorString(cudaStatus));
 		goto Error;
 	}
 
@@ -71,8 +102,8 @@ Error:
 	}
 
 	// finish
-	printf("\nPress any key to continue.\n");
-	scanf("%c");
+	//printf("\nPress any key to continue.\n");
+	//scanf("%c");
 
 	return 0;
 }

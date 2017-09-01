@@ -1,5 +1,6 @@
 #include <sys/statcu.h>
 #include <stdiocu.h>
+#include <stringcu.h>
 
 __device__ int d_dcmp_rc;
 __global__ void g_dcmp(char *str, char *str2)

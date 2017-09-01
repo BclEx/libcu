@@ -95,9 +95,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="fsystem.h" />
-    <ClInclude Include="..\include\_stddefcu.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\bits\_libcu_dirent.h">
       <Filter>include\bits</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\include\bits\_libcu_stdio.h">
       <Filter>include\bits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\xstddefcu.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
