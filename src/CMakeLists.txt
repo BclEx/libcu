@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(libcu LANGUAGES CXX CUDA)
 set(arch 35)
 include(CTest)
+enable_testing()
 
 include_directories(include)
 

@@ -3,31 +3,10 @@
 #include <stringcu.h>
 #include <assert.h>
 
-static __global__ void g_general_speed()
-{
-	char *test = 
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
-		"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog.";
-	for (int i = 0; i < 1000; i++) {
-		int testLength = strnlen(nullptr, 3000);
-		assert(testLength == 0);
-	}
-	for (int i = 0; i < 1000; i++) {
-		int testLength = strnlen(test, 3000);
-		assert(testLength == 2196);
-		//printf("%d\n", testLength);
-	}
-}
+static __global__ void g_memmove_speed();
+static __global__ void g_strlen_speed();
+static __global__ void g_strnlen_speed();
+#define g_speed g_memmove_speed
 
 int main()
 {
@@ -46,7 +25,7 @@ int main()
 	// Launch test
 	cudaEventRecord(start);
 	for (int i = 0; i < 1; i++)
-		g_general_speed<<<1, 32>>>();
+		g_speed<<<1, 32>>>();
 	cudaEventRecord(stop);
 	//
 	cudaStatus = cudaDeviceSynchronize(); 
@@ -80,4 +59,60 @@ Error:
 	scanf("%c");
 
 	return 0;
+}
+
+static __constant__ char *_quickbrownfox = 
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog."
+	"The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog.";
+
+static __device__ char _buf0[] = "The quick brown fox jumped over the lazy dog.";
+static __device__ char _buf1[50];
+
+static __global__ void g_memmove_speed()
+{
+	for (int i = 0; i < 1000; i++) {
+		void *c = memmove(_buf1, nullptr, 0);
+		assert(c == _buf1);
+	}
+	for (int i = 0; i < 1000; i++) {
+		void *c = memmove(_buf1, _buf1, 10);
+		assert(c == _buf1);
+	}
+	//for (int i = 0; i < 1000; i++) {
+	//	void *c = memmove(_buf1, _buf0, 45);
+	//}
+}
+
+static __global__ void g_strlen_speed()
+{
+	for (int i = 0; i < 1000; i++) {
+		int testLength = strlen(nullptr);
+		assert(testLength == 0);
+	}
+	for (int i = 0; i < 1000; i++) {
+		int testLength = strlen(_quickbrownfox);
+		assert(testLength == 2196);
+	}
+}
+
+static __global__ void g_strnlen_speed()
+{
+	for (int i = 0; i < 1000; i++) {
+		int testLength = strnlen(nullptr, 3000);
+		assert(testLength == 0);
+	}
+	for (int i = 0; i < 1000; i++) {
+		int testLength = strnlen(_quickbrownfox, 3000);
+		assert(testLength == 2196);
+	}
 }

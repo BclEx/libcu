@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#define OMIT_PTX 1
+#define xOMIT_PTX
 __BEGIN_DECLS;
 
 /* Copy N bytes of SRC to DEST.  */
@@ -15,17 +15,72 @@ __BEGIN_DECLS;
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
 __device__ void *memmove_(void *dest, const void *src, size_t n)
 {
-	if (!n) return dest;
+#ifndef OMIT_PTX
+	void *r;
+	asm(
+		".reg .pred p1;\n"
+		".reg "_UX" z0;\n"
+		".reg .b8 c;\n"
+		"setp.eq"_BX"	p1, %3, 0;\n"
+		"setp.eq.or"_BX" p1, %1, %2, p1;\n"
+		"@!p1 bra _Start;\n"
+		"mov"_BX"		%0, %1;\n"
+		"bra.uni _End;\n"
+		"_Start:\n"
+
+		// Check for destructive overlap.
+		"setp.lt"_UX"	p1, %1, %2;\n"
+		"add"_UX"		z0, %1, %3;\n"
+		"setp.lt.and"_UX" p1, %2, z0, p1;\n"
+		"@!p1 bra _While1;\n"
+
+		// Destructive overlap ...
+		"add"_UX" 		%1, %1, %3;\n"
+		"add"_UX" 		%2, %2, %3;\n"
+		"bra.uni _End;\n\t"
+		"_While0:\n\t"
+		"add.s32 		%3, %3, -1;\n"
+		"setp.gt.u32	p1, %3, 0;\n"
+		"@!p1 bra _Ret;\n\t"
+		"add.s32 		%2, %2, -1;\n"
+		"ld.u8 			c, [%2];\n"
+		"add.s32 		%1, %1, -1;\n"
+		"st.u8 			[%1], c;\n"
+		"bra.uni _While0;\n"
+
+		// Do an ascending copy.
+		"_While1:\n"
+		//"mov.u32 	%r15, B;\n"
+		//"mov.u32 	%r14, A;\n"
+		//"mov.u32 	%r13, N;\n"
+		//"add.s32 	N, %r13, -1;\n"
+		"setp.gt.u32	%1, %1, 0;\n\t"
+		//"not.pred 	%p14, %p13;\n\t"
+		//"@%p14 bra 	BB39_14;\n"
+		//"bra.uni 	BB39_13;\n"
+		//"add.s32 	B, %r15, 1;\n"
+		//"ld.u8 	%rs1, [%r15];\n"
+		//"add.s32 	A, %r14, 1;\n"
+		//"st.u8 	[%r14], %rs1;\n"
+		//"bra.uni _While1;\n"
+
+		"_Ret:"
+		"mov"_UX" 		%0, %1;\n"
+		"_End:"
+		: "="__R(r) : __R(dest), __R(src), __R(n));
+	return r;
+#else
+	if (!n || dest == src) return dest; // No need to do that thing.
 	register unsigned char *a = (unsigned char *)dest;
 	register unsigned char *b = (unsigned char *)src;
-	if (a == b) return a; // No need to do that thing.
 	if (a < b && b < a + n) { // Check for destructive overlap.
 		a += n; b += n; // Destructive overlap ...
-		while (n-- > 0) { *--a= *--b; } // have to copy backwards.
+		while (n-- > 0) { *--a = *--b; } // have to copy backwards.
 		return a;
 	}
 	while (n-- > 0) { *a++ = *b++; } // Do an ascending copy.
 	return a;
+#endif
 }
 
 /* Set N bytes of S to C.  */
@@ -252,10 +307,9 @@ __device__ size_t strlen_(const char *s)
 		"@!p1 bra _Start;\n\t"
 		"mov"_BX"		%0, 0;\n\t"
 		"bra.uni _End;\n\t"
-
 		"_Start:\n\t"
 		"mov"_UX"		s2, %1;\n\t"
-		
+
 		"_While:\n\t"
 		"ld.u8			c, [s2];\n\t"
 		//"and.b16		c, c, 255;\n\t"
@@ -301,11 +355,10 @@ __device__ size_t strnlen_(const char *s, size_t maxlen)
 		"@!p1 bra _Start;\n\t"
 		"mov"_BX" 		%0, 0;\n\t"
 		"bra.uni _End;\n\t"
-		
 		"_Start:\n\t"
 		"mov"_UX"		s2, %1;\n\t"
 		"add"_UX"		s2m, %1, %2;\n\t"
-		
+
 		"_While:\n\t"
 		"ld.u8 			c, [s2];\n\t"
 		//"and.b16  	c, c, 255;\n\t"
@@ -314,7 +367,7 @@ __device__ size_t strnlen_(const char *s, size_t maxlen)
 		"@!p1 bra _Value;\n\t"
 		"add"_UX" 		s2, s2, 1;\n\t"
 		"bra.uni _While;\n\t"
-		
+
 		"_Value:\n\t"
 		"sub"_UX"		r, s2, %1;\n\t"
 		"and"_BX"		%0, r, 0x3fffffff;\n\t"

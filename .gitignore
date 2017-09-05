@@ -3,6 +3,7 @@ _build/
 *.orig
 
 # Windows
+Testing/
 Program Files/
 x64/
 [Dd]ebug/

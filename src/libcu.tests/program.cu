@@ -92,6 +92,11 @@ int main(int argc, char ** argv)
 
 Error:
 	sentinelServerShutdown();
+	
+	// close
+	if (cudaStatus != cudaSuccess) {
+		return 1;
+	}
 
 	// cudaDeviceReset must be called before exiting in order for profiling and
 	// tracing tools such as Nsight and Visual Profiler to show complete traces.
