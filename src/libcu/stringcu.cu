@@ -87,7 +87,6 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 	int r;
 	asm(
 		".reg .pred p1;\n"
-		".reg "_UX" z0;\n"
 		".reg .s32 c1, c2;\n"
 		"setp.eq"_BX"	p1, %3, 0;\n"
 		"@!p1 bra _Start;\n"
@@ -125,6 +124,34 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 /* Search N bytes of S for C.  */
 __device__ void *memchr_(const void *s, int c, size_t n)
 {
+#ifndef OMIT_PTX
+	void *r;
+	asm(
+		".reg .pred p1;\n"
+		".reg .u32 c1;\n"
+		"setp.eq"_BX"	p1, %3, 0;\n"
+		"@!p1 bra _Start;\n"
+		"mov"_BX"		%0, 0;\n"
+		"bra.uni _End;\n"
+		"_Start:\n"
+
+		//
+		"_While0:\n"
+		"ld.u8 			c1, [%1];\n"
+		"setp.eq.u32	p1, c1, %2;\n\t"
+		"@p1 bra _Ret;\n\t"
+		"add"_UX" 		%1, %1, 1;\n"
+		"add.s32 		%3, %3, -1;\n"
+		"setp.gt.u32	p1, %3, 0;\n\t"
+		"@p1 bra _While0;\n"
+		"mov"_UX" 		%1, 0;\n"
+
+		"_Ret:"
+		"mov"_UX" 		%0, %1;\n"
+		"_End:"
+		: "="__R(r) : __R(s), __R(c), __R(n));
+	return r;
+#else
 	if (!n) return nullptr;
 	register const char *p = (const char *)s;
 	do {
@@ -132,15 +159,40 @@ __device__ void *memchr_(const void *s, int c, size_t n)
 			return (void *)(p - 1);
 	} while (--n > 0);
 	return nullptr;
+#endif
 }
 
 /* Copy SRC to DEST.  */
 __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1;\n"
+		".reg .u32 c1;\n"
+
+		//
+		"_While0:\n"
+		"ld.u8 			c1, [%2];\n"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"st.u8 			[%1], c1;\n"
+		"add"_UX" 		%1, %1, 1;\n"
+		"add"_UX" 		%2, %2, 1;\n"
+		"bra.uni _While0;\n"
+
+		"_Ret:"
+		"st.u8 			[%1], c1;\n"
+		"mov"_UX" 		%0, %1;\n"
+		"_End:"
+		: "="__R(r) : __R(dest), __R(src));
+	return r;
+#else
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
 	while (*s) { *d++ = *s++; } *d = *s;
 	return (char *)d;
+#endif
 }
 
 /* Copy no more than N characters of SRC to DEST.  */
