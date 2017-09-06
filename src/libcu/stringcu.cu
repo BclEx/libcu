@@ -37,32 +37,26 @@ __device__ void *memmove_(void *dest, const void *src, size_t n)
 		// Destructive overlap ...
 		"add"_UX" 		%1, %1, %3;\n"
 		"add"_UX" 		%2, %2, %3;\n"
-		"bra.uni _End;\n\t"
 		"_While0:\n\t"
 		"add.s32 		%3, %3, -1;\n"
 		"setp.gt.u32	p1, %3, 0;\n"
 		"@!p1 bra _Ret;\n\t"
-		"add.s32 		%2, %2, -1;\n"
 		"ld.u8 			c, [%2];\n"
-		"add.s32 		%1, %1, -1;\n"
+		"add.s32 		%2, %2, -1;\n"
 		"st.u8 			[%1], c;\n"
+		"add.s32 		%1, %1, -1;\n"
 		"bra.uni _While0;\n"
 
 		// Do an ascending copy.
 		"_While1:\n"
-		//"mov.u32 	%r15, B;\n"
-		//"mov.u32 	%r14, A;\n"
-		//"mov.u32 	%r13, N;\n"
-		//"add.s32 	N, %r13, -1;\n"
-		"setp.gt.u32	%1, %1, 0;\n\t"
-		//"not.pred 	%p14, %p13;\n\t"
-		//"@%p14 bra 	BB39_14;\n"
-		//"bra.uni 	BB39_13;\n"
-		//"add.s32 	B, %r15, 1;\n"
-		//"ld.u8 	%rs1, [%r15];\n"
-		//"add.s32 	A, %r14, 1;\n"
-		//"st.u8 	[%r14], %rs1;\n"
-		//"bra.uni _While1;\n"
+		"add.s32 		%3, %3, -1;\n"
+		"setp.gt.u32	p1, %3, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"ld.u8 			c, [%2];\n"
+		"add.s32 		%2, %2, 1;\n"
+		"st.u8 			[%1], c;\n"
+		"add.s32 		%1, %1, 1;\n"
+		"bra.uni _While1;\n"
 
 		"_Ret:"
 		"mov"_UX" 		%0, %1;\n"
@@ -75,10 +69,10 @@ __device__ void *memmove_(void *dest, const void *src, size_t n)
 	register unsigned char *b = (unsigned char *)src;
 	if (a < b && b < a + n) { // Check for destructive overlap.
 		a += n; b += n; // Destructive overlap ...
-		while (n-- > 0) { *--a = *--b; } // have to copy backwards.
+		while (--n > 0) { *a-- = *b--; } // have to copy backwards.
 		return a;
 	}
-	while (n-- > 0) { *a++ = *b++; } // Do an ascending copy.
+	while (--n > 0) { *a++ = *b++; } // Do an ascending copy.
 	return a;
 #endif
 }
@@ -89,11 +83,43 @@ __device__ void *memmove_(void *dest, const void *src, size_t n)
 /* Compare N bytes of S1 and S2.  */
 __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 {
+#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .pred p1;\n"
+		".reg "_UX" z0;\n"
+		".reg .s32 c1, c2;\n"
+		"setp.eq"_BX"	p1, %3, 0;\n"
+		"@!p1 bra _Start;\n"
+		"mov"_BX"		%0, 0;\n"
+		"bra.uni _End;\n"
+		"_Start:\n"
+
+		// Do an ascending copy.
+		"_While0:\n"
+		"add.s32 		%3, %3, -1;\n"
+		"setp.gt.u32	p1, %3, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"ld.u8 			c1, [%1];\n"
+		"ld.u8 			c2, [%2];\n"
+		"setp.eq.s32	p1, c1, c2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add.s32 		%1, %1, 1;\n"
+		"add.s32 		%2, %2, 1;\n"
+		"bra.uni _While0;\n"
+
+		"_Ret:"
+		"sub.s32 		%0, c1, c2;\n"
+		"_End:"
+		: "="__R(r) : __R(s1), __R(s2), __R(n));
+	return r;
+#else
 	if (!n) return 0;
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (--n > 0 && *a == *b) { a++; b++; }
 	return *a - *b;
+#endif
 }
 
 /* Search N bytes of S for C.  */
