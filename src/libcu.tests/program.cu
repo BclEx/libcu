@@ -46,6 +46,7 @@ int main(int argc, char ** argv)
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 
 	// Launch test
+	//testId = 25;
 	switch (testId)
 	{
 	case 1: cudaStatus = crtdefs_test1(); break;

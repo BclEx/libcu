@@ -18,49 +18,49 @@ __device__ void *memmove_(void *dest, const void *src, size_t n)
 #ifndef OMIT_PTX
 	void *r;
 	asm(
-		".reg .pred p1;\n"
-		".reg "_UX" z0;\n"
-		".reg .b8 c;\n"
-		"setp.eq"_BX"	p1, %3, 0;\n"
-		"setp.eq.or"_BX" p1, %1, %2, p1;\n"
-		"@!p1 bra _Start;\n"
-		"mov"_BX"		%0, %1;\n"
-		"bra.uni _End;\n"
-		"_Start:\n"
+		".reg .pred p1;\n\t"
+		".reg "_UX" z0;\n\t"
+		".reg .b8 c;\n\t"
+		"setp.eq"_BX"	p1, %3, 0;\n\t"
+		"setp.eq.or"_BX" p1, %1, %2, p1;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX"		%0, %1;\n\t"
+		"bra.uni _End;\n\t"
+		"_Start:\n\t"
 
 		// Check for destructive overlap.
-		"setp.lt"_UX"	p1, %1, %2;\n"
-		"add"_UX"		z0, %1, %3;\n"
-		"setp.lt.and"_UX" p1, %2, z0, p1;\n"
-		"@!p1 bra _While1;\n"
+		"setp.lt"_UX"	p1, %1, %2;\n\t"
+		"add"_UX"		z0, %1, %3;\n\t"
+		"setp.lt.and"_UX" p1, %2, z0, p1;\n\t"
+		"@!p1 bra _While1;\n\t"
 
 		// Destructive overlap ...
-		"add"_UX" 		%1, %1, %3;\n"
-		"add"_UX" 		%2, %2, %3;\n"
+		"add"_UX" 		%1, %1, %3;\n\t"
+		"add"_UX" 		%2, %2, %3;\n\t"
 		"_While0:\n\t"
-		"add.s32 		%3, %3, -1;\n"
-		"setp.gt.u32	p1, %3, 0;\n"
-		"@!p1 bra _Ret;\n\t"
-		"ld.u8 			c, [%2];\n"
-		"add.s32 		%2, %2, -1;\n"
-		"st.u8 			[%1], c;\n"
-		"add.s32 		%1, %1, -1;\n"
-		"bra.uni _While0;\n"
-
-		// Do an ascending copy.
-		"_While1:\n"
-		"add.s32 		%3, %3, -1;\n"
+		"add.s32 		%3, %3, -1;\n\t"
 		"setp.gt.u32	p1, %3, 0;\n\t"
 		"@!p1 bra _Ret;\n\t"
-		"ld.u8 			c, [%2];\n"
-		"add.s32 		%2, %2, 1;\n"
-		"st.u8 			[%1], c;\n"
-		"add.s32 		%1, %1, 1;\n"
-		"bra.uni _While1;\n"
+		"ld.u8 			c, [%2];\n\t"
+		"add.s32 		%2, %2, -1;\n\t"
+		"st.u8 			[%1], c;\n\t"
+		"add.s32 		%1, %1, -1;\n\t"
+		"bra.uni _While0;\n\t"
 
-		"_Ret:"
-		"mov"_UX" 		%0, %1;\n"
-		"_End:"
+		// Do an ascending copy.
+		"_While1:\n\t"
+		"add.s32 		%3, %3, -1;\n\t"
+		"setp.gt.u32	p1, %3, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"ld.u8 			c, [%2];\n\t"
+		"add.s32 		%2, %2, 1;\n\t"
+		"st.u8 			[%1], c;\n\t"
+		"add.s32 		%1, %1, 1;\n\t"
+		"bra.uni _While1;\n\t"
+
+		"_Ret:\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		"_End:\n\t"
 		: "="__R(r) : __R(dest), __R(src), __R(n));
 	return r;
 #else
@@ -86,30 +86,30 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 #ifndef OMIT_PTX
 	int r;
 	asm(
-		".reg .pred p1;\n"
-		".reg .s32 c1, c2;\n"
-		"setp.eq"_BX"	p1, %3, 0;\n"
-		"@!p1 bra _Start;\n"
-		"mov"_BX"		%0, 0;\n"
-		"bra.uni _End;\n"
-		"_Start:\n"
+		".reg .pred p1;\n\t"
+		".reg .s32 c1, c2;\n\t"
+		"setp.eq"_BX"	p1, %3, 0;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
+		"bra.uni _End;\n\t"
+		"_Start:\n\t"
 
 		// Do an ascending copy.
-		"_While0:\n"
-		"add.s32 		%3, %3, -1;\n"
+		"_While0:\n\t"
+		"add.s32 		%3, %3, -1;\n\t"
 		"setp.gt.u32	p1, %3, 0;\n\t"
 		"@!p1 bra _Ret;\n\t"
-		"ld.u8 			c1, [%1];\n"
-		"ld.u8 			c2, [%2];\n"
+		"ld.u8 			c1, [%1];\n\t"
+		"ld.u8 			c2, [%2];\n\t"
 		"setp.eq.s32	p1, c1, c2;\n\t"
 		"@!p1 bra _Ret;\n\t"
-		"add.s32 		%1, %1, 1;\n"
-		"add.s32 		%2, %2, 1;\n"
-		"bra.uni _While0;\n"
+		"add.s32 		%1, %1, 1;\n\t"
+		"add.s32 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
 
-		"_Ret:"
-		"sub.s32 		%0, c1, c2;\n"
-		"_End:"
+		"_Ret:\n\t"
+		"sub.s32 		%0, c1, c2;\n\t"
+		"_End:\n\t"
 		: "="__R(r) : __R(s1), __R(s2), __R(n));
 	return r;
 #else
@@ -127,28 +127,28 @@ __device__ void *memchr_(const void *s, int c, size_t n)
 #ifndef OMIT_PTX
 	void *r;
 	asm(
-		".reg .pred p1;\n"
-		".reg .u32 c1;\n"
-		"setp.eq"_BX"	p1, %3, 0;\n"
-		"@!p1 bra _Start;\n"
-		"mov"_BX"		%0, 0;\n"
-		"bra.uni _End;\n"
-		"_Start:\n"
+		".reg .pred p1;\n\t"
+		".reg .u32 c1;\n\t"
+		"setp.eq"_BX"	p1, %3, 0;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
+		"bra.uni _End;\n\t"
+		"_Start:\n\t"
 
 		//
-		"_While0:\n"
-		"ld.u8 			c1, [%1];\n"
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
 		"setp.eq.u32	p1, c1, %2;\n\t"
 		"@p1 bra _Ret;\n\t"
-		"add"_UX" 		%1, %1, 1;\n"
-		"add.s32 		%3, %3, -1;\n"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add.s32 		%3, %3, -1;\n\t"
 		"setp.gt.u32	p1, %3, 0;\n\t"
-		"@p1 bra _While0;\n"
-		"mov"_UX" 		%1, 0;\n"
+		"@p1 bra _While0;\n\t"
+		"mov"_UX" 		%1, 0;\n\t"
 
-		"_Ret:"
-		"mov"_UX" 		%0, %1;\n"
-		"_End:"
+		"_Ret:\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		"_End:\n\t"
 		: "="__R(r) : __R(s), __R(c), __R(n));
 	return r;
 #else
@@ -168,23 +168,22 @@ __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 #ifndef OMIT_PTX
 	char *r;
 	asm(
-		".reg .pred p1;\n"
-		".reg .u32 c1;\n"
+		".reg .pred p1;\n\t"
+		".reg .u32 c1;\n\t"
 
 		//
-		"_While0:\n"
-		"ld.u8 			c1, [%2];\n"
+		"_While0:\n\t"
+		"ld.u8 			c1, [%2];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
 		"@!p1 bra _Ret;\n\t"
-		"st.u8 			[%1], c1;\n"
-		"add"_UX" 		%1, %1, 1;\n"
-		"add"_UX" 		%2, %2, 1;\n"
-		"bra.uni _While0;\n"
+		"st.u8 			[%1], c1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
 
-		"_Ret:"
-		"st.u8 			[%1], c1;\n"
-		"mov"_UX" 		%0, %1;\n"
-		"_End:"
+		"_Ret:\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
 		: "="__R(r) : __R(dest), __R(src));
 	return r;
 #else
@@ -198,66 +197,278 @@ __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 /* Copy no more than N characters of SRC to DEST.  */
 __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, size_t n)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 i1, c1;\n\t"
+		"mov.u32 		i1, 0;\n\t"
+
+		//
+		"_While0:\n\t"
+		"setp.lt.u32	p1, i1, %3;\n\t"
+		"@!p1 bra _While1;\n\t"
+		"ld.u8 			c1, [%2];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _While1;\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"add.u32 		i1, i1, 1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		//
+		"_While1:\n\t"
+		"setp.lt.u32	p1, i1, %3;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"st.u8 			[%1], 0;\n\t"
+		"add.u32 		i1, i1, 1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While1;\n\t"
+
+		"_Ret:\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		: "="__R(r) : __R(dest), __R(src), __R(n));
+	return r;
+#else
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
 	size_t i = 0;
 	for (; i < n && *s; ++i, ++d, ++s) *d = *s;
 	for (; i < n; ++i, ++d, ++s) *d = 0;
 	return (char *)d;
+#endif
 }
 
 /* Append SRC onto DEST.  */
 __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 c1;\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _While1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		//
+		"_While1:\n\t"
+		"ld.u8 			c1, [%2];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While1;\n\t"
+
+		"_Ret:\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		: "="__R(r) : __R(dest), __R(src));
+	return r;
+#else
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
 	while (*d) d++;
 	while (*s) { *d++ = *s++; } *d = *s;
 	return (char *)d;
+#endif
 }
 
 /* Append no more than N characters from SRC onto DEST.  */
 __device__ char *strncat_(char *__restrict dest, const char *__restrict src, size_t n)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 c1;\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _While1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		//
+		"_While1:\n\t"
+		"ld.u8 			c1, [%2];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"setp.ne.u32.and p1, %3, 0, p1;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"add.u32 		%3, %3, -1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While1;\n\t"
+
+		"_Ret:\n\t"
+		"st.u8 			[%1], c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		: "="__R(r) : __R(dest), __R(src), __R(n));
+	return r;
+#else
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
 	while (*d) d++;
 	while (*s && !--n) { *d++ = *s++; } *d = *s;
 	return (char *)d;
+#endif
 }
 
 /* Compare S1 and S2.  */
 __device__ int strcmp_(const char *s1, const char *s2)
 {
+#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 c1, c2;\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"ld.u8 			c2, [%2];\n\t"
+		"setp.eq.u32	p1, c1, c2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"sub.u32 		%0, c1, c2;\n\t"
+		: "="__R(r) : __R(s1), __R(s2));
+	return r;
+#else
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (*a && *a == *b) { a++; b++; }
 	return *a - *b;
+#endif
 }
 /* Compare S1 and S2. Case insensitive.  */
 __device__ int stricmp_(const char *s1, const char *s2)
 {
+#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 c1, c2;\n\t"
+		".reg "_UX" u2l;\n\t"
+		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add"_UX" 		c1, c1, u2l; ld.u8 c1, [c1];\n\t"
+		"ld.u8 			c2, [%2];\n\t"
+		"add"_UX" 		c2, c2, u2l; ld.u8 c2, [c2];\n\t"
+		"setp.eq.u32	p1, c1, c2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"sub.u32 		%0, c1, c2;\n\t"
+		: "="__R(r) : __R(s1), __R(s2));
+	return r;
+#else
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (*a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
 	return __curtUpperToLower[*a] - __curtUpperToLower[*b];
+#endif
 }
 
 /* Compare N characters of S1 and S2.  */
 __device__ int strncmp_(const char *s1, const char *s2, size_t n)
 {
+#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg .u32 c1, c2;\n\t"
+
+		//
+		"_While0:\n\t"
+		"setp.gt.u32	p2, %3, 0;\n\t"
+		"@!p2 bra _Ret;\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"ld.u8 			c2, [%2];\n\t"
+		"setp.eq.u32	p1, c1, c2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add.u32 		%3, %3, -1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"@!p2 mov.u32 	%0, 0;\n\t"
+		"@p2 sub.u32 	%0, c1, c2;\n\t"
+		: "="__R(r) : __R(s1), __R(s2), __R(n));
+	return r;
+#else
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (n-- > 0 && *a && *a == *b) { a++; b++; }
 	return !n ? 0 : *a - *b;
+#endif
 }
 /* Compare N characters of S1 and S2. Case insensitive.  */
 __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 {
+#ifndef OMIT_PTX
+	int r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg .u32 c1, c2;\n\t"
+		".reg "_UX" u2l;\n\t"
+		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+
+		//
+		"_While0:\n\t"
+		"setp.gt.u32	p2, %3, 0;\n\t"
+		"@!p2 bra _Ret;\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add"_UX" 		c1, c1, u2l; ld.u8 c1, [c1];\n\t"
+		"ld.u8 			c2, [%2];\n\t"
+		"add"_UX" 		c2, c2, u2l; ld.u8 c2, [c2];\n\t"
+		"setp.eq.u32	p1, c1, c2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add.u32 		%3, %3, -1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"@!p2 mov.u32 	%0, 0;\n\t"
+		"@p2 sub.u32 	%0, c1, c2;\n\t"
+		: "="__R(r) : __R(s1), __R(s2), __R(n));
+	return r;
+#else
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
 	while (n-- > 0 && *a && __curtUpperToLower[*a] == __curtUpperToLower[*b]) { a++; b++; }
 	return !n ? 0 : __curtUpperToLower[*a] - __curtUpperToLower[*b];
+#endif
 }
 
 /* Compare the collated forms of S1 and S2.  */
@@ -298,20 +509,68 @@ __device__ char *strndup_(const char *s, size_t n)
 /* Find the first occurrence of C in S.  */
 __device__ char *strchr_(const char *s, int c)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg .u32 c1;\n\t"
+		".reg "_UX" u2l;\n\t"
+		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+		"add"_UX" 		%2, %2, u2l; ld.u8 %2, [%2];\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p2, c1, 0;\n\t"
+		"@!p2 bra _Ret;\n\t"
+		"add"_UX" 		c1, c1, u2l; ld.u8 c1, [c1];\n\t"
+		"setp.ne.u32	p1, c1, %2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"@p2 mov"_UX" 	%0, %1;\n\t"
+		"@!p2 mov"_UX" 	%0, 0;\n\t"
+		: "="__R(r) : __R(s), __R(c));
+	return r;
+#else
 	register unsigned char *s1 = (unsigned char *)s;
 	register unsigned char l = (unsigned char)__curtUpperToLower[c];
 	while (*s1 && __curtUpperToLower[*s1] != l) s1++;
 	return (char *)(*s1 ? s1 : nullptr);
+#endif
 }
 
 /* Find the last occurrence of C in S.  */
 __device__ char *strrchr_(const char *s, int c)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1;\n\t"
+		".reg .u32 c1;\n\t"
+		"mov"_UX" 		%0, 0;\n\t"
+
+		//
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"setp.eq.u32	p1, c1, %2;\n\t"
+		"@!p1 bra _Ret;\n\t"
+		"@p1 mov"_UX" 	%0, %1;\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		: "="__R(r) : __R(s), __R(c));
+	return r;
+#else
 	char *save; char c1;
-	for (save = (char *)0; c1 = *s; s++)
-		if (c1 == c)
-			save = (char *)s;
+	for (save = (char *)0; c1 = *s; s++) if (c1 == c) save = (char *)s;
 	return save;
+#endif
 }
 
 /* Return the length of the initial segment of S which consists entirely of characters not in REJECT.  */
@@ -399,7 +658,7 @@ __device__ size_t strlen_(const char *s)
 		"_Value:\n\t"
 		"sub"_UX"		r, s2, %1;\n\t"
 		"and"_BX"		%0, r, 0x3fffffff;\n\t"
-		"_End:"
+		"_End:\n\t"
 		: "="__R(r) : __R(s));
 	return r;
 #else
@@ -449,7 +708,7 @@ __device__ size_t strnlen_(const char *s, size_t maxlen)
 		"_Value:\n\t"
 		"sub"_UX"		r, s2, %1;\n\t"
 		"and"_BX"		%0, r, 0x3fffffff;\n\t"
-		"_End:"
+		"_End:\n\t"
 		: "="__R(r) : __R(s), __R(maxlen));
 	return r;
 #else
