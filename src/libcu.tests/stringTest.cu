@@ -3,18 +3,24 @@
 #include <stringcu.h>
 #include <assert.h>
 
+
 static __global__ void g_string_test1()
 {
 	printf("string_test1\n");
 
+	char *src = "abcdefghijklmnopqrstuvwxyz";
+	char *dest[100];
+
 	//// MEMCPY, MEMMOVE, MEMSET, MEMCPY, MEMCHR ////
-	////builtin: extern void *__cdecl memset(void *, int, size_t);
-	////builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
-	//__device__ __forceinline void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n);
+	//__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n);
 	//extern __device__ void *memmove_(void *dest, const void *src, size_t n);
-	//__device__ __forceinline void *memset_(void *s, int c, size_t n) { return (s ? memset(s, c, n) : nullptr); }
+	//__forceinline __device__ void *memset_(void *s, int c, size_t n);
 	//extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);
 	//extern __device__ void *memchr_(const void *s, int c, size_t n);
+	void *a0a = memcpy(dest, src, 0); void *a0b = memcpy(dest, src, 1); //assert(a0a && a0b);
+	void *a1a = memmove(src, dest, 0); void *a1b = memmove(src, src, 1); void *a1c = memmove(src, dest, 10); void *a1d = memmove(dest, dest + 1, 10); //assert(a1a && a1b && a1c);
+	void *a2a = memset(dest, 0, 0); void *a0b = memset(dest, 0, 1); //assert(a2a && a2b);
+	int a3a = memcmp(nullptr, nullptr, 0); int a3b = memcmp("abc", "abc", 2); int a3c = memcmp("abc", "abc", 10); int a3d = memcmp("abc", "axc", 10); //assert(a3a && a3b && a3c && a3d);
 
 	//// STRCPY, STRNCPY, STRCAT, STRNCAT ////
 	//extern __device__ char *strcpy_(char *__restrict dest, const char *__restrict src);

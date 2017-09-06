@@ -32,12 +32,12 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
-//builtin: extern void *__cdecl memset(void *, int, size_t);
-//builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
+
 
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
-__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return (n ? memcpy(dest, src, n) : nullptr); }
+//builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
+__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return n ? memcpy(dest, src, n) : nullptr; }
 #define memcpy memcpy_
 
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
@@ -47,7 +47,8 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Set N bytes of S to C.  */
-__forceinline __device__ void *memset_(void *s, int c, size_t n) { return (s ? memset(s, c, n) : nullptr); }
+//builtin: extern void *__cdecl memset(void *, int, size_t);
+__forceinline __device__ void *memset_(void *s, int c, size_t n) { return s ? memset(s, c, n) : nullptr; }
 #define memset memset_
 /* Compare N bytes of S1 and S2.  */
 extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);

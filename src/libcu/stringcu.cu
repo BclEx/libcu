@@ -94,7 +94,7 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 		"bra.uni _End;\n\t"
 		"_Start:\n\t"
 
-		// Do an ascending copy.
+		//
 		"_While0:\n\t"
 		"add.s32 		%3, %3, -1;\n\t"
 		"setp.gt.u32	p1, %3, 0;\n\t"
