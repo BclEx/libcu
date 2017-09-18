@@ -32,8 +32,6 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
-
-
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
 //builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
@@ -160,6 +158,7 @@ __END_NAMESPACE_STD;
 
 __END_DECLS;
 #else
+#define strndup (0)
 #define strlen16
 #endif  /* __CUDA_ARCH__ */
 __BEGIN_DECLS;

@@ -250,6 +250,7 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 	asm(
 		".reg .pred p1;\n\t"
 		".reg .u32 c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
 
 		//
 		"_While0:\n\t"
@@ -271,7 +272,6 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 
 		"_Ret:\n\t"
 		"st.u8 			[%1], c1;\n\t"
-		"mov"_UX" 		%0, %1;\n\t"
 		: "="__R(r) : __R(dest), __R(src));
 	return r;
 #else
@@ -279,7 +279,7 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 	register unsigned char *s = (unsigned char *)src;
 	while (*d) d++;
 	while (*s) { *d++ = *s++; } *d = *s;
-	return (char *)d;
+	return (char *)dest;
 #endif
 }
 
@@ -291,6 +291,7 @@ __device__ char *strncat_(char *__restrict dest, const char *__restrict src, siz
 	asm(
 		".reg .pred p1;\n\t"
 		".reg .u32 c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
 
 		//
 		"_While0:\n\t"
@@ -314,7 +315,6 @@ __device__ char *strncat_(char *__restrict dest, const char *__restrict src, siz
 
 		"_Ret:\n\t"
 		"st.u8 			[%1], c1;\n\t"
-		"mov"_UX" 		%0, %1;\n\t"
 		: "="__R(r) : __R(dest), __R(src), __R(n));
 	return r;
 #else
@@ -322,7 +322,7 @@ __device__ char *strncat_(char *__restrict dest, const char *__restrict src, siz
 	register unsigned char *s = (unsigned char *)src;
 	while (*d) d++;
 	while (*s && !--n) { *d++ = *s++; } *d = *s;
-	return (char *)d;
+	return (char *)dest;
 #endif
 }
 
@@ -628,14 +628,51 @@ __device__ size_t strspn_(const char *s, const char *accept)
 /* Find the first occurrence in S of any character in ACCEPT.  */
 __device__ char *strpbrk_(const char *s, const char *accept)
 {
+#ifndef OMIT_PTX
+	char *r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg .u32 c1, c2;\n\t"
+		".reg "_UX" scanp1;\n\t"
+		"mov"_UX" 		%0, 0;\n\t"
+
+		// while
+		"_While0:\n\t"
+		"ld.u8 			c1, [%1];\n\t"
+		"setp.ne.u32	p1, c1, 0;\n\t"
+		"@!p1 bra _End;\n\t"
+		
+		// for
+		"mov"_UX" 		scanp1, %2;\n\t"
+		"_For0:\n\t"
+		"ld.u8 			c2, [scanp1];\n\t"
+		"setp.ne.u32	p2, c2, 0;\n\t"
+		"@!p2 bra _nWhile0;\n\t"
+		"setp.eq.u32	p2, c1, c2;\n\t"
+		"@p2 bra _Ret;\n\t"
+		"add"_UX" 		scanp1, scanp1, 1;\n\t"
+		"bra.uni _For0;\n\t"
+		
+		// ^while
+		"_nWhile0:\n\t"
+		"add"_UX" 		%1, %1, 1;\n\t"
+		"bra.uni _While0;\n\t"
+
+		"_Ret:\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
+		"_End:\n\t"
+		: "="__R(r) : __R(s), __R(accept));
+	return r;
+#else
 	register const char *scanp;
 	register int c, sc;
 	while (c = *s++) {
-		for (scanp = accept; sc = *scanp++;)
-			if (sc == c)
+		for (scanp = accept; c2 = *scanp++;)
+			if (c2 == c)
 				return (char *)(s - 1);
 	}
 	return nullptr;
+#endif
 }
 
 /* Find the first occurrence of NEEDLE in HAYSTACK.  */
