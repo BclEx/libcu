@@ -158,8 +158,8 @@ __END_NAMESPACE_STD;
 
 __END_DECLS;
 #else
-#define strndup (0)
-#define strlen16
+#define strndup(s, n) nullptr
+#define strlen16(s) 0
 #endif  /* __CUDA_ARCH__ */
 __BEGIN_DECLS;
 
