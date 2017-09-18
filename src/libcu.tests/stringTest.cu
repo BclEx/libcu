@@ -27,9 +27,11 @@ static __global__ void g_string_test1()
 	//extern __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, size_t n);
 	//extern __device__ char *strcat_(char *__restrict dest, const char *__restrict src);
 	//extern __device__ char *strncat_(char *__restrict dest, const char *__restrict src, size_t n);
-	strcpy(src, "abcdef");
-	char *b0a = strcpy(dest, src); assert();
-	char *b1a = strncpy(dest, src, 10);
+	strcpy(src, "abcd");
+	char *b0a = strcpy(dest, src); assert(!strcmp(b0a, "abcd"));
+	char *b1a = strncpy(dest+5, src, 10); assert(!strcmp(b1a, "abcd"));
+	char *b2a = strcat(dest+10, "xyz"); assert(!strcmp(b2a, "xyz"));
+	char *b3a = strncat(dest+15, "xyz", 2); assert(!strncmp(b3a, "xy", 2));
 
 	//// STRCMP, STRICMP, STRNCMP, STRNICMP ///2
 	//extern __device__ int strcmp_(const char *s1, const char *s2);
