@@ -135,46 +135,97 @@ static __global__ void g_stdio_test1()
 	int p2a = sscanf("test", "%s", buf); bool p2b = !strcmp(buf, "1"); assert(p2a && p2b);
 
 	//// FGETC, GETCHAR, GETC, FPUTC, PUTCHAR, PUTC, UNGETC ////
-	//__forceinline __device__ int fgetc_(FILE *stream); #sentinel-branch
+	//extern __device__ int fgetc_(FILE *stream); #sentinel-branch
 	//__forceinline __device__ int getchar_(void);
 	////sky: #define getc(fp) __GETC(fp)
-	//__forceinline __device__ int fputc_(int c, FILE *stream, bool wait = true); #sentinel-branch
+	//extern __device__ int fputc_(int c, FILE *stream, bool wait = true); #sentinel-branch
 	//__forceinline __device__ int putchar_(int c);
 	////sky: #define putc(ch, fp) __PUTC(ch, fp)
 	//__forceinline __device__ int ungetc_(int c, FILE *stream, bool wait = true); #sentinel-branch
+	//skipped: getchar();
+	//skipped: getc(fp);
+	/* Host Absolute */
+	FILE *q0a = fopen(HostDir"test.txt", "w"); int q0b = fputc('a', q0a); int q0c = fputc('b', q0a); int q0d = fputc('c', q0a); fclose(q0a); assert(q0b && q0c && q0d);
+	FILE *q1a = fopen(HostDir"test.txt", "r"); int q1b = fgetc(q1a); int q1c = fgetc(q1a); int q1d = fgetc(q1a); fclose(q1a); assert(q1b == 'a' && q1c == 'b' && q1d == 'c');
+	//?? ungetc
+
+	/* Device Absolute */
+	FILE *r0a = fopen(DeviceDir"test.txt", "w"); int r0b = fputc('a', r0a); int r0c = fputc('b', r0a); int r0d = fputc('c', r0a); fclose(r0a); assert(r0b && r0c && r0d);
+	FILE *r1a = fopen(DeviceDir"test.txt", "r"); int r1b = fgetc(r1a); int r1c = fgetc(r1a); int r1d = fgetc(r1a); fclose(r1a); assert(r1b == 'a' && r1c == 'b' && r1d == 'c');
+	//?? ungetc
 
 	//// FGETS, FPUTS, PUTS ////
-	//__forceinline __device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream); #sentinel-branch
-	//__forceinline __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait = true); #sentinel-branch
+	//extern __device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream); #sentinel-branch
+	//extern __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait = true); #sentinel-branch
 	//__forceinline __device__ int puts_(const char *s);
+	//skipped: puts(s);
+	/* Host Absolute */
+	FILE *s0a = fopen(HostDir"test.txt", "w"); int s0b = fputs("abc", s0a); fclose(s0a); assert(s0b);
+	FILE *s1a = fopen(HostDir"test.txt", "r"); char *s1b = fgets(buf, 3, s1a); fclose(q1a); assert(!strncmp(s1b, "abc", 3));
 
-	//__forceinline __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true); #sentinel-branch
-	//__forceinline __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true); #sentinel-branch
+	/* Device Absolute */
+	FILE *t0a = fopen(DeviceDir"test.txt", "w"); int t0b = fputs("abc", t0a); fclose(t0a); assert(t0b);
+	FILE *t1a = fopen(DeviceDir"test.txt", "r"); char *t1b = fgets(buf, 3, t1a); fclose(t1a); assert(!strncmp(t1b, "abc", 3));
+
+	//extern __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true); #sentinel-branch
+	//extern __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait = true); #sentinel-branch
+	/* Host Absolute */
+	FILE *u1a = fopen(HostDir"test.txt", "w"); int u1b = fwrite("test", 4, 1, u1a); fclose(u1a); assert(u1b == 4);
+	FILE *u2a = fopen(HostDir"test.txt", "r"); int u2b = fread(buf, 4, 1, u2a); fclose(u2a); assert(u2b == 4 && !strncmp(buf, "test", 4));
+
+	/* Device Absolute */
+	FILE *v1a = fopen(DeviceDir"test.txt", "w"); int v1b = fwrite("test", 4, 1, v1a); fclose(v1a); assert(v1b == 4);
+	FILE *v2a = fopen(DeviceDir"test.txt", "r"); int v2b = fread(buf, 4, 1, v2a); fclose(v2a); assert(v2b == 4 && !strncmp(buf, "test", 4));
 
 	//// FSEEK, FTELL, REWING, FSEEKO, FGETPOS, FSETPOS ///
-	//__forceinline __device__ int fseek_(FILE *stream, long int off, int whence); #sentinel-branch
-	//__forceinline __device__ long int ftell_(FILE *stream); #sentinel-branch
-	//__forceinline __device__ void rewind_(FILE *stream); #sentinel-branch
+	//extern __device__ int fseek_(FILE *stream, long int off, int whence); #sentinel-branch
+	//extern __device__ long int ftell_(FILE *stream); #sentinel-branch
+	//extern __device__ void rewind_(FILE *stream); #sentinel-branch
 	//extern __device__ int fseeko_(FILE *stream, __off_t off, int whence);
-	//__forceinline __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos); #sentinel-branch
-	//__forceinline __device__ int fsetpos_(FILE *stream, const fpos_t *pos); #sentinel-branch
+	//extern __device__ __off_t ftello_(FILE *stream);
+	//extern __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos); #sentinel-branch
+	//extern __device__ int fsetpos_(FILE *stream, const fpos_t *pos); #sentinel-branch
+	//skipped: fseeko(s, 0, 0);
+	//skipped: ftello(s);
+	/* Host Absolute */
+	makeAFile(HostDir"test.txt");
+	FILE *w0a = fopen(HostDir"test.txt", "r"); long int w0b = ftell(w0a); int w0c = fseek(w0a, 2, 0); long int w0d = ftell(w0a); rewind(w0a); long int w0e = ftell(w0a); fclose(w0a); assert(w0b == 0 && w0c && w0d == 2 && w0e == 0);
+	FILE *w1a = fopen(HostDir"test.txt", "r"); fpos_t w1b; int w1c = fgetpos(w1a, &w1b); fpos_t w1d = 2; int w1e = fsetpos(w1a, &w1d); fpos_t w1f; int w1g = fgetpos(w1a, &w1f); fclose(w1a); assert(w1b == 0 && w1c && w1d == 2 && w1e && w1g == 2 && w1g);
 
+	/* Device Absolute */
+	makeAFile(DeviceDir"test.txt");
+	FILE *x0a = fopen(DeviceDir"test.txt", "r"); long int x0b = ftell(x0a); int x0c = fseek(x0a, 2, 0); long int x0d = ftell(x0a); rewind(x0a); long int x0e = ftell(x0a); fclose(x0a); assert(x0b == 0 && x0c && x0d == 2 && x0e == 0);
+	FILE *x1a = fopen(DeviceDir"test.txt", "r"); fpos_t x1b; int x1c = fgetpos(x1a, &x1b); fpos_t x1d = 2; int x1e = fsetpos(x1a, &x1d); fpos_t x1f; int x1g = fgetpos(x1a, &x1f); fclose(x1a); assert(x1b == 0 && x1c && x1d == 2 && x1e && x1g == 2 && x1g);
+	
 	//// CLEARERR, FERROR, PERROR ////
-	//__forceinline __device__ void clearerr_(FILE *stream); #sentinel-branch
-	//__forceinline __device__ int ferror_(FILE *stream); #sentinel-branch
+	//extern __device__ void clearerr_(FILE *stream); #sentinel-branch
+	//extern __device__ int ferror_(FILE *stream); #sentinel-branch
 	//extern __device__ void perror_(const char *s);
+	//skipped: perror(s);
+	/* Host Absolute */
+	FILE *y0a = fopen(HostDir"test.txt", "r"); int y0b = ferror(y0a); clearerr(y0a); int y0c = ferror(y0a); fclose(y0a); assert(y0b == 0 && y0c == 0);
 
-	//// FEOF ////
-	//__forceinline __device__ int feof_(FILE *stream); #sentinel-branch
+	/* Device Absolute */
+	FILE *z0a = fopen(DeviceDir"test.txt", "r"); int z0b = ferror(z0a); clearerr(z0a); int z0c = ferror(z0a); fclose(z0a); assert(z0b == 0 && z0c == 0);
 
-	//// FILENO ////
-	//__forceinline __device__ int fileno_(FILE *stream); #sentinel-branch
+	//// FEOF, FILENO ////
+	//extern __device__ int feof_(FILE *stream); #sentinel-branch
+	//extern __device__ int fileno_(FILE *stream); #sentinel-branch
+	/* Host Absolute */
+	FILE *A0a = fopen(HostDir"test.txt", "r"); int A0b = feof(A0a); fseek(A0a, 4, 0); int A0c = feof(A0a); fclose(A0a); assert(!A0b && A0c);
+	FILE *A1a = fopen(HostDir"test.txt", "r"); int A1b = fileno(A0a); fclose(A1a); assert(A1b);
 
+	/* Device Absolute */
+	FILE *B0a = fopen(DeviceDir"test.txt", "r"); int B0b = feof(B0a); fseek(B0a, 4, 0); int B0c = feof(B0a); fclose(B0a); assert(!B0b && B0c);
+	FILE *B1a = fopen(DeviceDir"test.txt", "r"); int B1b = fileno(B0a); fclose(B1a); assert(B1b);
+	
 	//// EXT: MTAGPRINTF, MPRINTF, MNPRINTF ////
 	//__device__ char *vmtagprintf_(void *tag, const char *format, va_list va);
 	//__device__ char *vmprintf_(const char *format, va_list va);
 	//__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
-
+	//skipped: vmtagprintf();
+	//skipped: vmprintf();
+	//skipped: vmsnprintf();
 }
 cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

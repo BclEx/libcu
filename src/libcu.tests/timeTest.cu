@@ -11,10 +11,12 @@ static __global__ void g_time_test1()
 	////builtin: extern __device__ clock_t clock();
 	//extern __device__ time_t time_(time_t *timer);
 	//extern __device__ double difftime_(time_t time1, time_t time0);
-	//__forceinline __device__ time_t mktime_(struct tm *tp);
+	//extern __device__ time_t mktime_(struct tm *tp); #sentinel
+	time_t a0a = time(nullptr); time_t a0b; time_t a0c = time(&a0b); assert(0);
+	double a1a = difftime(1, 2); assert(0);
 
 	//// STRFTIME ////
-	//__forceinline size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp); #sentinel
+	//extern size_t strftime_(char *__restrict s, size_t maxsize, const char *__restrict format, const struct tm *__restrict tp); #sentinel
 
 	//// GMTIME ////
 	//extern __device__ struct tm *gmtime_(const time_t *timer);
