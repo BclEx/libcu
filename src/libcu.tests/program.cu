@@ -34,7 +34,7 @@ cudaError_t unistd_test1();
 
 int main(int argc, char ** argv)
 {
-	int testId = atoi(argv[1]);
+	int testId = argv[1] ? atoi(argv[1]) : 25;
 	sentinelServerInitialize();
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
@@ -46,7 +46,6 @@ int main(int argc, char ** argv)
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 
 	// Launch test
-	//testId = 25;
 	switch (testId)
 	{
 	case 1: cudaStatus = crtdefs_test1(); break;

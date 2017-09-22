@@ -35,7 +35,7 @@ __BEGIN_DECLS;
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
 //builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
-__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return n ? memcpy(dest, src, n) : nullptr; }
+__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return n ? memcpy(dest, src, n) : dest; } //: sqlcheck
 #define memcpy memcpy_
 
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */

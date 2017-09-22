@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#define xOMIT_PTX
+#define OMIT_PTX
 __BEGIN_DECLS;
 
 /* Copy N bytes of SRC to DEST.  */
@@ -69,10 +69,10 @@ __device__ void *memmove_(void *dest, const void *src, size_t n)
 	register unsigned char *b = (unsigned char *)src;
 	if (a <= b || b >= a + n) { // Check for destructive overlap.
 		while (n--) *a++ = *b++; // Do an ascending copy.
-	else {
-		a += n-1; b += n-1; // Destructive overlap ...
-		while (n--) *a-- = *b--; // have to copy backwards.
+		return a;
 	}
+	a += n; b += n; // Destructive overlap ...
+	while (n--) *a-- = *b--; // have to copy backwards.
 	return a;
 #endif
 }
@@ -439,7 +439,7 @@ __device__ int strncmp_(const char *s1, const char *s2, size_t n)
 #else
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
-	while (n-- > 0 && *a && *a == *b) { a++; b++; }
+	while (--n > 0 && *a && *a == *b) { a++; b++; }
 	return !n ? 0 : *a - *b;
 #endif
 }
@@ -641,7 +641,7 @@ __device__ char *strpbrk_(const char *s, const char *accept)
 		"ld.u8 			c1, [%1];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
 		"@!p1 bra _End;\n\t"
-		
+
 		// for
 		"mov"_UX" 		scanp1, %2;\n\t"
 		"_For0:\n\t"
@@ -652,7 +652,7 @@ __device__ char *strpbrk_(const char *s, const char *accept)
 		"@p2 bra _Ret;\n\t"
 		"add"_UX" 		scanp1, scanp1, 1;\n\t"
 		"bra.uni _For0;\n\t"
-		
+
 		// ^while
 		"_nWhile0:\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
@@ -665,7 +665,7 @@ __device__ char *strpbrk_(const char *s, const char *accept)
 	return r;
 #else
 	register const char *scanp;
-	register int c, sc;
+	register int c, c2;
 	while (c = *s++) {
 		for (scanp = accept; c2 = *scanp++;)
 			if (c2 == c)
