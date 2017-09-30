@@ -1,9 +1,3 @@
----
-id: stringcu
-title: stringcu.h
-permalink: stringcu.html
----
-
 ## #include <stringcu.h>
 
 Also includes:

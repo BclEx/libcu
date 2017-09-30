@@ -1,9 +1,3 @@
----
-id: stdlibcu
-title: stdlibcu.h
-permalink: stdlibcu.html
----
-
 ## #include <stdlibcu.h>
 
 Also includes:

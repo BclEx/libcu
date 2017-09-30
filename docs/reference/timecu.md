@@ -1,9 +1,3 @@
----
-id: timecu
-title: timecu.h
-permalink: timecu.html
----
-
 ## #include <timecu.h>
 
 Also includes:

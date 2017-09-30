@@ -1,9 +1,3 @@
----
-id: memfile
-title: memfile.h
-permalink: ext\memfile.html
----
-
 ## #include <ext\memfile.h>
 
 ## Device Side

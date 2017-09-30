@@ -1,9 +1,3 @@
----
-id: stddefcu
-title: stddefcu.h
-permalink: stddefcu.html
----
-
 ## #include <stddefcu.h>
 
 Also includes:

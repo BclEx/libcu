@@ -1,9 +1,3 @@
----
-id: cuda_runtimecu
-title: cuda_runtimecu.h
-permalink: cuda_runtimecu.html
----
-
 ## #include <cuda_runtimecu.h>
 
 Also includes:

@@ -1,9 +1,3 @@
----
-id: sentinel
-title: sentinel.h
-permalink: sentinel.html
----
-
 ## #include <sentinel.h>
 
 ## Host Side

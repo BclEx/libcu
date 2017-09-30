@@ -1,9 +1,3 @@
----
-id: pwdcu
-title: pwdcu.h
-permalink: pwdcu.html
----
-
 ## #include <pwdcu.h>
 
 Also includes:

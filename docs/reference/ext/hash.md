@@ -1,9 +1,3 @@
----
-id: hash
-title: hash.h
-permalink: ext\hash.html
----
-
 ## #include <ext\hash.h>
 
 ## Device Side

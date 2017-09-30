@@ -1,9 +1,3 @@
----
-id: stdiocu
-title: stdiocu.h
-permalink: stdiocu.html
----
-
 ## #include <stdiocu.h>
 
 Also includes:

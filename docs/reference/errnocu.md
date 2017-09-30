@@ -1,9 +1,3 @@
----
-id: errnocu
-title: errnocu.h
-permalink: errnocu.html
----
-
 ## #include <errnocu.h>
 
 Also includes:

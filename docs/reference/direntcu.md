@@ -1,9 +1,3 @@
----
-id: direntcu
-title: direntcu.h
-permalink: direntcu.html
----
-
 ## #include <direntcu.h>
 
 Also includes: (portable)

@@ -1,9 +1,3 @@
----
-id: ctypecu
-title: ctypecu.h
-permalink: ctypecu.html
----
-
 ## #include <ctypecu.h>
 
 Also includes:

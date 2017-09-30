@@ -1,9 +1,3 @@
----
-id: grpcu
-title: grpcu.h
-permalink: grpcu.html
----
-
 ## #include <grpcu.h>
 
 Also includes:

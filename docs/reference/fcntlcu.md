@@ -1,9 +1,3 @@
----
-id: fcntlcu
-title: fcntlcu.h
-permalink: fcntlcu.html
----
-
 ## #include <fcntlcu.h>
 
 Also includes:
