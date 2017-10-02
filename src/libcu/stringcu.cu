@@ -39,16 +39,23 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 		// Do an ascending copy
 		"_While0:\n\t"
 
+		// align to word
 		"or"_UX"  		t, %1, %2;\n\t"
 		"or"_UX"  		t, t, wmask;\n\t"
 		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@!p1 bra 		_wholepage;\n\t"
 
 		"xor"_UX"  		t, %1, %2;\n\t"
 		"and"_UX"  		t, t, wmask;\n\t"
-		"setp.ne"_UX"	%p31, t, 0;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
 		"setp.lt.or"_UX" p1, %3, wsize, p1;\n\t"
+		"@p1 mov"_UX" 	t, %2;\n\t"
+		"@!p1 and"_UX"  t, t, 3;\n\t"
+		"@!p1 sub"_UX" 	t, 4, t;\n\t"
 
 
+		// set whole pages
+		"_wholepage:\n\t"
 		"add"_UX" 		%3, %3, -1;\n\t"
 		"setp.ne"_UX"	p1, %3, 0;\n\t"
 		"@!p1 bra _Ret;\n\t"
@@ -84,8 +91,9 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 	// Do an ascending copy
 	if (a < b) { // Check for destructive overlap
 		// align to word
+		//t = (uintptr_t)b;
 		if (((uintptr_t)b | (uintptr_t)a) | wmask) {
-			t = ((uintptr_t)b ^ (uintptr_t)a) & wmask || n < wsize ? n : wsize-(t & wmask);
+			t = ((uintptr_t)b ^ (uintptr_t)a) & wmask || n < wsize ? n : wsize-((uintptr_t)b & wmask);
 			n -= t;
 			do { *a++ = *b++; } while (--t);
 		}
