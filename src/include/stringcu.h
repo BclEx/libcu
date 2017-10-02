@@ -35,18 +35,18 @@ __BEGIN_DECLS;
 __BEGIN_NAMESPACE_STD;
 /* Copy N bytes of SRC to DEST.  */
 //builtin: extern void *__cdecl memcpy(void *, const void *, size_t);
-__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n) { return n ? memcpy(dest, src, n) : dest; } //: sqlcheck
+extern __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n);
 #define memcpy memcpy_
 
 /* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
-extern __device__ void *memmove_(void *dest, const void *src, size_t n);
-#define memmove memmove_
+//extern __device__ void *memmove_(void *__restrict dest, const void *__restrict src, size_t n);
+#define memmove memcpy_
 __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Set N bytes of S to C.  */
 //builtin: extern void *__cdecl memset(void *, int, size_t);
-__forceinline __device__ void *memset_(void *s, int c, size_t n) { return s ? memset(s, c, n) : nullptr; }
+extern __device__ void *memset_(void *s, int c, size_t n);
 #define memset memset_
 /* Compare N bytes of S1 and S2.  */
 extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);
