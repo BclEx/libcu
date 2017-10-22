@@ -30,11 +30,11 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	////strchr("Me", 'M');
 	printf("%d %s\n", 2, "sky morey");
 
-	//mkdir(":\\T_", 0);
-	FILE *f = fopen("C:\\T_\\fopen.txt", "w");
+	mkdir("\\Temp", 0);
+	FILE *f = fopen("\\Temp\\fopen.txt", "w");
 	if (f) {
+		fwrite("test\n", 4, 1, f);
 		fprintf_(f, "The quick brown fox jumps over the lazy dog");
-		//fwrite("test", 4, 1, f);
 		fflush(f);
 		fclose(f);
 	}
@@ -46,6 +46,27 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	printf("%f\n", atof("1.2"));
 
 	libcuReset();
+}
+
+__global__ void simplePrint()
+{
+	char buf[50] = {0};
+	snprintf(buf, 50, "test");
+	printf("%s\n", buf);
+	printf("%d\n", atoi("51236"));
+	printf("%f\n", atof("1.2"));
+}
+
+__global__ void simpleWrite()
+{
+	mkdir("\\Temp", 0);
+	FILE *f = fopen("\\Temp\\fopen.txt", "w");
+	if (f) {
+		fwrite("test\n", 4, 1, f);
+		fprintf_(f, "The quick brown fox jumps over the lazy dog");
+		fflush(f);
+		fclose(f);
+	}
 }
 
 int main()

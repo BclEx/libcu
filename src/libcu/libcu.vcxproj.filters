@@ -61,9 +61,6 @@
     <ClInclude Include="..\include\setjmpcu.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\host_functions.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\ext\hash.h">
       <Filter>include\ext</Filter>
     </ClInclude>
@@ -104,7 +101,7 @@
     <ClInclude Include="..\include\bits\_libcu_stdio.h">
       <Filter>include\bits</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\xstddefcu.h">
+    <ClInclude Include="..\include\stddefcu.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -141,7 +138,7 @@
     <ClCompile Include="sentinel-msg.cpp" />
     <ClCompile Include="sentinel-host.cpp" />
     <ClCompile Include="sentinel.cpp" />
-    <ClCompile Include="host_functions.cpp" />
+    <ClCompile Include="cuda_runtime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libcu.Native.nuspec" />

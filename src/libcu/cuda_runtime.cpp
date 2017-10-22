@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <host_functions.h>
+#include <cuda_runtimecu.h>
 
 bool gpuAssert(cudaError_t code, const char *action, const char *file, int line, bool abort)
 {

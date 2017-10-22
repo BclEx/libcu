@@ -1,5 +1,5 @@
 /*
-cuda_runtimecu.h - Inject in cuda_runtime
+cuda_runtimecu.h - cuda_runtime
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -28,7 +28,23 @@ THE SOFTWARE.
 #define __CUDA_RUNTIMECU_H__
 
 #include <cuda_runtime.h>
-#include <host_functions.h>
-extern __device__ void libcuReset();
+//#include <cuda_runtime_api.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	extern __device__ void libcuReset();
+	extern bool gpuAssert(cudaError_t code, const char *action, const char *file = nullptr, int line = 0, bool abort = true);
+	extern int gpuGetMaxGflopsDevice();
+	extern char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaError_t *error = nullptr);
+
+#ifdef __cplusplus
+}
+#endif
+
+#define cudaErrorCheck(x) { gpuAssert((x), #x, __FILE__, __LINE__, true); }
+#define cudaErrorCheckA(x) { gpuAssert((x), #x, __FILE__, __LINE__, false); }
+#define cudaErrorCheckF(x, f) { if (!gpuAssert((x), #x, __FILE__, __LINE__, false)) f; }
+#define cudaErrorCheckLast() { gpuAssert(cudaPeekAtLastError(), __FILE__, __LINE__); }
 
 #endif /* __CUDA_RUNTIMECU_H__ */
