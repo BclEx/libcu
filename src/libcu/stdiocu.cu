@@ -9,7 +9,7 @@
 #include <fcntlcu.h>
 #include <errnocu.h>
 
-#define CORE_MAXLENGTH 1000000000
+#define LIBCU_MAXLENGTH 1000000000
 
 __BEGIN_DECLS;
 
@@ -22,10 +22,10 @@ typedef struct __align__(8) {
 	unsigned short threadid;// thread ID of author
 } streamRef;
 
-__device__ streamRef __iob_streamRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
+__device__ streamRef __iob_streamRefs[LIBCU_MAXFILESTREAM]; // Start of circular buffer (set up by host)
 volatile __device__ streamRef *__iob_freeStreamPtr = __iob_streamRefs; // Current atomically-incremented non-wrapped offset
 volatile __device__ streamRef *__iob_retnStreamPtr = __iob_streamRefs; // Current atomically-incremented non-wrapped offset
-__constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
+__constant__ FILE __iob_streams[LIBCU_MAXFILESTREAM+3];
 
 static __device__ __forceinline void writeStreamRef(streamRef *ref, FILE *s)
 {
@@ -38,7 +38,7 @@ static __device__ FILE *streamGet(int fd = 0)
 {
 	// advance circular buffer
 	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
-	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
+	offset %= (sizeof(streamRef)*LIBCU_MAXFILESTREAM);
 	int offsetId = offset / sizeof(streamRef);
 	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
 	FILE *s = ref->file;
@@ -57,7 +57,7 @@ static __device__ void streamFree(FILE *s)
 	//	close(s->_file);
 	// advance circular buffer
 	size_t offset = atomicAdd((uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
-	offset %= (sizeof(streamRef)*CORE_MAXFILESTREAM);
+	offset %= (sizeof(streamRef)*LIBCU_MAXFILESTREAM);
 	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
 	writeStreamRef(ref, s);
 }
@@ -244,7 +244,7 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
 	strbldAppendFormat(&b, format, va);
 	const char *v = strbldToString(&b);
 	int size = b.index + 1;
@@ -866,7 +866,7 @@ __device__ char *vmtagprintf_(void *tag, const char *format, va_list va)
 	assert(tag != nullptr);
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
 	b.tag = tag;
 	strbldAppendFormat(&b, format, va);
 	char *str = strbldToString(&b);
@@ -880,7 +880,7 @@ __device__ char *vmprintf_(const char *format, va_list va)
 {
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
-	strbldInit(&b, nullptr, base, sizeof(base), CORE_MAXLENGTH);
+	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
 	strbldAppendFormat(&b, format, va);
 	return strbldToString(&b);
 }

@@ -32,7 +32,7 @@ __device__ void fsystemClose(int fd);
 __device__ void fsystemReset();
 
 extern __device__ dirEnt_t __iob_root;
-extern __constant__ file_t __iob_files[CORE_MAXFILESTREAM];
+extern __constant__ file_t __iob_files[LIBCU_MAXFILESTREAM];
 #define GETFD(fd) (INT_MAX-(fd))
 #define GETFILE(fd) (&__iob_files[GETFD(fd)])
 

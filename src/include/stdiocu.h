@@ -79,8 +79,8 @@ __BEGIN_DECLS;
 ///* Default path prefix for `mkstemp'.  */
 //#define P_tmpdir "/tmp"
 
-#define ISHOSTFILE(stream) ((stream) < __iob_streams || (stream) > __iob_streams + CORE_MAXFILESTREAM+3)
-extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
+#define ISHOSTFILE(stream) ((stream) < __iob_streams || (stream) > __iob_streams + LIBCU_MAXFILESTREAM+3)
+extern __constant__ FILE __iob_streams[LIBCU_MAXFILESTREAM+3];
 #undef stdin
 #undef stdout
 #undef stderr

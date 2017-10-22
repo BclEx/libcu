@@ -33,7 +33,6 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
-	extern __device__ void libcuReset();
 	extern bool gpuAssert(cudaError_t code, const char *action, const char *file = nullptr, int line = 0, bool abort = true);
 	extern int gpuGetMaxGflopsDevice();
 	extern char **cudaDeviceTransferStringArray(size_t length, char *const value[], cudaError_t *error = nullptr);

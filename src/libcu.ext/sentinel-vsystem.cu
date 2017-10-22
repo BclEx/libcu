@@ -4,7 +4,7 @@
 #if OS_MAP
 #pragma region OS_MAP
 
-#define CORE_NAME CoreS
+#define LIBCU_NAME CoreS
 #include "Core.cu.h"
 #include "SysEx.cu"
 #include "SysEx+Random.cu"
@@ -12,7 +12,7 @@
 #include "VSystem.cu"
 #include "VSystem-win.cu"
 
-namespace CORE_NAME
+namespace LIBCU_NAME
 {
 	static bool Executor(void *tag, RuntimeSentinelMessage *data, int length)
 	{

@@ -2,7 +2,7 @@
 #include <new.h>
 
 #if OS_MAP && !defined(_SENTINEL)
-namespace CORE_NAME
+namespace LIBCU_NAME
 {
 
 #pragma region Preamble

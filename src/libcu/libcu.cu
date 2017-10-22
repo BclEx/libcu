@@ -18,8 +18,3 @@
 #include "pwdcu.cu"
 #include "fsystem.cu"
 #include "fcntlcu.cu"
-
-__device__ void libcuReset()
-{
-	fsystemReset();
-}

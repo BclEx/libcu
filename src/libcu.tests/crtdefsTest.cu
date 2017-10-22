@@ -31,6 +31,6 @@ static __global__ void g_crtdefs_test1()
 	strcpy(__cwd, ":\\"); bool e1a = ISHOSTPATH("."); bool e1b = ISHOSTPATH("test"); bool e1c = ISHOSTPATH("\test"); bool e1d = ISHOSTPATH("/test"); assert(!e1a && !e1b && !e1c && !e1d);
 	strcpy(__cwd, "\0"); bool e2a = ISHOSTPATH("."); bool e2b = ISHOSTPATH("test"); bool e2c = ISHOSTPATH("\test"); bool e2d = ISHOSTPATH("/test"); assert(e2a && e2b && e2c && e2d);
 	/* Determines where you are based on number(handle) */
-	bool f0a = ISHOSTHANDLE(1); bool f0b = ISHOSTHANDLE(INT_MAX-CORE_MAXFILESTREAM); bool f0c = ISHOSTHANDLE(INT_MAX); assert(f0a && !f0b && !f0c);
+	bool f0a = ISHOSTHANDLE(1); bool f0b = ISHOSTHANDLE(INT_MAX-LIBCU_MAXFILESTREAM); bool f0c = ISHOSTHANDLE(INT_MAX); assert(f0a && !f0b && !f0c);
 }
 cudaError_t crtdefs_test1() { g_crtdefs_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

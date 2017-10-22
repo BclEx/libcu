@@ -11,10 +11,10 @@ typedef struct __align__(8) {
 	unsigned short threadid;// thread ID of author
 } hostRef;
 
-__device__ hostRef __iob_hostRefs[CORE_MAXHOSTPTR]; // Start of circular buffer (set up by host)
+__device__ hostRef __iob_hostRefs[LIBCU_MAXHOSTPTR]; // Start of circular buffer (set up by host)
 volatile __device__ hostRef *__iob_freeDevicePtr = __iob_hostRefs; // Current atomically-incremented non-wrapped offset
 volatile __device__ hostRef *__iob_retnDevicePtr = __iob_hostRefs; // Current atomically-incremented non-wrapped offset
-__constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
+__constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
 
 static __device__ __forceinline void writeHostRef(hostRef *ref, hostptr_t *p)
 {
@@ -27,7 +27,7 @@ __device__ hostptr_t *__hostptrGet(void *host)
 {
 	// advance circular buffer
 	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs);
-	offset %= (sizeof(hostRef)*CORE_MAXHOSTPTR);
+	offset %= (sizeof(hostRef)*LIBCU_MAXHOSTPTR);
 	int offsetId = offset / sizeof(hostRef);
 	hostRef *ref = (hostRef *)((char *)&__iob_hostRefs + offset);
 	hostptr_t *p = ref->ptr;
@@ -44,12 +44,18 @@ __device__ void __hostptrFree(hostptr_t *p)
 	if (!p) return;
 	// advance circular buffer
 	size_t offset = atomicAdd((uintptr_t *)&__iob_retnDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs;
-	offset %= (sizeof(hostRef)*CORE_MAXHOSTPTR);
+	offset %= (sizeof(hostRef)*LIBCU_MAXHOSTPTR);
 	hostRef *ref = (hostRef *)((char *)&__iob_hostRefs + offset);
 	writeHostRef(ref, p);
 }
 
 #pragma endregion
+
+__device__ void fsystemReset();
+__device__ void libcuReset()
+{
+	fsystemReset();
+}
 
 // EXT-METHODS
 #pragma region EXT-METHODS

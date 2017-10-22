@@ -2286,7 +2286,7 @@ static __device__ int DbObjCmd(ClientData clientData, Jim_Interp *interp, int ar
 		//    $db version
 		//
 		// Return the version string for this database.
-		Jim_SetResultString(interp, CORE_VERSION, -1);
+		Jim_SetResultString(interp, LIBCU_VERSION, -1);
 		return rc; }
 
 	} // End of the SWITCH statement
@@ -2323,7 +2323,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 		arg = Jim_String(args[1]);
 		if (!strcmp(arg, "-version"))
 		{
-			Jim_SetResultString(interp, CORE_VERSION, -1);
+			Jim_SetResultString(interp, LIBCU_VERSION, -1);
 			return JIM_OK;
 		}
 		if (!strcmp(arg, "-has-codec"))
@@ -2463,7 +2463,7 @@ static __device__ int DbMain(void *cd, Jim_Interp *interp, int argc, Jim_Obj *co
 
 // Make sure we have a PACKAGE_VERSION macro defined.  This will be defined automatically by the TEA makefile.  But other makefiles do not define it.
 #ifndef PACKAGE_VERSION
-#define PACKAGE_VERSION CORE_VERSION
+#define PACKAGE_VERSION LIBCU_VERSION
 #endif
 
 // Initialize this module.

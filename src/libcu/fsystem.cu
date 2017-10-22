@@ -17,10 +17,10 @@ typedef struct __align__(8) {
 	unsigned short threadid;// thread ID of author
 } fileRef;
 
-__device__ fileRef __iob_fileRefs[CORE_MAXFILESTREAM]; // Start of circular buffer (set up by host)
+__device__ fileRef __iob_fileRefs[LIBCU_MAXFILESTREAM]; // Start of circular buffer (set up by host)
 volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
 volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
-__constant__ file_t __iob_files[CORE_MAXFILESTREAM];
+__constant__ file_t __iob_files[LIBCU_MAXFILESTREAM];
 
 static __device__ __forceinline void writeFileRef(fileRef *ref, file_t *f)
 {
@@ -33,7 +33,7 @@ static __device__ int fileGet(file_t **file)
 {
 	// advance circular buffer
 	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
+	offset %= (sizeof(fileRef)*LIBCU_MAXFILESTREAM);
 	int offsetId = offset / sizeof(fileRef);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
 	file_t *f = ref->file;
@@ -51,7 +51,7 @@ static __device__ void fileFree(int fd)
 	file_t *f = GETFILE(fd);
 	// advance circular buffer
 	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
-	offset %= (sizeof(fileRef)*CORE_MAXFILESTREAM);
+	offset %= (sizeof(fileRef)*LIBCU_MAXFILESTREAM);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
 	writeFileRef(ref, f);
 }

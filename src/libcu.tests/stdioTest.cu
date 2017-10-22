@@ -12,7 +12,7 @@ static __device__ void makeAFile(char *file)
 }
 #endif
 
-extern __constant__ FILE __iob_streams[CORE_MAXFILESTREAM+3];
+extern __constant__ FILE __iob_streams[LIBCU_MAXFILESTREAM+3];
 static __global__ void g_stdio_test1()
 {
 	printf("stdio_test1\n");

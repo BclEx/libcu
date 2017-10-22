@@ -54,12 +54,12 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define __USE_FILE_OFFSET64	1
 #endif
 
-#ifndef CORE_MAXFILESTREAM
-#define CORE_MAXFILESTREAM 10
+#ifndef LIBCU_MAXFILESTREAM
+#define LIBCU_MAXFILESTREAM 10
 #endif
 
-#ifndef CORE_MAXHOSTPTR
-#define CORE_MAXHOSTPTR 10
+#ifndef LIBCU_MAXHOSTPTR
+#define LIBCU_MAXHOSTPTR 10
 #endif
 
 //_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
@@ -237,16 +237,19 @@ typedef struct hostptr_t {
 /* IsDevice support.  */
 extern "C" __device__ char __cwd[];
 #define ISHOSTPATH(path) ((path)[1] == ':' || ((path)[0] != ':' && __cwd[0] == 0))
-#define ISHOSTHANDLE(handle) (handle < INT_MAX-CORE_MAXFILESTREAM)
-#define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+CORE_MAXHOSTPTR)
-extern "C" __constant__ hostptr_t __iob_hostptrs[CORE_MAXHOSTPTR];
+#define ISHOSTHANDLE(handle) (handle < INT_MAX-LIBCU_MAXFILESTREAM)
+#define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+LIBCU_MAXHOSTPTR)
 
 /* Host pointer support.  */
+extern "C" __constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
 extern "C" __device__ hostptr_t *__hostptrGet(void *host);
 extern "C" __device__ void __hostptrFree(hostptr_t *p);
 template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
 template <typename T> __forceinline __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
 template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
+
+/* Reset library */
+extern "C" __device__ void libcuReset();
 
 #pragma endregion
 

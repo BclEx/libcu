@@ -10,7 +10,7 @@ namespace CoreS
 	};
 }
 
-namespace CORE_NAME { namespace Messages
+namespace LIBCU_NAME { namespace Messages
 {
 #pragma region File
 

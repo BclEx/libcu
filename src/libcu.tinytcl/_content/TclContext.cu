@@ -2283,7 +2283,7 @@ static __device__ int DbObjCmd(void *cd, Tcl_Interp *interp, int argc, const cha
 		//    $db version
 		//
 		// Return the version string for this database.
-		Tcl_SetResult(interp, CORE_VERSION, TCL_STATIC);
+		Tcl_SetResult(interp, LIBCU_VERSION, TCL_STATIC);
 		return rc; }
 
 	} // End of the SWITCH statement
@@ -2320,7 +2320,7 @@ static __device__ int DbMain(void *cd, Tcl_Interp *interp, int argc, const char 
 		arg = args[1];
 		if (!_strcmp(arg, "-version"))
 		{
-			Tcl_AppendResult(interp, CORE_VERSION, nullptr);
+			Tcl_AppendResult(interp, LIBCU_VERSION, nullptr);
 			return TCL_OK;
 		}
 		if (!_strcmp(arg, "-has-codec"))
