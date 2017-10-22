@@ -1,9 +1,3 @@
----
-id: crtdefscu
-title: crtdefscu.h
-permalink: crtdefscu.html
----
-
 ## #include <crtdefscu.h>
 
 Also includes:

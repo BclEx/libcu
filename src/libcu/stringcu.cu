@@ -10,75 +10,414 @@
 __BEGIN_DECLS;
 
 /* Copy N bytes of SRC to DEST.  */
-//builtin: extern __device__ void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
+#ifdef _WIN64
+typedef	long long int word; /* "word" used for optimal copy speed */
+#else
+typedef	long int word; /* "word" used for optimal copy speed */
+#endif
+#define	wsize sizeof(word)
+#define	wmask (wsize-1)
+#define	_wsize "4"
+#define	_wsizex8 "32"
+#define	_wmask "3"
 
-/* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
-__device__ void *memmove_(void *dest, const void *src, size_t n)
+__device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n)
 {
 #ifndef OMIT_PTX
 	void *r;
 	asm(
 		".reg .pred p1;\n\t"
 		".reg "_UX" z0;\n\t"
+		".reg "_UX" t;\n\t"
 		".reg .b8 c;\n\t"
+		"mov"_BX" 		%0, %1;\n\t"
+		// if (!n || dest == src) goto _ret;
 		"setp.eq"_BX"	p1, %3, 0;\n\t"
 		"setp.eq.or"_BX" p1, %1, %2, p1;\n\t"
-		"@!p1 bra _Start;\n\t"
-		"mov"_BX"		%0, %1;\n\t"
-		"bra.uni _End;\n\t"
-		"_Start:\n\t"
+		"@p1 bra		_Ret;\n\t"
+		// if (a < b)
+		"setp.lt"_UX"	p1, %1, %2;\n\t" // Check for destructive overlap
+		"@!p1 bra		_WhileDesc;\n\t"
+		// Do an ascending copy
 
-		// Check for destructive overlap.
-		"setp.le"_UX"	p1, %1, %2;\n\t"
-		"add"_UX"		z0, %1, %3;\n\t"
-		"setp.lt.or"_UX" p1, %2, z0, p1;\n\t"
-		"@!p1 bra _While1;\n\t"
+		// align to word
+		// if (((uintptr_t)a | (uintptr_t)b) & wmask)
+		"or"_BX"  		t, %1, %2;\n\t"
+		"and"_BX"  		t, t, "_wmask";\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@!p1 bra		_ascWholepage;\n\t"
 
-		// Do an ascending copy.
-		"_While0:\n\t"
-		"add"_UX" 		%3, %3, -1;\n\t"
-		"setp.ne"_UX"	p1, %3, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
+		// t = ((uintptr_t)a ^ (uintptr_t)b) & wmask || n < wsize ? n : wsize-((uintptr_t)b & wmask);
+		"xor"_BX"  		t, %1, %2;\n\t"
+		"and"_BX"  		t, t, "_wmask";\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"setp.lt.or"_UX" p1, %3, "_wsize", p1;\n\t"
+		"and"_BX"		t, %2, "_wmask";\n\t"
+		"@p1 mov"_UX" 	t, %2;\n\t"
+		"@!p1 sub"_UX" 	t, "_wsize", t;\n\t"
+		// n -= t;
+		"sub"_UX" 		%3, %3, t;\n\t"
+		// do { *a++ = *b++; } while (--t);
+		"_asc0:\n\t"
 		"ld.u8 			c, [%2];\n\t"
 		"add"_UX" 		%2, %2, 1;\n\t"
 		"st.u8 			[%1], c;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
-		"bra.uni _While0;\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_asc0;\n\t"
 
-		// Destructive overlap ...
-		"add"_UX" 		%1, %1, %3; add"_UX" %1, %1, -1;\n\t"
-		"add"_UX" 		%2, %2, %3; add"_UX" %2, %2, -1;\n\t"
-		"_While1:\n\t"
-		"add"_UX" 		%3, %3, -1;\n\t"
-		"setp.ne"_UX"	p1, %3, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
-		"ld.u8 			c, [%2];\n\t"
+		// asc - set whole pages
+		"_ascWholepage:\n\t"
+		// t = n / (wsize * 8);
+		"div"_UX" 		t, %3, "_wsizex8";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_ascWholeword;\n\t"
+		// n %= wsize * 8;
+		"rem"_UX" 		%3, %3, "_wsizex8";\n\t"
+		// do {...} while (--t);
+		"_asc1:\n\t"
+		"ld"_UX" 		z0, [%2+0];		st"_UX"	[%1+0], z0;\n\t"
+		"ld"_UX" 		z0, [%2+4];		st"_UX"	[%1+4], z0;\n\t"
+		"ld"_UX" 		z0, [%2+8];		st"_UX"	[%1+8], z0;\n\t"
+		"ld"_UX" 		z0, [%2+12];	st"_UX"	[%1+12], z0;\n\t"
+		"ld"_UX" 		z0, [%2+16];	st"_UX"	[%1+16], z0;\n\t"
+		"ld"_UX" 		z0, [%2+20];	st"_UX"	[%1+20], z0;\n\t"
+		"ld"_UX" 		z0, [%2+24];	st"_UX"	[%1+24], z0;\n\t"
+		"ld"_UX" 		z0, [%2+28];	st"_UX"	[%1+28], z0;\n\t"
+		"add"_UX" 		%1, %1, "_wsizex8";\n\t"
+		"add"_UX" 		%2, %2, "_wsizex8";\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra 		_asc1;\n\t"
+
+		// copy whole words
+		"_ascWholeword:\n\t"
+		// t = n / wsize;
+		"div"_UX" 		t, %3, "_wsize";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_ascTrailing;\n\t"
+		// do { *(word *)a = *(word *)b; a += wsize; b += wsize; } while (--t);
+		"_asc2:\n\t"
+		"ld.u32 		z0, [%2];\n\t"
+		"add"_UX" 		%2, %2, "_wsize";\n\t"
+		"st.u32 		[%1], z0;\n\t"
+		"add"_UX" 		%1, %1, "_wsize";\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra 		_asc2;\n\t"
+
+		// copy trailing bytes
+		"_ascTrailing:\n\t"
+		// t = n & wmask;
+		"and"_BX" 		t, %3, "_wmask";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_Ret;\n\t"
+		// do { *a++ = *b++; } while (--t);
+		"_asc3:\n\t"
+		"ld.u8			c, [%2];\n\t"
+		"add"_UX" 		%2, %2, 1;\n\t"
+		"st.u8			[%1], c;\n\t"
+		"add"_UX"		%1, %1, 1;\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_asc3;\n\t"
+		"bra.uni		_Ret;\n\t"
+
+
+		// Destructive overlap
+		"_WhileDesc:\n\t"
+		"add"_UX" 		%1, %1, %3;\n\t"
+		"add"_UX" 		%2, %2, %3;\n\t"
+
+		// align to word
+		// if (((uintptr_t)a | (uintptr_t)b) & wmask)
+		"or"_BX"  		t, %1, %2;\n\t"
+		"and"_BX"  		t, t, "_wmask";\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@!p1 bra		_descWholepage;\n\t"
+
+		// t = ((uintptr_t)a ^ (uintptr_t)b) & wmask || n <= wsize ? n : ((uintptr_t)b & wmask);
+		"xor"_BX"  		t, %1, %2;\n\t"
+		"and"_BX"  		t, t, "_wmask";\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"setp.le.or"_UX" p1, %3, "_wsize", p1;\n\t"
+		"@!p1 and"_BX"	t, %2, "_wmask";\n\t"
+		"@p1 mov"_UX" 	t, %2;\n\t"
+		// n -= t;
+		"sub"_UX" 		%3, %3, t;\n\t"
+		// do { *--a = *--b; } while (--t);
+		"_desc0:\n\t"
 		"add"_UX" 		%2, %2, -1;\n\t"
-		"st.u8 			[%1], c;\n\t"
+		"ld.u8 			c, [%2];\n\t"
 		"add"_UX" 		%1, %1, -1;\n\t"
-		"bra.uni _While1;\n\t"
+		"st.u8 			[%1], c;\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_desc0;\n\t"
+
+		// asc - set whole pages
+		"_descWholepage:\n\t"
+		// t = n / (wsize * 8);
+		"div"_UX" 		t, %3, "_wsizex8";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_descWholeword;\n\t"
+		// n %= wsize * 8;
+		"rem"_UX" 		%3, %3, "_wsizex8";\n\t"
+		// do {...} while (--t);
+		"_desc1:\n\t"
+		"ld"_UX" 		z0, [%2+28];	st"_UX"	[%1+28], z0;\n\t"
+		"ld"_UX" 		z0, [%2+24];	st"_UX"	[%1+24], z0;\n\t"
+		"ld"_UX" 		z0, [%2+20];	st"_UX"	[%1+20], z0;\n\t"
+		"ld"_UX" 		z0, [%2+16];	st"_UX"	[%1+16], z0;\n\t"
+		"ld"_UX" 		z0, [%2+12];	st"_UX"	[%1+12], z0;\n\t"
+		"ld"_UX" 		z0, [%2+8];		st"_UX"	[%1+8], z0;\n\t"
+		"ld"_UX" 		z0, [%2+4];		st"_UX"	[%1+4], z0;\n\t"
+		"ld"_UX" 		z0, [%2+0];		st"_UX"	[%1+0], z0;\n\t"
+		"add"_UX" 		%1, %1, -"_wsizex8";\n\t"
+		"add"_UX" 		%2, %2, -"_wsizex8";\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra 		_desc1;\n\t"
+
+		// copy whole words
+		"_descWholeword:\n\t"
+		// t = n / wsize;
+		"div"_UX" 		t, %3, "_wsize";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_descTrailing;\n\t"
+		// do { a -= wsize; b -= wsize; *(word *)a = *(word *)b; } while (--t);
+		"_desc2:\n\t"
+		"add"_UX" 		%2, %2, -"_wsize";\n\t"
+		"ld.u32 		z0, [%2];\n\t"
+		"add"_UX" 		%1, %1, -"_wsize";\n\t"
+		"st.u32 		[%1], z0;\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra 		_desc2;\n\t"
+
+		// copy trailing bytes
+		"_descTrailing:\n\t"
+		// t = n & wmask;
+		"and"_BX" 		t, %3, "_wmask";\n\t"
+		// if (t)
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_Ret;\n\t"
+		// do { *--a = *--b; } while (--t);
+		"_desc3:\n\t"
+		"add"_UX" 		%2, %2, -1;\n\t"
+		"ld.u8			c, [%2];\n\t"
+		"add"_UX"		%1, %1, -1;\n\t"
+		"st.u8			[%1], c;\n\t"
+		"add"_UX" 		t, t, -1;\n\t"
+		"setp.ne"_UX"	p1, t, 0;\n\t"
+		"@p1 bra		_desc3;\n\t"
 
 		"_Ret:\n\t"
-		"mov"_UX" 		%0, %1;\n\t"
-		"_End:\n\t"
 		: "="__R(r) : __R(dest), __R(src), __R(n));
 	return r;
 #else
-	if (!n || dest == src) return dest; // No need to do that thing.
+	if (!n || dest == src) goto _ret;
 	register unsigned char *a = (unsigned char *)dest;
 	register unsigned char *b = (unsigned char *)src;
-	if (a <= b || b >= a + n) { // Check for destructive overlap.
-		while (n--) *a++ = *b++; // Do an ascending copy.
-		return a;
+	size_t t;
+	// Do an ascending copy
+	if (a < b) { // Check for destructive overlap
+		// align to word
+		if (((uintptr_t)a | (uintptr_t)b) & wmask) {
+			t = ((uintptr_t)a ^ (uintptr_t)b) & wmask || n < wsize ? n : wsize-((uintptr_t)b & wmask);
+			n -= t;
+			do { *a++ = *b++; } while (--t);
+		}
+		// set whole pages
+		t = n / (wsize * 8);
+		if (t) {
+			n %= wsize * 8;
+			do {
+				((word *)a)[0] = ((word *)b)[0];
+				((word *)a)[1] = ((word *)b)[1];
+				((word *)a)[2] = ((word *)b)[2];
+				((word *)a)[3] = ((word *)b)[3];
+				((word *)a)[4] = ((word *)b)[4];
+				((word *)a)[5] = ((word *)b)[5];
+				((word *)a)[6] = ((word *)b)[6];
+				((word *)a)[7] = ((word *)b)[7];
+				a += wsize * 8; b += wsize * 8;
+			} while (--t);
+		}
+		// copy whole words
+		t = n / wsize;
+		if (t) do { *(word *)a = *(word *)b; a += wsize; b += wsize; } while (--t);
+		// copy trailing bytes
+		t = n & wmask;
+		if (t) do { *a++ = *b++; } while (--t);
 	}
-	a += n; b += n; // Destructive overlap ...
-	while (n--) *a-- = *b--; // have to copy backwards.
-	return a;
+	else {
+		b += n;
+		a += n;
+		// align to word
+		if (((uintptr_t)a | (uintptr_t)b) & wmask) {
+			t = ((uintptr_t)a ^ (uintptr_t)b) & wmask || n <= wsize ? n : ((uintptr_t)b & wmask);
+			n -= t;
+			do { *--a = *--b; } while (--t);
+		}
+		// set whole pages
+		t = n / (wsize * 8);
+		if (t) {
+			n %= wsize * 8;
+			do {
+				((word *)a)[7] = ((word *)b)[7];
+				((word *)a)[6] = ((word *)b)[6];
+				((word *)a)[5] = ((word *)b)[5];
+				((word *)a)[4] = ((word *)b)[4];
+				((word *)a)[3] = ((word *)b)[3];
+				((word *)a)[2] = ((word *)b)[2];
+				((word *)a)[1] = ((word *)b)[1];
+				((word *)a)[0] = ((word *)b)[0];
+				a -= wsize; b -= wsize;
+			} while (--t);
+		}
+		// copy whole words
+		t = n / wsize;
+		if (t) do { a -= wsize; b -= wsize; *(word *)a = *(word *)b; } while (--t);
+		// copy trailing bytes
+		t = n & wmask;
+		if (t) do { *--a = *--b; } while (--t);
+	}
+_ret:
+	return dest;
 #endif
 }
 
+/* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
+//__device__ void *memmove_(void *dest, const void *src, size_t n)
+//{
+//#ifndef OMIT_PTX
+//	void *r;
+//	asm(
+//		".reg .pred p1;\n\t"
+//		".reg "_UX" z0;\n\t"
+//		".reg .b8 c;\n\t"
+//		"setp.eq"_BX"	p1, %3, 0;\n\t"
+//		"setp.eq.or"_BX" p1, %1, %2, p1;\n\t"
+//		"@!p1 bra _Start;\n\t"
+//		"mov"_BX"		%0, %1;\n\t"
+//		"bra.uni _End;\n\t"
+//		"_Start:\n\t"
+//
+//		// Check for destructive overlap
+//		"setp.le"_UX"	p1, %1, %2;\n\t"
+//		"add"_UX"		z0, %1, %3;\n\t"
+//		"setp.lt.or"_UX" p1, %2, z0, p1;\n\t"
+//		"@!p1 bra _While1;\n\t"
+//
+//		// Do an ascending copy
+//		"_While0:\n\t"
+//		"add"_UX" 		%3, %3, -1;\n\t"
+//		"setp.ne"_UX"	p1, %3, 0;\n\t"
+//		"@!p1 bra _Ret;\n\t"
+//		"ld.u8 			c, [%2];\n\t"
+//		"add"_UX" 		%2, %2, 1;\n\t"
+//		"st.u8 			[%1], c;\n\t"
+//		"add"_UX" 		%1, %1, 1;\n\t"
+//		"bra.uni _While0;\n\t"
+//
+//		// Destructive overlap
+//		"add"_UX" 		%1, %1, %3; add"_UX" %1, %1, -1;\n\t"
+//		"add"_UX" 		%2, %2, %3; add"_UX" %2, %2, -1;\n\t"
+//		"_While1:\n\t"
+//		"add"_UX" 		%3, %3, -1;\n\t"
+//		"setp.ne"_UX"	p1, %3, 0;\n\t"
+//		"@!p1 bra _Ret;\n\t"
+//		"ld.u8 			c, [%2];\n\t"
+//		"add"_UX" 		%2, %2, -1;\n\t"
+//		"st.u8 			[%1], c;\n\t"
+//		"add"_UX" 		%1, %1, -1;\n\t"
+//		"bra.uni _While1;\n\t"
+//
+//		"_Ret:\n\t"
+//		"mov"_UX" 		%0, %1;\n\t"
+//		"_End:\n\t"
+//		: "="__R(r) : __R(dest), __R(src), __R(n));
+//	return r;
+//#else
+//	if (!n || dest == src) goto _ret;
+//	register unsigned char *a = (unsigned char *)dest;
+//	register unsigned char *b = (unsigned char *)src;
+//	if (a <= b || b >= a + n) { // Check for destructive overlap.
+//		while (n--) *a++ = *b++; // Do an ascending copy.
+//		return a;
+//	}
+//	a += n; b += n; // Destructive overlap ...
+//	while (n--) *a-- = *b--; // have to copy backwards.
+//_ret:
+//	return dest;
+//#endif
+//}
+
 /* Set N bytes of S to C.  */
-//builtin: extern __device__ void *memset(void *s, int c, size_t n);
+__device__ void *memset_(void *s, int c, size_t n)
+{
+	//#ifndef OMIT_PTX
+	//#else
+	if (!n) goto _ret;
+	register unsigned char *a = (unsigned char *)s;
+	register size_t t;
+	// tiny optimize
+	if (n < 3 * wsize) {
+		while (n) { *a++ = c; --n; }
+		goto _ret;
+	}
+	// set value
+#ifdef _WIN64
+	long long int cccc;
+#else
+	long int cccc;
+#endif
+	if ((cccc = (unsigned char)c)) {
+		cccc |= cccc << 8;
+		cccc |= cccc << 16;
+#ifdef _WIN64
+		cccc |= cccc << 32;
+#endif
+	}
+	// align to word
+	if ((t = (int)a & wmask)) {
+		t = wsize - t;
+		n -= t;
+		do { *a++ = c; } while (--t);
+	}
+	// set whole pages
+	t = n / (wsize * 8);
+	if (t) {
+		n %= wsize * 8;
+		do {
+			((word *)a)[0] = cccc;
+			((word *)a)[1] = cccc;
+			((word *)a)[2] = cccc;
+			((word *)a)[3] = cccc;
+			((word *)a)[4] = cccc;
+			((word *)a)[5] = cccc;
+			((word *)a)[6] = cccc;
+			((word *)a)[7] = cccc;
+			a += wsize * 8;
+		} while (--t);
+	}
+	// set whole words
+	t = n / wsize;
+	if (t) do { *(word *)a = cccc; a += wsize; } while (--t);
+	// set trailing bytes
+	t = n & wmask;
+	if (t) do { *a++ = c; } while (--t);
+_ret:
+	return s;
+	//#endif
+}
 
 /* Compare N bytes of S1 and S2.  */
 __device__ int memcmp_(const void *s1, const void *s2, size_t n)
@@ -116,7 +455,7 @@ __device__ int memcmp_(const void *s1, const void *s2, size_t n)
 	if (!n) return 0;
 	register unsigned char *a = (unsigned char *)s1;
 	register unsigned char *b = (unsigned char *)s2;
-	while (--n > 0 && *a == *b) { a++; b++; }
+	while (--n && *a == *b) { a++; b++; }
 	return *a - *b;
 #endif
 }
@@ -152,12 +491,13 @@ __device__ void *memchr_(const void *s, int c, size_t n)
 		: "="__R(r) : __R(s), "r"(c), __R(n));
 	return r;
 #else
-	if (!n) return nullptr;
+	if (!n) goto _ret;
 	register const char *p = (const char *)s;
 	do {
 		if (*p++ == c)
-			return (void *)(p - 1);
-	} while (n--);
+			return (void *)(p-1);
+	} while (--n);
+_ret:
 	return nullptr;
 #endif
 }

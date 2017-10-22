@@ -1,9 +1,3 @@
----
-id: falloc
-title: falloc.h
-permalink: falloc.html
----
-
 ## #include <falloc.h>
 
 ## Host Side

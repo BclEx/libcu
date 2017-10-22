@@ -1,9 +1,3 @@
----
-id: host_functions
-title: host_functions.h
-permalink: host_functions.html
----
-
 ## #include <host_functions.h>
 
 Also includes:

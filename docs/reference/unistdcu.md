@@ -1,9 +1,3 @@
----
-id: unistdcu
-title: unistdcu.h
-permalink: unistdcu.html
----
-
 ## #include <unistdcu.h>
 
 Also includes:

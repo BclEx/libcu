@@ -1,9 +1,3 @@
----
-id: statcu
-title: statcu.h
-permalink: sys\statcu.html
----
-
 ## #include <sys\stat.h>
 
 Also includes:

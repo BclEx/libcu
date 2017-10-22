@@ -1,9 +1,3 @@
----
-id: stdargcu
-title: stdargcu.h
-permalink: stdargcu.html
----
-
 ## #include <stdargcu.h>
 
 Also includes:

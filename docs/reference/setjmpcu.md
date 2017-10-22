@@ -1,9 +1,3 @@
----
-id: setjmpcu
-title: setjmpcu.h
-permalink: setjmpcu.html
----
-
 ## #include <setjmpcu.h>
 
 Also includes:

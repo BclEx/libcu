@@ -1,11 +1,4 @@
----
-id: regexcu
-title: regexcu.h
-permalink: regexcu.html
----
-
 ## #include <regexcu.h>
-
 
 ## Device Side
 Prototype | Description | Tags

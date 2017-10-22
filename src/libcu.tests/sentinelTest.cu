@@ -3,33 +3,78 @@
 #include <sentinel.h>
 #include <assert.h>
 
+enum {
+	MODULE_SIMPLE = 0,
+	MODULE_STRING,
+};
+
+struct module_simple {
+	sentinelMessage Base;
+	int Value;
+	__device__ module_simple(bool wait, int value)
+		: Base(wait, MODULE_SIMPLE), Value(value) { sentinelDeviceSend(&Base, sizeof(module_simple)); }
+	int RC;
+};
+
+struct module_string {
+	static __forceinline __device__ char *Prepare(module_string *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += strLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(str, t->Str, strLength);
+		t->Str = str + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Str;
+	__device__ module_string(bool wait, const char *str)
+		: Base(wait, MODULE_STRING, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(module_string)); }
+	int RC;
+};
+
+bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
+{
+	switch (data->OP) {
+	case MODULE_SIMPLE: { module_simple *msg = (module_simple *)data; msg->RC = msg->Value; return true; }
+	case MODULE_STRING: { module_string *msg = (module_string *)data; msg->RC = strlen(msg->Str); return true; }
+	}
+	return false;
+}
+
 static __global__ void g_sentinel_test1()
 {
 	printf("sentinel_test1\n");
 
-	//// SENTINELDEFAULTEXECUTOR ////
-	//	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
+	//module_simple msg(false); return msg.RC
 
-	//// SENTINELSERVERINITIALIZE, SENTINELSERVERSHUTDOWN ////
-	//	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
-	//	extern void sentinelServerShutdown();
+		//// SENTINELDEFAULTEXECUTOR ////
+		//	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
 
-	//// SENTINELDEVICESEND ////
-	//	extern __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength);
+		//// SENTINELSERVERINITIALIZE, SENTINELSERVERSHUTDOWN ////
+		//	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
+		//	extern void sentinelServerShutdown();
 
-	//// SENTINELCLIENTINITIALIZE, SENTINELCLIENTSHUTDOWN ////
-	//	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
-	//	extern void sentinelClientShutdown();
+		//// SENTINELDEVICESEND ////
+		//	extern __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength);
 
-	//// SENTINELCLIENTSEND ////
-	//	extern void sentinelClientSend(sentinelMessage *msg, int msgLength);
+		//// SENTINELCLIENTINITIALIZE, SENTINELCLIENTSHUTDOWN ////
+		//	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
+		//	extern void sentinelClientShutdown();
 
-	//// SENTINELFINDEXECUTOR, SENTINELREGISTEREXECUTOR, SENTINELUNREGISTEREXECUTOR ////
-	//	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
-	//	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
-	//	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
-	
-	//// SENTINELREGISTERFILEUTILS ////
-	//	extern void sentinelRegisterFileUtils();
+		//// SENTINELCLIENTSEND ////
+		//	extern void sentinelClientSend(sentinelMessage *msg, int msgLength);
+
+		//// SENTINELFINDEXECUTOR, SENTINELREGISTEREXECUTOR, SENTINELUNREGISTEREXECUTOR ////
+		//	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
+		//	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
+		//	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
+
+		//// SENTINELREGISTERFILEUTILS ////
+		//	extern void sentinelRegisterFileUtils();
 }
-cudaError_t sentinel_test1() { g_sentinel_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
+cudaError_t sentinel_test1() { 
+
+	g_sentinel_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); 
+}
