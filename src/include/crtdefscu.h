@@ -79,8 +79,7 @@ All macros listed above as possibly being defined by this file are explicitly un
 // UTILITY
 #pragma region UTILITY
 
-/* For these things, GCC behaves the ANSI way normally,
-and the non-ANSI way under -traditional.  */
+/* For these things, GCC behaves the ANSI way normally, and the non-ANSI way under -traditional.  */
 #define __CONCAT(x,y) x ## y
 #define __STRING(x) #x
 
