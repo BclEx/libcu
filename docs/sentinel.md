@@ -53,6 +53,7 @@ These defines are used for Sentinel:
 #define SENTINEL_MSGCOUNT 1
 ```
 
+### SentinelContext
 SentinelContext is a singleton which represents the state of Sentinel. Sentinel provides two distinct message buses for device to host, and host to host communication respectivly. The later is used for IPC using named pipes, named `SENTINEL_NAME`, and is extensivly used by the file-system utilities.
 
 `SentinelServerInitialize` execution:
@@ -68,6 +69,7 @@ sentinelContext
 - DeviceList - linked list of sentinelExecutor(s) for device processing
 ```
 
+### SentinelMap
 Each `sentinelMap` has a dedicated processing thread and can hold `SENTINEL_MSGCOUNT` messages of size `SENTINEL_MSGSIZE`, this size must include the `sentinelCommand` size.
 * `GetId` is a rolling index into the next message to read
 * New messages are written to `SetId`, which is marked volatile to by-pass any caching issues
@@ -81,6 +83,7 @@ sentinelMap
 - Data[SENTINEL_MSGSIZE*SENTINEL_MSGCOUNT]
 ```
 
+### SentinelCommand
 Each `sentinelCommand` represents a command being passed across the bus, and has an embeded `sentinelMessage` in it's `Data` property
 * `Magic` is used to ensure message alignment
 * `Control` handles flow control, and is marked volatile to by-pass any caching issues
@@ -98,6 +101,7 @@ sentinelCommand
 - Data[...] - data
 ```
 
+### SentinelMessage
 Each `sentinelMessage` is a custom message being passed across the bus
 ```
 sentinelMessage
@@ -107,6 +111,7 @@ sentinelMessage
 - Prepare() - method to prepare message for transport
 ```
 
+### SentinelExecutor
 The `sentinelExecutor` is responsible for executing message on host.
 ```
 sentinelExecutor
@@ -121,6 +126,7 @@ sentinelExecutor
 
 The following is an example of creating a custom message, and using it.
 
+### Enum
 * Use an `enum` to auto-number the operations in a module
 * The developer is responsible for name collisions
 * Device and Host messages have seperate namespaces
@@ -132,6 +138,7 @@ enum {
 };
 ```
 
+### Message
 A simple message with a integer value named `Value`, and a integer return code named `RC`.
 * `Base` must be first
 * `Base` constructor parameters of `size` and `prepare` can be ignored
@@ -145,6 +152,7 @@ struct module_simple {
 };
 ```
 
+### Message
 Message asset(s) referenced outside of the message payload, like string values, must be coalesced into the message payload. refered values offset(s) must be adjusted to align memory maps.
 * `Base` must be first
 * `Base` constructor parameters of `size` and `prepare` are required
@@ -170,6 +178,7 @@ struct module_string {
 };
 ```
 
+### Executor
 ```
 bool sentinelExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
@@ -181,6 +190,7 @@ bool sentinelExecutor(void *tag, sentinelMessage *data, int length, char *(**hos
 }
 ```
 
+### Calling
 to call:
 ```
 module_simple msg(123);

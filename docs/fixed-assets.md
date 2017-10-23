@@ -32,6 +32,7 @@ This header includes most of the libcu base definitions, of which are also the p
 #endif
 ```
 
+### IsHost support
 These definitions determind if an assets is on the host or device:
 * `__cwd` - holds the current device relative base, this value should not be modified directly.
 * `ISHOSTPATH(path)` - if `path` begins with `:\` as an absolute path, or if `path` is relative and a device relative base has been set in `__cwd`, then `path` is a device path otherwise `path` is a host path.
@@ -45,6 +46,7 @@ extern "C" __device__ char __cwd[];
 #define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+LIBCU_MAXHOSTPTR)
 ```
 
+### Host pointer support
 These methods are used for working with the HostPtr system:
 * `newhostptr(p)` - returns a device `hostptr_t` object which wraps a host `p` pointer
 * `freehostptr(p)` - frees the device `hostptr_t` object in `p`
@@ -59,6 +61,7 @@ template <typename T> __forceinline __device__ void freehostptr(T *p) { if (p) _
 template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
 ```
 
+### Library support
 This method will reset the libcu library:
 * `libcuReset()` - resets the library
 ```
@@ -71,6 +74,7 @@ extern "C" __device__ void libcuReset();
 
 This header is included when working with streams.
 
+### IsHost support
 These methods are used when working with device side streams:
 * `ISHOSTFILE(stream)` - host if `stream` falls outside the fixed-asset stream range.
 * `stdin` - alias to the device standard input stream
@@ -93,6 +97,7 @@ extern __constant__ FILE __iob_streams[LIBCU_MAXFILESTREAM+3];
 
 Fsystem is a transparent sub-system which defines the device side filesystem.
 
+### State
 These are the initalization values for the filesystem:
 * `__iob_files` - folds the file handles which access the filesystem
 * `__cwd` - holds the current device relative base
@@ -105,6 +110,7 @@ __device__ dirEnt_t __iob_root = { { 0, 0, 0, 1, ":\\" }, nullptr, nullptr };
 __device__ hash_t __iob_dir = HASHINIT;
 ```
 
+### File support
 These methods are used internally when working the device side filesystem:
 * `fsystemReset()` - resets the filesystem back to original state
 * `GETFD(fd)` - translates a file pointer to a file handle
