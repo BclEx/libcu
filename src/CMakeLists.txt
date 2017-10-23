@@ -12,7 +12,7 @@ add_library(libcu.${arch} STATIC
   libcu/sentinel-msg.cpp
   libcu/sentinel.cpp
   libcu/sentinel-host.cpp
-  libcu/host_functions.cpp
+  libcu/cuda_runtime.cpp
   libcu/libcu.cu
   libcu/libcu.stdlib.cu
   )

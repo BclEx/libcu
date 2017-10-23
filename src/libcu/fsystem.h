@@ -31,6 +31,7 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 __device__ void fsystemClose(int fd);
 __device__ void fsystemReset();
 
+/* File support  */
 extern __device__ dirEnt_t __iob_root;
 extern __constant__ file_t __iob_files[LIBCU_MAXFILESTREAM];
 #define GETFD(fd) (INT_MAX-(fd))

@@ -19,8 +19,8 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	}
 	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
-	volatile long *status = (volatile long *)&cmd->Status;
-	//while (InterlockedCompareExchange((long *)status, 1, 0) != 0) { }
+	volatile long *control = (volatile long *)&cmd->Control;
+	//while (InterlockedCompareExchange((long *)control, 1, 0) != 0) { }
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
@@ -31,11 +31,11 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	memcpy(cmd->Data, msg, msgLength);
 	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
 
-	*status = 2;
+	*control = 2;
 	if (msg->Wait) {
-		while (InterlockedCompareExchange((long *)status, 5, 4) != 4) { }
+		while (InterlockedCompareExchange((long *)control, 5, 4) != 4) { }
 		memcpy(msg, cmd->Data, msgLength);
-		*status = 0;
+		*control = 0;
 	}
 #endif
 }

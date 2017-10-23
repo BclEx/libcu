@@ -35,9 +35,9 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 	while (map) {
 		long id = map->GetId;
 		sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
-		volatile long *status = (volatile long *)&cmd->Status;
+		volatile long *control = (volatile long *)&cmd->Control;
 		unsigned int s_;
-		while (_threadHostHandle && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); } //
+		while (_threadHostHandle && (s_ = InterlockedCompareExchange((long *)control, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); } //
 		if (!_threadHostHandle) return 0;
 		if (cmd->Magic != SENTINEL_MAGIC) {
 			printf("Bad Sentinel Magic");
@@ -49,7 +49,7 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 		char *(*hostPrepare)(void*,char*,char*,intptr_t) = nullptr;
 		for (sentinelExecutor *exec = _ctx.HostList; exec && exec->Executor && !exec->Executor(exec->Tag, msg, cmd->Length, &hostPrepare); exec = exec->Next) { }
 		//printf(".");
-		*status = msg->Wait ? 4 : 0;
+		*control = msg->Wait ? 4 : 0;
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;
@@ -71,9 +71,9 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 	while (map) {
 		long id = map->GetId;
 		sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
-		volatile long *status = (volatile long *)&cmd->Status;
+		volatile long *control = (volatile long *)&cmd->Control;
 		unsigned int s_;
-		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)status, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); }
+		while (_threadDeviceHandle[threadId] && (s_ = InterlockedCompareExchange((long *)control, 3, 2)) != 2) { /*printf("(%d)", s_);*/ Sleep(50); }
 		if (!_threadDeviceHandle[threadId]) return 0;
 		if (cmd->Magic != SENTINEL_MAGIC) {
 			printf("Bad Sentinel Magic");
@@ -89,7 +89,7 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 			printf("msg too long");
 			exit(0);
 		}
-		*status = msg->Wait ? 4 : 0;
+		*control = msg->Wait ? 4 : 0;
 		map->GetId += SENTINEL_MSGSIZE;
 	}
 	return 0;

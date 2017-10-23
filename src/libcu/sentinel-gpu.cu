@@ -16,7 +16,7 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 		panic("sentinel: device map not defined. did you start sentinel?\n");
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
-	volatile long *status = (volatile long *)&cmd->Status;
+	volatile long *control = (volatile long *)&cmd->Control;
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
@@ -25,11 +25,11 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 	memcpy(cmd->Data, msg, msgLength);
 	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
 
-	*status = 2;
+	*control = 2;
 	if (msg->Wait) {
-		unsigned int s_; do { s_ = *status; /*printf("%d ", s_);*/ __syncthreads(); } while (s_ != 4); __syncthreads();
+		unsigned int s_; do { s_ = *control; /*printf("%d ", s_);*/ __syncthreads(); } while (s_ != 4); __syncthreads();
 		memcpy(msg, cmd->Data, msgLength);
-		*status = 0;
+		*control = 0;
 	}
 }
 

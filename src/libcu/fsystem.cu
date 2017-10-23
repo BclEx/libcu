@@ -282,6 +282,7 @@ __device__ void fsystemClose(int fd)
 __device__ void fsystemReset()
 {
 	freeEnt(&__iob_root);
+	strcpy(__cwd, ":\\");
 }
 
 __END_DECLS;

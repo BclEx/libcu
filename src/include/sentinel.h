@@ -40,11 +40,11 @@ THE SOFTWARE.
 extern "C" {
 #endif
 
+#define SENTINEL_NAME "Sentinel" //"Global\\Sentinel"
 #define SENTINEL_MAGIC (unsigned short)0xC811
+#define SENTINEL_DEVICEMAPS 1
 #define SENTINEL_MSGSIZE 4096
 #define SENTINEL_MSGCOUNT 1
-#define SENTINEL_NAME "Sentinel" //"Global\\Sentinel"
-#define SENTINEL_DEVICEMAPS 1
 
 	struct sentinelMessage {
 		bool Wait;
@@ -59,7 +59,7 @@ extern "C" {
 
 	typedef struct __align__(8) {
 		unsigned short Magic;
-		volatile long Status;
+		volatile long Control;
 		int Length;
 #ifndef _WIN64
 		int Unknown;
@@ -112,6 +112,7 @@ extern "C" {
 	extern sentinelExecutor *sentinelFindExecutor(const char *name, bool forDevice = true);
 	extern void sentinelRegisterExecutor(sentinelExecutor *exec, bool makeDefault = false, bool forDevice = true);
 	extern void sentinelUnregisterExecutor(sentinelExecutor *exec, bool forDevice = true);
+
 	// file-utils
 	extern void sentinelRegisterFileUtils();
 
