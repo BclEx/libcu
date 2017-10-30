@@ -24,7 +24,7 @@ static __global__ void g_stdio_test1()
 	bool a0 = (stdin == &__iob_streams[0] && stdout == &__iob_streams[1] && stderr == &__iob_streams[2]); assert(a0);
 
 	//// REMOVE FILE ////
-	//__forceinline __device__ int remove_(const char *filename); #sentinel-branch
+	//extern __device__ int remove_(const char *filename); #sentinel-branch
 	/* Host Absolute */
 	int a0a = remove(HostDir"missing.txt"); assert(a0a < 0);
 	makeAFile(HostDir"test.txt");
@@ -48,7 +48,7 @@ static __global__ void g_stdio_test1()
 	int d1a = remove("test.txt"); assert(!d1a);
 
 	//// RENAME FILE ////
-	//__forceinline __device__ int rename_(const char *old, const char *new_); #sentinel-branch
+	//extern __device__ int rename_(const char *old, const char *new_); #sentinel-branch
 	/* Host Absolute */
 	int e0a = rename(HostDir"missing.txt", "missing.txt"); assert(e0a < 0);
 	makeAFile(HostDir"test.txt");
@@ -76,10 +76,10 @@ static __global__ void g_stdio_test1()
 	FILE *i0a = tmpfile();
 
 	//// FCLOSE, FFLUSH, FREOPEN, FOPEN, FPRINTF ////
-	//__forceinline __device__ int fclose_(FILE *stream, bool wait = true); #sentinel-branch
-	//__forceinline __device__ int fflush_(FILE *stream); #sentinel-branch
-	//__forceinline __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) #sentinel-branch
-	//__forceinline __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes); #sentinel-branch
+	//extern __device__ int fclose_(FILE *stream, bool wait = true); #sentinel-branch
+	//extern __device__ int fflush_(FILE *stream); #sentinel-branch
+	//extern __device__ FILE *freopen_(const char *__restrict filename, const char *__restrict modes, FILE *__restrict stream) #sentinel-branch
+	//extern __device__ FILE *fopen_(const char *__restrict filename, const char *__restrict modes); #sentinel-branch
 	//moved: extern __device__ int fprintf(FILE *__restrict stream, const char *__restrict format, ...); //extern __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 	char buf[100];
 	/* Host Absolute */
@@ -109,8 +109,8 @@ static __global__ void g_stdio_test1()
 	FILE *m2a = fopen("test.txt", "w"); int m2b = fprintf_(m2a, "test"); FILE *m2c = freopen("test.txt", "w", m2a); int m2d = fprintf_(m2c, "test"); int m2e = fflush(m1c); int m2f = fclose(m2c); assert(m2a);
 
 	//// SETVBUF, SETBUF ////
-	//__forceinline __device__ int setvbuf_(FILE *__restrict stream, char *__restrict buf, int modes, size_t n); #sentinel-branch
-	//__forceinline __device__ void setbuf_(FILE *__restrict stream, char *__restrict buf); #sentinel-branch
+	//extern __device__ int setvbuf_(FILE *__restrict stream, char *__restrict buf, int modes, size_t n); #sentinel-branch
+	//extern __device__ void setbuf_(FILE *__restrict stream, char *__restrict buf); #sentinel-branch
 	FILE *n0a = fopen(HostDir"test.txt", "w"); int n0b = setvbuf(n0a, nullptr, 0, 10); int n0c = fclose(n0a); assert(n0a && n0b && n0c);
 	FILE *n1a = fopen(HostDir"test.txt", "w"); setbuf(n1a, nullptr); int n1b = fclose(n0a); assert(n1a && n1b);
 	FILE *n2a = fopen(DeviceDir"test.txt", "w"); int n2b = setvbuf(n2a, nullptr, 0, 10); int n2c = fclose(n2a); assert(n2a && n2b && n2c);
@@ -141,7 +141,7 @@ static __global__ void g_stdio_test1()
 	//extern __device__ int fputc_(int c, FILE *stream, bool wait = true); #sentinel-branch
 	//__forceinline __device__ int putchar_(int c);
 	////sky: #define putc(ch, fp) __PUTC(ch, fp)
-	//__forceinline __device__ int ungetc_(int c, FILE *stream, bool wait = true); #sentinel-branch
+	//extern __device__ int ungetc_(int c, FILE *stream, bool wait = true); #sentinel-branch
 	//skipped: getchar();
 	//skipped: getc(fp);
 	/* Host Absolute */
@@ -228,8 +228,6 @@ static __global__ void g_stdio_test1()
 	//skipped: vmsnprintf();
 }
 cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
-
-
 
 #pragma region _64bit
 

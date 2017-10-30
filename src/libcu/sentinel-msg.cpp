@@ -20,6 +20,7 @@
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
+	if (data->OP > TIME_STRFTIME) return false;
 	switch (data->OP) {
 	case STDIO_REMOVE: { stdio_remove *msg = (stdio_remove *)data; msg->RC = remove(msg->Str); return true; }
 	case STDIO_RENAME: { stdio_rename *msg = (stdio_rename *)data; msg->RC = rename(msg->Str, msg->Str2); return true; }

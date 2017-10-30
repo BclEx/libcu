@@ -21,11 +21,11 @@ static __global__ void g_fcntl_test1()
 	printf("fcntl_test1\n");
 
 	//// FCTNL ////
-	//__forceinline __device__ int fcntlv_(int fd, int cmd, va_list va) #sentinel-branch
+	//extern __device__ int fcntlv_(int fd, int cmd, va_list va) #sentinel-branch
 	// NEEDED
 
 	//// OPENV ////
-	//__forceinline __device__ int openv_(const char *file, int oflag, va_list va) #sentinel-branch
+	//extern __device__ int openv_(const char *file, int oflag, va_list va) #sentinel-branch
 	/* Host Absolute */
 	int a0a = open(HostDir"missing.txt", O_RDONLY); assert(a0a < 0);
 	makeAFile(HostDir"test.txt");

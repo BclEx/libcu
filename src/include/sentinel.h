@@ -48,10 +48,10 @@ extern "C" {
 
 	struct sentinelMessage {
 		bool Wait;
-		char OP;
+		unsigned short OP;
 		int Size;
 		char *(*Prepare)(void*,char*,char*,intptr_t);
-		__device__ sentinelMessage(bool wait, char op, int size = 0, char *(*prepare)(void*,char*,char*,intptr_t) = nullptr)
+		__device__ sentinelMessage(bool wait, unsigned short op, int size = 0, char *(*prepare)(void*,char*,char*,intptr_t) = nullptr)
 			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
 	public:
 	};

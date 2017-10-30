@@ -3,6 +3,13 @@
 #include <stdlibcu.h>
 #include <assert.h>
 
+static __device__ int compareints(const void *a, const void *b)
+{
+	return (*(int*)a - *(int*)b);
+}
+
+__device__ int _values[] = { 50, 20, 60, 40, 10, 30 };
+
 static __global__ void g_stdlib_test1()
 {
 	printf("stdlib_test1\n");
@@ -29,7 +36,7 @@ static __global__ void g_stdlib_test1()
 	float b1a = strtof("1.0", nullptr); assert(b1a == 1.0F);
 	long double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
 	long int b3a = strtol("1.0", nullptr, 10); assert(b3a == 1);
-	unsigned long int b4a = strtoul("1.0", nullptr, 10); assert(b3a == 1L);
+	unsigned long int b4a = strtoul("1.0", nullptr, 10); assert(b4a == 1L);
 	long long int b5a = strtoll("1.0", nullptr, 10); assert(b5a == 1L);
 
 	//// RAND, SRAND ////
@@ -70,16 +77,22 @@ static __global__ void g_stdlib_test1()
 	int g1a = mkstemp("Test"); assert(g1a);
 
 	//// SYSTEM ////
-	//__forceinline __device__ int system_(const char *command); #sentinel
+	//extern __device__ int system_(const char *command); #sentinel
 	int h0a = system("echo"); assert(h0a);
 
 	//// BSEARCH ////
 	//extern __device__ void *bsearch_(const void *key, const void *base, size_t nmemb, size_t size, __compar_fn_t compar);
-	// TODO
+	qsort(_values, 6, sizeof(int), compareints);
+	int i0_in = 4; int i0_out = 41;
+	int *i0a = (int *)bsearch(&i0_in, _values, 6, sizeof(int), compareints);
+	int *i0b = (int *)bsearch(&i0_out, _values, 6, sizeof(int), compareints);
+	assert(i0a && !i0b);
 
 	//// QSORT ////
 	//extern __device__ void qsort_(void *base, size_t nmemb, size_t size, __compar_fn_t compar);
-	// TODO
+	qsort(_values, 6, sizeof(int), compareints);
+	int j0a = (int)_values[0];
+	assert(j0a == 10);
 
 	//// ABS, LABS, LLABS ////
 	//__forceinline __device__ int abs_(int x);
@@ -112,9 +125,12 @@ static __global__ void g_stdlib_test1()
 	//// STRTOQ, STRTOUQ ////
 	//__forceinline __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base);
 	//__forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base);
+	quad_t n0a = strtoq("1.0", nullptr, 10); assert(n0a == 1);
+	u_quad_t n1a = strtouq("1.0", nullptr, 10); assert(n1a == 1);
 
 	//// MALLOCZERO //// ??different than calloc??
 	//__forceinline __device__ void *mallocZero(size_t size);
+	// SKIP
 }
 cudaError_t stdlib_test1() { g_stdlib_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

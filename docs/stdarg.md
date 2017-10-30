@@ -118,12 +118,9 @@ The `STDARG` macros and the `va_arg` method will be your primary access methods
 ```
 #define STDARG(ret, name, body, ...) \
 	__forceinline __device__ ret name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); ret r = (body); _crt_va_end(va); return r; } \
-	template <typename T1> \
-	__forceinline __device__ ret name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); ret r = (body); _crt_va_end(va); return r; } \
-	template <typename T1, typename T2> \
-	__forceinline __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); ret r = (body); _crt_va_end(va); return r; } \
-	template <typename T1, typename T2, typename T3> \
-	__forceinline __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3) { _crt_va_list3<T1,T2,T3> va; _crt_va_start(va, arg1, arg2, arg3); ret r = (body); _crt_va_end(va); return r; }
+	template <typename T1> __forceinline __device__ ret name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); ret r = (body); _crt_va_end(va); return r; } \
+	template <typename T1, typename T2> __forceinline __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); ret r = (body); _crt_va_end(va); return r; } \
+	template <typename T1, typename T2, typename T3> __forceinline __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3) { _crt_va_list3<T1,T2,T3> va; _crt_va_start(va, arg1, arg2, arg3); ret r = (body); _crt_va_end(va); return r; }
 ```
 
 # va_start and state
