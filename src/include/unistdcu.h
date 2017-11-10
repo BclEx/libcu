@@ -154,6 +154,7 @@ extern __device__ int rmdir_(const char *path);
 __END_DECLS;
 #else
 #define __environ ((char **)nullptr)
+#define usleep(m) 0
 #define chown(f,o,g) 0
 //#define chgrp
 #endif  /* __CUDA_ARCH__ */

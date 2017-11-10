@@ -6,7 +6,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#define OMIT_PTX
+#define xOMIT_PTX
 __BEGIN_DECLS;
 
 /* Copy N bytes of SRC to DEST.  */
@@ -23,7 +23,7 @@ typedef	long int word; /* "word" used for optimal copy speed */
 
 __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n)
 {
-#ifndef OMIT_PTX
+#ifndef xOMIT_PTX
 	void *r;
 	asm(
 		".reg .pred p1;\n\t"
@@ -530,7 +530,7 @@ __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 	register unsigned char *d = (unsigned char *)dest;
 	register unsigned char *s = (unsigned char *)src;
 	while (*s) { *d++ = *s++; } *d = *s;
-	return (char *)d;
+	return (char *)dest;
 #endif
 }
 
@@ -578,7 +578,7 @@ __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, siz
 	size_t i = 0;
 	for (; i < n && *s; ++i, ++d, ++s) *d = *s;
 	for (; i < n; ++i, ++d, ++s) *d = 0;
-	return (char *)d;
+	return (char *)dest;
 #endif
 }
 
@@ -604,14 +604,13 @@ __device__ char *strcat_(char *__restrict dest, const char *__restrict src)
 		"_While1:\n\t"
 		"ld.u8 			c1, [%2];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 		"st.u8 			[%1], c1;\n\t"
+		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
 		"add"_UX" 		%2, %2, 1;\n\t"
 		"bra.uni _While1;\n\t"
 
 		"_Ret:\n\t"
-		"st.u8 			[%1], c1;\n\t"
 		: "="__R(r) : __R(dest), __R(src));
 	return r;
 #else
