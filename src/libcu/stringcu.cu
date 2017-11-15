@@ -510,20 +510,19 @@ __device__ char *strcpy_(char *__restrict dest, const char *__restrict src)
 	asm(
 		".reg .pred p1;\n\t"
 		".reg .u32 c1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
 
 		//
 		"_While0:\n\t"
 		"ld.u8 			c1, [%2];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 		"st.u8 			[%1], c1;\n\t"
+		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
 		"add"_UX" 		%2, %2, 1;\n\t"
 		"bra.uni _While0;\n\t"
 
 		"_Ret:\n\t"
-		"st.u8 			[%1], c1;\n\t"
-		"mov"_UX" 		%0, %1;\n\t"
 		: "="__R(r) : __R(dest), __R(src));
 	return r;
 #else
@@ -543,6 +542,7 @@ __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, siz
 		".reg .pred p1;\n\t"
 		".reg .u32 c1;\n\t"
 		".reg "_UX" i1;\n\t"
+		"mov"_UX" 		%0, %1;\n\t"
 		"mov"_UX" 		i1, 0;\n\t"
 
 		//
@@ -569,7 +569,6 @@ __device__ char *strncpy_(char *__restrict dest, const char *__restrict src, siz
 		"bra.uni _While1;\n\t"
 
 		"_Ret:\n\t"
-		"mov"_UX" 		%0, %1;\n\t"
 		: "="__R(r) : __R(dest), __R(src), __R(n));
 	return r;
 #else
@@ -678,8 +677,8 @@ __device__ int strcmp_(const char *s1, const char *s2)
 		"_While0:\n\t"
 		"ld.u8 			c1, [%1];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 		"ld.u8 			c2, [%2];\n\t"
+		"@!p1 bra _Ret;\n\t"
 		"setp.eq.u32	p1, c1, c2;\n\t"
 		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
@@ -709,13 +708,12 @@ __device__ int stricmp_(const char *s1, const char *s2)
 #if _WIN64
 		".reg "_UX" u2;\n\t"
 #endif
-		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+		"cvta.const"_UX" u2l, __curtUpperToLower;\n\t"
 
 		//
 		"_While0:\n\t"
 		"ld.u8 			c1, [%1];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 #if _WIN64
 		"cvt.u64.u32	u2, c1;\n\t"
 		"add"_UX"		u2, u2, u2l; ld.u8 c1, [u2];\n\t"
@@ -729,6 +727,7 @@ __device__ int stricmp_(const char *s1, const char *s2)
 #else
 		"add"_UX" 		c2, c2, u2l; ld.u8 c2, [c2];\n\t"
 #endif
+		"@!p1 bra _Ret;\n\t"
 		"setp.eq.u32	p1, c1, c2;\n\t"
 		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
@@ -761,8 +760,8 @@ __device__ int strncmp_(const char *s1, const char *s2, size_t n)
 		"@!p2 bra _Ret;\n\t"
 		"ld.u8 			c1, [%1];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 		"ld.u8 			c2, [%2];\n\t"
+		"@!p1 bra _Ret;\n\t"
 		"setp.eq.u32	p1, c1, c2;\n\t"
 		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%3, %3, -1;\n\t"
@@ -794,7 +793,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 #if _WIN64
 		".reg "_UX" u2;\n\t"
 #endif
-		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+		"cvta.const"_UX" u2l, __curtUpperToLower;\n\t"
 
 		//
 		"_While0:\n\t"
@@ -802,7 +801,6 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 		"@!p2 bra _Ret;\n\t"
 		"ld.u8 			c1, [%1];\n\t"
 		"setp.ne.u32	p1, c1, 0;\n\t"
-		"@!p1 bra _Ret;\n\t"
 #if _WIN64
 		"cvt.u64.u32	u2, c1;\n\t"
 		"add"_UX"		u2, u2, u2l; ld.u8 c1, [u2];\n\t"
@@ -816,6 +814,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 #else
 		"add"_UX" 		c2, c2, u2l; ld.u8 c2, [c2];\n\t"
 #endif
+		"@!p1 bra _Ret;\n\t"
 		"setp.eq.u32	p1, c1, c2;\n\t"
 		"@!p1 bra _Ret;\n\t"
 		"add"_UX" 		%3, %3, -1;\n\t"
@@ -883,7 +882,8 @@ __device__ char *strchr_(const char *s, int c)
 #if _WIN64
 		".reg "_UX" u2;\n\t"
 #endif
-		"mov"_UX" 		u2l, __curtUpperToLower;\n\t"
+		"cvta.const"_UX" u2l, __curtUpperToLower;\n\t"
+
 #if _WIN64
 		"cvt.u64.u32	u2, %2;\n\t"
 		"add"_UX"		u2, u2, u2l; ld.u8 %2, [u2];\n\t"
@@ -935,7 +935,6 @@ __device__ char *strrchr_(const char *s, int c)
 		"setp.ne.u32	p1, c1, 0;\n\t"
 		"@!p1 bra _Ret;\n\t"
 		"setp.eq.u32	p1, c1, %2;\n\t"
-		"@!p1 bra _Ret;\n\t"
 		"@p1 mov"_UX" 	%0, %1;\n\t"
 		"add"_UX" 		%1, %1, 1;\n\t"
 		"bra.uni _While0;\n\t"
@@ -1051,9 +1050,10 @@ __device__ size_t strlen_(const char *s)
 	size_t r;
 	asm(
 		".reg .pred p1, p2;\n\t"
-		".reg "_UX" s2, s2m;\n\t"
+		".reg "_UX" s2;\n\t"
 		".reg "_BX" r;\n\t"
 		".reg .b16 c;\n\t"
+
 		"setp.eq"_UX"	p1, %1, 0;\n\t"
 		"@!p1 bra _Start;\n\t"
 		"mov"_BX"		%0, 0;\n\t"
@@ -1084,13 +1084,44 @@ __device__ size_t strlen_(const char *s)
 }
 
 /* Return the length of S.  */
-//__device__ size_t strlen16(const void *s)
-//{
-//	if (!s) return 0;
-//	register const char *s2 = (const char *)s;
-//	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
-//	return n;
-//}
+__device__ size_t strlen16_(const void *s)
+{
+#ifndef xOMIT_PTX
+	size_t r;
+	asm(
+		".reg .pred p1, p2;\n\t"
+		".reg "_UX" s2;\n\t"
+		".reg "_BX" r;\n\t"
+		".reg .b16 c;\n\t"
+
+		"setp.eq"_UX"	p1, %1, 0;\n\t"
+		"@!p1 bra _Start;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
+		"bra.uni _End;\n\t"
+		"_Start:\n\t"
+		"mov"_UX"		s2, %1;\n\t"
+
+		"_While:\n\t"
+		"ld.u8			c, [s2];\n\t"
+		//"and.b16		c, c, 255;\n\t"
+		"setp.ne.u16	p2, c, 0;\n\t"
+		"@!p2 bra _Value;\n\t"
+		"add"_UX"		s2, s2, 1;\n\t"
+		"bra.uni _While;\n\t"
+
+		"_Value:\n\t"
+		"sub"_UX"		r, s2, %1;\n\t"
+		"and"_BX"		%0, r, 0x3fffffff;\n\t"
+		"_End:\n\t"
+		: "="__R(r) : __R(s));
+	return r;
+#else
+	if (!s) return 0;
+	register const char *s2 = (const char *)s;
+	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
+	return n >> 1;
+#endif
+}
 
 /* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
 __device__ size_t strnlen_(const char *s, size_t maxlen)
@@ -1102,6 +1133,7 @@ __device__ size_t strnlen_(const char *s, size_t maxlen)
 		".reg "_UX" s2, s2m;\n\t"
 		".reg "_BX" r;\n\t"
 		".reg .b16 c;\n\t"
+
 		"setp.eq"_UX"	p1, %1, 0;\n\t"
 		"@!p1 bra _Start;\n\t"
 		"mov"_BX" 		%0, 0;\n\t"

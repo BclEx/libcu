@@ -134,17 +134,11 @@ __BEGIN_NAMESPACE_STD;
 /* Return the length of S.  */
 extern __device__ size_t strlen_(const char *s);
 #define strlen strlen_
+__END_NAMESPACE_STD;
 
 /* Return the length of S.  */
-//extern __device__ size_t strlen16(const char *s);
-__forceinline __device__ size_t strlen16(const void *s)
-{
-	if (!s) return 0;
-	register const char *s2 = (const char *)s;
-	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
-	return n;
-}
-__END_NAMESPACE_STD;
+extern __device__ size_t strlen16_(const char *s);
+#define strlen16 strlen16_
 
 /* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */
 extern __device__ size_t strnlen_(const char *s, size_t maxlen);
@@ -159,7 +153,7 @@ __END_NAMESPACE_STD;
 __END_DECLS;
 #else
 #define strndup(s, n) nullptr
-#define strlen16(s) 0
+#define strlen16(s) ((size_t)0)
 #endif  /* __CUDA_ARCH__ */
 __BEGIN_DECLS;
 
