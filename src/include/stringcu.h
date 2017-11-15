@@ -137,7 +137,7 @@ extern __device__ size_t strlen_(const char *s);
 __END_NAMESPACE_STD;
 
 /* Return the length of S.  */
-extern __device__ size_t strlen16_(const char *s);
+extern __device__ size_t strlen16_(const void *s);
 #define strlen16 strlen16_
 
 /* Find the length of STRING, but scan at most MAXLEN characters. If no '\0' terminator is found in that many characters, return MAXLEN.  */

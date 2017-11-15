@@ -1049,23 +1049,21 @@ __device__ size_t strlen_(const char *s)
 #ifndef OMIT_PTX
 	size_t r;
 	asm(
-		".reg .pred p1, p2;\n\t"
+		".reg .pred p1;\n\t"
 		".reg "_UX" s2;\n\t"
 		".reg "_BX" r;\n\t"
 		".reg .b16 c;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
 
 		"setp.eq"_UX"	p1, %1, 0;\n\t"
-		"@!p1 bra _Start;\n\t"
-		"mov"_BX"		%0, 0;\n\t"
-		"bra.uni _End;\n\t"
-		"_Start:\n\t"
+		"@p1 bra _End;\n\t"
 		"mov"_UX"		s2, %1;\n\t"
 
 		"_While:\n\t"
 		"ld.u8			c, [s2];\n\t"
 		//"and.b16		c, c, 255;\n\t"
-		"setp.ne.u16	p2, c, 0;\n\t"
-		"@!p2 bra _Value;\n\t"
+		"setp.ne.u16	p1, c, 0;\n\t"
+		"@!p1 bra _Value;\n\t"
 		"add"_UX"		s2, s2, 1;\n\t"
 		"bra.uni _While;\n\t"
 
@@ -1086,40 +1084,40 @@ __device__ size_t strlen_(const char *s)
 /* Return the length of S.  */
 __device__ size_t strlen16_(const void *s)
 {
-#ifndef xOMIT_PTX
+#ifndef OMIT_PTX
 	size_t r;
 	asm(
-		".reg .pred p1, p2;\n\t"
+		".reg .pred p1;\n\t"
 		".reg "_UX" s2;\n\t"
 		".reg "_BX" r;\n\t"
 		".reg .b16 c;\n\t"
+		"mov"_BX"		%0, 0;\n\t"
 
 		"setp.eq"_UX"	p1, %1, 0;\n\t"
-		"@!p1 bra _Start;\n\t"
-		"mov"_BX"		%0, 0;\n\t"
-		"bra.uni _End;\n\t"
-		"_Start:\n\t"
+		"@p1 bra _End;\n\t"
 		"mov"_UX"		s2, %1;\n\t"
 
 		"_While:\n\t"
-		"ld.u8			c, [s2];\n\t"
-		//"and.b16		c, c, 255;\n\t"
-		"setp.ne.u16	p2, c, 0;\n\t"
-		"@!p2 bra _Value;\n\t"
-		"add"_UX"		s2, s2, 1;\n\t"
+		"ld.u16			c, [s2];\n\t"
+		"setp.ne.u16	p1, c, 0;\n\t"
+		"@!p1 bra _Value;\n\t"
+		"add"_UX"		s2, s2, 2;\n\t"
 		"bra.uni _While;\n\t"
 
 		"_Value:\n\t"
 		"sub"_UX"		r, s2, %1;\n\t"
+		"shr"_UX" 		r, r, 1;\n\t"
 		"and"_BX"		%0, r, 0x3fffffff;\n\t"
 		"_End:\n\t"
 		: "="__R(r) : __R(s));
 	return r;
 #else
 	if (!s) return 0;
-	register const char *s2 = (const char *)s;
-	int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
-	return n >> 1;
+	register const short *s2 = (const short *)s;
+	while (*s2) { s2++; }
+	return 0x3fffffff & (int)(s2 - s);
+	//int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
+	//return 0x3fffffff & (int)(n>>1);
 #endif
 }
 
@@ -1133,12 +1131,10 @@ __device__ size_t strnlen_(const char *s, size_t maxlen)
 		".reg "_UX" s2, s2m;\n\t"
 		".reg "_BX" r;\n\t"
 		".reg .b16 c;\n\t"
+		"mov"_BX" 		%0, 0;\n\t"
 
 		"setp.eq"_UX"	p1, %1, 0;\n\t"
-		"@!p1 bra _Start;\n\t"
-		"mov"_BX" 		%0, 0;\n\t"
-		"bra.uni _End;\n\t"
-		"_Start:\n\t"
+		"@p1 bra _End;\n\t"
 		"mov"_UX"		s2, %1;\n\t"
 		"add"_UX"		s2m, %1, %2;\n\t"
 

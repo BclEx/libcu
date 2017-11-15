@@ -23,16 +23,8 @@ static __global__ void g_string_test1()
 	assert(a1a == dest && !strncmp((char *)a1b, "abcde", 5) && !strncmp((char *)a1c, "abcde", 5));
 	void *a2a = memset(dest, 0, 0); void *a2b = memset(dest+1, 0, 5);
 	assert(a2a == dest && ((char *)a2a)[0] == 'a' && a2b == dest+1 && ((char *)a2b)[0] == 0);
-	int a3a = memcmp(nullptr, nullptr, 0);
-	int a3b = memcmp("abc", "abc", 2);
-	int a3c = memcmp("abc", "abc", 3);
-	int a3d = memcmp("abc", "axc", 3);
-	assert(!a3a && !a3b && !a3c && a3d);
-	void *a4a = memchr(src, 0, 0);
-	void *a4b = memchr(src, 'b', 1);
-	void *a4c = memchr(src, 'b', 3);
-	void *a4d = memchr(src, 'z', 3);
-	assert(!a4a && !a4b && a4c && !a4d);
+	int a3a = memcmp(nullptr, nullptr, 0); int a3b = memcmp("abc", "abc", 2); int a3c = memcmp("abc", "abc", 3); int a3d = memcmp("abc", "axc", 3); assert(!a3a && !a3b && !a3c && a3d);
+	void *a4a = memchr(src, 0, 0); void *a4b = memchr(src, 'b', 1); void *a4c = memchr(src, 'b', 3); void *a4d = memchr(src, 'z', 3); assert(!a4a && !a4b && a4c && !a4d);
 
 	//// STRCPY, STRNCPY, STRCAT, STRNCAT ////
 	//extern __device__ char *strcpy_(char *__restrict dest, const char *__restrict src);
@@ -99,7 +91,7 @@ static __global__ void g_string_test1()
 
 	//// STRERROR ////
 	//extern __device__ char *strerror_(int errnum);
-	char *j6a = strerror(0); assert(!strcpy(j6a, "ERROR"));
+	char *j6a = strerror(0); assert(!strcmp(j6a, "ERROR"));
 
 }
 cudaError_t string_test1() { g_string_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
