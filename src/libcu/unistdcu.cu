@@ -92,9 +92,10 @@ __device__ char *getcwd_(char *buf, size_t size)
 
 /* dup1:true - Duplicate FD, returning a new file descriptor on the same file.  */
 /* dup1:false - Duplicate FD to FD2, closing FD2 and making it open on the same file.  */
-__device__ int dup_(int fd, int fd2, bool dup1)
+__device__ int dup_(int fd)
 {
 	if (ISHOSTHANDLE(fd)) { unistd_dup msg(fd, -1, true); return msg.RC; }
+	panic("Not Implemented");
 	return 0;
 }
 
@@ -102,7 +103,8 @@ __device__ int dup_(int fd, int fd2, bool dup1)
 __device__ int dup2_(int fd, int fd2)
 {
 	if (ISHOSTHANDLE(fd)) { unistd_dup msg(fd, fd2, false); return msg.RC; }
-	return dup_(fd, fd2, false);
+	panic("Not Implemented");
+	return 0;
 }
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */

@@ -82,16 +82,24 @@ struct unistd_close {
 struct unistd_read {
 	static __forceinline __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
+		t->Ptr = ptr + offset;
 		return end;
 	}
+	static __forceinline __device__ bool Postfix(unistd_read *t, intptr_t offset)
+	{
+		char *ptr = (char *)t->Ptr - offset;
+		if ((int)t->RC > 0) memcpy(t->Buf, ptr, t->RC);
+		return true;
+	}
 	sentinelMessage Base;
-	int Handle; void *Ptr; size_t Size;
+	int Handle; void *Buf; size_t Size;
 	__device__ unistd_read(bool wait, int fd, void *buf, size_t nbytes)
-		: Base(wait, UNISTD_READ, 1024, SENTINELPREPARE(Prepare)), Handle(fd), Ptr(buf), Size(nbytes) { sentinelDeviceSend(&Base, sizeof(unistd_read)); }
+		: Base(wait, UNISTD_READ, 1024, SENTINELPREPARE(Prepare), SENTINELPOSTFIX(Postfix)), Handle(fd), Buf(buf), Size(nbytes) { sentinelDeviceSend(&Base, sizeof(unistd_read)); }
 	size_t RC;
+	void *Ptr;
 };
 
 struct unistd_write {
@@ -107,8 +115,8 @@ struct unistd_write {
 	}
 	sentinelMessage Base;
 	int Handle; const void *Ptr; size_t Size;
-	__device__ unistd_write(bool wait, int fd, const void *buf, size_t n)
-		: Base(wait, UNISTD_WRITE, 1024, SENTINELPREPARE(Prepare)), Handle(fd), Ptr(buf), Size(n) { sentinelDeviceSend(&Base, sizeof(unistd_write)); }
+	__device__ unistd_write(bool wait, int fd, const void *ptr, size_t n)
+		: Base(wait, UNISTD_WRITE, 1024, SENTINELPREPARE(Prepare)), Handle(fd), Ptr(ptr), Size(n) { sentinelDeviceSend(&Base, sizeof(unistd_write)); }
 	size_t RC;
 };
 

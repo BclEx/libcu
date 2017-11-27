@@ -102,7 +102,7 @@ static __device__ int reg_range_find(const int *string, int c);
 static __device__ const char *str_find(const char *string, int c, int nocase);
 static __device__ int prefix_cmp(const int *prog, int proglen, const char *string, int nocase);
 
-#ifdef _DEBUG
+#ifdef _DEBUGx
 static __device__ int regnarrate = 0;
 static __device__ void regdump(regex_t *preg);
 static __device__ const char *regprop(int op);
@@ -125,7 +125,7 @@ static __forceinline __device__ int _strlenint(const int *seq)
 // Beware that the optimization-preparation code in here knows about some of the structure of the compiled regexp.
 __device__ int regcomp_(regex_t *preg, const char *exp, int cflags)
 {
-#ifdef _DEBUG
+#ifdef _DEBUGx
 	printf("Compiling: '%s'\n", exp);
 #endif
 	memset(preg, 0, sizeof(*preg));
@@ -179,7 +179,7 @@ __device__ int regcomp_(regex_t *preg, const char *exp, int cflags)
 			preg->regmlen = len;
 		}
 	}
-#ifdef _DEBUG
+#ifdef _DEBUGx
 	regdump(preg);
 #endif
 	return 0;
@@ -693,7 +693,7 @@ __device__ int regexec_(regex_t *preg, const char *string, size_t nmatch, regmat
 	if (*preg->program != REG_MAGIC)
 		return REG_ERR_CORRUPTED;
 
-#ifdef _DEBUG
+#ifdef _DEBUGx
 	printf("regexec: %s\n", string);
 	regdump(preg);
 #endif
@@ -933,12 +933,12 @@ static __device__ int regmatch(regex_t *preg, int prog)
 {
 	const char *save;
 	int scan = prog; // Current node
-#ifdef _DEBUG
+#ifdef _DEBUGx
 	if (scan != 0 && regnarrate)
 		printf("%s(\n", regprop(scan));
 #endif
 	while (scan != 0) {
-#ifdef _DEBUG
+#ifdef _DEBUGx
 		if (regnarrate)
 			printf("%3d: %s...\n", scan, regprop(OP(preg, scan)));	// Where, what
 #endif
@@ -1134,7 +1134,7 @@ static __device__ int regopsize(regex_t *preg, int p)
 	return 2;
 }
 
-#ifdef _DEBUG
+#ifdef _DEBUGx
 // regdump - dump a regexp onto stdout in vaguely comprehensible form
 #define MAX_UTF8_LEN 4
 static __device__ void regdump(regex_t *preg)

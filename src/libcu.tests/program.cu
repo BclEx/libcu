@@ -11,7 +11,7 @@ cudaError_t falloc_lauched_cuda_kernel();
 cudaError_t falloc_alloc_with_getchunk();
 cudaError_t falloc_alloc_with_getchunks();
 cudaError_t falloc_alloc_with_context();
-cudaError_t fcntl_test1(); // fails
+cudaError_t fcntl_test1();
 cudaError_t fsystem_test1();
 cudaError_t grp_test1();
 cudaError_t pwd_test1();
@@ -21,11 +21,11 @@ cudaError_t setjmp_test1();
 cudaError_t stdarg_parse();
 cudaError_t stdarg_call();
 cudaError_t stddef_test1();
-cudaError_t stdio_test1(); // fails
+cudaError_t stdio_test1();
 cudaError_t stdio_64bit();
 cudaError_t stdio_ganging();
 cudaError_t stdio_scanf();
-cudaError_t stdlib_test1(); // fails
+cudaError_t stdlib_test1();
 cudaError_t stdlib_strtol();
 cudaError_t stdlib_strtoq();
 cudaError_t string_test1();
@@ -34,7 +34,7 @@ cudaError_t unistd_test1();
 
 int main(int argc, char ** argv)
 {
-	int testId = argv[1] ? atoi(argv[1]) : 25;
+	int testId = argv[1] ? atoi(argv[1]) : 27; //25;
 	sentinelServerInitialize();
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
@@ -53,10 +53,10 @@ int main(int argc, char ** argv)
 	case 3: cudaStatus = dirent_test1(); break;
 	case 4: cudaStatus = errno_test1(); break;
 	case 5: cudaStatus = falloc_lauched_cuda_kernel(); break;
-	case 6: cudaStatus = falloc_alloc_with_getchunk(); break;
+	case 6: cudaStatus = falloc_alloc_with_getchunk(); break; // memory access
 	case 7: cudaStatus = falloc_alloc_with_getchunks(); break;
-	case 8: cudaStatus = falloc_alloc_with_context(); break;
-	case 9: cudaStatus = fcntl_test1(); break;
+	case 8: cudaStatus = falloc_alloc_with_context(); break; // memory access
+	case 9: cudaStatus = fcntl_test1(); break; // assert
 	case 10: cudaStatus = grp_test1(); break;
 	case 11: cudaStatus = pwd_test1(); break;
 	case 12: cudaStatus = regex_test1(); break;
@@ -65,16 +65,16 @@ int main(int argc, char ** argv)
 	case 15: cudaStatus = stdarg_parse(); break;
 	case 16: cudaStatus = stdarg_call(); break;
 	case 17: cudaStatus = stddef_test1(); break;
-	case 18: cudaStatus = stdio_test1(); break;
+	case 18: cudaStatus = stdio_test1(); break; // assert
 	case 19: cudaStatus = stdio_64bit(); break;
 	case 20: cudaStatus = stdio_ganging(); break;
 	case 21: cudaStatus = stdio_scanf(); break;
-	case 22: cudaStatus = stdlib_test1(); break;
+	case 22: cudaStatus = stdlib_test1(); break; // assert
 	case 23: cudaStatus = stdlib_strtol(); break;
 	case 24: cudaStatus = stdlib_strtoq(); break;
 	case 25: cudaStatus = string_test1(); break;
-	case 26: cudaStatus = time_test1(); break;
-	case 27: cudaStatus = unistd_test1(); break;
+	case 26: cudaStatus = time_test1(); break; // assert
+	case 27: cudaStatus = unistd_test1(); break; // assert
 		// default
 	default: cudaStatus = crtdefs_test1(); break;
 	}
@@ -90,11 +90,18 @@ int main(int argc, char ** argv)
 		goto Error;
 	}
 
+	// finish
+	printf("\nSUCCESS\n");
+	int c; scanf("%c", &c);
+
 Error:
 	sentinelServerShutdown();
-	
+
 	// close
 	if (cudaStatus != cudaSuccess) {
+		// finish
+		printf("\ERROR\n");
+		scanf("%c", &c);
 		return 1;
 	}
 
@@ -105,10 +112,6 @@ Error:
 		fprintf(stderr, "cudaDeviceReset failed!\n");
 		return 1;
 	}
-
-	// finish
-	//printf("\nPress any key to continue.\n");
-	//scanf("%c");
 
 	return 0;
 }

@@ -170,6 +170,8 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 		"rem"_UX" 		%3, %3, "_wsizex8";\n\t"
 		// do {...} while (--t);
 		"_desc1:\n\t"
+		"add"_UX" 		%1, %1, -"_wsizex8";\n\t"
+		"add"_UX" 		%2, %2, -"_wsizex8";\n\t"
 		"ld"_UX" 		z0, [%2+28];	st"_UX"	[%1+28], z0;\n\t"
 		"ld"_UX" 		z0, [%2+24];	st"_UX"	[%1+24], z0;\n\t"
 		"ld"_UX" 		z0, [%2+20];	st"_UX"	[%1+20], z0;\n\t"
@@ -178,8 +180,6 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 		"ld"_UX" 		z0, [%2+8];		st"_UX"	[%1+8], z0;\n\t"
 		"ld"_UX" 		z0, [%2+4];		st"_UX"	[%1+4], z0;\n\t"
 		"ld"_UX" 		z0, [%2+0];		st"_UX"	[%1+0], z0;\n\t"
-		"add"_UX" 		%1, %1, -"_wsizex8";\n\t"
-		"add"_UX" 		%2, %2, -"_wsizex8";\n\t"
 		"add"_UX" 		t, t, -1;\n\t"
 		"setp.ne"_UX"	p1, t, 0;\n\t"
 		"@p1 bra 		_desc1;\n\t"
@@ -271,6 +271,7 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 		if (t) {
 			n %= wsize * 8;
 			do {
+				a -= wsize * 8; b -= wsize * 8;
 				((word *)a)[7] = ((word *)b)[7];
 				((word *)a)[6] = ((word *)b)[6];
 				((word *)a)[5] = ((word *)b)[5];
@@ -279,7 +280,6 @@ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size
 				((word *)a)[2] = ((word *)b)[2];
 				((word *)a)[1] = ((word *)b)[1];
 				((word *)a)[0] = ((word *)b)[0];
-				a -= wsize; b -= wsize;
 			} while (--t);
 		}
 		// copy whole words

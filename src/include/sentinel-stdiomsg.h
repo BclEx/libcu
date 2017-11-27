@@ -234,7 +234,7 @@ struct stdio_fwrite {
 		char *end = (char *)(data += size);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->Ptr, size);
-		t->Ptr = (char *)ptr + offset;
+		t->Ptr = ptr + offset;
 		return end;
 	}
 	sentinelMessage Base;

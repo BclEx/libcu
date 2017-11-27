@@ -20,7 +20,7 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + msgLength + msg->Size, map->Offset))
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + _ROUND8(msgLength) + msg->Size, map->Offset))
 		panic("msg too long");
 	memcpy(cmd->Data, msg, msgLength);
 	//printf("Msg: %d[%d]'", msg->OP, msgLength); for (int i = 0; i < msgLength; i++) printf("%02x", ((char *)msg)[i] & 0xff); printf("'\n");
@@ -30,6 +30,8 @@ __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 		unsigned int s_; do { s_ = *control; /*printf("%d ", s_);*/ __syncthreads(); } while (s_ != 4); __syncthreads();
 		memcpy(msg, cmd->Data, msgLength);
 		*control = 0;
+		if (msg->Postfix && !msg->Postfix(msg, map->Offset))
+			panic("postfix error");
 	}
 }
 

@@ -120,7 +120,7 @@ extern __device__ char *getcwd_(char *buf, size_t size);
 #define getcwd getcwd_
 
 /* Duplicate FD, returning a new file descriptor on the same file.  */
-extern __device__ int dup_(int fd, int fd2 = -1, bool dup1 = true);
+extern __device__ int dup_(int fd);
 #define dup dup_
 
 /* Duplicate FD to FD2, closing FD2 and making it open on the same file.  */

@@ -51,11 +51,13 @@ extern "C" {
 		unsigned short OP;
 		int Size;
 		char *(*Prepare)(void*,char*,char*,intptr_t);
-		__device__ sentinelMessage(bool wait, unsigned short op, int size = 0, char *(*prepare)(void*,char*,char*,intptr_t) = nullptr)
-			: Wait(wait), OP(op), Size(size), Prepare(prepare) { }
+		bool (*Postfix)(void*,intptr_t);
+		__device__ sentinelMessage(bool wait, unsigned short op, int size = 0, char *(*prepare)(void*,char*,char*,intptr_t) = nullptr, bool (*postfix)(void*,intptr_t) = nullptr)
+			: Wait(wait), OP(op), Size(size), Prepare(prepare), Postfix(postfix) { }
 	public:
 	};
 #define SENTINELPREPARE(P) ((char *(*)(void*,char*,char*,intptr_t))&P)
+#define SENTINELPOSTFIX(P) ((bool (*)(void*,intptr_t))&P)
 
 	typedef struct __align__(8) {
 		unsigned short Magic;
