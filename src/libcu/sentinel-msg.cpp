@@ -73,8 +73,9 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case DIRENT_READDIR64: { dirent_readdir64 *msg = (dirent_readdir64 *)data; msg->RC = readdir64(msg->Ptr); return true; }
 #endif
 	case DIRENT_REWINDDIR: { dirent_rewinddir *msg = (dirent_rewinddir *)data; rewinddir(msg->Ptr); return true; }
+	case TIME_TIME: { time_time *msg = (time_time *)data; msg->RC = time(nullptr); return true; }
 	case TIME_MKTIME: { time_mktime *msg = (time_mktime *)data; msg->RC = mktime(msg->Tp); return true; }
-	case TIME_STRFTIME: { time_strftime *msg = (time_strftime *)data; msg->RC = strftime((char *)msg->Str, msg->Maxsize, msg->Str2, msg->Tp); return true; }
+	case TIME_STRFTIME: { time_strftime *msg = (time_strftime *)data; msg->RC = strftime((char *)msg->Ptr, msg->Maxsize, msg->Fmt, &msg->Tp); return true; }
 	}
 	return false;
 }

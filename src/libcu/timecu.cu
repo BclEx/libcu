@@ -13,9 +13,9 @@ static __device__ struct tm __time_tm;
 /* Return the current time and put it in *TIMER if TIMER is not NULL.  */
 __device__ time_t time_(time_t *timer)
 {
-	clock_t start = clock();
-	time_t epoch = start;
-	return epoch;
+	time_time msg; time_t time = msg.RC;
+	if (timer) *timer = time;
+	return time;
 }
 
 /* Return the difference between TIME1 and TIME0.  */
@@ -88,7 +88,6 @@ static __device__ tm *_t2tm(const time_t *__restrict timer, int offset, struct t
 				++v;
 				/* Change to days since 1/1/1601 so that for 32 bit time_t values, we'll have t >= 0.  This should be changed for
 				* archs with larger time_t types. Also, correct for offset since a multiple of 7. */
-
 				t += (135140L - 366) + offset;
 			}
 			if ((t -= ((t1 = t / v) * v)) < 0) {

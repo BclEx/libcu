@@ -9,6 +9,7 @@
 static __device__ void makeAFile(char *file)
 {
 	FILE *fp = fopen(file, "w");
+	//fwrite("test", 4, 1, fp);
 	fprintf_(fp, "test");
 	fclose(fp);
 }
@@ -51,26 +52,18 @@ static __global__ void g_fcntl_test1()
 	//// CREATE ////
 	//#define creat(file, mode)
 	/* Host Absolute */
-	int e0a = creat(HostDir"missing.txt", O_RDONLY); assert(e0a < 0);
-	makeAFile(HostDir"test.txt");
-	int e1a = creat(HostDir"test.txt", O_RDONLY); int e1b = close(e1a); assert(e1a && !e1b);
+	int e0a = creat(HostDir"test.txt", 0666); int e0b = close(e0a); assert(e0a && !e0b);
 
 	/* Device Absolute */
-	int f0a = creat(DeviceDir"missing.txt", O_RDONLY); assert(f0a < 0);
-	makeAFile(DeviceDir"test.txt");
-	int f1a = creat(DeviceDir"test.txt", O_RDONLY); int f1b = close(f1a); assert(f1a && !f1b);
+	int f0a = creat(DeviceDir"test.txt", 0666); int f0b = close(f0a); assert(f0a && !f0b);
 
 	/* Host Relative */
 	chdir(HostDir);
-	int g0a = creat("missing.txt", O_RDONLY); assert(g0a < 0);
-	makeAFile("test.txt");
-	int g1a = creat("test.txt", O_RDONLY); int g1b = close(g1a); assert(g1a && !g1b);
+	int g0a = creat("test.txt", 0666); int g0b = close(g0a); assert(g0a && !g0b);
 
 	/* Device Relative */
 	chdir(DeviceDir);
-	int h0a = creat("missing.txt", O_RDONLY); assert(h0a < 0);
-	makeAFile("test.txt");
-	int h1a = creat("test.txt", O_RDONLY); int h1b = close(h1a); assert(h1a && !h1b);
+	int h0a = creat("test.txt", 0666); int h0b = close(h0a); assert(h0a && !h0b);
 }
 cudaError_t fcntl_test1() { g_fcntl_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

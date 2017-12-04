@@ -248,6 +248,8 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 	char newPath[MAX_PATH]; expandPath(path, newPath);
 	dirEnt_t *fileEnt = (dirEnt_t *)hashFind(&__iob_dir, newPath);
 	if (fileEnt) {
+		if (mode & O_TRUNC)
+			memfileTruncate(fileEnt->u.file, 0);
 		file_t *f; *fd = fileGet(&f);
 		f->base = (char *)fileEnt;
 		return fileEnt;

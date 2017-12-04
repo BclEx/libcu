@@ -34,7 +34,7 @@ cudaError_t unistd_test1();
 
 int main(int argc, char ** argv)
 {
-	int testId = argv[1] ? atoi(argv[1]) : 27; //25;
+	int testId = argv[1] ? atoi(argv[1]) : 18; //25;
 	sentinelServerInitialize();
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
@@ -56,7 +56,7 @@ int main(int argc, char ** argv)
 	case 6: cudaStatus = falloc_alloc_with_getchunk(); break; // memory access
 	case 7: cudaStatus = falloc_alloc_with_getchunks(); break;
 	case 8: cudaStatus = falloc_alloc_with_context(); break; // memory access
-	case 9: cudaStatus = fcntl_test1(); break; // assert
+	case 9: cudaStatus = fcntl_test1(); break;
 	case 10: cudaStatus = grp_test1(); break;
 	case 11: cudaStatus = pwd_test1(); break;
 	case 12: cudaStatus = regex_test1(); break;
@@ -73,8 +73,8 @@ int main(int argc, char ** argv)
 	case 23: cudaStatus = stdlib_strtol(); break;
 	case 24: cudaStatus = stdlib_strtoq(); break;
 	case 25: cudaStatus = string_test1(); break;
-	case 26: cudaStatus = time_test1(); break; // assert
-	case 27: cudaStatus = unistd_test1(); break; // assert
+	case 26: cudaStatus = time_test1(); break;
+	case 27: cudaStatus = unistd_test1(); break; // missing device, throws on fast run
 		// default
 	default: cudaStatus = crtdefs_test1(); break;
 	}

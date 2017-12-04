@@ -32,8 +32,16 @@ THE SOFTWARE.
 #include <stringcu.h>
 
 enum {
-	TIME_MKTIME = 70,
+	TIME_TIME = 70,
+	TIME_MKTIME,
 	TIME_STRFTIME,
+};
+
+struct time_time {
+	sentinelMessage Base;
+	__device__ time_time()
+		: Base(true, TIME_TIME) { sentinelDeviceSend(&Base, sizeof(time_time)); }
+	time_t RC;
 };
 
 struct time_mktime {
@@ -47,23 +55,28 @@ struct time_mktime {
 struct time_strftime {
 	static __forceinline __device__ char *Prepare(time_strftime *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
-		char *str2 = (char *)(data += strLength);
-		char *end = (char *)(data += str2Length);
+		int fmtLength = (t->Fmt ? (int)strlen(t->Fmt) + 1 : 0);
+		char *fmt = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += fmtLength);
+		char *end = (char *)(data += 1024-fmtLength);
 		if (end > dataEnd) return nullptr;
-		memcpy(str, t->Str, strLength);
-		memcpy(str2, t->Str2, str2Length);
-		t->Str = str + offset;
-		t->Str2 = str2 + offset;
+		memcpy(fmt, t->Fmt, fmtLength);
+		t->Fmt = fmt + offset;
+		t->Ptr = ptr + offset;
 		return end;
 	}
+	static __forceinline __device__ bool Postfix(time_strftime *t, intptr_t offset)
+	{
+		char *ptr = (char *)t->Ptr - offset;
+		if ((int)t->RC > 0) memcpy((void *)t->Buf, ptr, t->RC);
+		return true;
+	}
 	sentinelMessage Base;
-	const char *Str; size_t Maxsize; const char *Str2; const struct tm *Tp;
-	__device__ time_strftime(const char *str, size_t maxsize, const char *str2, const struct tm *tp)
-		: Base(true, TIME_STRFTIME, 1024, SENTINELPREPARE(Prepare)), Str(str), Maxsize(maxsize), Str2(str2), Tp(tp) { sentinelDeviceSend(&Base, sizeof(time_strftime)); }
+	const char *Buf; size_t Maxsize; const char *Fmt; const struct tm Tp;
+	__device__ time_strftime(const char *buf, size_t maxsize, const char *fmt, const struct tm *tp)
+		: Base(true, TIME_STRFTIME, 1024, SENTINELPREPARE(Prepare), SENTINELPOSTFIX(Postfix)), Buf(buf), Maxsize(maxsize), Fmt(fmt), Tp(*tp) { sentinelDeviceSend(&Base, sizeof(time_strftime)); }
 	size_t RC;
+	void *Ptr;
 };
 
 #endif  /* _SENTINEL_TIMEMSG_H */
