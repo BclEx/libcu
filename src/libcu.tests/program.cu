@@ -35,7 +35,6 @@ cudaError_t unistd_test1();
 int main(int argc, char ** argv)
 {
 	int testId = argv[1] ? atoi(argv[1]) : 18; //25;
-	sentinelServerInitialize();
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
 	cudaError_t cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());
@@ -44,6 +43,7 @@ int main(int argc, char ** argv)
 		goto Error;
 	}
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
+	sentinelServerInitialize();
 
 	// Launch test
 	switch (testId)
