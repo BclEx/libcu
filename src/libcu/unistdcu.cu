@@ -5,11 +5,10 @@
 __BEGIN_DECLS;
 
 /* Test for access to NAME using the real UID and real GID.  */
-__device__ int access_(const char *name, int type)
+__device__ int access_(const char *name, int mode)
 {
-	if (ISHOSTPATH(name)) { unistd_access msg(name, type); return msg.RC; }
-	panic("Not Implemented");
-	return 0;
+	if (ISHOSTPATH(name)) { unistd_access msg(name, mode); return msg.RC; }
+	int r; fsystemAccess(name, mode, &r); return r;
 }
 
 /* Move FD's file position to OFFSET bytes from the beginning of the file (if WHENCE is SEEK_SET),

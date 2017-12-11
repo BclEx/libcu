@@ -86,10 +86,29 @@ __device__ int rename_(const char *old, const char *new_)
 
 /* Create a temporary file and open it read/write. */
 #ifndef __USE_FILE_OFFSET64
+#define TEMP_DIR ":\\_temp\\"
+#define TEMP_DIRLENGTH sizeof(TEMP_DIR)-1
 __device__ FILE *tmpfile_(void)
 {
-	panic("Not Implemented");
-	return nullptr;
+	char newPath[50] = TEMP_DIR;
+	dirEnt_t *ent = fsystemOpendir(newPath);
+	int r; if (!ent) fsystemMkdir(newPath, 0666, &r);
+	newPath[TEMP_DIRLENGTH+6] = 0;
+	int i; for (i = 0; i < 10; i++) {
+		for (int n = 0; n < 6; n++) {
+			int x = rand() % (10+26);
+			char c = x < 10 ? x+'0' : x < 10+26 ? x-10+'a' : 'Z';
+			newPath[TEMP_DIRLENGTH+n] = c;
+		}
+		if (!fsystemAccess(newPath, 0, &r)) break;
+	}
+	if (i == 10) {
+		_set_errno(EINVAL);
+		return nullptr;
+	}
+	FILE *file = freopen(newPath, "wb+", nullptr);
+	fsystemSetFlag(file->_file, DELETE);
+	return file;
 }
 #endif
 

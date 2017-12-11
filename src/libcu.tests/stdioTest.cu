@@ -50,30 +50,43 @@ static __global__ void g_stdio_test1()
 	//// RENAME FILE ////
 	//extern __device__ int rename_(const char *old, const char *new_); #sentinel-branch
 	/* Host Absolute */
-	int e0a = rename(HostDir"missing.txt", "missing.txt"); assert(e0a < 0);
+	int e0a = rename(HostDir"missing.txt", "missing2.txt"); assert(e0a < 0);
 	makeAFile(HostDir"test.txt");
-	int e1a = rename(HostDir"test.txt", "test.txt"); assert(e1a);
+	int e1a = rename(HostDir"test.txt", "test2.txt"); int e1b = remove(HostDir"test2.txt"); assert(!e1a && !e1b);
+	makeAFile(HostDir"test.txt");
+	int e2a = rename(HostDir"test.txt", "missing\\test2.txt"); int e2b = remove(HostDir"test.txt"); assert(e2a < 0 && !e2b);
+	makeAFile(HostDir"test.txt");
+	mkdir(HostDir"_dir");
+	int e3a = rename(HostDir"test.txt", "_dir\\test2.txt"); int e3b = remove(HostDir"_dir\\test2.txt"); assert(!e3a && !e3b);
+	rmdir(HostDir"_dir");
 
 	/* Device Absolute */
-	int f0a = rename(DeviceDir"missing.txt", "missing.txt"); assert(f0a < 0);
+	int f0a = rename(DeviceDir"missing.txt", "missing2.txt"); assert(f0a < 0);
 	makeAFile(DeviceDir"test.txt");
-	int f1a = rename(DeviceDir"test.txt", "test.txt"); assert(f1a);
+	int f1a = rename(DeviceDir"test.txt", "test2.txt"); int f1b = remove(DeviceDir"test2.txt"); assert(!f1a && !f1b);
+	makeAFile(DeviceDir"test.txt");
+	int f2a = rename(DeviceDir"test.txt", "missing\\test2.txt"); int f2b = remove(DeviceDir"test.txt"); assert(f2a < 0 && !f2b);
+	makeAFile(DeviceDir"test.txt");
+	mkdir(DeviceDir"_dir");
+	int f3a = rename(DeviceDir"test.txt", "_dir\\test2.txt"); int f3b = remove(DeviceDir"_dir\\test2.txt"); assert(!f3a && !f3b);
+	rmdir(DeviceDir"_dir");
 
 	/* Host Relative */
 	chdir(HostDir);
-	int g0a = rename("missing.txt", "missing.txt"); assert(g0a < 0);
+	int g0a = rename("missing.txt", "missing2.txt"); assert(g0a < 0);
 	makeAFile("test.txt");
-	int g1a = rename("test.txt", "test.txt"); assert(g1a);
+	int g1a = rename("test.txt", "test2.txt"); int g1b = remove("test2.txt"); assert(!g1a && !g1b);
 
 	/* Device Relative */
 	chdir(DeviceDir);
-	int h0a = rename("missing.txt", "missing.txt"); assert(h0a < 0);
+	int h0a = rename("missing.txt", "missing2.txt"); assert(h0a < 0);
 	makeAFile("test.txt");
-	int h1a = rename("test.txt", "test.txt"); assert(h1a);
+	int h1a = rename("test.txt", "test2.txt"); int h1b = remove("test2.txt"); assert(!h1a && !h1b);
 
 	//// TMPFILE ////
 	//extern __device__ FILE *tmpfile_(void);
 	FILE *i0a = tmpfile();
+	fclose(i0a);
 
 	//// FCLOSE, FFLUSH, FREOPEN, FOPEN, FPRINTF ////
 	//extern __device__ int fclose_(FILE *stream, bool wait = true); #sentinel-branch
@@ -83,27 +96,27 @@ static __global__ void g_stdio_test1()
 	//moved: extern __device__ int fprintf(FILE *__restrict stream, const char *__restrict format, ...); //extern __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 	char buf[100];
 	/* Host Absolute */
-	FILE *j0a = fopen(HostDir"missing.txt", "r"); assert(j0a < 0);
+	FILE *j0a = fopen(HostDir"missing.txt", "r"); assert(!j0a);
 	makeAFile(HostDir"test.txt");
 	FILE *j1a = fopen(HostDir"test.txt", "r"); int j1b = fread(buf, 4, 1, j1a); FILE *j1c = freopen(HostDir"test.txt", "r", j1a); int j1d = fread(buf, 4, 1, j1c); int j1e = fclose(j1c); assert(j1a);
 	FILE *j2a = fopen(HostDir"test.txt", "w"); int j2b = fprintf_(j2a, "test"); FILE *j2c = freopen(HostDir"test.txt", "w", j2a); int j2d = fprintf_(j2c, "test"); int j2e = fflush(j1c); int j2f = fclose(j2c); assert(j2a);
 
 	/* Device Absolute */
-	FILE *k0a = fopen(DeviceDir"missing.txt", "r"); assert(k0a < 0);
+	FILE *k0a = fopen(DeviceDir"missing.txt", "r"); assert(!k0a);
 	makeAFile(DeviceDir"test.txt");
 	FILE *k1a = fopen(DeviceDir"test.txt", "r"); int k1b = fread(buf, 4, 1, k1a); FILE *k1c = freopen(DeviceDir"test.txt", "r", k1a); int k1d = fread(buf, 4, 1, k1c); int k1e = fclose(k1c); assert(k1a);
 	FILE *k2a = fopen(DeviceDir"test.txt", "w"); int k2b = fprintf_(k2a, "test"); FILE *k2c = freopen(DeviceDir"test.txt", "w", k2a); int k2d = fprintf_(k2c, "test"); int k2e = fflush(k1c); int k2f = fclose(k2c); assert(k2a);
 
 	/* Host Relative */
 	chdir(HostDir);
-	FILE *l0a = fopen("missing.txt", "r"); assert(l0a < 0);
+	FILE *l0a = fopen("missing.txt", "r"); assert(!l0a);
 	makeAFile("test.txt");
 	FILE *l1a = fopen("test.txt", "r"); int l1b = fread(buf, 4, 1, l1a); FILE *l1c = freopen("test.txt", "r", l1a); int l1d = fread(buf, 4, 1, l1c); int l1e = fclose(l1c); assert(l1a);
 	FILE *l2a = fopen("test.txt", "w"); int l2b = fprintf_(l2a, "test"); FILE *l2c = freopen("test.txt", "w", l2a); int l2d = fprintf_(l2c, "test"); int l2e = fflush(l1c); int l2f = fclose(l2c); assert(l2a);
 
 	/* Device Relative */
 	chdir(DeviceDir);
-	FILE *m0a = fopen("missing.txt", "r"); assert(m0a < 0);
+	FILE *m0a = fopen("missing.txt", "r"); assert(!m0a);
 	makeAFile("test.txt");
 	FILE *m1a = fopen("test.txt", "r"); int m1b = fread(buf, 4, 1, m1a); FILE *m1c = freopen("test.txt", "r", m1a); int m1d = fread(buf, 4, 1, m1c); int m1e = fclose(m1c); assert(m1a);
 	FILE *m2a = fopen("test.txt", "w"); int m2b = fprintf_(m2a, "test"); FILE *m2c = freopen("test.txt", "w", m2a); int m2d = fprintf_(m2c, "test"); int m2e = fflush(m1c); int m2f = fclose(m2c); assert(m2a);
@@ -196,7 +209,7 @@ static __global__ void g_stdio_test1()
 	makeAFile(DeviceDir"test.txt");
 	FILE *x0a = fopen(DeviceDir"test.txt", "r"); long int x0b = ftell(x0a); int x0c = fseek(x0a, 2, 0); long int x0d = ftell(x0a); rewind(x0a); long int x0e = ftell(x0a); fclose(x0a); assert(x0b == 0 && x0c && x0d == 2 && x0e == 0);
 	FILE *x1a = fopen(DeviceDir"test.txt", "r"); fpos_t x1b; int x1c = fgetpos(x1a, &x1b); fpos_t x1d = 2; int x1e = fsetpos(x1a, &x1d); fpos_t x1f; int x1g = fgetpos(x1a, &x1f); fclose(x1a); assert(x1b == 0 && x1c && x1d == 2 && x1e && x1g == 2 && x1g);
-	
+
 	//// CLEARERR, FERROR, PERROR ////
 	//extern __device__ void clearerr_(FILE *stream); #sentinel-branch
 	//extern __device__ int ferror_(FILE *stream); #sentinel-branch
@@ -218,7 +231,7 @@ static __global__ void g_stdio_test1()
 	/* Device Absolute */
 	FILE *B0a = fopen(DeviceDir"test.txt", "r"); int B0b = feof(B0a); fseek(B0a, 4, 0); int B0c = feof(B0a); fclose(B0a); assert(!B0b && B0c);
 	FILE *B1a = fopen(DeviceDir"test.txt", "r"); int B1b = fileno(B0a); fclose(B1a); assert(B1b);
-	
+
 	//// EXT: MTAGPRINTF, MPRINTF, MNPRINTF ////
 	//__device__ char *vmtagprintf_(void *tag, const char *format, va_list va);
 	//__device__ char *vmprintf_(const char *format, va_list va);

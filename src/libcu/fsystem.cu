@@ -62,7 +62,7 @@ __device__ char __cwd[MAX_PATH] = ":\\";
 __device__ dirEnt_t __iob_root = { { 0, 0, 0, 1, ":\\" }, nullptr, nullptr };
 __device__ hash_t __iob_dir = HASHINIT;
 
-__device__ void expandPath(const char *path, char *newPath)
+__device__ int expandPath(const char *path, char *newPath)
 {
 	register unsigned char *d = (unsigned char *)newPath;
 	register unsigned char *s;
@@ -89,6 +89,7 @@ __device__ void expandPath(const char *path, char *newPath)
 	}
 	// remove trailing '\.' && '\'
 	d[c == '.' && i == 2 ? -2 : i == 1 ? -1 : 0] = 0;
+	return d - (unsigned char *)newPath;
 }
 
 static __device__ dirEnt_t *createEnt(dirEnt_t *parentEnt, const char *path, const char *name, int type, int extraSize)
@@ -118,6 +119,7 @@ static __device__ void freeEnt(dirEnt_t *ent)
 	} else if (ent->dir.d_type == 2)
 		memfileClose(ent->u.file);
 	if (ent != &__iob_root) {
+		hashInsert(&__iob_dir, ent->path, nullptr);
 		free(ent->path);
 		free(ent);
 	}
@@ -168,13 +170,36 @@ __device__ dirEnt_t *fsystemOpendir(const char *path)
 
 __device__ int fsystemRename(const char *old, const char *new_)
 {
-	char newPath[MAX_PATH]; expandPath(old, newPath);
-	dirEnt_t *ent = (dirEnt_t *)hashFind(&__iob_dir, old);
+	char oldPath[MAX_PATH], newPath[MAX_PATH]; int oldPathLength = expandPath(old, oldPath);
+	dirEnt_t *ent = (dirEnt_t *)hashFind(&__iob_dir, oldPath);
 	if (!ent) {
 		_set_errno(ENOENT);
 		return -1;
 	}
-	// todo: rename
+	register char *oldPathEnd = oldPath+oldPathLength-1; while (*oldPathEnd && *oldPathEnd != '\\') oldPathEnd--;
+	strcpy(oldPathEnd+1, new_);
+	int newPathLength = expandPath(oldPath, newPath);
+	//
+	dirEnt_t *ent2 = (dirEnt_t *)hashFind(&__iob_dir, newPath);
+	if (ent2) {
+		_set_errno(EEXIST);
+		return -1;
+	}
+	const char *name;
+	dirEnt_t *parentEnt = findDirInPath(newPath, &name);
+	if (!parentEnt) {
+		_set_errno(ENOENT);
+		return -1;
+	}
+	//
+	char *newPath2 = (char *)malloc(newPathLength+1);
+	strcpy(newPath2, newPath);
+	char *lastPath = ent->path;
+	ent->path = newPath2;
+	if (hashInsert(&__iob_dir, newPath2, ent))
+		panic("removed entity");
+	hashInsert(&__iob_dir, lastPath, nullptr);
+	free(lastPath);
 	return 0;
 }
 
@@ -243,6 +268,24 @@ __device__ dirEnt_t *fsystemMkdir(const char *__restrict path, int mode, int *r)
 	return dirEnt;
 }
 
+__device__ dirEnt_t *fsystemAccess(const char *__restrict path, int mode, int *r)
+{
+	char newPath[MAX_PATH]; expandPath(path, newPath);
+	dirEnt_t *dirEnt = (dirEnt_t *)hashFind(&__iob_dir, newPath);
+	if (!dirEnt) {
+		_set_errno(ENOENT);
+		*r = -1;
+		return nullptr;
+	}
+	//if ((mode & 2) && false) {
+	//	_set_errno(EACCES);
+	//	*r = -1;
+	//	return dirEnt;
+	//}
+	*r = 0;
+	return dirEnt;
+}
+
 __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 {
 	char newPath[MAX_PATH]; expandPath(path, newPath);
@@ -277,7 +320,12 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 }
 
 __device__ void fsystemClose(int fd)
-{
+{	
+	file_t *f = GETFILE(fd);
+	if (f->flag & DELETE) {
+		dirEnt_t *fileEnt = (dirEnt_t *)f->base;
+		fsystemUnlink(fileEnt->path, false);
+	}
 	fileFree(fd);
 }
 
@@ -285,6 +333,12 @@ __device__ void fsystemReset()
 {
 	freeEnt(&__iob_root);
 	strcpy(__cwd, ":\\");
+}
+
+__device__ void fsystemSetFlag(int fd, int flag)
+{	
+	file_t *f = GETFILE(fd);
+	f->flag |= flag;
 }
 
 __END_DECLS;

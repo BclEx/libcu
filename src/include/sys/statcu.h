@@ -99,7 +99,7 @@ extern __device__ mode_t umask_(mode_t mask);
 #define umask umask_
 
 /* Create a new directory named PATH, with permission bits MODE.  */
-extern __device__ int mkdir_(const char *path, mode_t mode);
+extern __device__ int mkdir_(const char *path, mode_t mode = 0666);
 #define mkdir mkdir_
 
 /* Create a new FIFO named PATH, with permission bits MODE.  */

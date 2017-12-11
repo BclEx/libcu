@@ -601,7 +601,7 @@ __device__ unsigned long long __strtoll(register const Wchar * __restrict str, W
 // https://sites.google.com/site/murmurhash/
 // http://fabiensanglard.net/fizzlefade/index.php
 // cuRAND
-__device__ uint32_t _rand_value = 0;
+__device__ uint32_t _rand_value = 1;
 __device__ int rand_()
 {
 #if 0 //#ifndef OMIT_PTX
@@ -619,7 +619,6 @@ __device__ int rand_()
 	int x = _rand_value & RAND_MAX;		// X = low 8 bits
 	unsigned lsb = _rand_value & 1;		// Get the output bit
 	_rand_value >>= 1;					// Shift register
-
 	if (lsb) _rand_value ^= 0x00012000; // If the output is 0, the xor can be skipped
 	return x;
 #endif

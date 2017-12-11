@@ -136,13 +136,13 @@ static __global__ void g_unistd_test1()
 	//extern __device__ int rmdir_(const char *path); #sentinel-branch
 	/* Host Absolute */
 	int o0a = rmdir(HostDir"missing");
-	mkdir(HostDir"test", 0);
+	mkdir(HostDir"test");
 	int o0b = rmdir(HostDir"test");
 	assert(o0a == -1 && !o0b);
 
 	/* Device Absolute */
 	//int p0a = rmdir(DeviceDir"missing");
-	//mkdir(DeviceDir"test", 0);
+	//mkdir(DeviceDir"test");
 	//int p0b = rmdir(DeviceDir"test");
 	//assert(p0a == -1 && !p0b);
 }
