@@ -1,8 +1,11 @@
+#include <cuda_runtimecu.h>
 #include <errnocu.h>
+#include <stringcu.h>
+
 #include "jimautoconf.h"
 #include "jim.h"
 #ifdef USE_LINENOISE
-#include <unistd.h>
+#include <unistdcu.h>
 #include "linenoise.h"
 #else
 #define MAX_LINE_LEN 512

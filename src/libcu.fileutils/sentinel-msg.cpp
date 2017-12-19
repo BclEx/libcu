@@ -19,7 +19,7 @@ int drmdir(char *str);
 int dpwd(char *str);
 int dcd(char *str);
 
-bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
+extern "C" bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
 	if (data->OP < FILEUTILS_DCAT || data->OP > FILEUTILS_DCD) return false;
 	switch (data->OP) {

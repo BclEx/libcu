@@ -81,8 +81,7 @@ static void MainInit(int argc, char *const argv[]) {
 	_dataP.buffer = Tcl_CreateCmdBuf();
 
 	int result;
-	if (argc > 1 && strcmp(argv[1], "-"))
-	{
+	if (argc > 1 && strcmp(argv[1], "-")) {
 		char *filename = (char *)argv[1]+1;
 
 		// Before we eval the file, create an args global containing the remaining arguments
@@ -100,16 +99,13 @@ static void MainInit(int argc, char *const argv[]) {
 		}
 		exit(0);
 	}
-	else
-	{
+	else {
 		// Are we in interactive mode or script from stdin mode?
 		_dataP.noninteractive = (argc > 1);
 #ifndef TCL_GENERIC_ONLY
-		if (!_dataP.noninteractive)
-		{
+		if (!_dataP.noninteractive) {
 			result = Tcl_Eval(interp, _initCmd, 0, (char **)NULL);
-			if (result != TCL_OK)
-			{
+			if (result != TCL_OK) {
 				printf("%s\n", interp->result);
 				exit(1);
 			}
@@ -219,8 +215,7 @@ static void MainShutdown() {
 #endif
 }
 
-int main(int argc, char *const argv[])
-{
+int main(int argc, char *const argv[]) {
 	MainInit(argc, argv);
 	if (h_dataP.quitFlag)
 		exit(h_dataP.retcode);

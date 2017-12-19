@@ -697,9 +697,8 @@ __device__ void _Exit_(int status)
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
 __device__ char *getenv_(const char *name)
 {
-	//if (!strcmp(name, "HOME")) return "gpu:\\";
-	//if (!strcmp(name, "PATH")) return "gpu:\\";
-	panic("Not Implemented");
+	if (!strcmp(name, "HOME") || !strcmp(name, "PATH")) return "gpu:\\";
+	//panic("Not Implemented");
 	return nullptr;
 }
 

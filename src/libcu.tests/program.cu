@@ -32,9 +32,15 @@ cudaError_t string_test1();
 cudaError_t time_test1();
 cudaError_t unistd_test1();
 
+void mainPause(char *message = nullptr)
+{
+	printf(message ? message : "\nPress any key to continue.\n");
+	int c; scanf("%c", &c);
+}
+
 int main(int argc, char ** argv)
 {
-	int testId = argv[1] ? atoi(argv[1]) : 18; //25;
+	int testId = argv[1] ? atoi(argv[1]) : 0; //18; //25;
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
 	cudaError_t cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());
@@ -44,10 +50,12 @@ int main(int argc, char ** argv)
 	}
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 	sentinelServerInitialize();
+	sentinelRegisterFileUtils();
 
 	// Launch test
 	switch (testId)
 	{
+	case 0: mainPause(); break;
 	case 1: cudaStatus = crtdefs_test1(); break;
 	case 2: cudaStatus = ctype_test1(); break;
 	case 3: cudaStatus = dirent_test1(); break;
@@ -91,8 +99,7 @@ int main(int argc, char ** argv)
 	}
 
 	// finish
-	printf("\nSUCCESS\n");
-	int c; scanf("%c", &c);
+	mainPause("\nSUCCESS\n");
 
 Error:
 	sentinelServerShutdown();
@@ -100,8 +107,7 @@ Error:
 	// close
 	if (cudaStatus != cudaSuccess) {
 		// finish
-		printf("\ERROR\n");
-		scanf("%c", &c);
+		mainPause("\ERROR\n");
 		return 1;
 	}
 

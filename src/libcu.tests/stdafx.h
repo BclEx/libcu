@@ -11,6 +11,8 @@ void allClassCleanup(bool sentinel = true);
 void allTestInitialize();
 void allTestCleanup();
 
+void mainPause(char *message = nullptr);
+
 #define __BEGIN_TEST(name, testInitialize, testCleanup) \
 	[TestClass] \
 	public ref class name##Test \

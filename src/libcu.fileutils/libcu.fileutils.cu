@@ -16,7 +16,7 @@
 #include "dpwd.cuh"
 #include "dcd.cuh"
 
-bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
+extern "C" bool sentinelFileUtilsExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
 static sentinelExecutor _fileUtilsExecutor = { nullptr, "fileutils", sentinelFileUtilsExecutor, nullptr };
 void sentinelRegisterFileUtils()
 {

@@ -46,7 +46,7 @@
 #define JIM_OPTIMIZATION // comment to avoid optimizations and reduce size
 
 //#include <stdiocu.h>
-//#include <stringcu.h>
+#include <stringcu.h>
 //#include <stdargcu.h>
 //#include <ctypecu.h>
 //#include <limitscu.h>
@@ -319,8 +319,7 @@ static __device__ int JimStringFirst(const char *s1, int l1, const char *s2, int
 	for (int i = idx; i <= l2 - l1; i++) {
 		if (!memcmp(s2, s1, l1bytelen))
 			return i;
-		int c;
-		s2 += utf8_tounicode(s2, &c);
+		int c; s2 += utf8_tounicode(s2, &c);
 	}
 	return -1;
 }
@@ -1108,7 +1107,7 @@ static __device__ int JimParseScript(struct JimParserCtx *pc)
 			pc->comment = 0;
 			return JimParseStr(pc);
 		}
-		return JIM_OK; // unreached
+		//return JIM_OK; // unreached
 	}
 }
 
@@ -1519,7 +1518,7 @@ static __device__ int JimParseStr(struct JimParserCtx *pc)
 		pc->p++;
 		pc->len--;
 	}
-	return JIM_OK; // unreached
+	//return JIM_OK; // unreached
 }
 
 static __device__ int JimParseComment(struct JimParserCtx *pc)
@@ -9672,7 +9671,7 @@ static __device__ int Jim_IfCoreCommand(ClientData dummy, Jim_Interp *interp, in
 				goto err;
 			return Jim_EvalObj(interp, argv[falsebody]);
 		}
-		return JIM_OK; // unreached
+		//return JIM_OK; // unreached
 	}
 err:
 	Jim_WrongNumArgs(interp, 1, argv, "condition ?then? trueBody ?elseif ...? ?else? falseBody");
@@ -10741,8 +10740,7 @@ static __device__ Jim_Obj *JimStringMap(Jim_Interp *interp, Jim_Obj *mapListObjP
 		if (i == numMaps) {
 			if (noMatchStart == NULL)
 				noMatchStart = str;
-			int c;
-			str += utf8_tounicode(str, &c);
+			int c; str += utf8_tounicode(str, &c);
 			strLen--;
 		}
 	}
@@ -10929,9 +10927,9 @@ badcompareargs:
 		else if (len == Jim_Length(argv[2]))
 			Jim_SetResultString(interp, str + idx, 1);
 		else {
-			int c;
+			
 			int i = utf8_index(str, idx);
-			Jim_SetResultString(interp, str + i, utf8_tounicode(str + i, &c));
+			int c; Jim_SetResultString(interp, str + i, utf8_tounicode(str + i, &c));
 		}
 		return JIM_OK; }
 	case OPT_FIRST:
@@ -12187,22 +12185,19 @@ static __device__ int Jim_InterpCoreCommand(ClientData dummy, Jim_Interp *interp
 	case INTERP_CREATE: {
 		const char *arg;
 		bool safe = false;
-		if (argc == 4)
-		{
+		if (argc == 4) {
 			arg = Jim_String(argv[1]);
 			if (!strcmp(arg, "-safe")) {
 				argc--;
 				safe = true;
 			}
 		}
-		if (argc < 3)
-		{
+		if (argc < 3) {
 			Jim_WrongNumArgs(interp, 2, argv, "CREATE ?-safe? path");
 			return JIM_ERROR;
 		}
 		Jim_Interp *p = Jim_CreateInterp();
-		if (!p)
-		{
+		if (!p) {
 			Jim_SetResultString(interp, "malloc failed", -1);
 			return JIM_ERROR;
 		}

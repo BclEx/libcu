@@ -20,9 +20,7 @@
 #ifndef __TCLHASH_H__
 #include "tclHash.h"
 #endif
-#ifndef __LIBCU__
-#include <regexcu.h>
-#else
+#ifndef REGEX_COMPAT_H
 #include "regex_compat.h"
 #endif
 

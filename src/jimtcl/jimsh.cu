@@ -36,9 +36,10 @@
 #pragma endregion
 
 #include <cuda_runtimecu.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
+#include <sentinel.h>
+#include <stdiocu.h>
+#include <stdlibcu.h>
+#include <stringcu.h>
 #include <jim.h>
 #include <jimautoconf.h>
 
@@ -95,6 +96,7 @@ static int MainInit(int argc, char *const argv[]) {
 	//cudaErrorCheck(cudaSetDeviceFlags(cudaDeviceMapHost | cudaDeviceLmemResizeToMax));
 	cudaErrorCheck(cudaSetDevice(gpuGetMaxGflopsDevice()));
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
+	sentinelServerInitialize();
 	//
 	char **d_argv = cudaDeviceTransferStringArray(argc, argv);
 	D_DATAP(); g_MainInit<<<1,1>>>(argc, d_argv); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
@@ -158,6 +160,7 @@ __global__ void g_MainShutdown(int retcode);
 static int MainShutdown(int retcode) {
 	D_DATAP(); g_MainShutdown<<<1,1>>>(retcode); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();
 	cudaDeviceReset();
+	sentinelServerShutdown();
 	return h_dataP.retcode;
 }
 

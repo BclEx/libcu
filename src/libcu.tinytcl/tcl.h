@@ -30,8 +30,7 @@ typedef struct Tcl_Interp {
 	int errorLine;		// When TCL_ERROR is returned, this gives the line number within the command where the error occurred (1 means first line).
 } Tcl_Interp;
 
-typedef struct Tcl_Obj
-{
+typedef struct Tcl_Obj {
 	char *Value;	// This points to the first byte of the object's string representation. The array must be followed by a null byte (i.e., at offset length) but may also contain
 	int RefCount;	// When 0 the object will be freed.
 	int Bytes;		// The number of bytes at *value, not including the terminating null.
@@ -77,8 +76,7 @@ typedef void (Tcl_FreeProc)(char *blockPtr);
 typedef char *(Tcl_VarTraceProc)(ClientData clientData, Tcl_Interp *interp, char *part1, char *part2, int flags);
 
 // CMD INFO
-typedef struct Tcl_CmdInfo
-{
+typedef struct Tcl_CmdInfo {
 	//int isNativeObjectProc;
 	Tcl_CmdProc *objProc;
 	ClientData objClientData;

@@ -100,7 +100,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -121,7 +121,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -147,7 +147,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -172,7 +172,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.fileutils.cu.obj" "$(IntDir)sentinel-msg.obj" -o "$(OutDir)libcu.fileutils.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

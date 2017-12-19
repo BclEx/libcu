@@ -65,13 +65,11 @@
 #ifndef __JIM__H
 #define __JIM__H
 
-#include <cuda_runtimecu.h>
 #include <sys/timecu.h>
 #include <limits.h>
 #include <stdiocu.h> /* for the FILE typedef definition */
 #include <stdlibcu.h> /* In order to export the Jim_Free() macro */
 #include <stdargcu.h> /* In order to get type va_list */
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -175,8 +173,7 @@ extern "C" {
 	// -----------------------------------------------------------------------------
 	// Stack
 	// -----------------------------------------------------------------------------
-	typedef struct Jim_Stack
-	{
+	typedef struct Jim_Stack {
 		int len;
 		int maxlen;
 		void **vector;
@@ -185,15 +182,13 @@ extern "C" {
 	// -----------------------------------------------------------------------------
 	// Hash table
 	// -----------------------------------------------------------------------------
-	typedef struct Jim_HashEntry
-	{
+	typedef struct Jim_HashEntry {
 		void *key;
 		union { void *val; int intval; } u;
 		struct Jim_HashEntry *next;
 	} Jim_HashEntry;
 
-	typedef struct Jim_HashTableType
-	{
+	typedef struct Jim_HashTableType {
 		unsigned int (*hashFunction)(const void *key);
 		void *(*keyDup)(void *privdata, const void *key);
 		void *(*valDup)(void *privdata, const void *obj);
@@ -202,8 +197,7 @@ extern "C" {
 		void (*valDestructor)(void *privdata, void *obj);
 	} Jim_HashTableType;
 
-	typedef struct Jim_HashTable
-	{
+	typedef struct Jim_HashTable {
 		Jim_HashEntry **table;
 		const Jim_HashTableType *type;
 		void *privdata;
@@ -214,8 +208,7 @@ extern "C" {
 		unsigned int uniq;
 	} Jim_HashTable;
 
-	typedef struct Jim_HashTableIterator
-	{
+	typedef struct Jim_HashTableIterator {
 		Jim_HashTable *ht;
 		Jim_HashEntry *entry, *nextEntry;
 		int index;
@@ -299,8 +292,7 @@ extern "C" {
 	typedef void (Jim_DupInternalRepProc)(struct Jim_Interp *interp, struct Jim_Obj *srcPtr, Jim_Obj *dupPtr);
 	typedef void (Jim_UpdateStringProc)(struct Jim_Obj *objPtr);
 
-	typedef struct Jim_ObjType
-	{
+	typedef struct Jim_ObjType {
 		const char *name; // The name of the type
 		Jim_FreeInternalRepProc *freeIntRepProc;
 		Jim_DupInternalRepProc *dupIntRepProc;
@@ -320,8 +312,7 @@ extern "C" {
 	// -----------------------------------------------------------------------------
 
 	// Call frame
-	typedef struct Jim_CallFrame
-	{
+	typedef struct Jim_CallFrame {
 		unsigned long id;				// Call Frame ID. Used for caching.
 		int level;						// Level of this call frame. 0 = global
 		struct Jim_HashTable vars;		// Where local vars are stored
@@ -344,8 +335,7 @@ extern "C" {
 	// to a variable of name store on objPtr living on the given callframe (this happens when the [global] or [upvar] command is used).
 	// The interp in order to always know how to free the Jim_Obj associated with a given variable because In Jim objects memory management is
 	// bound to interpreters.
-	typedef struct Jim_Var
-	{
+	typedef struct Jim_Var {
 		Jim_Obj *objPtr;
 		struct Jim_CallFrame *linkFramePtr;
 	} Jim_Var;
@@ -356,8 +346,7 @@ extern "C" {
 
 	// A command is implemented in C if isproc is 0, otherwise it's a Tcl procedure with the arglist and body represented by the
 	// two objects referenced by arglistObjPtr and bodyoObjPtr.
-	typedef struct Jim_Cmd
-	{
+	typedef struct Jim_Cmd {
 		int inUse;					// Reference count
 		int isproc;					// Is this a procedure?
 		struct Jim_Cmd *prevCmd;    // Previous command defn if cmd created 'local'
@@ -388,16 +377,14 @@ extern "C" {
 	} Jim_Cmd;
 
 	// Pseudo Random Number Generator State structure
-	typedef struct Jim_PrngState
-	{
+	typedef struct Jim_PrngState {
 		unsigned char sbox[256];
 		unsigned int i, j;
 	} Jim_PrngState;
 
 	// Jim interpreter structure.
 	// Fields similar to the real Tcl interpreter structure have the same names.
-	typedef struct Jim_Interp
-	{
+	typedef struct Jim_Interp {
 		Jim_Obj *result;			// object returned by the last command called
 		int errorLine;				// Error line where an error occurred
 		Jim_Obj *errorFileNameObj;	// Error file where an error occurred
@@ -464,8 +451,7 @@ extern "C" {
 
 	// Reference structure. The interpreter pointer is held within privdata member in HashTable
 #define JIM_REFERENCE_TAGLEN 7 // The tag is fixed-length, because the reference string representation must be fixed length.
-	typedef struct Jim_Reference
-	{
+	typedef struct Jim_Reference {
 		Jim_Obj *objPtr;
 		Jim_Obj *finalizerCmdNamePtr;
 		char tag[JIM_REFERENCE_TAGLEN+1];
@@ -637,15 +623,13 @@ extern "C" {
 #define Jim_NewBooleanObj Jim_NewIntObj
 #define Jim_NewWideObj Jim_NewIntObj
 	JIM_EXPORT __device__ Jim_Obj *Jim_NewIntObj(Jim_Interp *interp, jim_wide wideValue);
-	__inline __device__ int Jim_GetInt(Jim_Interp *interp, Jim_Obj *objPtr, int *intPtr)
-	{
+	__inline __device__ int Jim_GetInt(Jim_Interp *interp, Jim_Obj *objPtr, int *intPtr) {
 		jim_wide wideValue;
 		int retval;
 		if ((retval = Jim_GetWide(interp, objPtr, &wideValue)) == JIM_OK) *intPtr = (int)wideValue;
 		return retval;
 	}
-	__inline __device__ int Jim_GetBoolean(Jim_Interp *interp, Jim_Obj *objPtr, bool *boolPtr)
-	{
+	__inline __device__ int Jim_GetBoolean(Jim_Interp *interp, Jim_Obj *objPtr, bool *boolPtr) {
 		jim_wide wideValue;
 		int retval;
 		if ((retval = Jim_GetWide(interp, objPtr, &wideValue)) == JIM_OK) *boolPtr = (wideValue != 0);
