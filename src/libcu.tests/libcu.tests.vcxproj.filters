@@ -1,42 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="StdioTest.cpp" />
-    <ClCompile Include="StdlibTest.cpp" />
-    <ClCompile Include="ctypeTest.cpp" />
-    <ClCompile Include="errnoTest.cpp" />
-    <ClCompile Include="stdargTest.cpp" />
-    <ClCompile Include="stringTest.cpp" />
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Properties</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>Properties</Filter>
     </ClCompile>
-    <ClCompile Include="fallocTest.cpp" />
-    <ClCompile Include="crtdefsTest.cpp" />
-    <ClCompile Include="direntTest.cpp" />
-    <ClCompile Include="fcntlTest.cpp" />
-    <ClCompile Include="fsystemTest.cpp" />
-    <ClCompile Include="grpTest.cpp" />
-    <ClCompile Include="pwdTest.cpp" />
-    <ClCompile Include="regexTest.cpp" />
-    <ClCompile Include="sentinelTest.cpp" />
-    <ClCompile Include="setjmpTest.cpp" />
-    <ClCompile Include="stddefTest.cpp" />
-    <ClCompile Include="timeTest.cpp" />
-    <ClCompile Include="unistdTest.cpp" />
-    <ClCompile Include="sys\sys_statTest.cpp">
-      <Filter>sys</Filter>
-    </ClCompile>
-    <ClCompile Include="sys\sys_timeTest.cpp">
-      <Filter>sys</Filter>
-    </ClCompile>
-    <ClCompile Include="ext\ext_hashTest.cpp">
+    <ClCompile Include="allTests.cpp" />
+    <ClCompile Include="ext\ext_allTests.cpp">
       <Filter>ext</Filter>
     </ClCompile>
-    <ClCompile Include="ext\ext_memfileTest.cpp">
-      <Filter>ext</Filter>
+    <ClCompile Include="sys\sys_allTests.cpp">
+      <Filter>sys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

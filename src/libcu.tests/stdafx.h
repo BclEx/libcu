@@ -11,7 +11,7 @@ void allClassCleanup(bool sentinel = true);
 void allTestInitialize();
 void allTestCleanup();
 
-#define __BEGIN_TEST(name) \
+#define __BEGIN_TEST(name, testInitialize, testCleanup) \
 	[TestClass] \
 	public ref class name##Test \
 { \
@@ -20,8 +20,8 @@ private: \
 public: \
 	[ClassInitialize()] static void ClassInitialize(Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ testContext) { allClassInitialize(); } \
 	[ClassCleanup()] static void ClassCleanup() { allClassCleanup(); } \
-	[TestInitialize()]void TestInitialize() { allTestInitialize(); } \
-	[TestCleanup()] void TestCleanup() { allTestCleanup(); } \
+	[TestInitialize()]void TestInitialize() { allTestInitialize(); testInitialize } \
+	[TestCleanup()] void TestCleanup() { allTestCleanup(); testCleanup } \
 	property Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ TestContext \
 { \
 	Microsoft::VisualStudio::TestTools::UnitTesting::TestContext^ get() { return _testCtx; } \

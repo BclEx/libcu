@@ -173,35 +173,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
-    <ClCompile Include="crtdefsTest.cpp" />
-    <ClCompile Include="direntTest.cpp" />
-    <ClCompile Include="ext\ext_hashTest.cpp" />
-    <ClCompile Include="ext\ext_memfileTest.cpp" />
-    <ClCompile Include="fallocTest.cpp" />
-    <ClCompile Include="fcntlTest.cpp" />
-    <ClCompile Include="fsystemTest.cpp" />
-    <ClCompile Include="grpTest.cpp" />
-    <ClCompile Include="pwdTest.cpp" />
-    <ClCompile Include="regexTest.cpp" />
-    <ClCompile Include="sentinelTest.cpp" />
-    <ClCompile Include="setjmpTest.cpp" />
+    <ClCompile Include="allTests.cpp" />
+    <ClCompile Include="ext\ext_allTests.cpp" />
+    <ClCompile Include="sys\sys_allTests.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ctypeTest.cpp" />
-    <ClCompile Include="errnoTest.cpp" />
-    <ClCompile Include="stdargTest.cpp" />
-    <ClCompile Include="stddefTest.cpp" />
-    <ClCompile Include="stdioTest.cpp" />
-    <ClCompile Include="stdlibTest.cpp" />
-    <ClCompile Include="stringTest.cpp" />
-    <ClCompile Include="sys\sys_statTest.cpp" />
-    <ClCompile Include="sys\sys_timeTest.cpp" />
-    <ClCompile Include="timeTest.cpp" />
-    <ClCompile Include="unistdTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -214,21 +194,13 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ext\ext_hashTest.cu">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="ext\ext_memfileTest.cu">
-      <FileType>Document</FileType>
-    </None>
+    <None Include="ext\ext_hashTest.cu" />
+    <None Include="ext\ext_memfileTest.cu" />
     <CudaCompile Include="ext\ext_libcu.tests.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="sys\sys_libcu.tests.cu" />
-    <None Include="sys\sys_statTest.cu">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="sys\sys_timeTest.cu">
-      <FileType>Document</FileType>
-    </None>
+    <None Include="sys\sys_statTest.cu" />
+    <None Include="sys\sys_timeTest.cu" />
     <None Include="crtdefsTest.cu" />
     <None Include="ctypeTest.cu" />
     <None Include="direntTest.cu" />
