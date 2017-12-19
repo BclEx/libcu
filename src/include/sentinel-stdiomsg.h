@@ -213,15 +213,22 @@ struct stdio_ungetc {
 struct stdio_fread {
 	static __forceinline __device__ char *Prepare(stdio_fread *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
+		t->Ptr = ptr + offset;
 		return end;
 	}
+	static __forceinline __device__ bool Postfix(stdio_fread *t, intptr_t offset)
+	{
+		char *ptr = (char *)t->Ptr - offset;
+		if ((int)t->RC > 0) memcpy(t->Buf, ptr, t->RC);
+		return true;
+	}
 	sentinelMessage Base;
-	size_t Size; size_t Num; FILE *File;
-	__device__ stdio_fread(bool wait, size_t size, size_t num, FILE *file)
-		: Base(wait, STDIO_FREAD, 1024, SENTINELPREPARE(Prepare)), Size(size), Num(num), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_fread)); }
+	void *Buf; size_t Size; size_t Num; FILE *File;
+	__device__ stdio_fread(bool wait, void *buf, size_t size, size_t num, FILE *file)
+		: Base(wait, STDIO_FREAD, 1024, SENTINELPREPARE(Prepare), SENTINELPOSTFIX(Postfix)), Buf(buf), Size(size), Num(num), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_fread)); }
 	size_t RC;
 	void *Ptr;
 };

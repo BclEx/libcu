@@ -114,7 +114,7 @@ __BEGIN_NAMESPACE_STD;
 extern __device__ int fclose_(FILE *stream, bool wait = true);
 #define fclose fclose_
 /* Flush STREAM, or all streams if STREAM is NULL. */
-extern __device__ int fflush_(FILE *stream);
+extern __device__ int fflush_(FILE *stream, bool wait = true);
 #define fflush fflush_
 __END_NAMESPACE_STD;
 

@@ -1447,7 +1447,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			}
 			else {
 				uint64_t n = (uint64_t)precision + 10 + precision/3;
-				out = extra = (char *)malloc(outLength);
+				out = extra = (char *)malloc(n);
 				if (!out) {
 					strbldSetError(b, STRACCUM_NOMEM);
 					return;

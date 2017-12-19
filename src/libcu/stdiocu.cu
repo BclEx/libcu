@@ -126,9 +126,9 @@ __device__ int fclose_(FILE *stream, bool wait)
 }
 
 /* Flush STREAM, or all streams if STREAM is NULL. */
-__device__ int fflush_(FILE *stream)
+__device__ int fflush_(FILE *stream, bool wait)
 { 
-	if (ISHOSTFILE(stream)) { stdio_fflush msg(false, stream); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fflush msg(wait, stream); return msg.RC; }
 	return 0; 
 }
 
@@ -268,11 +268,11 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	const char *v = strbldToString(&b);
 	int size = b.index + 1;
 	// chunk results
-	int offset = 0; int rc = 0;
-	if (!ISHOSTFILE(s)) while (size > 0 && !rc) { rc = fwrite_(v + offset, size > 1024 ? 1024 : size, 1, s); size -= 1024; }
-	else while (size > 0 && !rc) { stdio_fwrite msg(true, v + offset, size > 1024 ? 1024 : size, 1, s); rc = msg.RC; size -= 1024; }
+	int rc = 1, offset = 0;
+	if (!ISHOSTFILE(s)) while (size > 0 && rc > 0) { rc = fwrite_(v + offset, 1, size > 1024 ? 1024 : size, s); size -= 1024; offset += rc; }
+	else while (size > 0 && rc > 0) { stdio_fwrite msg(true, v + offset, 1, size > 1024 ? 1024 : size, s); rc = msg.RC; size -= 1024; offset += rc; }
 	free((void *)v);
-	return rc; 
+	return offset - 1; // remove null termination, returns number of characters written
 }
 #endif
 
@@ -335,7 +335,7 @@ __device__ int ungetc_(int c, FILE *stream, bool wait)
 /* Read chunks of generic data from STREAM.  */
 __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__restrict stream, bool wait)
 {
-	if (ISHOSTFILE(stream)) { stdio_fread msg(wait, size, n, stream); memcpy(ptr, msg.Ptr, msg.RC); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fread msg(wait, ptr, size, n, stream); return msg.RC; }
 	dirEnt_t *f;
 	if (!stream || !(f = (dirEnt_t *)stream->_base))
 		panic("fwrite: !stream");
@@ -343,7 +343,7 @@ __device__ size_t fread_(void *__restrict ptr, size_t size, size_t n, FILE *__re
 		panic("fwrite: stream !file");
 	size *= n;
 	memfileRead(f->u.file, ptr, size, 0);
-	return size;
+	return n;
 }
 
 /* Write chunks of generic data to STREAM.  */
@@ -357,7 +357,7 @@ __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FIL
 		panic("fwrite: stream !file");
 	size *= n;
 	memfileWrite(f->u.file, ptr, size, 0);
-	return size;
+	return n;
 }
 
 /* Seek to a certain position on STREAM.  */
