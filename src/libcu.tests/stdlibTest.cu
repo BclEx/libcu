@@ -64,11 +64,18 @@ static __global__ void g_stdlib_test1()
 	//extern __device__ char *getenv_(const char *name);
 	//extern __device__ int setenv_(const char *name, const char *value, int replace);
 	//extern __device__ int unsetenv_(const char *name);
+	/* Host */
 	char *f0a = getenv("Test"); assert(f0a);
 	int f1a = setenv("Test", "value", true);
 	char *f1b = getenv("Test");
 	int f1c = unsetenv("Test");
 	assert(f1a && f1b && f1c);
+	/* Device */
+	//char *f0a = getenv("Test"); assert(f0a);
+	//int f1a = setenv("Test", "value", true);
+	//char *f1b = getenv("Test");
+	//int f1c = unsetenv("Test");
+	//assert(f1a && f1b && f1c);
 
 	//// MKTEMP, MKSTEMP ////
 	//extern __device__ char *mktemp_(char *template_);

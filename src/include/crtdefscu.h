@@ -236,6 +236,7 @@ typedef struct hostptr_t {
 
 /* IsHost support  */
 extern "C" __device__ char __cwd[];
+#define ISHOSTENV(name) (name[0] != ':')
 #define ISHOSTPATH(path) ((path)[1] == ':' || ((path)[0] != ':' && __cwd[0] == 0))
 #define ISHOSTHANDLE(handle) (handle < INT_MAX-LIBCU_MAXFILESTREAM)
 #define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+LIBCU_MAXHOSTPTR)

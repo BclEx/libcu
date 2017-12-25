@@ -38,7 +38,7 @@ bool sentinelModuleExecutor(void *tag, sentinelMessage *data, int length, char *
 {
 	switch (data->OP) {
 	case MODULE_SIMPLE: { module_simple *msg = (module_simple *)data; msg->RC = msg->Value; return true; }
-	case MODULE_STRING: { module_string *msg = (module_string *)data; msg->RC = strlen(msg->Str); return true; }
+	case MODULE_STRING: { module_string *msg = (module_string *)data; msg->RC = (int)strlen(msg->Str); return true; }
 	}
 	return false;
 }

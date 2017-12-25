@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <sentinel.h>
+#include <cuda_runtimecu.h>
 
 #if HAS_HOSTSENTINEL
 
@@ -17,7 +18,9 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 		printf("sentinel: device map not defined. did you start sentinel?\n");
 		exit(0);
 	}
+#if __OS_WIN
 	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
+#endif
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *control = (volatile long *)&cmd->Control;
 	//while (InterlockedCompareExchange((long *)control, 1, 0) != 0) { }
@@ -33,7 +36,9 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 
 	*control = 2;
 	if (msg->Wait) {
+#if __OS_WIN
 		while (InterlockedCompareExchange((long *)control, 5, 4) != 4) { }
+#endif
 		memcpy(msg, cmd->Data, msgLength);
 		*control = 0;
 	}

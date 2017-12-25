@@ -2,6 +2,7 @@
 #include <stdiocu.h>
 #include <sentinel-stdlibmsg.h>
 #include <bits/libcu_fpmax.h>
+#include <ext/hash.h>
 #include <ctypecu.h>
 #include <errnocu.h>
 #include <fcntlcu.h>
@@ -694,25 +695,32 @@ __device__ void _Exit_(int status)
 	stdlib_exit msg(false, status);
 }
 
+__device__ hash_t __env_dir = HASHINIT;
+
 /* Return the value of envariable NAME, or NULL if it doesn't exist.  */
 __device__ char *getenv_(const char *name)
 {
-	if (!strcmp(name, "HOME") || !strcmp(name, "PATH")) return "gpu:\\";
-	//panic("Not Implemented");
-	return nullptr;
+	if (ISHOSTENV(name)) { stdlib_getenv msg(name); return msg.RC; }
+	//if (!strcmp(name, "HOME") || !strcmp(name, "PATH")) return "gpu:\\";
+	return (char *)hashFind(&__env_dir, name);
 }
 
 /* Set NAME to VALUE in the environment. If REPLACE is nonzero, overwrite an existing value.  */
 __device__ int setenv_(const char *name, const char *value, int replace)
 {
-	panic("Not Implemented");
+	if (ISHOSTENV(name)) { stdlib_setenv msg(name, value, replace); return msg.RC; }
+	if (!replace && hashFind(&__env_dir, name)) return 0;
+	if (hashInsert(&__env_dir, name, (void *)value))
+		panic("removed environment");
 	return 0;
 }
 
 /* Remove the variable NAME from the environment.  */
 __device__ int unsetenv_(const char *name)
 {
-	panic("Not Implemented");
+	if (ISHOSTENV(name)) { stdlib_unsetenv msg(name); return msg.RC; }
+	if (hashInsert(&__env_dir, name, nullptr))
+		panic("removed environment");
 	return 0;
 }
 

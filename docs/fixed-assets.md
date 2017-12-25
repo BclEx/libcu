@@ -35,12 +35,14 @@ This header includes most of the libcu base definitions, of which are also the p
 ### IsHost support
 These definitions determind if an assets is on the host or device:
 * `__cwd` - holds the current device relative base, this value should not be modified directly.
+* `ISHOSTENV(path)` - if `name` begins with `:` then it is a device name otherwise `name` is a host name.
 * `ISHOSTPATH(path)` - if `path` begins with `:\` as an absolute path, or if `path` is relative and a device relative base has been set in `__cwd`, then `path` is a device path otherwise `path` is a host path.
 * `ISHOSTHANDLE(handle)` - host if `handle` falls outside fixed-asset handle range.
 * `ISHOSTPTR(ptr)` - host if `ptr` falls outside fixed-asset handle range.
 ```
 /* IsHost support  */
 extern "C" __device__ char __cwd[];
+#define ISHOSTENV(name) (name[0] != ':')
 #define ISHOSTPATH(path) ((path)[1] == ':' || ((path)[0] != ':' && __cwd[0] == 0))
 #define ISHOSTHANDLE(handle) (handle < INT_MAX-LIBCU_MAXFILESTREAM)
 #define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+LIBCU_MAXHOSTPTR)

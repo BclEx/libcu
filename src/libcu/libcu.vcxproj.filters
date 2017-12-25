@@ -135,10 +135,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sentinel-msg.cpp" />
-    <ClCompile Include="sentinel-host.cpp" />
-    <ClCompile Include="sentinel.cpp" />
     <ClCompile Include="cuda_runtime.cpp" />
+    <ClCompile Include="sentinel.cpp" />
+    <ClCompile Include="sentinel-host.cpp" />
+    <ClCompile Include="sentinel-msg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Libcu.Native.nuspec" />

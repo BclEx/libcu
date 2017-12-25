@@ -107,7 +107,7 @@ Error:
 	// close
 	if (cudaStatus != cudaSuccess) {
 		// finish
-		mainPause("\ERROR\n");
+		mainPause("ERROR\n");
 		return 1;
 	}
 

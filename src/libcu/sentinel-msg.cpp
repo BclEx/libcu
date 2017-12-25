@@ -18,6 +18,16 @@
 #define fcntl(fd, cmd, ...) 0
 #define mkfifo(path, mode) 0
 
+int setenv(const char *name, const char *value, int overwrite) {
+	int errcode = 0;
+	if (!overwrite) {
+		size_t envsize = 0;
+		errcode = getenv_s(&envsize, NULL, 0, name);
+		if (errcode || envsize) return errcode;
+	}
+	return _putenv_s(name, value);
+}
+
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
 	if (data->OP > TIME_STRFTIME) return false;
@@ -46,6 +56,9 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case STDIO_FILENO: { stdio_fileno *msg = (stdio_fileno *)data; msg->RC = _fileno(msg->File); return true; }
 	case STDLIB_SYSTEM: { stdlib_system *msg = (stdlib_system *)data; msg->RC = system(msg->Str); return true; }
 	case STDLIB_EXIT: { stdlib_exit *msg = (stdlib_exit *)data; if (msg->Std) exit(msg->Status); else _exit(msg->Status); return true; }
+	case STDLIB_GETENV: { stdlib_getenv *msg = (stdlib_getenv *)data; msg->RC = getenv(msg->Str); return true; }
+	case STDLIB_SETENV: { stdlib_setenv *msg = (stdlib_setenv *)data; msg->RC = setenv(msg->Str, msg->Str2, msg->Replace); return true; }
+	case STDLIB_UNSETENV: { stdlib_unsetenv *msg = (stdlib_unsetenv *)data; msg->RC = _putenv_s(msg->Str, nullptr); return true; }
 	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = _access(msg->Name, msg->Type); return true; }
 	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data; msg->RC = _lseek(msg->Handle, msg->Offset, msg->Whence); return true; }
 	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = _close(msg->Handle); return true; }
