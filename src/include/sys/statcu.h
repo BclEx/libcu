@@ -108,9 +108,11 @@ extern __device__ int mkfifo_(const char *path, mode_t mode);
 
 __END_DECLS;
 #else
+#if __OS_WIN
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path) 
 #define lstat stat
+#endif
 #endif /* __CUDA_ARCH__  */
 
 #endif /* _SYS_STATCU_H  */

@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <sentinel.h>
-#include <cuda_runtimecu.h>
+//#include <cuda_runtimecu.h>
 
 #if HAS_HOSTSENTINEL
 

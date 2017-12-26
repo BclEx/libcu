@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sentinel.h>
 #include <assert.h>
-#include <cuda_runtimecu.h>
+//#include <cuda_runtimecu.h>
 
 void sentinelCommand::Dump()
 {

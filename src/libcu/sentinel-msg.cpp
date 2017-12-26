@@ -4,14 +4,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/statcu.h>
+#include <math.h>
+#if __OS_WIN
 #include <io.h>
+#endif
 #include <sentinel-direntmsg.h>
 #include <sentinel-fcntlmsg.h>
 #include <sentinel-unistdmsg.h>
 #include <sentinel-stdiomsg.h>
 #include <sentinel-stdlibmsg.h>
 #include <sentinel-timemsg.h>
-#include <math.h>
 
 //#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 

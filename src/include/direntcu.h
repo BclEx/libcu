@@ -28,7 +28,11 @@ THE SOFTWARE.
 #define	_DIRENTCU_H
 #include <crtdefscu.h>
 
+#if __OS_WIN
 #include <_dirent.h>
+#elif __OS_UNIX
+#include <dirent.h>
+#endif
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 

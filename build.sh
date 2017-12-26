@@ -1,4 +1,5 @@
 #! /bin/sh
+cp src/CMakeLists.work.txt src/CMakeLists.txt
 
 rm -rf _build
 mkdir _build

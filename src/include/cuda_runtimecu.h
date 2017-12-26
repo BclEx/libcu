@@ -46,34 +46,4 @@ extern "C" {
 #define cudaErrorCheckF(x, f) { if (!gpuAssert((x), #x, __FILE__, __LINE__, false)) f; }
 #define cudaErrorCheckLast() { gpuAssert(cudaPeekAtLastError(), __FILE__, __LINE__); }
 
-/* Figure out if we are dealing with Unix, Windows, or some other operating system. */
-#if defined(__OS_OTHER)
-# if __OS_OTHER == 1
-#  undef __OS_UNIX
-#  define __OS_UNIX 0
-#  undef __OS_WIN
-#  define __OS_WIN 0
-# else
-#  undef __OS_OTHER
-# endif
-#endif
-#if !defined(__OS_UNIX) && !defined(__OS_OTHER)
-# define __OS_OTHER 0
-# ifndef __OS_WIN
-#  if defined(_WIN32) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
-#   define __OS_WIN 1
-#   define __OS_UNIX 0
-#  else
-#   define __OS_WIN 0
-#   define __OS_UNIX 1
-#  endif
-# else
-#  define __OS_UNIX 0
-# endif
-#else
-# ifndef __OS_WIN
-#  define __OS_WIN 0
-# endif
-#endif
-
 #endif /* __CUDA_RUNTIMECU_H__ */
