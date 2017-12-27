@@ -15,10 +15,10 @@ static __global__ void g_stdlib_test1()
 	printf("stdlib_test1\n");
 
 	//// ATOI, ATOL, ATOLL ////
-	//__forceinline __device__ double atof_(const char *nptr);
-	//__forceinline __device__ int atoi_(const char *nptr);
-	//__forceinline __device__ long int atol_(const char *nptr);
-	//__forceinline __device__ long long int atoll_(const char *nptr);
+	//__forceinline__ __device__ double atof_(const char *nptr);
+	//__forceinline__ __device__ int atoi_(const char *nptr);
+	//__forceinline__ __device__ long int atol_(const char *nptr);
+	//__forceinline__ __device__ long long int atoll_(const char *nptr);
 	double a0a = atof("1.0"); assert(a0a == 1.0);
 	int a1a = atoi("1.0"); assert(a1a == 1);
 	long int a2a = atol("1.0"); assert(a2a == 1);
@@ -28,10 +28,10 @@ static __global__ void g_stdlib_test1()
 	//extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
 	//extern __device__ float strtof_(const char *__restrict nptr, char **__restrict endptr);
 	//extern __device__ long double strtold_(const char *__restrict nptr, char **__restrict endptr);
-	//__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base);
-	//__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base);
-	//__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base):
-	//__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base):
+	//__forceinline__ __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base);
+	//__forceinline__ __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base);
+	//__forceinline__ __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base):
+	//__forceinline__ __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base):
 	double b0a = strtod("1.0", nullptr); assert(b0a == 1.0);
 	float b1a = strtof("1.0", nullptr); assert(b1a == 1.0F);
 	long double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
@@ -47,7 +47,7 @@ static __global__ void g_stdlib_test1()
 
 	//// MALLOC, CALLOC, MSIZE, REALLOC, FREE ////
 	//extern __device__ void *malloc_(size_t size);
-	//__device__ __forceinline void *calloc_(size_t nmemb, size_t size);
+	//__device__ __forceinline__ void *calloc_(size_t nmemb, size_t size);
 	//extern __device__ size_t _msize_(void *ptr);
 	//extern __device__ void *realloc_(void *ptr, size_t size);
 	//extern __device__ void free_(void *ptr);
@@ -55,10 +55,10 @@ static __global__ void g_stdlib_test1()
 	char *d1a = (char *)calloc(10, 1); free(d1a); assert(d1a);
 
 	//// ABORT, ATEXIT, EXIT, _EXIT ////
-	//skipped: __forceinline __device__ void abort_(void); #trap
-	//skipped: __forceinline __device__ int atexit_(void(*func)(void)); #notsupported
-	//skipped: __forceinline __device__ void exit_(int status); #sentinel
-	//skipped: __forceinline __device__ void _Exit_(int status); #sentinel
+	//skipped: __forceinline__ __device__ void abort_(void); #trap
+	//skipped: __forceinline__ __device__ int atexit_(void(*func)(void)); #notsupported
+	//skipped: __forceinline__ __device__ void exit_(int status); #sentinel
+	//skipped: __forceinline__ __device__ void _Exit_(int status); #sentinel
 
 	//// GETENV, SETENV, UNSETENV ////
 	//extern __device__ char *getenv_(const char *name);
@@ -102,9 +102,9 @@ static __global__ void g_stdlib_test1()
 	assert(j0a == 10);
 
 	//// ABS, LABS, LLABS ////
-	//__forceinline __device__ int abs_(int x);
-	//__forceinline __device__ long int labs_(long int x):
-	//__forceinline __device__ long long int llabs_(long long int x);
+	//__forceinline__ __device__ int abs_(int x);
+	//__forceinline__ __device__ long int labs_(long int x):
+	//__forceinline__ __device__ long long int llabs_(long long int x);
 	int k0a = abs(0); int k0b = abs(1); int k0c = abs(-1); assert(k0a == 0 && k0b == 1 & k0c == 1);
 	long int k1a = abs(0); long int k1b = abs(1); long int k1c = abs(-1); assert(k1a == 0 && k1b == 1 & k1c == 1);
 	long long int k2a = abs(0L); long long int k2b = abs(1L); long long int k2c = abs(-1L); assert(k2a == 0L && k2b == 1L & k2c == 1L);
@@ -130,13 +130,13 @@ static __global__ void g_stdlib_test1()
 	size_t m3a = mbstowcs(L"test", buf, sizeof(buf));
 
 	//// STRTOQ, STRTOUQ ////
-	//__forceinline __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base);
-	//__forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base);
+	//__forceinline__ __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base);
+	//__forceinline__ __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base);
 	quad_t n0a = strtoq("1.0", nullptr, 10); assert(n0a == 1);
 	u_quad_t n1a = strtouq("1.0", nullptr, 10); assert(n1a == 1);
 
 	//// MALLOCZERO //// ??different than calloc??
-	//__forceinline __device__ void *mallocZero(size_t size);
+	//__forceinline__ __device__ void *mallocZero(size_t size);
 	// SKIP
 }
 cudaError_t stdlib_test1() { g_stdlib_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

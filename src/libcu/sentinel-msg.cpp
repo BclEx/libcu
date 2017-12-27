@@ -7,6 +7,9 @@
 #include <math.h>
 #if __OS_WIN
 #include <io.h>
+#elif __OS_UNIX
+#include <unistd.h>
+#include <fcntl.h>
 #endif
 #include <sentinel-direntmsg.h>
 #include <sentinel-fcntlmsg.h>
@@ -17,9 +20,9 @@
 
 //#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
 
+#if __OS_WIN
 #define fcntl(fd, cmd, ...) 0
 #define mkfifo(path, mode) 0
-
 int setenv(const char *name, const char *value, int overwrite) {
 	int errcode = 0;
 	if (!overwrite) {
@@ -29,6 +32,27 @@ int setenv(const char *name, const char *value, int overwrite) {
 	}
 	return _putenv_s(name, value);
 }
+
+#define fileno _fileno
+#define unsetenv(a) _putenv_s(a, nullptr)
+#define access _access
+#define lseek _lseek
+#define close _close
+#define read _read
+#define write _write
+#define chown(a, b, c) 0
+#define chdir _chdir
+#define getcwd _getcwd
+#define dup _dup
+#define dup2 _dup2
+#define unlink _unlink
+#define rmdir _rmdir
+#define open _open
+#define stat64 _stat64
+#define fstat64 _fstat64
+#define chmod _chmod
+
+#endif
 
 bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t))
 {
@@ -55,30 +79,34 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case STDIO_CLEARERR: { stdio_clearerr *msg = (stdio_clearerr *)data; clearerr(msg->File); return true; }
 	case STDIO_FEOF: { stdio_feof *msg = (stdio_feof *)data; msg->RC = feof(msg->File); return true; }
 	case STDIO_FERROR: { stdio_ferror *msg = (stdio_ferror *)data; msg->RC = ferror(msg->File); return true; }
-	case STDIO_FILENO: { stdio_fileno *msg = (stdio_fileno *)data; msg->RC = _fileno(msg->File); return true; }
+	case STDIO_FILENO: { stdio_fileno *msg = (stdio_fileno *)data; msg->RC = fileno(msg->File); return true; }
 	case STDLIB_SYSTEM: { stdlib_system *msg = (stdlib_system *)data; msg->RC = system(msg->Str); return true; }
+#if __OS_WIN
 	case STDLIB_EXIT: { stdlib_exit *msg = (stdlib_exit *)data; if (msg->Std) exit(msg->Status); else _exit(msg->Status); return true; }
+#elif __OS_UNIX
+	case STDLIB_EXIT: { stdlib_exit *msg = (stdlib_exit *)data; exit(msg->Status); return true; }
+#endif
 	case STDLIB_GETENV: { stdlib_getenv *msg = (stdlib_getenv *)data; msg->RC = getenv(msg->Str); return true; }
 	case STDLIB_SETENV: { stdlib_setenv *msg = (stdlib_setenv *)data; msg->RC = setenv(msg->Str, msg->Str2, msg->Replace); return true; }
-	case STDLIB_UNSETENV: { stdlib_unsetenv *msg = (stdlib_unsetenv *)data; msg->RC = _putenv_s(msg->Str, nullptr); return true; }
-	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = _access(msg->Name, msg->Type); return true; }
-	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data; msg->RC = _lseek(msg->Handle, msg->Offset, msg->Whence); return true; }
-	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = _close(msg->Handle); return true; }
-	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = _read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
-	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = _write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
-	case UNISTD_CHOWN: { unistd_chown *msg = (unistd_chown *)data; msg->RC = /*_chown(msg->Str, msg->Owner, msg->Group)*/0; return true; }
-	case UNISTD_CHDIR: { unistd_chdir *msg = (unistd_chdir *)data; msg->RC = _chdir(msg->Str); return true; }
-	case UNISTD_GETCWD: { unistd_getcwd *msg = (unistd_getcwd *)data; msg->RC = _getcwd(msg->Ptr, (int)msg->Size); return true; }
-	case UNISTD_DUP: { unistd_dup *msg = (unistd_dup *)data; msg->RC = (msg->Dup1 ? _dup(msg->Handle) : _dup2(msg->Handle, msg->Handle2)); return true; }
-	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = _unlink(msg->Str); return true; }
-	case UNISTD_RMDIR: { unistd_rmdir *msg = (unistd_rmdir *)data; msg->RC = _rmdir(msg->Str); return true; }
+	case STDLIB_UNSETENV: { stdlib_unsetenv *msg = (stdlib_unsetenv *)data; msg->RC = unsetenv(msg->Str); return true; }
+	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = access(msg->Name, msg->Type); return true; }
+	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data; msg->RC = lseek(msg->Handle, msg->Offset, msg->Whence); return true; }
+	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = close(msg->Handle); return true; }
+	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_CHOWN: { unistd_chown *msg = (unistd_chown *)data; msg->RC = chown(msg->Str, msg->Owner, msg->Group); return true; }
+	case UNISTD_CHDIR: { unistd_chdir *msg = (unistd_chdir *)data; msg->RC = chdir(msg->Str); return true; }
+	case UNISTD_GETCWD: { unistd_getcwd *msg = (unistd_getcwd *)data; msg->RC = getcwd(msg->Ptr, (int)msg->Size); return true; }
+	case UNISTD_DUP: { unistd_dup *msg = (unistd_dup *)data; msg->RC = (msg->Dup1 ? dup(msg->Handle) : dup2(msg->Handle, msg->Handle2)); return true; }
+	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = unlink(msg->Str); return true; }
+	case UNISTD_RMDIR: { unistd_rmdir *msg = (unistd_rmdir *)data; msg->RC = rmdir(msg->Str); return true; }
 	case FCNTL_FCNTL: { fcntl_fcntl *msg = (fcntl_fcntl *)data; msg->RC = fcntl(msg->Handle, msg->Cmd, msg->P0); return true; }
-	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data; msg->RC = _open(msg->Str, msg->OFlag, msg->P0); return true; }
+	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data; msg->RC = open(msg->Str, msg->OFlag, msg->P0); return true; }
 	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
 	case FCNTL_FSTAT: { fcntl_fstat *msg = (fcntl_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
-	case FCNTL_STAT64: { fcntl_stat64 *msg = (fcntl_stat64 *)data; msg->RC = _stat64(msg->Str, msg->Ptr); return true; }
-	case FCNTL_FSTAT64: { fcntl_fstat64 *msg = (fcntl_fstat64 *)data; msg->RC = _fstat64(msg->Handle, msg->Ptr); return true; }
-	case FCNTL_CHMOD: { fcntl_chmod *msg = (fcntl_chmod *)data; msg->RC = _chmod(msg->Str, msg->Mode); return true; }
+	case FCNTL_STAT64: { fcntl_stat64 *msg = (fcntl_stat64 *)data; msg->RC = stat64(msg->Str, msg->Ptr); return true; }
+	case FCNTL_FSTAT64: { fcntl_fstat64 *msg = (fcntl_fstat64 *)data; msg->RC = fstat64(msg->Handle, msg->Ptr); return true; }
+	case FCNTL_CHMOD: { fcntl_chmod *msg = (fcntl_chmod *)data; msg->RC = chmod(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKDIR: { fcntl_mkdir *msg = (fcntl_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKFIFO: { fcntl_mkfifo *msg = (fcntl_mkfifo *)data; msg->RC = mkfifo(msg->Str, msg->Mode); return true; }
 	case DIRENT_OPENDIR: { dirent_opendir *msg = (dirent_opendir *)data; msg->RC = opendir(msg->Str); return true; }

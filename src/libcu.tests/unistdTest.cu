@@ -73,7 +73,7 @@ static __global__ void g_unistd_test1()
 
 	//// USLEEP, SLEEP, PAUSE ////
 	//extern __device__ void usleep_(unsigned long milliseconds);
-	//__forceinline __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
+	//__forceinline__ __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
 	////nosupport: extern int pause_(void); #notsupported
 	usleep(1); assert(1);
 	sleep(1); assert(1);

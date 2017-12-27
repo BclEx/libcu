@@ -52,7 +52,7 @@ enum {
 
 struct fileutils_dcat
 {
-	static __forceinline char *Prepare(fileutils_dcat *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dcat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -71,7 +71,7 @@ struct fileutils_dcat
 
 struct fileutils_dchgrp
 {
-	static __forceinline char *Prepare(fileutils_dchgrp *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dchgrp *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -90,7 +90,7 @@ struct fileutils_dchgrp
 
 struct fileutils_dchmod
 {
-	static __forceinline char *Prepare(fileutils_dchmod *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dchmod *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -109,7 +109,7 @@ struct fileutils_dchmod
 
 struct fileutils_dchown
 {
-	static __forceinline char *Prepare(fileutils_dchown *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dchown *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -128,7 +128,7 @@ struct fileutils_dchown
 
 struct fileutils_dcmp
 {
-	static __forceinline char *Prepare(fileutils_dcmp *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dcmp *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
@@ -151,7 +151,7 @@ struct fileutils_dcmp
 
 struct fileutils_dcp
 {
-	static __forceinline char *Prepare(fileutils_dcp *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dcp *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
@@ -174,7 +174,7 @@ struct fileutils_dcp
 
 struct fileutils_dgrep
 {
-	static __forceinline char *Prepare(fileutils_dgrep *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dgrep *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
@@ -197,7 +197,7 @@ struct fileutils_dgrep
 
 struct fileutils_dls
 {
-	static __forceinline char *Prepare(fileutils_dls *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dls *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -216,7 +216,7 @@ struct fileutils_dls
 
 struct fileutils_dmkdir
 {
-	static __forceinline char *Prepare(fileutils_dmkdir *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dmkdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -235,7 +235,7 @@ struct fileutils_dmkdir
 
 struct fileutils_dmore
 {
-	static __forceinline char *Prepare(fileutils_dmore *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dmore *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -254,7 +254,7 @@ struct fileutils_dmore
 
 struct fileutils_dmv
 {
-	static __forceinline char *Prepare(fileutils_dmv *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dmv *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
@@ -277,7 +277,7 @@ struct fileutils_dmv
 
 struct fileutils_drm
 {
-	static __forceinline char *Prepare(fileutils_drm *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_drm *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -296,7 +296,7 @@ struct fileutils_drm
 
 struct fileutils_drmdir
 {
-	static __forceinline char *Prepare(fileutils_drmdir *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_drmdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -315,7 +315,7 @@ struct fileutils_drmdir
 
 struct fileutils_dpwd
 {
-	static __forceinline __device__ char *Prepare(fileutils_dpwd *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fileutils_dpwd *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -331,7 +331,7 @@ struct fileutils_dpwd
 
 struct fileutils_dcd
 {
-	static __forceinline char *Prepare(fileutils_dcd *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ char *Prepare(fileutils_dcd *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

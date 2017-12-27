@@ -75,7 +75,7 @@ extern __device__ char *asctime_(const struct tm *tp);
 #define asctime asctime_
 
 /* Equivalent to `asctime (localtime (timer))'.  */
-__forceinline __device__ char *ctime_(const time_t *timer) { return asctime(localtime(timer)); }
+__forceinline__ __device__ char *ctime_(const time_t *timer) { return asctime(localtime(timer)); }
 #define ctime ctime_
 __END_NAMESPACE_STD;
 

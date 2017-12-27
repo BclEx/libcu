@@ -1,4 +1,3 @@
-#include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <stdlibcu.h>
 #include <stringcu.h>
@@ -9,9 +8,9 @@
 #define utf8_strlen(S, B) ((B) < 0 ? strlen(S) : (B))
 #define utf8_tounicode(S, CP) (*(CP) = (unsigned char)*(S), 1)
 #define utf8_getchars(CP, C) (*(CP) = (C), 1)
-#define utf8_upper(C) _toupper(C)
-#define utf8_title(C) _toupper(C)
-#define utf8_lower(C) _tolower(C)
+#define utf8_upper(C) toupper(C)
+#define utf8_title(C) toupper(C)
+#define utf8_lower(C) tolower(C)
 #define utf8_index(C, I) (I)
 #define utf8_charlen(C) 1
 #define utf8_prev_len(S, L) 1
@@ -109,7 +108,7 @@ static __device__ const char *regprop(int op);
 #endif
 
 // Returns the length of the null-terminated integer sequence.
-static __forceinline __device__ int _strlenint(const int *seq)
+static __forceinline__ __device__ int _strlenint(const int *seq)
 {
 	int n = 0;
 	while (*seq++) { n++; }

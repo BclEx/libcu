@@ -52,7 +52,7 @@ extern "C" cudaError_t cudaFallocSetDefaultHeap(cudaDeviceFallocHeap &heap)
 //  Takes a buffer length to allocate, creates the memory on the device and
 //  returns a pointer to it for when a kernel is called. It's up to the caller
 //  to free it.
-static __forceinline void writeChunkRefHost(fallocChunkRef *ref, fallocChunkHeader *chunk) { ref->chunk = chunk; ref->chunkid = 0; ref->threadid = 0; }
+static __forceinline__ void writeChunkRefHost(fallocChunkRef *ref, fallocChunkHeader *chunk) { ref->chunk = chunk; ref->chunkid = 0; ref->threadid = 0; }
 extern "C" cudaDeviceFallocHeap cudaDeviceFallocHeapCreate(size_t chunkSize, size_t length, cudaError_t *error, void *reserved)
 {
 	cudaError_t localError; if (!error) error = &localError;
@@ -127,14 +127,14 @@ __constant__ cuFallocDeviceHeap *_defaultDeviceHeap;
 
 #define FALLOC_MAGIC (unsigned short)0x3412 // All our headers are prefixed with a magic number so we know they're ours
 
-static __device__ __forceinline void writeChunkRef(fallocChunkRef *ref, fallocChunkHeader *chunk)
+static __device__ __forceinline__ void writeChunkRef(fallocChunkRef *ref, fallocChunkHeader *chunk)
 {
 	ref->chunk = chunk;
 	ref->chunkid = gridDim.x*blockIdx.y + blockIdx.x;
 	ref->threadid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x*threadIdx.y + threadIdx.x;
 }
 
-static __device__ __forceinline void writeChunkHeader(fallocChunkHeader *hdr, unsigned short count)
+static __device__ __forceinline__ void writeChunkHeader(fallocChunkHeader *hdr, unsigned short count)
 {
 	fallocChunkHeader header;
 	header.magic = FALLOC_MAGIC;

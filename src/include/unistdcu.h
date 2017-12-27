@@ -27,12 +27,16 @@ THE SOFTWARE.
 #ifndef _UNISTDCU_H
 #define _UNISTDCU_H
 #include <crtdefscu.h>
+#include <sys/types.h>
 
+#if __OS_WIN
 #include <_dirent.h>
 #include <_unistd.h>
-#include <sys/types.h>
 typedef short gid_t;
 typedef short uid_t;
+#elif __OS_UNIX
+#include <unistd.h>
+#endif
 
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
@@ -97,7 +101,7 @@ SIGALRM signal while inside `sleep' call, the handling of the SIGALRM signal aft
 error, but if `sleep' returns SECONDS, it probably didn't work.  */
 extern __device__ void usleep_(unsigned long milliseconds);
 #define usleep usleep_
-__forceinline __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
+__forceinline__ __device__ void sleep_(unsigned int seconds) { usleep_(seconds * 1000); }
 #define sleep sleep_
 
 /* Suspend the process until a signal arrives. This always returns -1 and sets `errno' to EINTR.  */

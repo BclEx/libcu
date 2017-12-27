@@ -1,22 +1,33 @@
+#include <sentinel.h>
+#if __OS_WIN
 #include <windows.h>
 #include <process.h>
+#define THREADHANDLE HANDLE
+#define THREADCALL unsigned int __stdcall
+#elif __OS_UNIX
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <pthread.h>
+#define THREADHANDLE pthread_t
+#define THREADCALL void *
+#endif
 #include <stdio.h>
-#include <sentinel.h>
 #include <assert.h>
-//#include <cuda_runtimecu.h>
+#include <cuda_runtimecu.h>
 
 void sentinelCommand::Dump()
 {
-	register char *b = (char *)&Data;
+	register unsigned char *b = (unsigned char *)&Data;
 	register int l = Length;
 	printf("Cmd: %d[%d]'", ((sentinelMessage*)Data)->OP, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
 
 void sentinelMap::Dump()
 {
-	register char *b = (char *)this;
+	register unsigned char *b = (unsigned char *)this;
 	register int l = sizeof(sentinelMap);
-	printf("Map: 0x%x[%d]'", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
+	printf("Map: 0x%p[%d]'", b, l); for (int i = 0; i < l; i++) printf("%02x", b[i] & 0xff); printf("'\n");
 }
 
 static sentinelContext _ctx;
@@ -24,11 +35,8 @@ static sentinelExecutor _baseExecutor = { nullptr, "base", sentinelDefaultExecut
 
 // HOSTSENTINEL
 #if HAS_HOSTSENTINEL
-
-static HANDLE _hostMapHandle = NULL;
-static int *_hostMap = nullptr;
-static HANDLE _threadHostHandle = NULL;
-static unsigned int __stdcall sentinelHostThread(void *data) 
+static THREADHANDLE _threadHostHandle = 0;
+static THREADCALL sentinelHostThread(void *data) 
 {
 	sentinelContext *ctx = &_ctx;
 	sentinelMap *map = ctx->HostMap;
@@ -56,18 +64,14 @@ static unsigned int __stdcall sentinelHostThread(void *data)
 	}
 	return 0;
 }
-
 #endif
 
 // DEVICESENTINEL
 #if HAS_DEVICESENTINEL
-
-static bool _sentinelDevice = false;
-static int *_deviceMap[SENTINEL_DEVICEMAPS];
-static HANDLE _threadDeviceHandle[SENTINEL_DEVICEMAPS];
-static unsigned int __stdcall sentinelDeviceThread(void *data) 
+static THREADHANDLE _threadDeviceHandle[SENTINEL_DEVICEMAPS];
+static THREADCALL sentinelDeviceThread(void *data) 
 {
-	int threadId = (int)data;
+	int threadId = (int)(intptr_t)data;
 	sentinelContext *ctx = &_ctx;
 	sentinelMap *map = ctx->DeviceMap[threadId];
 	while (map) {
@@ -98,11 +102,22 @@ static unsigned int __stdcall sentinelDeviceThread(void *data)
 	}
 	return 0;
 }
-
 #endif
 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa366551(v=vs.85).aspx
 // https://github.com/pathscale/nvidia_sdk_samples/blob/master/simpleStreams/0_Simple/simpleStreams/simpleStreams.cu
+#if HAS_HOSTSENTINEL
+#if __OS_WIN
+static HANDLE _hostMapHandle = NULL;
+static int *_hostMap = nullptr;
+#elif __OS_UNIX
+static void *_hostMap = nullptr;
+#endif
+#endif
+#if HAS_DEVICESENTINEL
+static bool _sentinelDevice = false;
+static int *_deviceMap[SENTINEL_DEVICEMAPS];
+#endif
 void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, bool hostSentinel, bool deviceSentinel)
 {
 	// create host map
@@ -123,7 +138,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
 		_ctx.HostMap->Offset = (intptr_t)_sentinelHostMap;
 #elif __OS_UNIX
-		_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_PUBLIC | MAP_POPULATE, 0, 0);
+		_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 		if (!_hostMap) {
 			printf("Could not map view of file.\n");
 			exit(1);
@@ -165,8 +180,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 #if __OS_WIN
 		_threadHostHandle = (HANDLE)_beginthreadex(0, 0, sentinelHostThread, nullptr, 0, 0);
 #elif __OS_UNIX
-		int err;
-		if (err = pthread_create(&_threadDeviceHandle[i], NULL, &sentinelDeviceThread, (void *)i)) {
+		int err; if (err = pthread_create(&_threadHostHandle, NULL, &sentinelDeviceThread, NULL)) {
 			printf("Could not create host thread (%s).\n", strerror(err));
 			exit(1);
 		}
@@ -180,9 +194,8 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 		for (int i = 0; i < SENTINEL_DEVICEMAPS; i++)
 			_threadDeviceHandle[i] = (HANDLE)_beginthreadex(0, 0, sentinelDeviceThread, (void *)i, 0, 0);
 #elif __OS_UNIX
-		int err;
-		for (int i = 0; i < SENTINEL_DEVICEMAPS; i++)
-			if (err = pthread_create(&_threadDeviceHandle[i], NULL, &sentinelDeviceThread, (void *)i)) {
+		int err; for (int i = 0; i < SENTINEL_DEVICEMAPS; i++)
+			if (err = pthread_create(&_threadDeviceHandle[i], NULL, &sentinelDeviceThread, (void *)(intptr_t)i)) {
 				printf("Could not create device thread (%s).\n", strerror(err));
 				exit(1);
 			}
@@ -200,21 +213,28 @@ void sentinelServerShutdown()
 {
 	// close host map
 #if HAS_HOSTSENTINEL
-	if (_hostMapHandle) { 
 #if __OS_WIN
+	if (_hostMapHandle) { 
 		if (_threadHostHandle) { CloseHandle(_threadHostHandle); _threadHostHandle = NULL; }
 		if (_hostMap) { UnmapViewOfFile(_hostMap); _hostMap = nullptr; }
 		CloseHandle(_hostMapHandle); _hostMapHandle = NULL;
-#elif __OS_UNIX
-		if (_hostMap) { munmap(_hostMap, sizeof(sentinelMap) + MEMORY_ALIGNMENT); _hostMap = nullptr; }
-#endif
 	}
+#elif __OS_UNIX
+	if (_hostMap) { 
+		if (_threadHostHandle) { pthread_cancel(_threadHostHandle); _threadHostHandle = 0; }
+		munmap(_hostMap, sizeof(sentinelMap) + MEMORY_ALIGNMENT); _hostMap = nullptr;
+	}
+#endif
 #endif
 	// close device maps
 #if HAS_DEVICESENTINEL
 	if (_sentinelDevice) {
 		for (int i = 0; i < SENTINEL_DEVICEMAPS; i++) {
+#if __OS_WIN
 			if (_threadDeviceHandle[i]) { CloseHandle(_threadDeviceHandle[i]); _threadDeviceHandle[i] = NULL; }
+#elif __OS_UNIX
+			if (_threadDeviceHandle[i]) { pthread_cancel(_threadDeviceHandle[i]); _threadDeviceHandle[i] = 0; }
+#endif
 			if (_deviceMap[i]) { cudaErrorCheckA(cudaFreeHost(_deviceMap[i])); _deviceMap[i] = nullptr; }
 		}
 	}
@@ -239,7 +259,7 @@ void sentinelClientInitialize(char *mapHostName)
 	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
 	_sentinelHostMapOffset = (intptr_t)((char *)_ctx.HostMap->Offset - (char *)_sentinelHostMap);
 #elif __OS_UNIX
-	_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_PUBLIC | MAP_POPULATE, 0, 0);
+	_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 	if (!_hostMap) {
 		printf("Could not map view of file.\n");
 		exit(1);

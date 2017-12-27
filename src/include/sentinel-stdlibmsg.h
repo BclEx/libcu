@@ -47,7 +47,7 @@ struct stdlib_exit {
 };
 
 struct stdlib_system {
-	static __forceinline __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -65,7 +65,7 @@ struct stdlib_system {
 };
 
 struct stdlib_getenv {
-	static __forceinline __device__ char *Prepare(stdlib_getenv *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(stdlib_getenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -83,7 +83,7 @@ struct stdlib_getenv {
 };
 
 struct stdlib_setenv {
-	static __forceinline __device__ char *Prepare(stdlib_setenv *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(stdlib_setenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
@@ -107,7 +107,7 @@ struct stdlib_setenv {
 };
 
 struct stdlib_unsetenv {
-	static __forceinline __device__ char *Prepare(stdlib_unsetenv *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(stdlib_unsetenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

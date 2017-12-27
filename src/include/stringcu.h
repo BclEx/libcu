@@ -185,7 +185,7 @@ extern __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list 
 extern __device__ void strbldAppendChar(strbld_t *b, int n, int c);
 extern __device__ void strbldAppend(strbld_t *b, const char *str, int length);
 extern __device__ void strbldAppendAll(strbld_t *b, const char *str);
-extern __forceinline __device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
+extern __forceinline__ __device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
 extern __device__ char *strbldToString(strbld_t *b);
 extern __device__ void strbldReset(strbld_t *b);
 

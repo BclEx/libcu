@@ -22,7 +22,7 @@ volatile __device__ fileRef *__iob_freeFilePtr = __iob_fileRefs; // Current atom
 volatile __device__ fileRef *__iob_retnFilePtr = __iob_fileRefs; // Current atomically-incremented non-wrapped offset
 __constant__ file_t __iob_files[LIBCU_MAXFILESTREAM];
 
-static __device__ __forceinline void writeFileRef(fileRef *ref, file_t *f)
+static __forceinline__ __device__ void writeFileRef(fileRef *ref, file_t *f)
 {
 	ref->file = f;
 	ref->id = gridDim.x*blockIdx.y + blockIdx.x;

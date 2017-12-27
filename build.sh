@@ -7,7 +7,7 @@ cd _build
 
 mkdir build32
 cd build32
-cmake -DCMAKE_CUDA_FLAGS="-arch=sm_35" ../../src
+cmake -DCMAKE_CUDA_FLAGS="-arch=sm_60" ../../src
 cd ..
 
 cmake --build build32 --config Debug

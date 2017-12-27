@@ -1,7 +1,10 @@
-#include <windows.h>
-#include <stdio.h>
 #include <sentinel.h>
-//#include <cuda_runtimecu.h>
+#if __OS_WIN
+#include <windows.h>
+#elif __OS_UNIX
+#include <stdlib.h>
+#endif
+#include <stdio.h>
 
 #if HAS_HOSTSENTINEL
 

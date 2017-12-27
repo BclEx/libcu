@@ -14,7 +14,7 @@ bool gpuAssert(cudaError_t code, const char *action, const char *file, int line,
 	return true;
 }
 
-__forceinline int __convertSMVer2Cores(int major, int minor)
+__forceinline__ int __convertSMVer2Cores(int major, int minor)
 {
 	typedef struct { // Defines for GPU Architecture types (using the SM version to determine the # of cores per SM
 		int SM; // 0xMm (hexidecimal notation), M = SM Major version, and m = SM minor version

@@ -30,6 +30,9 @@ THE SOFTWARE.
 #include <sentinel.h>
 #include <crtdefscu.h>
 #include <stringcu.h>
+#if __OS_WIN
+#define stat64 _stat64
+#endif
 
 enum {
 	FCNTL_FCNTL = 46,
@@ -53,7 +56,7 @@ struct fcntl_fcntl {
 };
 
 struct fcntl_open {
-	static __forceinline __device__ char *Prepare(fcntl_open *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_open *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -71,7 +74,7 @@ struct fcntl_open {
 };
 
 struct fcntl_stat {
-	static __forceinline __device__ char *Prepare(fcntl_stat *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_stat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -90,7 +93,7 @@ struct fcntl_stat {
 };
 
 struct fcntl_fstat {
-	static __forceinline __device__ char *Prepare(fcntl_fstat *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_fstat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -106,7 +109,7 @@ struct fcntl_fstat {
 };
 
 struct fcntl_stat64 {
-	static __forceinline __device__ char *Prepare(fcntl_stat64 *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_stat64 *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -114,34 +117,34 @@ struct fcntl_stat64 {
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
 		t->Str = str + offset;
-		t->Ptr = (struct _stat64 *)(str + offset);
+		t->Ptr = (struct stat64 *)(str + offset);
 		return end;
 	}
 	sentinelMessage Base;
-	const char *Str; struct _stat64 *Ptr; bool LStat;
-	__device__ fcntl_stat64(const char *str, struct _stat64 *ptr, bool lstat)
+	const char *Str; struct stat64 *Ptr; bool LStat;
+	__device__ fcntl_stat64(const char *str, struct stat64 *ptr, bool lstat)
 		: Base(true, FCNTL_STAT64, 1024, SENTINELPREPARE(Prepare)), Str(str), Ptr(ptr), LStat(lstat) { sentinelDeviceSend(&Base, sizeof(fcntl_stat64)); }
 	int RC;
 };
 
 struct fcntl_fstat64 {
-	static __forceinline __device__ char *Prepare(fcntl_fstat64 *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_fstat64 *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
-		t->Ptr = (struct _stat64 *)ptr;
+		t->Ptr = (struct stat64 *)ptr;
 		return end;
 	}
 	sentinelMessage Base;
-	int Handle; struct _stat64 *Ptr; bool LStat;
-	__device__ fcntl_fstat64(int fd, struct _stat64 *ptr)
+	int Handle; struct stat64 *Ptr; bool LStat;
+	__device__ fcntl_fstat64(int fd, struct stat64 *ptr)
 		: Base(true, FCNTL_FSTAT64), Handle(fd), Ptr(ptr) { sentinelDeviceSend(&Base, sizeof(fcntl_fstat64)); }
 	int RC;
 };
 
 struct fcntl_chmod {
-	static __forceinline __device__ char *Prepare(fcntl_chmod *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_chmod *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -159,7 +162,7 @@ struct fcntl_chmod {
 };
 
 struct fcntl_mkdir {
-	static __forceinline __device__ char *Prepare(fcntl_mkdir *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_mkdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -177,7 +180,7 @@ struct fcntl_mkdir {
 };
 
 struct fcntl_mkfifo {
-	static __forceinline __device__ char *Prepare(fcntl_mkfifo *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(fcntl_mkfifo *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

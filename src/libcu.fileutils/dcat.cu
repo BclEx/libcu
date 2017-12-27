@@ -12,7 +12,7 @@ void dumpfile(FILE *f)
 		fwrite(readbuf, nred, 1, stdout);
 }
 
-__forceinline int dcat_(char *str) { fileutils_dcat msg(str); return msg.RC; }
+__forceinline__ int dcat_(char *str) { fileutils_dcat msg(str); return msg.RC; }
 
 int main(int argc, char **argv)
 {

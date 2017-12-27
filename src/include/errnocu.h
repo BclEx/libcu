@@ -32,15 +32,21 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
+#undef errno
+#define errno (*_errno())
 extern __device__ int *_errno_(void);
 #define _errno _errno_
-#define errno (*_errno())
-extern __device__ errno_t _set_errno_(int value);
+extern __device__ int _set_errno_(int value);
 #define _set_errno _set_errno_
-extern __device__ errno_t _get_errno_(int *value);
+extern __device__ int _get_errno_(int *value);
 #define _get_errno _get_errno_
 
 __END_DECLS;
+#else
+#if __OS_UNIX
+#define _set_errno(err) (errno = (err))
+#define _get_errno(err) (errno)
+#endif
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _ERRNOCU_H */

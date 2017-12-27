@@ -9,21 +9,21 @@ static __global__ void g_ctype_test1()
 	//fprintf_(stdout, "ctype_test1\n");
 
 	//// ISCTYPE ////
-	extern __forceinline __device__ int isctype_(int c, int type);
+	//extern __forceinline__ __device__ int isctype_(int c, int type);
 	bool _0 = isctype('a', 0x02); assert(_0);
 
 	//// ISALNUM, ISALPHA, ISCNTRL, ISDIGIT, ISLOWER, ISGRAPH, ISPRINT, ISPUNCT, ISSPACE, ISUPPER, ISXDIGIT ////
-	//extern __forceinline __device__ int isalnum_(int c);
-	//extern __forceinline __device__ int isalpha_(int c);
-	//extern __forceinline __device__ int iscntrl_(int c);
-	//extern __forceinline __device__ int isdigit_(int c);
-	//extern __forceinline __device__ int islower_(int c);
-	//extern __forceinline __device__ int isgraph_(int c);
-	//extern __forceinline __device__ int isprint_(int c);
-	//extern __forceinline __device__ int ispunct_(int c);
-	//extern __forceinline __device__ int isspace_(int c);
-	//extern __forceinline __device__ int isupper_(int c);
-	//extern __forceinline __device__ int isxdigit_(int c);
+	//extern __forceinline__ __device__ int isalnum_(int c);
+	//extern __forceinline__ __device__ int isalpha_(int c);
+	//extern __forceinline__ __device__ int iscntrl_(int c);
+	//extern __forceinline__ __device__ int isdigit_(int c);
+	//extern __forceinline__ __device__ int islower_(int c);
+	//extern __forceinline__ __device__ int isgraph_(int c);
+	//extern __forceinline__ __device__ int isprint_(int c);
+	//extern __forceinline__ __device__ int ispunct_(int c);
+	//extern __forceinline__ __device__ int isspace_(int c);
+	//extern __forceinline__ __device__ int isupper_(int c);
+	//extern __forceinline__ __device__ int isxdigit_(int c);
 	bool a0 = isalnum('a'); bool a0n = isalnum('1'); assert(a0 && a0n);
 	bool a1 = isalpha('a'); bool a1n = isalpha('A'); assert(a1 && a1n);
 	bool a2 = iscntrl('a'); bool a2n = iscntrl('A'); assert(!a2 && !a2n);
@@ -37,8 +37,8 @@ static __global__ void g_ctype_test1()
 	bool aA = isxdigit('a'); bool aAn = isxdigit('A'); assert(aA && aAn);
 
 	//// TOLOWER, TOUPPER, _TOLOWER, _TOUPPER ////
-	//extern __forceinline __device__ int tolower_(int c);
-	//extern __forceinline __device__ int toupper_(int c);
+	//extern __forceinline__ __device__ int tolower_(int c);
+	//extern __forceinline__ __device__ int toupper_(int c);
 	////existing: #define _tolower(c)
 	////existing: #define _toupper(c)
 	char b0 = tolower('a'); char b0n = tolower('A'); assert(b0 == 'a' && b0n == 'a');
@@ -47,8 +47,8 @@ static __global__ void g_ctype_test1()
 	char b3 = _tolower('a'); char b3n = _tolower('A'); assert(b3 != 'a' && b3n == 'a');
 
 	//// ISBLANK, ISIDCHAR ////
-	//extern __forceinline __device__ int isblank_(int c);
-	//extern __forceinline __device__ int isidchar_(int c);
+	//extern __forceinline__ __device__ int isblank_(int c);
+	//extern __forceinline__ __device__ int isidchar_(int c);
 	bool c0 = isblank(' '); bool c0n = isblank('A'); assert(c0 && !c0n);
 	bool c1 = isidchar('a'); bool c1n = isidchar('A'); assert(c1 && c1n);
 

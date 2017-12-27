@@ -686,9 +686,9 @@ extern "C" {
 
 	// variable command *added*
 	JIM_EXPORT __device__ Jim_Obj *Jim_GetVar2(Jim_Interp *interp, const char *name, const char *key, int flags);
-	__device__ __forceinline Jim_Obj *Jim_ObjGetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, int flags) { Jim_Obj *obj; Jim_DictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, &obj, flags); return obj; }
+	__device__ __forceinline__ Jim_Obj *Jim_ObjGetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, int flags) { Jim_Obj *obj; Jim_DictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, &obj, flags); return obj; }
 	JIM_EXPORT __device__ int Jim_SetVar2(Jim_Interp *interp, const char *name, const char *key, const char *val, int flags);
-	__device__ __forceinline int Jim_ObjSetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, Jim_Obj *valObjPtr) { return Jim_SetDictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, valObjPtr, 0); }
+	__device__ __forceinline__ int Jim_ObjSetVar2(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *keyObjPtr, Jim_Obj *valObjPtr) { return Jim_SetDictKeysVector(interp, nameObjPtr, &keyObjPtr, 1, valObjPtr, 0); }
 
 	// result append *added*
 #define Jim_AppendResult(i, ...) do { \

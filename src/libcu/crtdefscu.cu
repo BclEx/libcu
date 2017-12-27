@@ -16,7 +16,7 @@ volatile __device__ hostRef *__iob_freeDevicePtr = __iob_hostRefs; // Current at
 volatile __device__ hostRef *__iob_retnDevicePtr = __iob_hostRefs; // Current atomically-incremented non-wrapped offset
 __constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
 
-static __device__ __forceinline void writeHostRef(hostRef *ref, hostptr_t *p)
+static __forceinline__ __device__ void writeHostRef(hostRef *ref, hostptr_t *p)
 {
 	ref->ptr = p;
 	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
@@ -26,7 +26,7 @@ static __device__ __forceinline void writeHostRef(hostRef *ref, hostptr_t *p)
 __device__ hostptr_t *__hostptrGet(void *host)
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs);
+	size_t offset = (atomicAdd((_uintptr_t *)&__iob_freeDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs);
 	offset %= (sizeof(hostRef)*LIBCU_MAXHOSTPTR);
 	int offsetId = offset / sizeof(hostRef);
 	hostRef *ref = (hostRef *)((char *)&__iob_hostRefs + offset);
@@ -43,7 +43,7 @@ __device__ void __hostptrFree(hostptr_t *p)
 {
 	if (!p) return;
 	// advance circular buffer
-	size_t offset = atomicAdd((uintptr_t *)&__iob_retnDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs;
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_retnDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs;
 	offset %= (sizeof(hostRef)*LIBCU_MAXHOSTPTR);
 	hostRef *ref = (hostRef *)((char *)&__iob_hostRefs + offset);
 	writeHostRef(ref, p);

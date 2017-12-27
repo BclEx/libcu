@@ -147,7 +147,7 @@ static __device__ __fpmax_t __strtofpmax(const Wchar *str, Wchar **endptr, int e
 
 	negative = 0;
 	switch(*pos) {				/* Handle optional sign. */
-	case '-': negative = 1;	/* Fall through to increment position. */
+	case '-': negative = 1;		/* Fall through to increment position. */
 	case '+': ++pos;
 	}
 
@@ -155,7 +155,7 @@ static __device__ __fpmax_t __strtofpmax(const Wchar *str, Wchar **endptr, int e
 	if ((*pos == '0') && (((pos[1])|0x20) == 'x')) {
 		poshex = ++pos;			/* Save position of 'x' in case no digits */
 		++pos;					/*   and advance past it.  */
-		is_mask = _HEX;	/* Used by IS_X_DIGIT. */
+		is_mask = _HEX;			/* Used by IS_X_DIGIT. */
 		expchar = 'p';			/* Adjust exponent char. */
 		p_base = 16;			/* Adjust base multiplier. */
 	}
@@ -761,7 +761,7 @@ __device__ void *bsearch_(const void *key, const void *base, size_t nmemb, size_
 	do { register TYPE t = *pi; *pi++ = *pj; *pj++ = t; } while (--i > 0); \
 }
 #define SWAPINIT(a, size) swaptype = (((char*)a-(char*)0)%sizeof(long)||size%sizeof(long)?2:(size==sizeof(long)?0:1));
-__forceinline __device__ void swapfunc(char *a, char *b, int n, int swaptype)
+__forceinline__ __device__ void swapfunc(char *a, char *b, int n, int swaptype)
 {
 	if (swaptype <= 1) SWAPCODE(long, a, b, n)
 	else SWAPCODE(char, a, b, n)
@@ -771,7 +771,7 @@ __forceinline __device__ void swapfunc(char *a, char *b, int n, int swaptype)
 	else swapfunc(a, b, size, swaptype)
 #define VECSWAP(a, b, n) if ((n) > 0) swapfunc(a, b, n, swaptype)
 
-__forceinline __device__ char *med3(char *a, char *b, char *c, __compar_fn_t compar)
+__forceinline__ __device__ char *med3(char *a, char *b, char *c, __compar_fn_t compar)
 {
 	return compar(a, b)<0 ? (compar(b, c)<0?b:(compar(a, c)<0?c:a)) : (compar(b, c)>0?b:(compar(a, c)<0?a:c));
 }

@@ -29,7 +29,7 @@ static __global__ void g_time_test1()
 
 	//// ASCTIME, CTIME ////
 	//extern __device__ char *asctime_(const struct tm *tp);
-	//__forceinline __device__ char *ctime_(const time_t *timer);
+	//__forceinline__ __device__ char *ctime_(const time_t *timer);
 	char *d0a = asctime(timeinfo); assert(d0a);
 	char *d1a = ctime(&rawtime); assert(d1a);
 }

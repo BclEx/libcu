@@ -168,10 +168,10 @@ __BEGIN_NAMESPACE_STD;
 extern __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 #define vfprintf vfprintf_
 /* Write formatted output to stdout from argument list ARG. */
-//builtin: __forceinline __device__ int vprintf_(const char *__restrict format, va_list va) { return vfprintf(stdout, format, va, true); };
+//builtin: __forceinline__ __device__ int vprintf_(const char *__restrict format, va_list va) { return vfprintf(stdout, format, va, true); };
 //#define vprintf vprintf_
 /* Write formatted output to S from argument list ARG.  */
-__forceinline __device__ int vsprintf_(char *__restrict s, const char *__restrict format, va_list va) { return vsnprintf(s, 0xffffffff, format, va); }
+__forceinline__ __device__ int vsprintf_(char *__restrict s, const char *__restrict format, va_list va) { return vsnprintf(s, 0xffffffff, format, va); }
 #define vsprintf vsprintf_
 __END_NAMESPACE_STD;
 
@@ -189,7 +189,7 @@ __BEGIN_NAMESPACE_C99;
 extern __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
 #define vfscanf vfscanf_
 /* Read formatted input from stdin into argument list ARG. */
-__forceinline __device__ int vscanf_(const char *__restrict format, va_list va) { return vfscanf(stdin, format, va, true); }
+__forceinline__ __device__ int vscanf_(const char *__restrict format, va_list va) { return vfscanf(stdin, format, va, true); }
 #define vscanf vscanf_
 /* Read formatted input from S into argument list ARG.  */
 extern __device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va);
@@ -200,9 +200,10 @@ __BEGIN_NAMESPACE_STD;
 /* Read a character from STREAM.  */
 extern __device__ int fgetc_(FILE *stream);
 #define fgetc fgetc_
+#undef getc
 #define getc(stream) fgetc(stream)
 /* Read a character from stdin.  */
-__forceinline __device__ int getchar_(void) { return fgetc(stdin); }
+__forceinline__ __device__ int getchar_(void) { return fgetc(stdin); }
 #define getchar getchar_
 __END_NAMESPACE_STD;
 
@@ -213,9 +214,10 @@ __BEGIN_NAMESPACE_STD;
 /* Write a character to STREAM.  */
 extern __device__ int fputc_(int c, FILE *stream, bool wait = true);
 #define fputc fputc_
+#undef putc
 #define putc(c, stream) fputc(c, stream)
 /* Write a character to stdout.  */
-__forceinline __device__ int putchar_(int c) { return fputc(c, stdout); }
+__forceinline__ __device__ int putchar_(int c) { return fputc(c, stdout); }
 #define putchar putchar_
 __END_NAMESPACE_STD;
 
@@ -235,7 +237,7 @@ extern __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, 
 
 /* Write a string, followed by a newline, to stdout.  */
 //extern __device__ int puts(const char *s);
-__forceinline __device__ int puts_(const char *s) { fputs(s, stdout); return fputs("\n", stdout); }
+__forceinline__ __device__ int puts_(const char *s) { fputs(s, stdout); return fputs("\n", stdout); }
 #define puts puts_
 
 /* Push a character back onto the input buffer of STREAM.  */
@@ -319,7 +321,7 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Print a message describing the meaning of the value of errno.  */
-//__forceinline __device__ void perror_(const char *s) { printf(s); }
+//__forceinline__ __device__ void perror_(const char *s) { printf(s); }
 extern __device__ void perror_(const char *s);
 #define perror perror_
 __END_NAMESPACE_STD;
@@ -410,8 +412,12 @@ __END_NAMESPACE_EXT;
 
 #else
 #define ISHOSTFILE(stream) false
+#if __OS_WIN
 #define snprintf _snprintf
 #define fprintf_ fprintf
+#elif __OS_UNIX
+#define fprintf_ fprintf
+#endif
 // EXT
 #define mtagprintf(tag, format, ...) format
 #define vmtagprintf(tag, format, va) format

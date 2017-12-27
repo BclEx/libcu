@@ -101,13 +101,13 @@ extern "C" {
 #endif
 
 	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));
-	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
+	extern void sentinelServerInitialize(sentinelExecutor *executor = nullptr, char *mapHostName = (char *)SENTINEL_NAME, bool hostSentinel = true, bool deviceSentinel = true);
 	extern void sentinelServerShutdown();
 #if HAS_DEVICESENTINEL
 	extern __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength);
 #endif
 #if HAS_HOSTSENTINEL
-	extern void sentinelClientInitialize(char *mapHostName = SENTINEL_NAME);
+	extern void sentinelClientInitialize(char *mapHostName = (char *)SENTINEL_NAME);
 	extern void sentinelClientShutdown();
 	extern void sentinelClientSend(sentinelMessage *msg, int msgLength);
 #endif

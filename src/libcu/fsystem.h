@@ -3,7 +3,11 @@
 #include <crtdefscu.h>
 #include <fcntl.h>
 #include <ext/memfile.h>
+#if __OS_WIN
 #include <_dirent.h>
+#elif __OS_UNIX
+#include <dirent.h>
+#endif
 
 __BEGIN_DECLS;
 

@@ -11,6 +11,14 @@
 
 #define LIBCU_MAXLENGTH 1000000000
 
+#if __OS_WIN
+#elif __OS_UNIX
+#define _base _IO_buf_base
+#define _flag _flags
+#define _file _fileno
+#define DELETE (0x00010000L)
+#endif
+
 __BEGIN_DECLS;
 
 // STREAMS
@@ -27,7 +35,7 @@ volatile __device__ streamRef *__iob_freeStreamPtr = __iob_streamRefs; // Curren
 volatile __device__ streamRef *__iob_retnStreamPtr = __iob_streamRefs; // Current atomically-incremented non-wrapped offset
 __constant__ FILE __iob_streams[LIBCU_MAXFILESTREAM+3];
 
-static __device__ __forceinline void writeStreamRef(streamRef *ref, FILE *s)
+static __forceinline__ __device__ void writeStreamRef(streamRef *ref, FILE *s)
 {
 	ref->file = s;
 	ref->id = gridDim.x*blockIdx.y + blockIdx.x;
@@ -37,7 +45,7 @@ static __device__ __forceinline void writeStreamRef(streamRef *ref, FILE *s)
 static __device__ FILE *streamGet(int fd = 0)
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
+	size_t offset = (atomicAdd((_uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
 	offset %= (sizeof(streamRef)*LIBCU_MAXFILESTREAM);
 	int offsetId = offset / sizeof(streamRef);
 	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
@@ -56,7 +64,7 @@ static __device__ void streamFree(FILE *s)
 	//if (s->_file != -1)
 	//	close(s->_file);
 	// advance circular buffer
-	size_t offset = atomicAdd((uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_retnStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
 	offset %= (sizeof(streamRef)*LIBCU_MAXFILESTREAM);
 	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);
 	writeStreamRef(ref, s);
@@ -188,7 +196,7 @@ __device__ FILE *freopen64_(const char *__restrict filename, const char *__restr
 {
 	if (ISHOSTPATH(filename)) { stdio_freopen msg(filename, modes, stream); return msg.RC; }
 	if (stream)
-		fclose_(stream);
+		streamFree(stream);
 	// Parse the specified mode.
 	unsigned short openMode = O_RDONLY;
 	if (*modes != 'r') { // Not read...
@@ -212,12 +220,12 @@ __device__ FILE *freopen64_(const char *__restrict filename, const char *__restr
 
 	// Need to allocate a FILE (not freopen).
 	if (!stream) {
-		stream = getNextStream();
+		stream = streamGet();
 		if (!stream)
 			return nullptr;
 	}
 	stream->_flag = openMode;
-	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file, &r);
+	stream->_base = (char *)fsystemOpen(filename, openMode, &stream->_file);
 	return stream;
 }
 

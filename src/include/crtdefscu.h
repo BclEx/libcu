@@ -59,6 +59,13 @@ THE SOFTWARE.
 #if __OS_WIN
 #include <crtdefs.h>
 //#include <corecrt_io.h>
+#define _uintptr_t uintptr_t
+#elif __OS_UNIX
+#ifdef _WIN64
+typedef unsigned int long long _uintptr_t;
+#else
+typedef unsigned int _uintptr_t;
+#endif
 #endif
 
 #include <cuda_runtime.h>
@@ -95,12 +102,20 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define LIBCU_MAXHOSTPTR 10
 #endif
 
-//_Check_return_opt_ _CRTIMP int __cdecl printf(_In_z_ _Printf_format_string_ const char *_Format, ...);
+
 #if defined(__CUDA_ARCH__)
+#if __OS_WIN
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }
+#elif __OS_UNIX
+#define panic(fmt, ...) { printf(fmt"\n"); asm("trap;"); }
+#endif
 #else
-//__forceinline void Coverage(int line) { }
+//__forceinline__ void Coverage(int line) { }
+#if __OS_WIN
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); exit(1); }
+#elif __OS_UNIX
+#define panic(fmt, ...) { printf(fmt"\n"); exit(1); }
+#endif
 #endif  /* __CUDA_ARCH__ */
 
 /* GCC does not define the offsetof() macro so we'll have to do it ourselves. */
@@ -278,9 +293,9 @@ extern "C" __device__ char __cwd[];
 extern "C" __constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
 extern "C" __device__ hostptr_t *__hostptrGet(void *host);
 extern "C" __device__ void __hostptrFree(hostptr_t *p);
-template <typename T> __forceinline __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
-template <typename T> __forceinline __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
-template <typename T> __forceinline __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
+template <typename T> __forceinline__ __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
+template <typename T> __forceinline__ __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
+template <typename T> __forceinline__ __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
 
 /* Reset library */
 extern "C" __device__ void libcuReset();
@@ -308,9 +323,9 @@ extern "C" __device__ void libcuReset();
 #ifndef NDEBUG
 #define ASSERTONLY(X) X
 #if defined(__CUDA_ARCH__)
-__forceinline __device__ void Coverage(int line) { }
+__forceinline__ __device__ void Coverage(int line) { }
 #else
-__forceinline void Coverage(int line) { }
+__forceinline__ void Coverage(int line) { }
 #endif
 #define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
 #else

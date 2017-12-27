@@ -29,12 +29,15 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 
 #include <sys/stat.h>
+#if __OS_WIN
 //#include <corecrt_io.h>
+//#include <bits/libcu_stat.h>
+typedef int mode_t;
+#endif
+
 //#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 //#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 
-//#include <bits/libcu_stat.h>
-typedef int mode_t;
 //
 ///* Test macros for file types.	*/
 //#define	__S_ISTYPE(mode, mask)	(((mode) & __S_IFMT) == (mask))

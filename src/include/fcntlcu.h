@@ -31,8 +31,10 @@ THE SOFTWARE.
 #include <sys/statcu.h>
 
 #include <fcntl.h>
-#if defined(__CUDA_ARCH__)
+#if __OS_WIN
 #include <io.h>
+#endif
+#if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
 /* Do the file control operation described by CMD on FD. The remaining arguments are interpreted depending on CMD. */
@@ -77,8 +79,6 @@ STDARG(int, fcntl64_, fcntl64v_(fd, cmd, va), int fd, int cmd);
 STDARG(int, open64_, open64v_(file, oflag, va), const char *file, int oflag);
 #endif
 
-#else
-#include <io.h>
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _FCNTLCU_H */

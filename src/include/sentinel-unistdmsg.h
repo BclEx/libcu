@@ -46,7 +46,7 @@ enum {
 };
 
 struct unistd_access {
-	static __forceinline __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int nameLength = (t->Name ? (int)strlen(t->Name) + 1 : 0);
 		char *name = (char *)(data += _ROUND8(sizeof(*t)));
@@ -80,7 +80,7 @@ struct unistd_close {
 };
 
 struct unistd_read {
-	static __forceinline __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_read *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -88,7 +88,7 @@ struct unistd_read {
 		t->Ptr = ptr + offset;
 		return end;
 	}
-	static __forceinline __device__ bool Postfix(unistd_read *t, intptr_t offset)
+	static __forceinline__ __device__ bool Postfix(unistd_read *t, intptr_t offset)
 	{
 		char *ptr = (char *)t->Ptr - offset;
 		if ((int)t->RC > 0) memcpy(t->Buf, ptr, t->RC);
@@ -103,7 +103,7 @@ struct unistd_read {
 };
 
 struct unistd_write {
-	static __forceinline __device__ char *Prepare(unistd_write *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_write *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		size_t size = t->Size;
 		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
@@ -121,7 +121,7 @@ struct unistd_write {
 };
 
 struct unistd_chown {
-	static __forceinline __device__ char *Prepare(unistd_chown *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_chown *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -139,7 +139,7 @@ struct unistd_chown {
 };
 
 struct unistd_chdir {
-	static __forceinline __device__ char *Prepare(unistd_chdir *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_chdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -157,7 +157,7 @@ struct unistd_chdir {
 };
 
 struct unistd_getcwd {
-	static __forceinline __device__ char *Prepare(unistd_getcwd *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_getcwd *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
@@ -180,7 +180,7 @@ struct unistd_dup {
 };
 
 struct unistd_unlink {
-	static __forceinline __device__ char *Prepare(unistd_unlink *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_unlink *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
@@ -198,7 +198,7 @@ struct unistd_unlink {
 };
 
 struct unistd_rmdir {
-	static __forceinline __device__ char *Prepare(unistd_rmdir *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(unistd_rmdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));

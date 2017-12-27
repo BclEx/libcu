@@ -53,7 +53,7 @@ struct time_mktime {
 };
 
 struct time_strftime {
-	static __forceinline __device__ char *Prepare(time_strftime *t, char *data, char *dataEnd, intptr_t offset)
+	static __forceinline__ __device__ char *Prepare(time_strftime *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int fmtLength = (t->Fmt ? (int)strlen(t->Fmt) + 1 : 0);
 		char *fmt = (char *)(data += _ROUND8(sizeof(*t)));
@@ -65,7 +65,7 @@ struct time_strftime {
 		t->Ptr = ptr + offset;
 		return end;
 	}
-	static __forceinline __device__ bool Postfix(time_strftime *t, intptr_t offset)
+	static __forceinline__ __device__ bool Postfix(time_strftime *t, intptr_t offset)
 	{
 		char *ptr = (char *)t->Ptr - offset;
 		if ((int)t->RC > 0) memcpy((void *)t->Buf, ptr, t->RC);

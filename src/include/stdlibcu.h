@@ -81,20 +81,20 @@ __BEGIN_NAMESPACE_STD;
 extern __device__ double strtod_(const char *__restrict nptr, char **__restrict endptr);
 
 /* Convert a string to a floating-point number.  */
-__forceinline __device__ double atof_(const char *nptr) { return strtod_(nptr, NULL); }
+__forceinline__ __device__ double atof_(const char *nptr) { return strtod_(nptr, NULL); }
 #define atof atof_
 /* Convert a string to an integer.  */
-__forceinline __device__ int atoi_(const char *nptr) { return (int)__strtol(nptr, (char **)NULL, 10, 1); }
+__forceinline__ __device__ int atoi_(const char *nptr) { return (int)__strtol(nptr, (char **)NULL, 10, 1); }
 #define atoi atoi_
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int atol_(const char *nptr) { return __strtol(nptr, (char **)NULL, 10, 1); }
+__forceinline__ __device__ long int atol_(const char *nptr) { return __strtol(nptr, (char **)NULL, 10, 1); }
 #define atol atol_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a long long integer.  */
-__forceinline __device__ long long int atoll_(const char *nptr) { return __strtoll(nptr, (char **)NULL, 10, 1); }
+__forceinline__ __device__ long long int atoll_(const char *nptr) { return __strtoll(nptr, (char **)NULL, 10, 1); }
 #define atoll atoll_
 __END_NAMESPACE_C99;
 #endif
@@ -115,20 +115,20 @@ __END_NAMESPACE_C99;
 
 __BEGIN_NAMESPACE_STD;
 /* Convert a string to a long integer.  */
-__forceinline __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 1); }
+__forceinline__ __device__ long int strtol_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 1); }
 #define strtol strtol_
 /* Convert a string to an unsigned long integer.  */
-__forceinline __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 0); }
+__forceinline__ __device__ unsigned long int strtoul_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtol(nptr, endptr, base, 0); }
 #define strtoul strtoul_
 __END_NAMESPACE_STD;
 
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
 /* Convert a string to a quadword integer.  */
-__forceinline __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 1); }
+__forceinline__ __device__ long long int strtoll_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 1); }
 #define strtoll strtoll_
 /* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 0); }
+__forceinline__ __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base) { return __strtoll(nptr, endptr, base, 0); }
 #define strtoull strtoull_
 __END_NAMESPACE_C99;
 #endif
@@ -146,7 +146,7 @@ __BEGIN_NAMESPACE_STD;
 /* Allocate SIZE bytes of memory.  */
 extern __device__ void *malloc_(size_t size);
 #ifdef GANGING
-__device__ __forceinline void *mallocG(size_t size) { __shared__ void *p; if (!threadIdx.x) p = malloc_(size); __syncthreads(); return p; }
+__forceinline__ __device__ void *mallocG(size_t size) { __shared__ void *p; if (!threadIdx.x) p = malloc_(size); __syncthreads(); return p; }
 #define malloc mallocG
 #else
 #define malloc malloc_
@@ -154,9 +154,9 @@ __device__ __forceinline void *mallocG(size_t size) { __shared__ void *p; if (!t
 /* Allocate NMEMB elements of SIZE bytes each, all initialized to 0.  */
 //extern __device__ void *calloc_(size_t nmemb, size_t size);
 
-__forceinline __device__ void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
+__forceinline__ __device__ void *calloc_(size_t nmemb, size_t size) { void *p = malloc_(nmemb * size); if (p) memset(p, 0, size); return p; }
 #ifdef GANGING
-__forceinline __device__ void *callocG(size_t nmemb, size_t size) { __shared__ void *p; if (!threadIdx.x) p = calloc_(nmemb, size); __syncthreads(); return p; }
+__forceinline__ __device__ void *callocG(size_t nmemb, size_t size) { __shared__ void *p; if (!threadIdx.x) p = calloc_(nmemb, size); __syncthreads(); return p; }
 #define calloc callocG
 #else
 #define calloc calloc_
@@ -173,7 +173,7 @@ __BEGIN_NAMESPACE_STD;
 /* Re-allocate the previously allocated block in PTR, making the new block SIZE bytes long.  */
 extern __device__ void *realloc_(void *ptr, size_t size);
 #ifdef GANGING
-__device__ __forceinline void *reallocG(void *ptr, size_t size) { __shared__ void *v; if (!threadIdx.x) v = realloc_(ptr, size); __syncthreads(); return v; }
+__forceinline__ __device__ void *reallocG(void *ptr, size_t size) { __shared__ void *v; if (!threadIdx.x) v = realloc_(ptr, size); __syncthreads(); return v; }
 #define realloc reallocG
 #else
 #define realloc realloc_
@@ -181,7 +181,7 @@ __device__ __forceinline void *reallocG(void *ptr, size_t size) { __shared__ voi
 /* Free a block allocated by `malloc', `realloc' or `calloc'.  */
 extern __device__ void free_(void *ptr);
 #ifdef GANGING
-__device__ __forceinline void freeG(void *p) { if (!threadIdx.x) free_(p); __syncthreads(); }
+__forceinline__ __device__ void freeG(void *p) { if (!threadIdx.x) free_(p); __syncthreads(); }
 #define free freeG
 #else
 #define free free_
@@ -190,10 +190,10 @@ __END_NAMESPACE_STD;
 
 __BEGIN_NAMESPACE_STD;
 /* Abort execution and generate a core-dump.  */
-__forceinline __device__ void abort_(void) { asm("trap;"); }
+__forceinline__ __device__ void abort_(void) { asm("trap;"); }
 #define abort abort_
 /* Register a function to be called when `exit' is called.  */
-__forceinline __device__ int atexit_(void(*func)(void)) { panic("Not Supported"); return -1; }
+__forceinline__ __device__ int atexit_(void(*func)(void)) { panic("Not Supported"); return -1; }
 #define atexit atexit_
 //extern __device__ int atexit_(void(*func)(void)); #define atexit atexit_
 __END_NAMESPACE_STD;
@@ -257,14 +257,14 @@ extern __device__ void qsort_(void *base, size_t nmemb, size_t size, __compar_fn
 #define qsort qsort_
 
 /* Return the absolute value of X.  */
-__forceinline __device__ int abs_(int x) { return x >= 0 ? x : -x; }
+__forceinline__ __device__ int abs_(int x) { return x >= 0 ? x : -x; }
 #define abs abs_
-__forceinline __device__ long int labs_(long int x) { return x >= 0 ? x : -x; }
+__forceinline__ __device__ long int labs_(long int x) { return x >= 0 ? x : -x; }
 #define labs labs_
 __END_NAMESPACE_STD;
 #if defined(ULLONG_MAX)
 __BEGIN_NAMESPACE_C99;
-__forceinline __device__ long long int llabs_(long long int x) { return x >= 0 ? x : -x; }
+__forceinline__ __device__ long long int llabs_(long long int x) { return x >= 0 ? x : -x; }
 #define llabs llabs_
 __END_NAMESPACE_C99;
 #endif
@@ -320,20 +320,22 @@ __END_DECLS;
 __BEGIN_DECLS;
 
 #if defined(ULLONG_MAX)
+#if __OS_WIN
 /* Returned by `strtoq'.  */
 typedef long long int quad_t;
 /* Returned by `strtouq'.  */
 typedef unsigned long long int u_quad_t;
+#endif
 /* Convert a string to a quadword integer.  */
-__forceinline __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)strtol(nptr, endptr, base); }
+__forceinline__ __device__ quad_t strtoq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (quad_t)strtol(nptr, endptr, base); }
 #define strtoq strtoq_
 /* Convert a string to an unsigned quadword integer.  */
-__forceinline __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
+__forceinline__ __device__ u_quad_t strtouq_(const char *__restrict nptr, char **__restrict endptr, int base) { return (u_quad_t)strtoul(nptr, endptr, base); }
 #define strtouq strtouq_
 #endif
 
-/* Allocate SIZE bytes of memory.  Then Zero memory. */
-__forceinline __device__ void *mallocZero(size_t size) { void *p = malloc(size); if (p) memset(p, 0, size); return p; }
+/* Allocate SIZE bytes of memory.  Then Zero memory. */ // use:calloc
+//__forceinline__ __device__ void *mallocZero(size_t size) { void *p = malloc(size); if (p) memset(p, 0, size); return p; }
 
 __END_DECLS;
 #endif  /* _STDLIBCU_H */

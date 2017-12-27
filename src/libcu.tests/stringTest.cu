@@ -11,9 +11,9 @@ static __global__ void g_string_test1()
 	char dest[50]; memset(dest, 0, 50);
 
 	//// MEMCPY, MEMMOVE, MEMSET, MEMCPY, MEMCHR ////
-	//__forceinline __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n);
+	//__forceinline__ __device__ void *memcpy_(void *__restrict dest, const void *__restrict src, size_t n);
 	//extern __device__ void *memmove_(void *dest, const void *src, size_t n);
-	//__forceinline __device__ void *memset_(void *s, int c, size_t n);
+	//__forceinline__ __device__ void *memset_(void *s, int c, size_t n);
 	//extern __device__ int memcmp_(const void *s1, const void *s2, size_t n);
 	//extern __device__ void *memchr_(const void *s, int c, size_t n);
 	void *a0a = memcpy(dest, src, 0);
@@ -83,7 +83,7 @@ static __global__ void g_string_test1()
 
 	//// STRLEN, STRLEN16, STRNLEN ////
 	//extern __device__ size_t strlen_(const char *s);
-	//__forceinline __device__ size_t strlen16(const void *s);
+	//__forceinline__ __device__ size_t strlen16(const void *s);
 	//extern __device__ size_t strnlen_(const char *s, size_t maxlen);
 	size_t i0a = strlen(nullptr); size_t i0b = strlen(""); size_t i0c = strlen("abc"); assert(!i0a && !i0b && i0c == 3);
 	size_t i1a = strlen16(nullptr); size_t i1b = strlen16(L""); size_t i1c = strlen16(L"abc"); assert(!i1a && !i1b && i1c == 3);

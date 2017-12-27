@@ -1,36 +1,37 @@
 # https://devblogs.nvidia.com/parallelforall/building-cuda-applications-cmake
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(libcu LANGUAGES CXX CUDA)
-set(arch 35)
+set(arch 60)
 
 include_directories(include)
 
 add_library(libcu.${arch} STATIC
-  libcu/sentinel-msg.cpp
-  libcu/sentinel.cpp
-  libcu/sentinel-host.cpp
-  libcu/cuda_runtime.cpp
+  #libcu/sentinel-msg.cpp
+  #libcu/sentinel.cpp
+  #libcu/sentinel-host.cpp
+  #libcu/cuda_runtime.cpp
 
-  libcu/crtdefscu.cu
-  libcu/ctypecu.cu
-  libcu/errnocu.cu
-  libcu/regexcu.cu
-  libcu/sentinel-gpu.cu
-  libcu/setjmpcu.cu
-  libcu/stdiocu.cu
+  #libcu/crtdefscu.cu
+  #libcu/ctypecu.cu
+  #libcu/errnocu.cu
+  #libcu/regexcu.cu
+  #libcu/sentinel-gpu.cu
+  #libcu/setjmpcu.cu
+
+  #libcu/stdiocu.cu
   libcu/stdlibcu.cu
-  libcu/stringcu.cu
-  libcu/timecu.cu
-  libcu/unistdcu.cu
-  libcu/direntcu.cu
-  libcu/sys/statcu.cu
-  libcu/sys/timecu.cu
-  libcu/ext/hash.cu
-  libcu/ext/memfile.cu
-  libcu/grpcu.cu
-  libcu/pwdcu.cu
-  libcu/fsystem.cu
-  libcu/fcntlcu.cu
+  #libcu/stringcu.cu
+  #libcu/timecu.cu
+  #libcu/unistdcu.cu
+  #libcu/direntcu.cu
+  #libcu/sys/statcu.cu
+  #libcu/sys/timecu.cu
+  #libcu/ext/hash.cu
+  #libcu/ext/memfile.cu
+  #libcu/grpcu.cu
+  #libcu/pwdcu.cu
+  #libcu/fsystem.cu
+  #libcu/fcntlcu.cu
 
   libcu/libcu.stdlib.cu
   )

@@ -137,14 +137,14 @@ here:
 	//#define sprintf(s, format, ...) snprintf_(s, 0xffffffff, format, __VA_ARGS__)
 	//moved: extern __device__ int snprintf(char *__restrict s, size_t maxlen, const char *__restrict format, ...); //extern __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, va_list va);
 	////moved: extern __device__ int printf(const char *__restrict format, ...);
-	////moved: extern __device__ int sprintf(char *__restrict s, const char *__restrict format, ...); //__forceinline __device__ int vsprintf_(char *__restrict s, const char *__restrict format, va_list va);
+	////moved: extern __device__ int sprintf(char *__restrict s, const char *__restrict format, ...); //__forceinline__ __device__ int vsprintf_(char *__restrict s, const char *__restrict format, va_list va);
 	int o0a = snprintf(buf, sizeof(buf), "%d", 1); bool o0b = !strcmp(buf, "1"); assert(o0a && o0b);
 	//skipped: printf("%d", 1);
 	int o1a = sprintf(buf, "%d", 1); bool o1b = !strcmp(buf, "1"); assert(o1a && o1b);
 
 	//// FSCANF, SCANF, SSCANF ////
 	//moved: extern __device__ int fscanf(FILE *__restrict stream, const char *__restrict format, ...); //extern __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait = true);
-	//moved: extern __device__ int scanf(const char *__restrict format, ...); //__forceinline __device__ int vscanf_(const char *__restrict format, va_list va);
+	//moved: extern __device__ int scanf(const char *__restrict format, ...); //__forceinline__ __device__ int vscanf_(const char *__restrict format, va_list va);
 	//moved: extern __device__ int sscanf(const char *__restrict s, const char *__restrict format, ...); //extern __device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va);
 	FILE *p0a = fopen(HostDir"test.txt", "r"); int p0b = fscanf(p0a, "%s", buf); int p0c = fclose(p0a); bool p0d = !strcmp(buf, "1"); assert(p0a && p0b && p0c && p0d);
 	FILE *p1a = fopen(DeviceDir"test.txt", "r"); int p1b = fscanf(p1a, "%s", buf); int p1c = fclose(p1a); bool p1d = !strcmp(buf, "1"); assert(p1a && p1b && p1c && p1d);
@@ -153,10 +153,10 @@ here:
 
 	//// FGETC, GETCHAR, GETC, FPUTC, PUTCHAR, PUTC, UNGETC ////
 	//extern __device__ int fgetc_(FILE *stream); #sentinel-branch
-	//__forceinline __device__ int getchar_(void);
+	//__forceinline__ __device__ int getchar_(void);
 	////sky: #define getc(fp) __GETC(fp)
 	//extern __device__ int fputc_(int c, FILE *stream, bool wait = true); #sentinel-branch
-	//__forceinline __device__ int putchar_(int c);
+	//__forceinline__ __device__ int putchar_(int c);
 	////sky: #define putc(ch, fp) __PUTC(ch, fp)
 	//extern __device__ int ungetc_(int c, FILE *stream, bool wait = true); #sentinel-branch
 	//skipped: getchar();
@@ -174,7 +174,7 @@ here:
 	//// FGETS, FPUTS, PUTS ////
 	//extern __device__ char *fgets_(char *__restrict s, int n, FILE *__restrict stream); #sentinel-branch
 	//extern __device__ int fputs_(const char *__restrict s, FILE *__restrict stream, bool wait = true); #sentinel-branch
-	//__forceinline __device__ int puts_(const char *s);
+	//__forceinline__ __device__ int puts_(const char *s);
 	//skipped: puts(s);
 	/* Host Absolute */
 	FILE *s0a = fopen(HostDir"test.txt", "w"); int s0b = fputs("abc", s0a); fclose(s0a); assert(s0b);
