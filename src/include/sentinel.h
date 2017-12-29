@@ -97,7 +97,7 @@ extern "C" {
 	extern intptr_t _sentinelHostMapOffset;
 #endif
 #if HAS_DEVICESENTINEL
-	extern __constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
+	extern __constant__ const sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 #endif
 
 	extern bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char *(**hostPrepare)(void*,char*,char*,intptr_t));

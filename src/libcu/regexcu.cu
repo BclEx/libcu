@@ -1243,7 +1243,7 @@ static __device__ const char *regprop(int op)
 	}
 }
 #endif
-__constant__ static const char *error_strings[] = {
+static __constant__ const char *error_strings[] = {
 	"success",
 	"no match",
 	"bad pattern",

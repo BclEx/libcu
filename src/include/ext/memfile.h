@@ -32,7 +32,7 @@ extern "C" {
 
 	typedef struct memfile_t memfile_t;
 
-	extern __constant__ int __sizeofMemfile_t;
+	extern __constant__ const int __sizeofMemfile_t;
 	extern __device__ void memfileOpen(memfile_t *f);
 	extern __device__ void memfileRead(memfile_t *f, void *buffer, int amount, int64_t offset);
 	extern __device__ bool memfileWrite(memfile_t *f, const void *buffer, int amount, int64_t offset);

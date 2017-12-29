@@ -8,7 +8,7 @@ struct cuDIR {
 	int fakeIdx; int fake;
 };
 
-__constant__ struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
+__constant__ const struct dirent _dirpFakes[2] = { { 0, 0, 2, 0, ".." }, { 0, 0, 1, 0, "." } };
 
 /* Open a directory stream on NAME. Return a DIR stream on the directory, or NULL if it could not be opened. */
 __device__ DIR *opendir_(const char *name)

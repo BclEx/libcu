@@ -45,8 +45,8 @@ __device__ struct tm *gmtime_(const time_t *timer)
 }
 
 /* Return a string of the form "Day Mon dd hh:mm:ss yyyy\n" that is the representation of TP in this format.  */
-static __constant__ char *__asctime_wday_name[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-static __constant__ char *__asctime_mon_name[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+static __constant__ const char *__asctime_wday_name[] = {		"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+static __constant__ const char *__asctime_mon_name[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 static __device__ char __asctime_buf[26];
 __device__ char *asctime_(const struct tm *tp)
 {

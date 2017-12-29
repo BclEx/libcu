@@ -8,10 +8,10 @@ __BEGIN_DECLS;
 #if HAS_DEVICESENTINEL
 
 __device__ volatile unsigned int _sentinelMapId;
-__constant__ sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
+__constant__ const sentinelMap *_sentinelDeviceMap[SENTINEL_DEVICEMAPS];
 __device__ void sentinelDeviceSend(sentinelMessage *msg, int msgLength)
 {
-	sentinelMap *map = _sentinelDeviceMap[_sentinelMapId++ % SENTINEL_DEVICEMAPS];
+	const sentinelMap *map = _sentinelDeviceMap[_sentinelMapId++ % SENTINEL_DEVICEMAPS];
 	if (!map)
 		panic("sentinel: device map not defined. did you start sentinel?\n");
 	long id = atomicAdd((int *)&map->SetId, SENTINEL_MSGSIZE);

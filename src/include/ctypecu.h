@@ -37,8 +37,8 @@ THE SOFTWARE.
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
 
-extern __constant__ unsigned char __curtUpperToLower[256];
-extern __constant__ unsigned char __curtCtypeMap[256];
+extern __constant__ const unsigned char __curtUpperToLower[256];
+extern __constant__ const unsigned char __curtCtypeMap[256];
 extern __forceinline__ __device__ int isctype_(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
 #define isctype isctype_
 

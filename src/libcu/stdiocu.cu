@@ -540,7 +540,7 @@ __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_li
 	return 0;
 }
 
-__constant__ static short _basefix[17] = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; // 'basefix' is used to avoid 'if' tests in the integer scanner
+static __constant__ const short _basefix[17] = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; // 'basefix' is used to avoid 'if' tests in the integer scanner
 __device__ int _sscanf_(const char *str, const char *fmt, va_list va)
 {
 	int c; // character from format, or conversion

@@ -28,7 +28,7 @@ extern "C" {
 		filePoint_t readpoint;		// Pointer to the end of the last xRead()
 	} memfile_t;
 
-	__constant__ int __sizeofMemfile_t = sizeof(memfile_t);
+	__constant__ const int __sizeofMemfile_t = sizeof(memfile_t);
 
 	__device__ void memfileOpen(memfile_t *f)
 	{
