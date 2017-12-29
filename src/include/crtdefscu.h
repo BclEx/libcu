@@ -56,6 +56,10 @@ THE SOFTWARE.
 # endif
 #endif
 
+#if defined(__LP64__) || defined(_LP64)
+#define _WIN64 1
+#endif
+
 #if __OS_WIN
 #include <crtdefs.h>
 //#include <corecrt_io.h>
@@ -136,10 +140,12 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define _UX ".u64"
 #define _BX ".b64"
 #define __R "l"
+#define __I "r"
 #else
 #define _UX ".u32"
 #define _BX ".b32"
 #define __R "r"
+#define __I "r"
 #endif
 
 /* This is not a typedef so `const __ptr_t' does the right thing.  */

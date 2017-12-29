@@ -27,6 +27,7 @@ THE SOFTWARE.
 #ifndef _STRINGCU_H
 #define _STRINGCU_H
 #include <crtdefscu.h>
+#include <stdargcu.h>
 
 #include <string.h>
 #if defined(__CUDA_ARCH__)

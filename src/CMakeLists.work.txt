@@ -20,8 +20,8 @@ add_library(libcu.${arch} STATIC
 
   #libcu/stdiocu.cu
   #libcu/stdlibcu.cu
-  #libcu/stringcu.cu
-  libcu/timecu.cu
+  libcu/stringcu.cu
+  #libcu/timecu.cu
   #libcu/unistdcu.cu
   #libcu/direntcu.cu
   #libcu/sys/statcu.cu
