@@ -226,18 +226,6 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_list14 _crt_va_list14
 #define va_list15 _crt_va_list15
 
-#else
-#define STDARGvoid(name, body, ...) __forceinline__ void name(...) { }
-#define STDARG1void(name, body, ...) __forceinline__ void name(...) { }
-#define STDARG2void(name, body, ...)
-#define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
-#define STDARG1(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
-#define STDARG2(ret, name, body, ...)
-#define STDARG3(ret, name, body, ...)
-#define _crt_va_restart _crt_va_start
-#endif  /* __CUDA_ARCH__ */
-
 #undef va_start
 #undef va_arg
 #undef va_end
@@ -246,4 +234,17 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_arg _crt_va_arg
 #define va_end _crt_va_end
 
+#else
+
+#define STDARGvoid(name, body, ...) __forceinline__ void name(...) { }
+#define STDARG1void(name, body, ...) __forceinline__ void name(...) { }
+#define STDARG2void(name, body, ...)
+#define STDARG3void(name, body, ...)
+#define STDARG(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
+#define STDARG1(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
+#define STDARG2(ret, name, body, ...)
+#define STDARG3(ret, name, body, ...)
+#define va_restart
+
+#endif  /* __CUDA_ARCH__ */
 #endif  /* _STDARGCU_H */

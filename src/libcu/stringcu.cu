@@ -294,72 +294,6 @@ _ret:
 #endif
 }
 
-/* Copy N bytes of SRC to DEST, guaranteeing correct behavior for overlapping strings.  */
-//__device__ void *memmove_(void *dest, const void *src, size_t n)
-//{
-//#ifndef OMIT_PTX
-//	void *r;
-//	asm(
-//		".reg .pred p1;\n\t"
-//		".reg "_UX" z0;\n\t"
-//		".reg .b8 c;\n\t"
-//		"setp.eq"_BX"	p1, %3, 0;\n\t"
-//		"setp.eq.or"_BX" p1, %1, %2, p1;\n\t"
-//		"@!p1 bra _Start;\n\t"
-//		"mov"_BX"		%0, %1;\n\t"
-//		"bra.uni _End;\n\t"
-//		"_Start:\n\t"
-//
-//		// Check for destructive overlap
-//		"setp.le"_UX"	p1, %1, %2;\n\t"
-//		"add"_UX"		z0, %1, %3;\n\t"
-//		"setp.lt.or"_UX" p1, %2, z0, p1;\n\t"
-//		"@!p1 bra _While1;\n\t"
-//
-//		// Do an ascending copy
-//		"_While0:\n\t"
-//		"add"_UX" 		%3, %3, -1;\n\t"
-//		"setp.ne"_UX"	p1, %3, 0;\n\t"
-//		"@!p1 bra _Ret;\n\t"
-//		"ld.u8 			c, [%2];\n\t"
-//		"add"_UX" 		%2, %2, 1;\n\t"
-//		"st.u8 			[%1], c;\n\t"
-//		"add"_UX" 		%1, %1, 1;\n\t"
-//		"bra.uni _While0;\n\t"
-//
-//		// Destructive overlap
-//		"add"_UX" 		%1, %1, %3; add"_UX" %1, %1, -1;\n\t"
-//		"add"_UX" 		%2, %2, %3; add"_UX" %2, %2, -1;\n\t"
-//		"_While1:\n\t"
-//		"add"_UX" 		%3, %3, -1;\n\t"
-//		"setp.ne"_UX"	p1, %3, 0;\n\t"
-//		"@!p1 bra _Ret;\n\t"
-//		"ld.u8 			c, [%2];\n\t"
-//		"add"_UX" 		%2, %2, -1;\n\t"
-//		"st.u8 			[%1], c;\n\t"
-//		"add"_UX" 		%1, %1, -1;\n\t"
-//		"bra.uni _While1;\n\t"
-//
-//		"_Ret:\n\t"
-//		"mov"_UX" 		%0, %1;\n\t"
-//		"_End:\n\t"
-//		: "="__R(r) : __R(dest), __R(src), __R(n));
-//	return r;
-//#else
-//	if (!n || dest == src) goto _ret;
-//	register unsigned char *a = (unsigned char *)dest;
-//	register unsigned char *b = (unsigned char *)src;
-//	if (a <= b || b >= a + n) { // Check for destructive overlap.
-//		while (n--) *a++ = *b++; // Do an ascending copy.
-//		return a;
-//	}
-//	a += n; b += n; // Destructive overlap ...
-//	while (n--) *a-- = *b--; // have to copy backwards.
-//_ret:
-//	return dest;
-//#endif
-//}
-
 /* Set N bytes of S to C.  */
 __device__ void *memset_(void *s, int c, size_t n)
 {
@@ -708,7 +642,7 @@ __device__ int stricmp_(const char *s1, const char *s2)
 #if _WIN64
 		".reg " _UX " u2;\n\t"
 #endif
-		"cvta.const" _UX " u2l, %3;\n\t"
+		"cvta.const" _UX " u2l, __curtUpperToLower;\n\t"
 
 		//
 		"_While0:\n\t"
@@ -736,7 +670,7 @@ __device__ int stricmp_(const char *s1, const char *s2)
 
 		"_Ret:\n\t"
 		"sub.u32 		%0, c1, c2;\n\t"
-		: "=" __I(r) : __R(s1), __R(s2), __R(__curtUpperToLower));
+		: "=" __I(r) : __R(s1), __R(s2));
 	return r;
 #else
 	register unsigned char *a = (unsigned char *)s1;
@@ -793,7 +727,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 #if _WIN64
 		".reg " _UX " u2;\n\t"
 #endif
-		"cvta.const" _UX " u2l, %4;\n\t"
+		"cvta.const" _UX " u2l, __curtUpperToLower;\n\t"
 
 		//
 		"_While0:\n\t"
@@ -825,7 +759,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 		"_Ret:\n\t"
 		"@!p2 mov.u32 	%0, 0;\n\t"
 		"@p2 sub.u32 	%0, c1, c2;\n\t"
-		: "=" __I(r) : __R(s1), __R(s2), __R(n), __R(__curtUpperToLower));
+		: "=" __I(r) : __R(s1), __R(s2), __R(n));
 	return r;
 #else
 	register unsigned char *a = (unsigned char *)s1;
@@ -882,7 +816,7 @@ __device__ char *strchr_(const char *s, int c)
 #if _WIN64
 		".reg " _UX " u2;\n\t"
 #endif
-		"cvta.const" _UX " u2l, %3;\n\t"
+		"cvta.const" _UX " u2l, __curtUpperToLower;\n\t"
 
 #if _WIN64
 		"cvt.u64.u32	u2, %2;\n\t"
@@ -909,7 +843,7 @@ __device__ char *strchr_(const char *s, int c)
 		"_Ret:\n\t"
 		"@p2 mov" _UX " %0, %1;\n\t"
 		"@!p2 mov" _UX " %0, 0;\n\t"
-		: "=" __R(r) : __R(s), __I(c), __R(__curtUpperToLower));
+		: "=" __R(r) : __R(s), __I(c));
 	return r;
 #else
 	register unsigned char *s1 = (unsigned char *)s;
@@ -1115,9 +1049,7 @@ __device__ size_t strlen16_(const void *s)
 	if (!s) return 0;
 	register const short *s2 = (const short *)s;
 	while (*s2) { s2++; }
-	return 0x3fffffff & (int)(s2 - s);
-	//int n; for (n = 0; s2[n] || s2[n+1]; n += 2) { }
-	//return 0x3fffffff & (int)(n>>1);
+	return 0x3fffffff & ((int)(s2 - (const short *)s)>>1);
 #endif
 }
 
