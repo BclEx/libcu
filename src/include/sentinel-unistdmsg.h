@@ -65,9 +65,9 @@ struct unistd_access {
 
 struct unistd_lseek {
 	sentinelMessage Base;
-	int Handle; long Offset; int Whence; bool Bit64;
-	__device__ unistd_lseek(int fd, long offset, int whence)
-		: Base(true, UNISTD_LSEEK), Handle(fd), Offset(offset), Whence(whence), Bit64(false) { sentinelDeviceSend(&Base, sizeof(unistd_lseek)); }
+	int Handle; long long Offset; int Whence; bool Bit64;
+	__device__ unistd_lseek(int fd, long long offset, int whence, bool bit64)
+		: Base(true, UNISTD_LSEEK), Handle(fd), Offset(offset), Whence(whence), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(unistd_lseek)); }
 	long RC;
 };
 

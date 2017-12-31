@@ -6,10 +6,10 @@ set(arch 60)
 include_directories(include)
 
 add_library(libcu.${arch} STATIC
-  #libcu/sentinel-msg.cpp
-  #libcu/sentinel.cpp
-  #libcu/sentinel-host.cpp
-  #libcu/cuda_runtime.cpp
+  libcu/sentinel-msg.cpp
+  libcu/sentinel.cpp
+  libcu/sentinel-host.cpp
+  libcu/cuda_runtime.cpp
 
   #libcu/crtdefscu.cu
   #libcu/ctypecu.cu
@@ -17,10 +17,8 @@ add_library(libcu.${arch} STATIC
   #libcu/regexcu.cu
   #libcu/sentinel-gpu.cu
   #libcu/setjmpcu.cu
-
   #libcu/stdiocu.cu
   #libcu/stdlibcu.cu
-  libcu/stringcu.cu
   #libcu/timecu.cu
   #libcu/unistdcu.cu
   #libcu/direntcu.cu
@@ -33,6 +31,8 @@ add_library(libcu.${arch} STATIC
   #libcu/fsystem.cu
   #libcu/fcntlcu.cu
 
+  libcu/stringcu.cu
+  libcu/libcu.cu
   libcu/libcu.stdlib.cu
   )
 
@@ -43,4 +43,8 @@ target_compile_features(libcu.${arch} PUBLIC cxx_std_11)
 # We need to explicitly state that we need all CUDA files in the particle
 # library to be built with -dc as the member functions could be called by
 # other libraries and executables
-set_target_properties(libcu.${arch} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+if (X64)
+set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+else()
+set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+endif()

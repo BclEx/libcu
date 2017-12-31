@@ -11,12 +11,10 @@
 
 #define LIBCU_MAXLENGTH 1000000000
 
-#if __OS_WIN
-#elif __OS_UNIX
+#if __OS_UNIX
 #define _base _IO_buf_base
 #define _flag _flags
 #define _file _fileno
-#define DELETE (0x00010000L)
 #endif
 
 __BEGIN_DECLS;
@@ -45,7 +43,7 @@ static __forceinline__ __device__ void writeStreamRef(streamRef *ref, FILE *s)
 static __device__ FILE *streamGet(int fd = 0)
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((_uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs);
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_freeStreamPtr, sizeof(streamRef)) - (size_t)&__iob_streamRefs;
 	offset %= (sizeof(streamRef)*LIBCU_MAXFILESTREAM);
 	int offsetId = offset / sizeof(streamRef);
 	streamRef *ref = (streamRef *)((char *)&__iob_streamRefs + offset);

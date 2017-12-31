@@ -1,6 +1,7 @@
 #include <unistdcu.h>
 #include <sentinel-unistdmsg.h>
 #include "fsystem.h"
+#include <stdio.h> // panic's printf
 
 __BEGIN_DECLS;
 
@@ -16,7 +17,7 @@ the current position (if WHENCE is SEEK_CUR), or the end of the file (if WHENCE 
 Return the new file position.  */
 __device__ off_t lseek_(int fd, off_t offset, int whence)
 {
-	if (ISHOSTHANDLE(fd)) { unistd_lseek msg(fd, offset, whence); return msg.RC; }
+	if (ISHOSTHANDLE(fd)) { unistd_lseek msg(fd, offset, whence, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -24,7 +25,7 @@ __device__ off_t lseek_(int fd, off_t offset, int whence)
 #ifdef __USE_LARGEFILE64
 __device__ off64_t lseek64_(int fd, off64_t offset, int whence)
 {
-	if (ISHOSTHANDLE(fd)) { unistd_lseek64 msg(fd, offset, whence); return msg.RC; }
+	if (ISHOSTHANDLE(fd)) { unistd_lseek msg(fd, offset, whence, true); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -107,9 +108,8 @@ __device__ int dup2_(int fd, int fd2)
 }
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
-__device__ char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
-
-extern __device__ char **__environ_ = (char **)__environ_device;
+//__device__ const char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
+extern __device__ char **__environ_ = nullptr; //(char **)__environ_device;
 
 /* Remove the link NAME.  */
 __device__ int unlink_(const char *filename)

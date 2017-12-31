@@ -1,4 +1,5 @@
 #include <ctypecu.h>
+#undef __curtUpperToLower
 
 __BEGIN_DECLS;
 

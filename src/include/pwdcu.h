@@ -27,11 +27,11 @@ THE SOFTWARE.
 #ifndef _PWDCU_H
 #define _PWDCU_H
 #include <crtdefscu.h>
+
+#if __OS_WIN
 #include <sys/types.h>
 #include <grpcu.h>
-
 #define uid_t short
-
 struct passwd {
 	char *pw_name;		// user's login name
 	uid_t pw_uid;		// numerical user ID
@@ -39,6 +39,9 @@ struct passwd {
 	//char *pw_dir;		// initial working directory
 	//char *pw_shell;		// program to use as shell
 };
+#elif __OS_UNIX
+#include <pwd.h>
+#endif
 
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;

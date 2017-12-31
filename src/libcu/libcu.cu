@@ -6,7 +6,6 @@
 #include "setjmpcu.cu"
 #include "stdiocu.cu"
 #include "stdlibcu.cu"
-#include "stringcu.cu"
 #include "timecu.cu"
 #include "unistdcu.cu"
 #include "direntcu.cu"

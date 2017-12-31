@@ -1,11 +1,12 @@
 #include <sys/statcu.h>
 #include <sentinel-fcntlmsg.h>
 #include "../fsystem.h"
+#include <stdio.h> // panic's printf
 
 /* Get file attributes for FILE and put them in BUF.  */
 __device__ int stat_(const char *__restrict file, struct stat *__restrict buf, bool lstat)
 {
-	if (ISHOSTPATH(file)) { fcntl_stat msg(file, buf, lstat); return msg.RC; }
+	if (ISHOSTPATH(file)) { fcntl_stat msg(file, buf, nullptr, false, lstat); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -13,7 +14,7 @@ __device__ int stat_(const char *__restrict file, struct stat *__restrict buf, b
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
 __device__ int fstat_(int fd, struct stat *buf)
 {
-	if (ISHOSTHANDLE(fd)) { fcntl_fstat msg(fd, buf); return msg.RC; }
+	if (ISHOSTHANDLE(fd)) { fcntl_fstat msg(fd, buf, nullptr, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -22,7 +23,7 @@ __device__ int fstat_(int fd, struct stat *buf)
 /* Get file attributes for FILE and put them in BUF.  */
 __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict buf, bool lstat)
 {
-	if (ISHOSTPATH(file)) { fcntl64_stat msg(file, buf, lstat); return msg.RC; }
+	if (ISHOSTPATH(file)) { fcntl_stat msg(file, nullptr, buf, lstat, true); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -30,7 +31,7 @@ __device__ int stat64_(const char *__restrict file, struct stat64 *__restrict bu
 /* Get file attributes for the file, device, pipe, or socket that file descriptor FD is open on and put them in BUF.  */
 __device__ int fstat64_(int fd, struct stat64 *buf)
 {
-	if (ISHOSTHANDLE(fd)) { fcntl_fstat msg(fd, buf); return msg.RC; }
+	if (ISHOSTHANDLE(fd)) { fcntl_fstat msg(fd, nullptr, buf, true); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }

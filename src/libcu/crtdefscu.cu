@@ -26,7 +26,7 @@ static __forceinline__ __device__ void writeHostRef(hostRef *ref, hostptr_t *p)
 __device__ hostptr_t *__hostptrGet(void *host)
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((_uintptr_t *)&__iob_freeDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs);
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_freeDevicePtr, sizeof(hostRef)) - (size_t)&__iob_hostRefs;
 	offset %= (sizeof(hostRef)*LIBCU_MAXHOSTPTR);
 	int offsetId = offset / sizeof(hostRef);
 	hostRef *ref = (hostRef *)((char *)&__iob_hostRefs + offset);

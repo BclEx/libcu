@@ -32,7 +32,7 @@ static __forceinline__ __device__ void writeFileRef(fileRef *ref, file_t *f)
 static __device__ int fileGet(file_t **file)
 {
 	// advance circular buffer
-	size_t offset = (atomicAdd((uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs);
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_freeFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
 	offset %= (sizeof(fileRef)*LIBCU_MAXFILESTREAM);
 	int offsetId = offset / sizeof(fileRef);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
@@ -50,7 +50,7 @@ static __device__ void fileFree(int fd)
 	//if (!f) return;
 	file_t *f = GETFILE(fd);
 	// advance circular buffer
-	size_t offset = atomicAdd((uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
+	size_t offset = atomicAdd((_uintptr_t *)&__iob_retnFilePtr, sizeof(fileRef)) - (size_t)&__iob_fileRefs;
 	offset %= (sizeof(fileRef)*LIBCU_MAXFILESTREAM);
 	fileRef *ref = (fileRef *)((char *)&__iob_fileRefs + offset);
 	writeFileRef(ref, f);

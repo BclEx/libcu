@@ -3,7 +3,11 @@
 #include "fsystem.h"
 
 struct cuDIR {
+#if __OS_WIN
 	struct DIR dir;
+#elif __OS_UNIX
+//	struct __dirstream dir;
+#endif
 	void *listIdx; void *list;
 	int fakeIdx; int fake;
 };
@@ -39,7 +43,7 @@ storage returned may be overwritten by a later readdir call on the same DIR stre
 If the Large File Support API is selected we have to use the appropriate interface.  */
 __device__ struct dirent *readdir_(DIR *dirp)
 {
-	if (ISHOSTPTR(dirp)) { dirent_readdir msg(hostptr<DIR>(dirp)); return msg.RC; }
+	if (ISHOSTPTR(dirp)) { dirent_readdir msg(hostptr<DIR>(dirp), false); return msg.RC; }
 	cuDIR *p = (cuDIR *)dirp;
 	if (!p || !p->listIdx) return nullptr;
 	if (p->fakeIdx)
@@ -52,14 +56,14 @@ __device__ struct dirent *readdir_(DIR *dirp)
 #ifdef __USE_LARGEFILE64
 __device__ struct dirent64 *readdir64_(DIR *dirp)
 {
-	if (ISHOSTPTR(dirp)) { dirent_readdir64 msg(hostptr<DIR>(dirp)); return msg.RC; }
+	if (ISHOSTPTR(dirp)) { dirent_readdir msg(hostptr<DIR>(dirp), true); return msg.RC64; }
 	cuDIR *p = (cuDIR *)dirp;
 	if (!p || !p->listIdx) return nullptr;
 	if (p->fakeIdx)
-		return (struct dirent *)&_dirpFakes[--p->fakeIdx];
+		return (struct dirent64 *)&_dirpFakes[--p->fakeIdx];
 	memcpy(p, p->listIdx, sizeof(dirent));
 	p->listIdx = ((dirEnt_t *)p->listIdx)->next;
-	return (struct dirent *)p;
+	return (struct dirent64 *)p;
 }
 #endif
 

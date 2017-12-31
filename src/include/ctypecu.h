@@ -35,11 +35,11 @@ THE SOFTWARE.
 #define _HEX            0x08    /* hexadecimal digit */
 #endif
 
-extern __constant__ const unsigned char __curtUpperToLower[256];
-extern __constant__ const unsigned char __curtCtypeMap[256];
-
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
+
+extern __constant__ const unsigned char __curtUpperToLower[256];
+extern __constant__ const unsigned char __curtCtypeMap[256];
 
 extern __forceinline__ __device__ int isctype_(int c, int type) { return (__curtCtypeMap[(unsigned char)c]&type)!=0; }
 #define isctype isctype_
@@ -87,6 +87,7 @@ extern __forceinline__ __device__ int isidchar_(int c) { return (__curtCtypeMap[
 
 __END_DECLS;
 #else
+#define __curtUpperToLower ((unsigned char *)nullptr)
 #define isctype(c, type) 0
 #define isidchar(c) 0
 #define isblank(c) ((c) == '\t' || (c) == ' ')

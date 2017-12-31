@@ -56,20 +56,20 @@ THE SOFTWARE.
 # endif
 #endif
 
-#if defined(__LP64__) || defined(_LP64)
-#define _WIN64 1
-#endif
-
 #if __OS_WIN
 #include <crtdefs.h>
 //#include <corecrt_io.h>
 #define _uintptr_t uintptr_t
+//#define __USE_LARGEFILE64 1
 #elif __OS_UNIX
-#ifdef _WIN64
+#define MAX_PATH 260
+#define DELETE 0x00010000L
+#if defined(__LP64__) || defined(_LP64)
+# define _WIN64 1
 typedef unsigned int long long _uintptr_t;
-#else
+# else
 typedef unsigned int _uintptr_t;
-#endif
+# endif
 #endif
 
 #include <cuda_runtime.h>

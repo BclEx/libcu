@@ -28,12 +28,16 @@ THE SOFTWARE.
 #define _GRPCU_H
 #include <crtdefscu.h>
 
+#if __OS_WIN
 #define gid_t short
 struct group {
 	char *gr_name;		// the name of the group
 	gid_t gr_gid;		// numerical group ID
 	char  **gr_mem;		// pointer to a null-terminated array of character pointers to member names
 };
+#elif __OS_UNIX
+#include <grp.h>
+#endif
 
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;

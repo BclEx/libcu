@@ -3,6 +3,7 @@
 #include <windows.h>
 #elif __OS_UNIX
 #include <stdlib.h>
+#include <string.h>
 #endif
 #include <stdio.h>
 
@@ -22,7 +23,9 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 		exit(0);
 	}
 #if __OS_WIN
-	long id = (InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE);
+	long id = InterlockedAdd((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE;
+#elif __OS_UNIX
+	long id = __sync_fetch_and_add((long *)&map->SetId, SENTINEL_MSGSIZE) - SENTINEL_MSGSIZE;
 #endif
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *control = (volatile long *)&cmd->Control;
@@ -41,6 +44,8 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	if (msg->Wait) {
 #if __OS_WIN
 		while (InterlockedCompareExchange((long *)control, 5, 4) != 4) { }
+#elif __OS_UNIX
+		while (__sync_val_compare_and_swap((long *)control, 5, 4) != 4) { }
 #endif
 		memcpy(msg, cmd->Data, msgLength);
 		*control = 0;

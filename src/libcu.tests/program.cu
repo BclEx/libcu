@@ -40,7 +40,7 @@ void mainPause(char *message = nullptr)
 
 int main(int argc, char ** argv)
 {
-	int testId = argv[1] ? atoi(argv[1]) : 0; //18; //25;
+	int testId = argv[1] ? atoi(argv[1]) : 25; //0; //18; //25;
 
 	// Choose which GPU to run on, change this on a multi-GPU system.
 	cudaError_t cudaStatus = cudaSetDevice(gpuGetMaxGflopsDevice());

@@ -36,7 +36,6 @@ enum {
 	DIRENT_OPENDIR = 60,
 	DIRENT_CLOSEDIR,
 	DIRENT_READDIR,
-	DIRENT_READDIR64,
 	DIRENT_REWINDDIR,
 };
 
@@ -78,22 +77,28 @@ struct dirent_readdir {
 		t->RC = (struct dirent *)(ptr - offset);
 		return end;
 	}
-	sentinelMessage Base;
-	DIR *Ptr;
-	__device__ dirent_readdir(DIR *ptr)
-		: Base(true, DIRENT_READDIR, 1024, nullptr), Ptr(ptr) { sentinelDeviceSend(&Base, sizeof(dirent_readdir)); }
-	struct dirent *RC;
-};
-
 #ifdef __USE_LARGEFILE64
-struct dirent_readdir64 {
-	sentinelMessage Base;
-	DIR *Ptr;
-	__device__ dirent_readdir64(DIR *ptr)
-		: Base(true, DIRENT_READDIR64), Ptr(ptr) { sentinelDeviceSend(&Base, sizeof(dirent_readdir64)); }
-	struct dirent64 *RC;
-};
+	static __forceinline__ __host__ char *HostPrepare64(dirent_readdir *t, char *data, char *dataEnd, intptr_t offset)
+	{
+		if (!t->RC64) return data;
+		int ptrLength = sizeof(struct dirent64);
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += ptrLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(ptr, t->RC64, ptrLength);
+		t->RC64 = (struct dirent64 *)(ptr - offset);
+		return end;
+	}
 #endif
+	sentinelMessage Base;
+	DIR *Ptr; bool Bit64;
+	__device__ dirent_readdir(DIR *ptr, bool bit64)
+		: Base(true, DIRENT_READDIR, 1024, nullptr), Ptr(ptr), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(dirent_readdir)); }
+	struct dirent *RC;
+#ifdef __USE_LARGEFILE64
+	struct dirent64 *RC64;
+#endif
+};
 
 struct dirent_rewinddir {
 	sentinelMessage Base;

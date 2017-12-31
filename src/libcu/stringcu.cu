@@ -670,7 +670,7 @@ __device__ int stricmp_(const char *s1, const char *s2)
 
 		"_Ret:\n\t"
 		"sub.u32 		%0, c1, c2;\n\t"
-		: "=" __I(r) : __R(s1), __R(s2));
+		: "=" __I(r) : __R(s1), __R(s2), __R(__curtUpperToLower));
 	return r;
 #else
 	register unsigned char *a = (unsigned char *)s1;
@@ -759,7 +759,7 @@ __device__ int strnicmp_(const char *s1, const char *s2, size_t n)
 		"_Ret:\n\t"
 		"@!p2 mov.u32 	%0, 0;\n\t"
 		"@p2 sub.u32 	%0, c1, c2;\n\t"
-		: "=" __I(r) : __R(s1), __R(s2), __R(n));
+		: "=" __I(r) : __R(s1), __R(s2), __R(n), __R(__curtUpperToLower));
 	return r;
 #else
 	register unsigned char *a = (unsigned char *)s1;
@@ -843,7 +843,7 @@ __device__ char *strchr_(const char *s, int c)
 		"_Ret:\n\t"
 		"@p2 mov" _UX " %0, %1;\n\t"
 		"@!p2 mov" _UX " %0, 0;\n\t"
-		: "=" __R(r) : __R(s), __I(c));
+		: "=" __R(r) : __R(s), __I(c), __R(__curtUpperToLower));
 	return r;
 #else
 	register unsigned char *s1 = (unsigned char *)s;

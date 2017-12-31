@@ -90,7 +90,12 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case STDLIB_SETENV: { stdlib_setenv *msg = (stdlib_setenv *)data; msg->RC = setenv(msg->Str, msg->Str2, msg->Replace); return true; }
 	case STDLIB_UNSETENV: { stdlib_unsetenv *msg = (stdlib_unsetenv *)data; msg->RC = unsetenv(msg->Str); return true; }
 	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = access(msg->Name, msg->Type); return true; }
-	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data; msg->RC = lseek(msg->Handle, msg->Offset, msg->Whence); return true; }
+	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data;
+		if (!msg->Bit64) msg->RC = lseek(msg->Handle, msg->Offset, msg->Whence);
+#ifdef __USE_LARGEFILE64
+		else msg->RC = lseek64(msg->Handle, msg->Offset, msg->Whence);
+#endif
+		return true; }
 	case UNISTD_CLOSE: { unistd_close *msg = (unistd_close *)data; msg->RC = close(msg->Handle); return true; }
 	case UNISTD_READ: { unistd_read *msg = (unistd_read *)data; msg->RC = read(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
 	case UNISTD_WRITE: { unistd_write *msg = (unistd_write *)data; msg->RC = write(msg->Handle, msg->Ptr, (int)msg->Size); return true; }
@@ -100,21 +105,42 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case UNISTD_DUP: { unistd_dup *msg = (unistd_dup *)data; msg->RC = (msg->Dup1 ? dup(msg->Handle) : dup2(msg->Handle, msg->Handle2)); return true; }
 	case UNISTD_UNLINK: { unistd_unlink *msg = (unistd_unlink *)data; msg->RC = unlink(msg->Str); return true; }
 	case UNISTD_RMDIR: { unistd_rmdir *msg = (unistd_rmdir *)data; msg->RC = rmdir(msg->Str); return true; }
-	case FCNTL_FCNTL: { fcntl_fcntl *msg = (fcntl_fcntl *)data; msg->RC = fcntl(msg->Handle, msg->Cmd, msg->P0); return true; }
-	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data; msg->RC = open(msg->Str, msg->OFlag, msg->P0); return true; }
-	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data; msg->RC = stat(msg->Str, msg->Ptr); return true; }
-	case FCNTL_FSTAT: { fcntl_fstat *msg = (fcntl_fstat *)data; msg->RC = fstat(msg->Handle, msg->Ptr); return true; }
-	case FCNTL_STAT64: { fcntl_stat64 *msg = (fcntl_stat64 *)data; msg->RC = stat64(msg->Str, msg->Ptr); return true; }
-	case FCNTL_FSTAT64: { fcntl_fstat64 *msg = (fcntl_fstat64 *)data; msg->RC = fstat64(msg->Handle, msg->Ptr); return true; }
+	case FCNTL_FCNTL: { fcntl_fcntl *msg = (fcntl_fcntl *)data;
+		if (!msg->Bit64) msg->RC = fcntl(msg->Handle, msg->Cmd, msg->P0);
+#ifdef __USE_LARGEFILE64
+		else panic("Not Implemented");
+		//else msg->RC = fcntl64(msg->Handle, msg->Cmd, msg->P0);
+#endif
+		return true; }
+	case FCNTL_OPEN: { fcntl_open *msg = (fcntl_open *)data;
+		if (!msg->Bit64) msg->RC = open(msg->Str, msg->OFlag, msg->P0);
+#ifdef __USE_LARGEFILE64
+		else msg->RC = open64(msg->Str, msg->OFlag, msg->P0);
+#endif
+		return true; }
+	case FCNTL_STAT: { fcntl_stat *msg = (fcntl_stat *)data;
+		if (!msg->Bit64) msg->RC = !msg->LStat ? stat(msg->Str, msg->Ptr) : lstat(msg->Str, msg->Ptr);
+#ifdef __USE_LARGEFILE64
+		else msg->RC = !msg->LStat ? stat64(msg->Str, msg->Ptr64) : lstat64(msg->Str, msg->Ptr64);
+#endif
+		return true; }
+	case FCNTL_FSTAT: { fcntl_fstat *msg = (fcntl_fstat *)data;
+		if (!msg->Bit64) msg->RC = fstat(msg->Handle, msg->Ptr);
+#ifdef __USE_LARGEFILE64
+		else msg->RC = fstat64(msg->Handle, msg->Ptr64);
+#endif
+		return true; }
 	case FCNTL_CHMOD: { fcntl_chmod *msg = (fcntl_chmod *)data; msg->RC = chmod(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKDIR: { fcntl_mkdir *msg = (fcntl_mkdir *)data; msg->RC = mkdir(msg->Str, msg->Mode); return true; }
 	case FCNTL_MKFIFO: { fcntl_mkfifo *msg = (fcntl_mkfifo *)data; msg->RC = mkfifo(msg->Str, msg->Mode); return true; }
 	case DIRENT_OPENDIR: { dirent_opendir *msg = (dirent_opendir *)data; msg->RC = opendir(msg->Str); return true; }
 	case DIRENT_CLOSEDIR: { dirent_closedir *msg = (dirent_closedir *)data; msg->RC = closedir(msg->Ptr); return true; }
-	case DIRENT_READDIR: { dirent_readdir *msg = (dirent_readdir *)data; msg->RC = readdir(msg->Ptr); *hostPrepare = SENTINELPREPARE(dirent_readdir::HostPrepare); return true; }
+	case DIRENT_READDIR: { dirent_readdir *msg = (dirent_readdir *)data;
+		if (!msg->Bit64) { msg->RC = readdir(msg->Ptr); *hostPrepare = SENTINELPREPARE(dirent_readdir::HostPrepare); }
 #ifdef __USE_LARGEFILE64
-	case DIRENT_READDIR64: { dirent_readdir64 *msg = (dirent_readdir64 *)data; msg->RC = readdir64(msg->Ptr); return true; }
+		else { msg->RC64 = readdir64(msg->Ptr); *hostPrepare = SENTINELPREPARE(dirent_readdir::HostPrepare64); }
 #endif
+		return true; }
 	case DIRENT_REWINDDIR: { dirent_rewinddir *msg = (dirent_rewinddir *)data; rewinddir(msg->Ptr); return true; }
 	case TIME_TIME: { time_time *msg = (time_time *)data; msg->RC = time(nullptr); return true; }
 	case TIME_MKTIME: { time_mktime *msg = (time_mktime *)data; msg->RC = mktime(msg->Tp); return true; }
