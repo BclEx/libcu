@@ -2,7 +2,7 @@
 # https://cmake.org/cmake/help/v3.9/manual/cmake-buildsystem.7.html
 cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(libcu LANGUAGES CXX CUDA)
-set(arch 35)
+set(arch 60)
 include(CTest)
 enable_testing()
 
@@ -33,9 +33,17 @@ target_compile_features(libcu.falloc.${arch} PUBLIC cxx_std_11)
 target_compile_features(libcu.fileutils.${arch} PUBLIC cxx_std_11)
 
 # We need to explicitly state that we need all CUDA files in the particle library to be built with -dc as the member functions could be called by other libraries and executables
-set_target_properties(libcu.${arch} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(libcu.falloc.${arch} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(libcu.fileutils.${arch} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+if (X64)
+  set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(libcu.falloc.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(libcu.fileutils.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+else()
+  set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(libcu.falloc.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(libcu.fileutils.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
+
 
 if (BUILD_TESTING)
   add_executable(libcu_tests
@@ -43,7 +51,11 @@ if (BUILD_TESTING)
 	libcu.tests/program.cu
   )
 
-  set_target_properties(libcu_tests PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  if (X64)
+    set_target_properties(libcu_tests PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  else()
+    set_target_properties(libcu_tests PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  endif()
   target_link_libraries(libcu_tests PRIVATE libcu.${arch} libcu.falloc.${arch})
 
   add_test(NAME crtdefs_test1 COMMAND libcu_tests 1)
