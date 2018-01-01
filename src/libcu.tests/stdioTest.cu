@@ -1,6 +1,15 @@
-#include <cuda_runtime.h>
 #include <stdiocu.h>
+#include <stringcu.h>
+#include <sys/statcu.h>
+#include <unistdcu.h>
 #include <assert.h>
+
+#ifndef HostDir
+#define HostDir "C:\\T_\\"
+#endif
+#ifndef DeviceDir
+#define DeviceDir ":\\"
+#endif
 
 #ifndef MAKEAFILE
 #define MAKEAFILE
@@ -57,7 +66,7 @@ static __global__ void g_stdio_test1()
 	makeAFile(HostDir"test.txt");
 	int e2a = rename(HostDir"test.txt", "missing\\test2.txt"); int e2b = remove(HostDir"test.txt"); assert(e2a < 0 && !e2b);
 	makeAFile(HostDir"test.txt");
-	mkdir(HostDir"_dir");
+	mkdir(HostDir"_dir", 0);
 	int e3a = rename(HostDir"test.txt", "_dir\\test2.txt"); int e3b = remove(HostDir"_dir\\test2.txt"); assert(!e3a && !e3b);
 	rmdir(HostDir"_dir");
 
@@ -68,7 +77,7 @@ static __global__ void g_stdio_test1()
 	makeAFile(DeviceDir"test.txt");
 	int f2a = rename(DeviceDir"test.txt", "missing\\test2.txt"); int f2b = remove(DeviceDir"test.txt"); assert(f2a < 0 && !f2b);
 	makeAFile(DeviceDir"test.txt");
-	mkdir(DeviceDir"_dir");
+	mkdir(DeviceDir"_dir", 0);
 	int f3a = rename(DeviceDir"test.txt", "_dir\\test2.txt"); int f3b = remove(DeviceDir"_dir\\test2.txt"); assert(!f3a && !f3b);
 	rmdir(DeviceDir"_dir");
 
@@ -207,12 +216,12 @@ here:
 	/* Host Absolute */
 	makeAFile(HostDir"test.txt");
 	FILE *w0a = fopen(HostDir"test.txt", "r"); long int w0b = ftell(w0a); int w0c = fseek(w0a, 2, 0); long int w0d = ftell(w0a); rewind(w0a); long int w0e = ftell(w0a); fclose(w0a); assert(w0b == 0 && w0c && w0d == 2 && w0e == 0);
-	FILE *w1a = fopen(HostDir"test.txt", "r"); fpos_t w1b; int w1c = fgetpos(w1a, &w1b); fpos_t w1d = 2; int w1e = fsetpos(w1a, &w1d); fpos_t w1f; int w1g = fgetpos(w1a, &w1f); fclose(w1a); assert(w1b == 0 && w1c && w1d == 2 && w1e && w1g == 2 && w1g);
+	FILE *w1a = fopen(HostDir"test.txt", "r"); fpos_t w1b; int w1c = fgetpos(w1a, &w1b); fseek(w1a, 2, 0); fpos_t w1d; fgetpos(w1a, &w1d); int w1e = fsetpos(w1a, &w1d); fpos_t w1f; int w1g = fgetpos(w1a, &w1f); fclose(w1a); assert(w1b == 0 && w1c && w1d == 2 && w1e && w1g == 2 && w1g);
 
 	/* Device Absolute */
 	makeAFile(DeviceDir"test.txt");
 	FILE *x0a = fopen(DeviceDir"test.txt", "r"); long int x0b = ftell(x0a); int x0c = fseek(x0a, 2, 0); long int x0d = ftell(x0a); rewind(x0a); long int x0e = ftell(x0a); fclose(x0a); assert(x0b == 0 && x0c && x0d == 2 && x0e == 0);
-	FILE *x1a = fopen(DeviceDir"test.txt", "r"); fpos_t x1b; int x1c = fgetpos(x1a, &x1b); fpos_t x1d = 2; int x1e = fsetpos(x1a, &x1d); fpos_t x1f; int x1g = fgetpos(x1a, &x1f); fclose(x1a); assert(x1b == 0 && x1c && x1d == 2 && x1e && x1g == 2 && x1g);
+	FILE *x1a = fopen(DeviceDir"test.txt", "r"); fpos_t x1b; int x1c = fgetpos(x1a, &x1b); fseek(x1a, 2, 0); fpos_t x1d; fgetpos(x1a, &x1d); int x1e = fsetpos(x1a, &x1d); fpos_t x1f; int x1g = fgetpos(x1a, &x1f); fclose(x1a); assert(x1b == 0 && x1c && x1d == 2 && x1e && x1g == 2 && x1g);
 
 	//// CLEARERR, FERROR, PERROR ////
 	//extern __device__ void clearerr_(FILE *stream); #sentinel-branch

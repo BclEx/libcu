@@ -1,4 +1,3 @@
-#include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <ctypecu.h>
 #include <assert.h>

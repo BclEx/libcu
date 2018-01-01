@@ -1,5 +1,5 @@
-#include <cuda_runtime.h>
 #include <string.h>
+#include <stdio.h>
 #include <falloc.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,6 +123,12 @@ extern "C" cudaError_t cudaDeviceFallocHeapDestroy(cudaDeviceFallocHeap &heap)
 // Heap function definitions for device-side code
 #pragma region DEVICE SIDE :: HEAP
 
+#if defined(__CUDA_ARCH__)
+#define panic(fmt) { printf(fmt"\n"); asm("trap;"); }
+#else
+#define panic(fmt) { printf(fmt"\n"); exit(1); }
+#endif  /* __CUDA_ARCH__ */
+
 __constant__ cuFallocDeviceHeap *_defaultDeviceHeap;
 
 #define FALLOC_MAGIC (unsigned short)0x3412 // All our headers are prefixed with a magic number so we know they're ours
@@ -162,7 +168,7 @@ extern "C" __device__ void fallocFreeChunk(void *obj, cuFallocDeviceHeap *heap)
 {
 	if (!heap) heap = _defaultDeviceHeap;
 	fallocChunkHeader *chunk = (fallocChunkHeader *)((char *)obj - sizeof(fallocChunkHeader));
-	if (chunk->magic != FALLOC_MAGIC || chunk->count > 1) __THROW; // bad magic or not a singular chunk
+	if (chunk->magic != FALLOC_MAGIC || chunk->count > 1) panic("bad magic"); // bad magic or not a singular chunk
 	// advance circular buffer
 	fallocChunkRef *chunkRefs = heap->chunkRefs;
 	size_t offset = atomicAdd((unsigned int *)&heap->retnChunkPtr, sizeof(fallocChunkRef)) - (size_t)chunkRefs;
@@ -175,7 +181,7 @@ extern "C" __device__ void fallocFreeChunk(void *obj, cuFallocDeviceHeap *heap)
 /*
 extern "C" __device__ inline void *fallocGetChunks(fallocHeap *heap, size_t length, size_t *allocLength = nullptr)
 {
-if (threadIdx.x || threadIdx.y || threadIdx.z) __THROW;
+if (threadIdx.x || threadIdx.y || threadIdx.z) panic("");
 size_t chunkSize = heap->chunkSize;
 // fix up length to be a multiple of chunkSize
 if (length % chunkSize)
@@ -184,7 +190,7 @@ length += chunkSize - (length % chunkSize);
 if (allocLength)
 *allocLength = length - sizeof(fallocChunkHeader);
 size_t chunks = (size_t)(length / chunkSize);
-if (chunks > heap->chunks) __THROW;
+if (chunks > heap->chunks) panic("");
 // single, equals: fallocGetChunk
 if (chunks == 1)
 return fallocGetChunk(heap);
@@ -195,8 +201,7 @@ volatile fallocChunkHeader* endChunk = (fallocChunkHeader*)((__int8*)heap + size
 { // critical
 for (chunk = (fallocChunkHeader*)((__int8*)heap + sizeof(fallocHeap)); index && chunk < endChunk; chunk = (fallocChunkHeader*)((__int8*)chunk + (chunkSize * chunk->count)))
 {
-if (chunk->magic != FALLOC_MAGIC)
-__THROW;
+if (chunk->magic != FALLOC_MAGIC) panic("bad magic");
 index = (chunk->next ? index - 1 : chunks);
 }
 if (index)
@@ -216,8 +221,7 @@ return (void*)((__int8*)chunk + sizeof(fallocChunkHeader));
 extern "C" __device__ inline void fallocFreeChunks(fallocHeap *heap, void *obj)
 {
 volatile fallocChunkHeader* chunk = (fallocChunkHeader*)((__int8*)obj - sizeof(fallocChunkHeader));
-if (chunk->magic != FALLOC_MAGIC)
-__THROW;
+if (chunk->magic != FALLOC_MAGIC) panic("bad magic");
 size_t chunks = chunk->count;
 // single, equals: fallocFreeChunk
 if (chunks == 1)
@@ -279,7 +283,7 @@ extern "C" __device__ cuFallocCtx *fallocCreateCtx(cuFallocDeviceHeap *heap)
 {
 	if (!heap) heap = _defaultDeviceHeap;
 	size_t chunkSize = heap->chunkSize;
-	if (sizeof(cuFallocCtx) > chunkSize) __THROW;
+	if (sizeof(cuFallocCtx) > chunkSize) panic("large chucksize");
 	cuFallocCtx *ctx = (cuFallocCtx *)fallocGetChunk(heap);
 	if (!ctx)
 		return nullptr;
@@ -307,7 +311,7 @@ extern "C" __device__ void fallocDisposeCtx(cuFallocCtx *ctx)
 
 extern "C" __device__ void *falloc(cuFallocCtx *ctx, unsigned short bytes, bool alloc)
 {
-	if (bytes > (ctx->chunkSize - sizeof(cuFallocCtx))) __THROW;
+	if (bytes > (ctx->chunkSize - sizeof(cuFallocCtx))) panic("size");
 	// find or add available node
 	fallocNode *node;
 	unsigned short freeOffset;
@@ -319,7 +323,7 @@ extern "C" __device__ void *falloc(cuFallocCtx *ctx, unsigned short bytes, bool 
 	if (!node || !hasFreeSpace) {
 		// add node
 		node = (fallocNode *)fallocGetChunk(ctx->heap);
-		if (!node) __THROW;
+		if (!node) panic("alloc");
 		node->magic = FALLOCNODE_MAGIC;
 		node->next = ctx->nodes; ctx->nodes = node;
 		node->nextAvailable = (alloc ? ctx->availableNodes : nullptr); ctx->availableNodes = node;
@@ -356,7 +360,7 @@ extern "C" __device__ void *fallocRetract(cuFallocCtx *ctx, unsigned short bytes
 		freeOffset = (int)node->freeOffset - bytes;
 	}
 	// first node && !overflow
-	if (node == &ctx->node && freeOffset < sizeof(cuFallocCtx)) __THROW;
+	if (node == &ctx->node && freeOffset < sizeof(cuFallocCtx)) panic("node");
 	node->freeOffset = (unsigned short)freeOffset;
 	return (char *)node + freeOffset;
 }

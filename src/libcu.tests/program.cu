@@ -32,11 +32,7 @@ cudaError_t string_test1();
 cudaError_t time_test1();
 cudaError_t unistd_test1();
 
-void mainPause(char *message = nullptr)
-{
-	printf(message ? message : "\nPress any key to continue.\n");
-	int c; scanf("%c", &c);
-}
+#define mainPause(fmt) { printf(fmt"\n"); char c; scanf("%c", &c); }
 
 int main(int argc, char ** argv)
 {
@@ -55,7 +51,7 @@ int main(int argc, char ** argv)
 	// Launch test
 	switch (testId)
 	{
-	case 0: mainPause(); break;
+	case 0: mainPause("Press any key to continue."); break;
 	case 1: cudaStatus = crtdefs_test1(); break;
 	case 2: cudaStatus = ctype_test1(); break;
 	case 3: cudaStatus = dirent_test1(); break;
@@ -99,7 +95,7 @@ int main(int argc, char ** argv)
 	}
 
 	// finish
-	mainPause("\nSUCCESS\n");
+	mainPause("SUCCESS");
 
 Error:
 	sentinelServerShutdown();
@@ -107,7 +103,7 @@ Error:
 	// close
 	if (cudaStatus != cudaSuccess) {
 		// finish
-		mainPause("ERROR\n");
+		mainPause("ERROR");
 		return 1;
 	}
 

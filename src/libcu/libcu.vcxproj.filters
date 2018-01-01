@@ -49,9 +49,6 @@
     <ClInclude Include="..\include\unistdcu.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\_unistd.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\_dirent.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -104,11 +101,15 @@
     <ClInclude Include="..\include\stddefcu.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\_unistd.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
+    <CudaCompile Include="stringcu.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -161,7 +162,6 @@
     <None Include="sys\statcu.cu">
       <Filter>sys</Filter>
     </None>
-    <None Include="stringcu.cu" />
     <None Include="ext\hash.cu">
       <Filter>ext</Filter>
     </None>

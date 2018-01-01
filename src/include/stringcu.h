@@ -156,6 +156,7 @@ __END_DECLS;
 #define strndup(s, n) (nullptr)
 #define strlen16(s) ((size_t)0)
 #define stricmp(s1, s2) (s1 == s2 ? 0 : -1)
+#define strnicmp(s1, s2, n) (s1 == s2 ? 0 : -1)
 #endif  /* __CUDA_ARCH__ */
 __BEGIN_DECLS;
 

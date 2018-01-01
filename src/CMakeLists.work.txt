@@ -5,11 +5,11 @@ set(arch 60)
 
 include_directories(include)
 
-add_library(libcu.${arch} STATIC
+add_library(cu.${arch} STATIC
   libcu/sentinel-msg.cpp
-  libcu/sentinel.cpp
-  libcu/sentinel-host.cpp
-  libcu/cuda_runtime.cpp
+  #libcu/sentinel.cpp
+  #libcu/sentinel-host.cpp
+  #libcu/cuda_runtime.cpp
 
   #libcu/crtdefscu.cu
   #libcu/ctypecu.cu
@@ -31,20 +31,59 @@ add_library(libcu.${arch} STATIC
   #libcu/fsystem.cu
   #libcu/fcntlcu.cu
 
-  libcu/stringcu.cu
-  libcu/libcu.cu
-  libcu/libcu.stdlib.cu
+  #libcu/stringcu.cu
+  #libcu/libcu.cu
+  #libcu/libcu.stdlib.cu
   )
+  
+add_library(cu.fileutils.${arch} STATIC
+  #libcu.fileutils/libcu.fileutils.cu
+  libcu.fileutils/sentinel-msg.cpp
+  )
+
+add_executable(cu_tests
+	libcu.tests/libcu.tests.cu
+	libcu.tests/program.cu
+
+  #libcu.tests/crtdefsTest.cu
+  #libcu.tests/ctypeTest.cu
+  #libcu.tests/direntTest.cu
+  #libcu.tests/errnoTest.cu
+  #libcu.tests/fallocTest.cu
+  #libcu.tests/fcntlTest.cu
+  #libcu.tests/fsystemTest.cu
+  #libcu.tests/grpTest.cu
+  #libcu.tests/pwdTest.cu
+  #libcu.tests/regexTest.cu
+  #libcu.tests/sentinelTest.cu
+  #libcu.tests/setjmpTest.cu
+  #libcu.tests/stdargTest.cu
+  #libcu.tests/stddefTest.cu
+  #libcu.tests/stdioTest.cu
+  #libcu.tests/stdlibTest.cu
+  #libcu.tests/stringTest.cu
+  #libcu.tests/timeTest.cu
+  #libcu.tests/unistdTest.cu
+  )
+target_link_libraries(cu_tests PRIVATE cu.${arch})
 
 # Request that libcu be built with -std=c++11
 # As this is a public compile feature anything that links to particles will also build with -std=c++11
-target_compile_features(libcu.${arch} PUBLIC cxx_std_11)
+target_compile_features(cu.${arch} PUBLIC cxx_std_11)
+target_compile_features(cu.fileutils.${arch} PUBLIC cxx_std_11)
 
 # We need to explicitly state that we need all CUDA files in the particle
 # library to be built with -dc as the member functions could be called by
 # other libraries and executables
 if (X64)
-set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu.fileutils.${arch} PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu_tests PROPERTIES COMPILE_FLAGS "-m64" LINK_FLAGS "-m64" CUDA_64_BIT_DEVICE_CODE ON CUDA_SEPARABLE_COMPILATION ON)
+  
 else()
-set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu.fileutils.${arch} PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(cu_tests PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32" CUDA_64_BIT_DEVICE_CODE OFF CUDA_SEPARABLE_COMPILATION ON)
 endif()
+
+

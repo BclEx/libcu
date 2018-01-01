@@ -1,8 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "sentinel-fileutilsmsg.h"
 
-#define panic(fmt, ...) { printf(fmt, __VA_ARGS__); exit(1); }
-
 int dcat(char *str);
 int dchgrp(char *str, int gid);
 int dchmod(char *str, int mode);

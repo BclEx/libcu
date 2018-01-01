@@ -106,7 +106,6 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define LIBCU_MAXHOSTPTR 10
 #endif
 
-
 #if defined(__CUDA_ARCH__)
 #if __OS_WIN
 #define panic(fmt, ...) { printf(fmt"\n", __VA_ARGS__); asm("trap;"); }

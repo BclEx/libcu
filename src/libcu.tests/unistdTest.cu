@@ -1,11 +1,18 @@
-#include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <unistdcu.h>
+#include <fcntlcu.h>
 #include <assert.h>
+
+#ifndef HostDir
+#define HostDir "C:\\T_\\"
+#endif
+#ifndef DeviceDir
+#define DeviceDir ":\\"
+#endif
 
 #ifndef MAKEAFILE
 #define MAKEAFILE
-static __device__ void makeAFile(char *file)
+static __device__ void makeAFile(const char *file)
 {
 	FILE *fp = fopen(file, "w");
 	fprintf_(fp, "test");
@@ -136,7 +143,7 @@ static __global__ void g_unistd_test1()
 	//extern __device__ int rmdir_(const char *path); #sentinel-branch
 	/* Host Absolute */
 	int o0a = rmdir(HostDir"missing");
-	mkdir(HostDir"test");
+	mkdir(HostDir"test", 0);
 	int o0b = rmdir(HostDir"test");
 	assert(o0a == -1 && !o0b);
 

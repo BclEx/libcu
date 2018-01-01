@@ -1,12 +1,18 @@
-#include <cuda_runtime.h>
 #include <stdiocu.h>
 #include <fcntlcu.h>
 #include <unistdcu.h>
 #include <assert.h>
 
+#ifndef HostDir
+#define HostDir "C:\\T_\\"
+#endif
+#ifndef DeviceDir
+#define DeviceDir ":\\"
+#endif
+
 #ifndef MAKEAFILE
 #define MAKEAFILE
-static __device__ void makeAFile(char *file)
+static __device__ void makeAFile(const char *file)
 {
 	FILE *fp = fopen(file, "w");
 	//fwrite("test", 4, 1, fp);
@@ -15,8 +21,6 @@ static __device__ void makeAFile(char *file)
 }
 #endif
 
-#define HostDir "C:\\T_\\"
-#define DeviceDir ":\\"
 static __global__ void g_fcntl_test1()
 {
 	printf("fcntl_test1\n");
