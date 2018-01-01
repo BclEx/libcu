@@ -32,7 +32,11 @@ cudaError_t string_test1();
 cudaError_t time_test1();
 cudaError_t unistd_test1();
 
+#if _HASPAUSE
 #define mainPause(fmt) { printf(fmt"\n"); char c; scanf("%c", &c); }
+#else
+#define mainPause(fmt) { printf(fmt"\n"); }
+#endif
 
 int main(int argc, char ** argv)
 {
