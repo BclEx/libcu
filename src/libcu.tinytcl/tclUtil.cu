@@ -667,7 +667,7 @@ thisCharOK:
 *
 *----------------------------------------------------------------------
 */
-__device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *freeProc)
+__device__ void Tcl_SetResult(Tcl_Interp *interp, const char *string, Tcl_FreeProc *freeProc)
 {
 	register Interp *iPtr = (Interp *)interp;
 	Tcl_FreeProc *oldFreeProc = iPtr->freeProc;
@@ -688,7 +688,7 @@ __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *fr
 		}
 		strcpy(iPtr->result, string);
 	} else {
-		iPtr->result = string;
+		iPtr->result = (char *)string;
 	}
 	// If the old result was dynamically-allocated, free it up.  Do it here, rather than at the beginning, in case the new result value was part of the old result value.
 	if (oldFreeProc != 0) {

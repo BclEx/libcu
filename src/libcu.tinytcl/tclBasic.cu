@@ -362,7 +362,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 	iPtr->numLevels++;
 	if (iPtr->numLevels > MAX_NESTING_DEPTH) {
 		iPtr->numLevels--;
-		iPtr->result = (char *)"too many nested calls to Tcl_Eval (infinite loop?)";
+		iPtr->result = "too many nested calls to Tcl_Eval (infinite loop?)";
 		return TCL_ERROR;
 	}
 
@@ -547,9 +547,9 @@ done:
 		if (result != TCL_OK && result != TCL_ERROR) {
 			Tcl_ResetResult(interp);
 			if (result == TCL_BREAK) {
-				iPtr->result = (char *)"invoked \"break\" outside of a loop";
+				iPtr->result = "invoked \"break\" outside of a loop";
 			} else if (result == TCL_CONTINUE) {
-				iPtr->result = (char *)"invoked \"continue\" outside of a loop";
+				iPtr->result = "invoked \"continue\" outside of a loop";
 			} else {
 				iPtr->result = iPtr->resultSpace;
 				sprintf(iPtr->resultSpace, "command returned bad code: %d", result);

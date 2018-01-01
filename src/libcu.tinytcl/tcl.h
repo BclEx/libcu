@@ -200,7 +200,7 @@ __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, char *obj) 
 __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, int obj) { }
 __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, int64_t obj) { }
 __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, double obj) { }
-extern __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *freeProc);
+extern __device__ void Tcl_SetResult(Tcl_Interp *interp, const char *string, Tcl_FreeProc *freeProc);
 extern __device__ char *Tcl_SetVar(Tcl_Interp *interp, const char *varName, char *newValue, int flags);
 extern __device__ char *Tcl_SetVar2(Tcl_Interp *interp, const char *part1, char *part2, char *newValue, int flags);
 extern __device__ char *Tcl_SignalId(int sig);
