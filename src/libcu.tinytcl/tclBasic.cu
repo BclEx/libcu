@@ -362,7 +362,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 	iPtr->numLevels++;
 	if (iPtr->numLevels > MAX_NESTING_DEPTH) {
 		iPtr->numLevels--;
-		iPtr->result = "too many nested calls to Tcl_Eval (infinite loop?)";
+		iPtr->result = (char *)"too many nested calls to Tcl_Eval (infinite loop?)";
 		return TCL_ERROR;
 	}
 
@@ -547,9 +547,9 @@ done:
 		if (result != TCL_OK && result != TCL_ERROR) {
 			Tcl_ResetResult(interp);
 			if (result == TCL_BREAK) {
-				iPtr->result = "invoked \"break\" outside of a loop";
+				iPtr->result = (char *)"invoked \"break\" outside of a loop";
 			} else if (result == TCL_CONTINUE) {
-				iPtr->result = "invoked \"continue\" outside of a loop";
+				iPtr->result = (char *)"invoked \"continue\" outside of a loop";
 			} else {
 				iPtr->result = iPtr->resultSpace;
 				sprintf(iPtr->resultSpace, "command returned bad code: %d", result);
@@ -584,7 +584,7 @@ done:
 		int numChars = (int)(src - cmdStart);
 		if (numChars > (NUM_CHARS-50)) {
 			numChars = NUM_CHARS-50;
-			ellipsis = " ...";
+			ellipsis = (char *)" ...";
 		}
 		if (!(iPtr->flags & ERR_IN_PROGRESS)) {
 			sprintf(copyStorage, "\n    while executing\n\"%.*s%s\"", numChars, cmdStart, ellipsis);
@@ -683,9 +683,9 @@ __device__ void Tcl_DeleteTrace(Tcl_Interp *interp, Tcl_Trace trace)
 *
 *----------------------------------------------------------------------
 */
-__device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message)
+__device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, const char *message)
 {
-	register Interp *iPtr = (Interp *) interp;
+	register Interp *iPtr = (Interp *)interp;
 	// If an error is already being logged, then the new errorInfo is the concatenation of the old info and the new message.
 	// If this is the first piece of info for the error, then the new errorInfo is the concatenation of the message in interp->result and the new message.
 	if (!(iPtr->flags & ERR_IN_PROGRESS)) {
@@ -694,10 +694,10 @@ __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message)
 
 		// If the errorCode variable wasn't set by the code that generated the error, set it to "NONE".
 		if (!(iPtr->flags & ERROR_CODE_SET)) {
-			Tcl_SetVar2(interp, "errorCode", (char *)NULL, "NONE", TCL_GLOBAL_ONLY);
+			Tcl_SetVar2(interp, "errorCode", (char *)NULL, (char *)"NONE", TCL_GLOBAL_ONLY);
 		}
 	}
-	Tcl_SetVar2(interp, "errorInfo", (char *)NULL, message, TCL_GLOBAL_ONLY|TCL_APPEND_VALUE);
+	Tcl_SetVar2(interp, "errorInfo", (char *)NULL, (char *)message, TCL_GLOBAL_ONLY|TCL_APPEND_VALUE);
 }
 
 /*

@@ -19,7 +19,7 @@ typedef struct {
 } TraceVarInfo;
 
 // Forward declarations for procedures defined in this file:
-static __device__ char *TraceVarProc(ClientData clientData, Tcl_Interp *interp, char *name1, char *name2, int flags);
+static __device__ char *TraceVarProc(ClientData clientData, Tcl_Interp *interp, const char *name1, char *name2, int flags);
 
 // Resize the regexp cache
 static __device__ void expand_regexp_cache(Interp *iPtr, int newsize)
@@ -972,7 +972,7 @@ __device__ int Tcl_TraceCmd(ClientData dummy, Tcl_Interp *interp, int argc, cons
 		tvarPtr->length = length;
 		flags |= TCL_TRACE_UNSETS;
 		strcpy(tvarPtr->command, args[4]);
-		if (Tcl_TraceVar(interp, (char *)args[2], flags, TraceVarProc, (ClientData)tvarPtr) != TCL_OK) {
+		if (Tcl_TraceVar(interp, (const char *)args[2], flags, TraceVarProc, (ClientData)tvarPtr) != TCL_OK) {
 			_freeFast((char *)tvarPtr);
 			return TCL_ERROR;
 		}
@@ -999,10 +999,10 @@ __device__ int Tcl_TraceCmd(ClientData dummy, Tcl_Interp *interp, int argc, cons
 		// Search through all of our traces on this variable to see if there's one with the given command.  If so, then delete the first one that matches.
 		length = strlen(args[4]);
 		ClientData clientData = 0;
-		while ((clientData = Tcl_VarTraceInfo(interp, (char *)args[2], 0, TraceVarProc, clientData)) != 0) {
+		while ((clientData = Tcl_VarTraceInfo(interp, (const char *)args[2], 0, TraceVarProc, clientData)) != 0) {
 			TraceVarInfo *tvarPtr = (TraceVarInfo *)clientData;
 			if (tvarPtr->length == length && tvarPtr->flags == flags && !strncmp(args[4], tvarPtr->command, length)) {
-				Tcl_UntraceVar(interp, (char *)args[2], flags | TCL_TRACE_UNSETS, TraceVarProc, clientData);
+				Tcl_UntraceVar(interp, (const char *)args[2], flags | TCL_TRACE_UNSETS, TraceVarProc, clientData);
 				_freeFast((char *)tvarPtr);
 				break;
 			}
@@ -1015,7 +1015,7 @@ __device__ int Tcl_TraceCmd(ClientData dummy, Tcl_Interp *interp, int argc, cons
 		char *prefix = "{";
 		char ops[4];
 		ClientData clientData = 0;
-		while ((clientData = Tcl_VarTraceInfo(interp, (char *)args[2], 0, TraceVarProc, clientData)) != 0) {
+		while ((clientData = Tcl_VarTraceInfo(interp, (const char *)args[2], 0, TraceVarProc, clientData)) != 0) {
 			TraceVarInfo *tvarPtr = (TraceVarInfo *)clientData;
 			p = ops;
 			if (tvarPtr->flags & TCL_TRACE_READS) {
@@ -1063,7 +1063,7 @@ badOps:
 *----------------------------------------------------------------------
 */
 #undef STATIC_SIZE
-static __device__ char *TraceVarProc(ClientData clientData, Tcl_Interp *interp, char *name1, char *name2, int flags)
+static __device__ char *TraceVarProc(ClientData clientData, Tcl_Interp *interp, const char *name1, char *name2, int flags)
 {
 	TraceVarInfo *tvarPtr = (TraceVarInfo *)clientData;
 #define STATIC_SIZE 199

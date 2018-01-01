@@ -73,7 +73,7 @@ typedef void (Tcl_CmdDeleteProc)(ClientData clientData);
 typedef int (Tcl_CmdProc)(ClientData clientData, Tcl_Interp *interp, int argc, const char *args[]);
 typedef void (Tcl_CmdTraceProc)(ClientData clientData, Tcl_Interp *interp, int level, char *command, Tcl_CmdProc *proc, ClientData cmdClientData, int argc, const char *args[]);
 typedef void (Tcl_FreeProc)(char *blockPtr);
-typedef char *(Tcl_VarTraceProc)(ClientData clientData, Tcl_Interp *interp, char *part1, char *part2, int flags);
+typedef char *(Tcl_VarTraceProc)(ClientData clientData, Tcl_Interp *interp, const char *part1, char *part2, int flags);
 
 // CMD INFO
 typedef struct Tcl_CmdInfo {
@@ -144,7 +144,7 @@ extern __device__ void Tcl_ValidateAllMemory(char *file, int line);
 #define Tcl_FreeResult(interp) \
 	if ((interp)->freeProc) { \
 	if ((interp)->freeProc == (Tcl_FreeProc *)free) { _freeFast((interp)->result); } \
-	else { (*(interp)->freeProc)((char *)(interp)->result); } \
+	else { (*(interp)->freeProc)((interp)->result); } \
 	(interp)->freeProc = nullptr; }
 
 // Exported Tcl procedures:
@@ -152,7 +152,7 @@ extern __device__ void Tcl_AppendElement(Tcl_Interp *interp, const char *string,
 extern __device__ void Tcl_AppendResult_(Tcl_Interp *interp, va_list va); STDARG1void(Tcl_AppendResult, Tcl_AppendResult_(interp, va), Tcl_Interp *interp);
 
 extern __device__ char *Tcl_AssembleCmd(Tcl_CmdBuf buffer, char *string);
-extern __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message);
+extern __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, const char *message);
 extern __device__ char Tcl_Backslash(const char *src, int *readPtr);
 extern __device__ int Tcl_CommandComplete(char *cmd);
 extern __device__ char *Tcl_Concat(int argc, const char *args[]);
@@ -183,8 +183,8 @@ extern __device__ int Tcl_GetDouble(Tcl_Interp *interp, const char *string, doub
 extern __device__ int Tcl_GetInt(Tcl_Interp *interp, const char *string, int *intPtr);
 extern __device__ int Tcl_GetWideInt(Tcl_Interp *interp, const char *string, int64_t *intPtr);
 extern __device__ char *Tcl_GetByteArray(Tcl_Interp *interp, const char *string, int *arrayLength);
-extern __device__ char *Tcl_GetVar(Tcl_Interp *interp, char *varName, int flags);
-extern __device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int flags);
+extern __device__ char *Tcl_GetVar(Tcl_Interp *interp, const char *varName, int flags);
+extern __device__ char *Tcl_GetVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags);
 extern __device__ int Tcl_GlobalEval(Tcl_Interp *interp, char *command);
 extern __device__ void Tcl_InitHistory(Tcl_Interp *interp);
 extern __device__ void Tcl_InitMemory(Tcl_Interp *interp);
@@ -201,23 +201,23 @@ __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, int obj) { 
 __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, int64_t obj) { }
 __device__ __forceinline__ void Tcl_SetObjResult(Tcl_Interp *interp, double obj) { }
 extern __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *freeProc);
-extern __device__ char *Tcl_SetVar(Tcl_Interp *interp, char *varName, char *newValue, int flags);
-extern __device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char *newValue, int flags);
+extern __device__ char *Tcl_SetVar(Tcl_Interp *interp, const char *varName, char *newValue, int flags);
+extern __device__ char *Tcl_SetVar2(Tcl_Interp *interp, const char *part1, char *part2, char *newValue, int flags);
 extern __device__ char *Tcl_SignalId(int sig);
 extern __device__ char *Tcl_SignalMsg(int sig);
 extern __device__ int Tcl_SplitList(Tcl_Interp *interp, char *list, int *argcPtr, const char **argsPtr[]);
 extern __device__ int Tcl_StringMatch(char *string, char *pattern);
 extern __device__ char *Tcl_TildeSubst(Tcl_Interp *interp, char *name);
-extern __device__ int Tcl_TraceVar(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
-extern __device__ int Tcl_TraceVar2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
+extern __device__ int Tcl_TraceVar(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
+extern __device__ int Tcl_TraceVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
 extern __device__ char *Tcl_OSError(Tcl_Interp *interp);
-extern __device__ int Tcl_UnsetVar(Tcl_Interp *interp, char *varName, int flags);
-extern __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int flags);
-extern __device__ void Tcl_UntraceVar(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
-extern __device__ void Tcl_UntraceVar2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
+extern __device__ int Tcl_UnsetVar(Tcl_Interp *interp, const char *varName, int flags);
+extern __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags);
+extern __device__ void Tcl_UntraceVar(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
+extern __device__ void Tcl_UntraceVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData);
 extern __device__ int Tcl_VarEval_(Tcl_Interp *interp, va_list va); STDARG1(int, Tcl_VarEval, Tcl_VarEval_(interp, va), Tcl_Interp *interp);
-extern __device__ ClientData Tcl_VarTraceInfo(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *procPtr, ClientData prevClientData);
-extern __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *procPtr, ClientData prevClientData);
+extern __device__ ClientData Tcl_VarTraceInfo(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *procPtr, ClientData prevClientData);
+extern __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *procPtr, ClientData prevClientData);
 extern __device__ int Tcl_WaitPids(int numPids, int *pidPtr, int *statusPtr);
 
 // LIST (Added_)

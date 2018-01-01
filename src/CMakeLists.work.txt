@@ -47,8 +47,8 @@ add_library(libcu.tinytcl.${arch} STATIC
 
   #libcu.tinytcl/tclAlloc.cu
   #libcu.tinytcl/tclAssem.cu
-  libcu.tinytcl/tclBasic.cu
-  #libcu.tinytcl/tclCmdAH.cu
+  #libcu.tinytcl/tclBasic.cu
+  libcu.tinytcl/tclCmdAH.cu
   #libcu.tinytcl/tclCmdIL.cu
   #libcu.tinytcl/tclCmdMZ.cu
   #libcu.tinytcl/tclExpr.cu

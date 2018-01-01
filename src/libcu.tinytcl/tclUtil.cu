@@ -671,7 +671,7 @@ __device__ void Tcl_SetResult(Tcl_Interp *interp, char *string, Tcl_FreeProc *fr
 {
 	register Interp *iPtr = (Interp *)interp;
 	Tcl_FreeProc *oldFreeProc = iPtr->freeProc;
-	const char *oldResult = iPtr->result;
+	char *oldResult = iPtr->result;
 	iPtr->freeProc = freeProc;
 	if (!string) {
 		iPtr->resultSpace[0] = 0;

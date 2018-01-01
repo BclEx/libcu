@@ -18,12 +18,12 @@ __constant__ static char *_noSuchElement = "no such element in array";
 __constant__ static char *_traceActive = "trace is active on variable";
 
 // Forward references to procedures defined later in this file:
-static __device__ char *CallTraces(Interp *iPtr, Var *arrayPtr, Tcl_HashEntry *hPtr, char *part1, char *part2, int flags);
+static __device__ char *CallTraces(Interp *iPtr, Var *arrayPtr, Tcl_HashEntry *hPtr, const char *part1, char *part2, int flags);
 static __device__ void DeleteSearches(Var *arrayVarPtr);
-static __device__ void DeleteArray(Interp *iPtr, char *arrayName, Var *varPtr, int flags);
+static __device__ void DeleteArray(Interp *iPtr, const char *arrayName, Var *varPtr, int flags);
 static __device__ Var *NewVar(int space);
 static __device__ ArraySearch *ParseSearchId(Tcl_Interp *interp, Var *varPtr, char *varName, char *string);
-static __device__ void VarErrMsg(Tcl_Interp *interp, char *part1, char *part2, char *operation, char *reason);
+static __device__ void VarErrMsg(Tcl_Interp *interp, const char *part1, char *part2, char *operation, char *reason);
 
 /*
 *----------------------------------------------------------------------
@@ -42,10 +42,10 @@ static __device__ void VarErrMsg(Tcl_Interp *interp, char *part1, char *part2, c
 *
 *----------------------------------------------------------------------
 */
-__device__ char *Tcl_GetVar(Tcl_Interp *interp, char *varName, int flags)
+__device__ char *Tcl_GetVar(Tcl_Interp *interp, const char *varName, int flags)
 {
 	// If varName refers to an array (it ends with a parenthesized element name), then handle it specially.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -84,7 +84,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int flags)
+__device__ char *Tcl_GetVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags)
 {
 	Interp *iPtr = (Interp *)interp;
 	// Lookup the first name.
@@ -172,10 +172,10 @@ __device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 *
 *----------------------------------------------------------------------
 */
-__device__ char *Tcl_SetVar(Tcl_Interp *interp, char *varName, char *newValue, int flags)
+__device__ char *Tcl_SetVar(Tcl_Interp *interp, const char *varName, char *newValue, int flags)
 {
 	// If varName refers to an array (it ends with a parenthesized element name), then handle it specially.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -214,7 +214,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char *newValue, int flags)
+__device__ char *Tcl_SetVar2(Tcl_Interp *interp, const char *part1, char *part2, char *newValue, int flags)
 {
 	// Initial value only used to stop compiler from complaining; not really needed.
 	register Interp *iPtr = (Interp *)interp;
@@ -353,10 +353,10 @@ __device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char 
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_UnsetVar(Tcl_Interp *interp, char *varName, int flags)
+__device__ int Tcl_UnsetVar(Tcl_Interp *interp, const char *varName, int flags)
 {
 	// Figure out whether this is an array reference, then call Tcl_UnsetVar2 to do all the real work.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -394,7 +394,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int flags)
+__device__ int Tcl_UnsetVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags)
 {
 	Interp *iPtr = (Interp *) interp;
 	// If the name starts with ::, we lookup in the global scope
@@ -508,10 +508,10 @@ __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_TraceVar(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
+__device__ int Tcl_TraceVar(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
 {
 	// If varName refers to an array (it ends with a parenthesized element name), then handle it specially.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -549,7 +549,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_TraceVar2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
+__device__ int Tcl_TraceVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
 {
 	Interp *iPtr = (Interp *)interp;
 	// Locate the variable, making a new (undefined) one if necessary. If the name starts with ::, we lookup in the global scope
@@ -630,10 +630,10 @@ __device__ int Tcl_TraceVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 *
 *----------------------------------------------------------------------
 */
-__device__ void Tcl_UntraceVar(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
+__device__ void Tcl_UntraceVar(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
 {
 	// If varName refers to an array (it ends with a parenthesized element name), then handle it specially.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -669,7 +669,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ void Tcl_UntraceVar2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
+__device__ void Tcl_UntraceVar2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData clientData)
 {
 	Interp *iPtr = (Interp *)interp;
 	// First, lookup the variable. If the name starts with ::, we lookup in the global scope
@@ -746,10 +746,10 @@ __device__ void Tcl_UntraceVar2(Tcl_Interp *interp, char *part1, char *part2, in
 *
 *----------------------------------------------------------------------
 */
-__device__ ClientData Tcl_VarTraceInfo(Tcl_Interp *interp, char *varName, int flags, Tcl_VarTraceProc *proc, ClientData prevClientData)
+__device__ ClientData Tcl_VarTraceInfo(Tcl_Interp *interp, const char *varName, int flags, Tcl_VarTraceProc *proc, ClientData prevClientData)
 {
 	// If varName refers to an array (it ends with a parenthesized element name), then handle it specially.
-	for (register char *p = varName; *p != '\0'; p++) {
+	for (register char *p = (char *)varName; *p != '\0'; p++) {
 		if (*p == '(') {
 			char *open = p;
 			do {
@@ -785,7 +785,7 @@ scalar:
 *
 *----------------------------------------------------------------------
 */
-__device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData prevClientData)
+__device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, const char *part1, char *part2, int flags, Tcl_VarTraceProc *proc, ClientData prevClientData)
 {
 	Interp *iPtr = (Interp *)interp;
 	// First, lookup the variable. If the name starts with ::, we lookup in the global scope
@@ -854,14 +854,14 @@ __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, char *p
 __device__ int Tcl_SetCmd(ClientData dummy, register Tcl_Interp *interp, int argc, const char *args[])
 {
 	if (argc == 2) {
-		char *value = Tcl_GetVar(interp, (char *)args[1], TCL_LEAVE_ERR_MSG);
+		char *value = Tcl_GetVar(interp, (const char *)args[1], TCL_LEAVE_ERR_MSG);
 		if (value == NULL) {
 			return TCL_ERROR;
 		}
 		interp->result = value;
 		return TCL_OK;
 	} else if (argc == 3) {
-		char *result = Tcl_SetVar(interp, (char *)args[1], (char *)args[2], TCL_LEAVE_ERR_MSG);
+		char *result = Tcl_SetVar(interp, (const char *)args[1], (char *)args[2], TCL_LEAVE_ERR_MSG);
 		if (result == NULL) {
 			return TCL_ERROR;
 		}
@@ -893,7 +893,7 @@ __device__ int Tcl_UnsetCmd(ClientData dummy, register Tcl_Interp *interp, int a
 		return TCL_ERROR;
 	}
 	for (int i = 1; i < argc; i++) {
-		if (Tcl_UnsetVar(interp, (char *)args[i], TCL_LEAVE_ERR_MSG) != 0) {
+		if (Tcl_UnsetVar(interp, (const char *)args[i], TCL_LEAVE_ERR_MSG) != 0) {
 			return TCL_ERROR;
 		}
 	}
@@ -922,7 +922,7 @@ __device__ int Tcl_AppendCmd(ClientData dummy, register Tcl_Interp *interp, int 
 	}
 	char *result = NULL; // (Initialization only needed to keep the compiler from complaining)
 	for (int i = 2; i < argc; i++) {
-		result = Tcl_SetVar(interp, (char *)args[1], (char *)args[i], TCL_APPEND_VALUE|TCL_LEAVE_ERR_MSG);
+		result = Tcl_SetVar(interp, (const char *)args[1], (char *)args[i], TCL_APPEND_VALUE|TCL_LEAVE_ERR_MSG);
 		if (result == NULL) {
 			return TCL_ERROR;
 		}
@@ -953,7 +953,7 @@ __device__ int Tcl_LappendCmd(ClientData dummy, register Tcl_Interp *interp, int
 	}
 	char *result = NULL; // (Initialization only needed to keep the compiler from complaining)
 	for (int i = 2; i < argc; i++) {
-		result = Tcl_SetVar(interp, (char *)args[1], (char *)args[i], TCL_APPEND_VALUE|TCL_LIST_ELEMENT|TCL_LEAVE_ERR_MSG);
+		result = Tcl_SetVar(interp, (const char *)args[1], (char *)args[i], TCL_APPEND_VALUE|TCL_LIST_ELEMENT|TCL_LEAVE_ERR_MSG);
 		if (result == NULL) {
 			return TCL_ERROR;
 		}
@@ -1003,7 +1003,7 @@ __device__ int Tcl_ArrayCmd(ClientData dummy, register Tcl_Interp *interp, int a
 		varPtr = (Var *)Tcl_GetHashValue(hPtr);
 		if (varPtr->flags & VAR_UPVAR) {
 			hPtr = varPtr->value.upvarPtr;
-			varPtr = (Var *) Tcl_GetHashValue(hPtr);
+			varPtr = (Var *)Tcl_GetHashValue(hPtr);
 		}
 		if (!(varPtr->flags & VAR_ARRAY)) {
 			notArray = true;
@@ -1079,7 +1079,7 @@ __device__ int Tcl_ArrayCmd(ClientData dummy, register Tcl_Interp *interp, int a
 		}
 		Tcl_HashSearch search;
 		for (hPtr = Tcl_FirstHashEntry(varPtr->value.tablePtr, &search); hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-			Var *varPtr2 = (Var *) Tcl_GetHashValue(hPtr);
+			Var *varPtr2 = (Var *)Tcl_GetHashValue(hPtr);
 			if (varPtr2->flags & VAR_UNDEFINED) {
 				continue;
 			}
@@ -1443,7 +1443,7 @@ __device__ void TclDeleteVars(Interp *iPtr, Tcl_HashTable *tablePtr)
 *
 *----------------------------------------------------------------------
 */
-static __device__ char *CallTraces(Interp *iPtr, register Var *arrayPtr, Tcl_HashEntry *hPtr, char *part1, char *part2, int flags)
+static __device__ char *CallTraces(Interp *iPtr, register Var *arrayPtr, Tcl_HashEntry *hPtr, const char *part1, char *part2, int flags)
 {
 	// If there are already similar trace procedures active for the variable, don't call them again.
 	Var *varPtr = (Var *)Tcl_GetHashValue(hPtr);
@@ -1624,7 +1624,7 @@ static __device__ void DeleteSearches(register Var *arrayVarPtr)
 *
 *----------------------------------------------------------------------
 */
-static __device__ void DeleteArray(Interp *iPtr, char *arrayName, Var *varPtr, int flags)
+static __device__ void DeleteArray(Interp *iPtr, const char *arrayName, Var *varPtr, int flags)
 {
 	DeleteSearches(varPtr);
 	Tcl_HashSearch search;
@@ -1661,7 +1661,7 @@ static __device__ void DeleteArray(Interp *iPtr, char *arrayName, Var *varPtr, i
 *
 *----------------------------------------------------------------------
 */
-static __device__ void VarErrMsg(Tcl_Interp *interp, char *part1, char *part2, char *operation, char *reason)
+static __device__ void VarErrMsg(Tcl_Interp *interp, const char *part1, char *part2, char *operation, char *reason)
 {
 	Tcl_ResetResult(interp);
 	Tcl_AppendResult(interp, "can't ", operation, " \"", part1, (char *)NULL);

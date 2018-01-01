@@ -12,7 +12,7 @@ static __device__ EnvInterp *_firstInterpPtr;
 // First in list of all managed interpreters, or NULL if none.
 
 // Declarations for local procedures defined in this file:
-static __device__ char *EnvTraceProc(ClientData clientData, Tcl_Interp *interp, char *name1, char *name2, int flags);
+static __device__ char *EnvTraceProc(ClientData clientData, Tcl_Interp *interp, const char *name1, char *name2, int flags);
 
 /*
 *----------------------------------------------------------------------
@@ -70,7 +70,7 @@ __device__ void TclSetupEnv(Tcl_Interp *interp)
 *
 *----------------------------------------------------------------------
 */
-static __device__ char *EnvTraceProc(ClientData clientData, Tcl_Interp *interp, char *name1, char *name2, int flags)
+static __device__ char *EnvTraceProc(ClientData clientData, Tcl_Interp *interp, const char *name1, char *name2, int flags)
 {
 	// First see if the whole "env" variable is being deleted.  If so, just forget about this interpreter.
 	if (name2 == NULL) {
