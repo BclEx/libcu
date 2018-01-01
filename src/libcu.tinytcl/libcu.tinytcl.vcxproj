@@ -63,7 +63,7 @@
     <None Include="tclExDbg.cu" />
     <None Include="tclNoExtensions.cu" />
     <None Include="tclExGen.cu" />
-    <None Include="TclMod.cu" />
+    <None Include="tclMod.cu" />
   </ItemGroup>
   <ItemGroup Condition="'$(CUARCH)'=='cpu'">
     <None Include="libcu.tinytcl.cu" />
@@ -94,7 +94,7 @@
     <ClCompile Include="tclExDbg.cu" />
     <ClCompile Include="tclExtensions.cu" />
     <ClCompile Include="tclExGen.cu" />
-    <ClCompile Include="TclMod.cu" />
+    <ClCompile Include="tclMod.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="library\init.tcl" />
