@@ -22,7 +22,7 @@ typedef struct Tcl_HashEntry {
 	struct Tcl_HashEntry **bucketPtr;	// Pointer to bucket that points to first entry in this entry's chain: used for deleting the entry.
 	ClientData clientData;		// Application stores something here with Tcl_SetHashValue.
 	union {						// Key has one of these forms:
-		char *oneWordValue;		// One-word value for key.
+		const char *oneWordValue; // One-word value for key.
 		int words[1];			// Multiple integer words for key. The actual size will be as large as necessary for this table's keys.
 		char string[4];			// String for key.  The actual size will be as large as needed to hold the key.
 	} key;				// MUST BE LAST FIELD IN RECORD!!
@@ -40,8 +40,8 @@ typedef struct Tcl_HashTable {
 	int downShift;			// Shift count used in hashing function.  Designed to use high- order bits of randomized keys.
 	int mask;				// Mask value used in hashing function.
 	int keyType;			// Type of keys used in this table.  It's either TCL_STRING_KEYS, TCL_ONE_WORD_KEYS, or an integer giving the number of ints in a
-	Tcl_HashEntry *(*findProc)(struct Tcl_HashTable *tablePtr, char *key);
-	Tcl_HashEntry *(*createProc)(struct Tcl_HashTable *tablePtr, char *key, int *newPtr);
+	Tcl_HashEntry *(*findProc)(struct Tcl_HashTable *tablePtr, const char *key);
+	Tcl_HashEntry *(*createProc)(struct Tcl_HashTable *tablePtr, const char *key, int *newPtr);
 } Tcl_HashTable;
 
 // Structure definition for information used to keep track of searches through hash tables:

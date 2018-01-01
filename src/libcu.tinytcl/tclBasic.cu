@@ -13,7 +13,7 @@
 
 // The following structure defines all of the commands in the Tcl core, and the C procedures that execute them.
 typedef struct {
-	char *name;				// Name of command.
+	const char *name;		// Name of command.
 	Tcl_CmdProc *proc;		// Procedure that executes command.
 } CmdInfo;
 
@@ -362,7 +362,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 	iPtr->numLevels++;
 	if (iPtr->numLevels > MAX_NESTING_DEPTH) {
 		iPtr->numLevels--;
-		iPtr->result =  "too many nested calls to Tcl_Eval (infinite loop?)";
+		iPtr->result = "too many nested calls to Tcl_Eval (infinite loop?)";
 		return TCL_ERROR;
 	}
 
@@ -400,7 +400,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 	const char *argStorage[NUM_ARGS]; // This procedure generates an (args, argc) array for the command, It starts out with stack-allocated space but uses dynamically- allocated storage to increase it if needed.
 	const char **args = argStorage;
 	int argSize = NUM_ARGS;
-	char *ellipsis = ""; // Used in setting errorInfo variable; set to "..." to indicate that not all of offending command is included in errorInfo.  "" means that the command is all there.
+	char *ellipsis = (char *)""; // Used in setting errorInfo variable; set to "..." to indicate that not all of offending command is included in errorInfo.  "" means that the command is all there.
 	while (*src != termChar) {
 		if (iPtr->catch_level && iPtr->signal) {
 			break;
@@ -438,7 +438,7 @@ __device__ int Tcl_Eval(Tcl_Interp *interp, char *cmd, int flags, char **termPtr
 			result = TclParseWords((Tcl_Interp *)iPtr, src, flags, maxArgs, termPtr, &newArgs, &args[argc], &pv);
 			src = *termPtr;
 			if (result != TCL_OK) {
-				ellipsis = "...";
+				ellipsis = (char *)"...";
 				goto done;
 			}
 

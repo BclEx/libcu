@@ -45,32 +45,32 @@ add_executable(jimtcl.${arch}
 add_library(libcu.tinytcl.${arch} STATIC
   #libcu.tinytcl/libcu.jimtcl.cu
 
-  libcu.tinytcl/tclAlloc.cu
-  libcu.tinytcl/tclAssem.cu
+  #libcu.tinytcl/tclAlloc.cu
+  #libcu.tinytcl/tclAssem.cu
   libcu.tinytcl/tclBasic.cu
-  libcu.tinytcl/tclCmdAH.cu
-  libcu.tinytcl/tclCmdIL.cu
-  libcu.tinytcl/tclCmdMZ.cu
-  libcu.tinytcl/tclExpr.cu
-  libcu.tinytcl/tclGet.cu
-  libcu.tinytcl/tclGlob.cu
-  libcu.tinytcl/tclGpuAZ.cu
-  libcu.tinytcl/tclGpuEnv.cu
-  libcu.tinytcl/tclGpuStr.cu
-  libcu.tinytcl/tclGpuUtil.cu
-  libcu.tinytcl/tclHash.cu
-  libcu.tinytcl/tclHistory.cu
-  libcu.tinytcl/tclLoad-noop.cu
-  libcu.tinytcl/tclLoad.cu
-  libcu.tinytcl/tclObj.cu
-  libcu.tinytcl/tclParse.cu
-  libcu.tinytcl/tclProc.cu
-  libcu.tinytcl/tclUtil.cu
-  libcu.tinytcl/tclVar.cu
-  libcu.tinytcl/tclExDbg.cu
-  libcu.tinytcl/tclNoExtensions.cu
-  libcu.tinytcl/tclExGen.cu
-  libcu.tinytcl/tclMod.cu
+  #libcu.tinytcl/tclCmdAH.cu
+  #libcu.tinytcl/tclCmdIL.cu
+  #libcu.tinytcl/tclCmdMZ.cu
+  #libcu.tinytcl/tclExpr.cu
+  #libcu.tinytcl/tclGet.cu
+  #libcu.tinytcl/tclGlob.cu
+  #libcu.tinytcl/tclGpuAZ.cu
+  #libcu.tinytcl/tclGpuEnv.cu
+  #libcu.tinytcl/tclGpuStr.cu
+  #libcu.tinytcl/tclGpuUtil.cu
+  #libcu.tinytcl/tclHash.cu
+  #libcu.tinytcl/tclHistory.cu
+  #libcu.tinytcl/tclLoad-noop.cu
+  #libcu.tinytcl/tclLoad.cu
+  #libcu.tinytcl/tclObj.cu
+  #libcu.tinytcl/tclParse.cu
+  #libcu.tinytcl/tclProc.cu
+  #libcu.tinytcl/tclUtil.cu
+  #libcu.tinytcl/tclVar.cu
+  #libcu.tinytcl/tclExDbg.cu
+  #libcu.tinytcl/tclNoExtensions.cu
+  #libcu.tinytcl/tclExGen.cu
+  #libcu.tinytcl/tclMod.cu
   )
   target_link_libraries(libcu.tinytcl.${arch} PRIVATE libcu.${arch})
 

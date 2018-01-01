@@ -144,7 +144,7 @@ extern __device__ void Tcl_ValidateAllMemory(char *file, int line);
 #define Tcl_FreeResult(interp) \
 	if ((interp)->freeProc) { \
 	if ((interp)->freeProc == (Tcl_FreeProc *)free) { _freeFast((interp)->result); } \
-	else { (*(interp)->freeProc)((interp)->result); } \
+	else { (*(interp)->freeProc)((char *)(interp)->result); } \
 	(interp)->freeProc = nullptr; }
 
 // Exported Tcl procedures:
