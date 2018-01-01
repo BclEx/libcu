@@ -685,7 +685,7 @@ __device__ void Tcl_DeleteTrace(Tcl_Interp *interp, Tcl_Trace trace)
 */
 __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message)
 {
-	register Interp *iPtr = (Interp *) interp;
+	register Interp *iPtr = (Interp *)interp;
 	// If an error is already being logged, then the new errorInfo is the concatenation of the old info and the new message.
 	// If this is the first piece of info for the error, then the new errorInfo is the concatenation of the message in interp->result and the new message.
 	if (!(iPtr->flags & ERR_IN_PROGRESS)) {

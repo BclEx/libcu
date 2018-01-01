@@ -441,7 +441,7 @@ __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 			}
 			return -1;
 		}
-		varPtr = (Var *) Tcl_GetHashValue(hPtr);
+		varPtr = (Var *)Tcl_GetHashValue(hPtr);
 	}
 
 	// If there is a trace active on this variable or if the variable is already being deleted then don't delete the variable:  it
@@ -805,7 +805,7 @@ __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, char *p
 	Var *varPtr = (Var *)Tcl_GetHashValue(hPtr);
 	if (varPtr->flags & VAR_UPVAR) {
 		hPtr = varPtr->value.upvarPtr;
-		varPtr = (Var *) Tcl_GetHashValue(hPtr);
+		varPtr = (Var *)Tcl_GetHashValue(hPtr);
 	}
 	if (part2 != NULL) {
 		if (!(varPtr->flags & VAR_ARRAY)) {
@@ -1003,7 +1003,7 @@ __device__ int Tcl_ArrayCmd(ClientData dummy, register Tcl_Interp *interp, int a
 		varPtr = (Var *)Tcl_GetHashValue(hPtr);
 		if (varPtr->flags & VAR_UPVAR) {
 			hPtr = varPtr->value.upvarPtr;
-			varPtr = (Var *) Tcl_GetHashValue(hPtr);
+			varPtr = (Var *)Tcl_GetHashValue(hPtr);
 		}
 		if (!(varPtr->flags & VAR_ARRAY)) {
 			notArray = true;
@@ -1079,7 +1079,7 @@ __device__ int Tcl_ArrayCmd(ClientData dummy, register Tcl_Interp *interp, int a
 		}
 		Tcl_HashSearch search;
 		for (hPtr = Tcl_FirstHashEntry(varPtr->value.tablePtr, &search); hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
-			Var *varPtr2 = (Var *) Tcl_GetHashValue(hPtr);
+			Var *varPtr2 = (Var *)Tcl_GetHashValue(hPtr);
 			if (varPtr2->flags & VAR_UNDEFINED) {
 				continue;
 			}

@@ -191,7 +191,7 @@ typedef struct CompiledRegexp {
 
 typedef struct Interp {
 	// Note:  the first three fields must match exactly the fields in a Tcl_Interp struct (see tcl.h).  If you change one, be sure to change the other.
-	const char *result;			// Points to result returned by last command.
+	char *result;			// Points to result returned by last command.
 	Tcl_FreeProc *freeProc;		// Zero means result is statically allocated. If non-zero, gives address of procedure to invoke to free the result.  Must be freed by Tcl_Eval before executing next command.
 	int errorLine;				// When TCL_ERROR is returned, this gives the line number within the command where the error occurred (1 means first line).
 	Tcl_HashTable commandTable;	// Contains all of the commands currently registered in this interpreter.  Indexed by strings; values have type (Command *).
