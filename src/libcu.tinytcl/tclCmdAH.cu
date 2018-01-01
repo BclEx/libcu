@@ -79,7 +79,7 @@ __device__ int Tcl_CaseCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 		const char **patArgs;
 
 		if (i == (caseArgc-1)) {
-			interp->result = "extra case pattern with no body";
+			interp->result = (char *)"extra case pattern with no body";
 			result = TCL_ERROR;
 			goto cleanup;
 		}
@@ -648,7 +648,7 @@ __device__ int Tcl_FormatCmd(ClientData dummy, Tcl_Interp *interp, int argc, con
 			}
 			break;
 		case 0:
-			interp->result = "format string ended in middle of field specifier";
+			interp->result = (char *)"format string ended in middle of field specifier";
 			goto fmtError;
 		default:
 			sprintf(interp->result, "bad field specifier \"%c\"", *format);
@@ -707,7 +707,7 @@ doField:
 	return TCL_OK;
 
 notEnoughArgs:
-	interp->result = "not enough arguments for all format specifiers";
+	interp->result = (char *)"not enough arguments for all format specifiers";
 fmtError:
 	if (dstSpace != TCL_RESULT_SIZE) {
 		_freeFast(dst);

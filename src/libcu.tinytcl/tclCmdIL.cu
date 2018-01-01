@@ -211,9 +211,9 @@ infoNoSuchProc:
 			return TCL_ERROR;
 		}
 		if (Tcl_CommandComplete((char *)args[2])) {
-			interp->result = "1";
+			interp->result = (char *)"1";
 		} else {
-			interp->result = "0";
+			interp->result = (char *)"0";
 		}
 		return TCL_OK;
 	} else if (c == 'd' && !strncmp(args[1], "default", length)) {
@@ -237,12 +237,12 @@ defStoreError:
 						Tcl_AppendResult(interp, "couldn't store default value in variable \"", args[4], "\"", (char *)NULL);
 						return TCL_ERROR;
 					}
-					iPtr->result = "1";
+					iPtr->result = (char *)"1";
 				} else {
-					if (Tcl_SetVar((Tcl_Interp *)iPtr, (char *)args[4], "", 0) == NULL) {
+					if (Tcl_SetVar((Tcl_Interp *)iPtr, (char *)args[4], (char *)"", 0) == NULL) {
 						goto defStoreError;
 					}
-					iPtr->result = "0";
+					iPtr->result = (char *)"0";
 				}
 				return TCL_OK;
 			}
@@ -257,7 +257,7 @@ defStoreError:
 		if (p == NULL) {
 			if (strchr(args[2], '(') != NULL) {
 noVar:
-				iPtr->result = "0";
+				iPtr->result = (char *)"0";
 				return TCL_OK;
 			}
 			Tcl_HashEntry *hPtr;
@@ -277,7 +277,7 @@ noVar:
 				goto noVar;
 			}
 		}
-		iPtr->result = "1";
+		iPtr->result = (char *)"1";
 		return TCL_OK;
 	} else if (c == 'g' && !strncmp(args[1], "globals", length)) {
 		if (argc > 3) {
@@ -316,7 +316,7 @@ noVar:
 	else if (c == 'l' && !strncmp(args[1], "level", length) && length >= 2) {
 		if (argc == 2) {
 			if (iPtr->varFramePtr == NULL) {
-				iPtr->result = "0";
+				iPtr->result = (char *)"0";
 			} else {
 				sprintf(iPtr->result, "%d", iPtr->varFramePtr->level);
 			}
@@ -357,7 +357,7 @@ levelError:
 		interp->result = getenv("TCL_LIBRARY");
 		if (interp->result == NULL) {
 #ifdef TCL_LIBRARY
-			interp->result = TCL_LIBRARY;
+			interp->result = (char *)TCL_LIBRARY;
 #else
 			interp->result = "there is no Tcl library at this installation";
 			return TCL_ERROR;
@@ -416,7 +416,7 @@ levelError:
 			return TCL_ERROR;
 		}
 		// Note:  TCL_VERSION below is expected to be set with a "-D" switch in the Makefile.
-		iPtr->result = TCL_VERSION;
+		iPtr->result = (char *)TCL_VERSION;
 		return TCL_OK;
 	} else if (c == 'v' && !strncmp(args[1], "vars", length)) {
 		if (argc > 3) {
@@ -465,7 +465,7 @@ __device__ int Tcl_JoinCmd(ClientData dummy, Tcl_Interp *interp, int argc, const
 {
 	char *joinString;
 	if (argc == 2) {
-		joinString = " ";
+		joinString = (char *)" ";
 	} else if (argc == 3) {
 		joinString = (char *)args[2];
 	} else {
