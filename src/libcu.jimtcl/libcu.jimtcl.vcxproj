@@ -36,7 +36,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(CUARCH)'!='cpu'">
     <CudaCompile Include="libcu.jimtcl.cu" />
-    <None Include="jim.cu" />
+    <CudaCompile Include="jim.cu" />
     <None Include="jim-aio.cu" />
     <None Include="jim-array.cu" />
     <None Include="jim-clock.cu" />
@@ -194,7 +194,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)jim.cu.obj" "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -217,7 +217,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)jim.cu.obj" "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -245,7 +245,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)jim.cu.obj" "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -272,7 +272,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
+      <Command Condition="'$(CUARCH)'!='cpu'">"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)jim.cu.obj" "$(IntDir)libcu.jimtcl.cu.obj" -o "$(OutDir)libcu.jimtcl.$(CUARCH).lib"</Command>
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>

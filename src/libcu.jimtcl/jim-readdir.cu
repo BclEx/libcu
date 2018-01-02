@@ -47,7 +47,7 @@
 #pragma endregion
 
 //#include <stdio.h>
-//#include <string.h>
+#include <stringcu.h>
 #include "jim.h"
 #include "jimautoconf.h"
 #include <errnocu.h>

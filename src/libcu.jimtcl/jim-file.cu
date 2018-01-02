@@ -330,7 +330,7 @@ static __device__ int file_cmd_delete(Jim_Interp *interp, int argc, Jim_Obj *con
 }
 
 #if defined(HAVE_MKDIR_ONE_ARG) && !defined(__CUDA_ARCH__)
-#define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME)
+#define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME, 0755)
 #else
 #define MKDIR_DEFAULT(PATHNAME) mkdir(PATHNAME, 0755)
 #endif

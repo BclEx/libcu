@@ -1,5 +1,5 @@
 #! /bin/sh
-cp src/CMakeLists.work.txt src/CMakeLists.txt
+cp src/CMakeLists.full.txt src/CMakeLists.txt
 
 # START
 rm -rf _build

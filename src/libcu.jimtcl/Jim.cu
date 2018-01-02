@@ -109,9 +109,9 @@ __device__ const char *jim_tt_name(int type);
 
 #ifdef JIM_DEBUG_PANIC
 static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va);
-#define JimPanic JimPanicDump
+#define JimPanic JimPanicDump //(c, msg, ...) JimPanicDump(c, msg, __VA_ARGS__)
 #else
-#define JimPanic(c, msg, ...) (void *)0
+#define JimPanic(c, msg, ...)
 #endif
 
 #pragma endregion
@@ -319,7 +319,7 @@ static __device__ int JimStringFirst(const char *s1, int l1, const char *s2, int
 	for (int i = idx; i <= l2 - l1; i++) {
 		if (!memcmp(s2, s1, l1bytelen))
 			return i;
-		int c; s2 += utf8_tounicode(s2, &c);
+		int c; UNUSED_SYMBOL(c); s2 += utf8_tounicode(s2, &c);
 	}
 	return -1;
 }
@@ -10740,7 +10740,7 @@ static __device__ Jim_Obj *JimStringMap(Jim_Interp *interp, Jim_Obj *mapListObjP
 		if (i == numMaps) {
 			if (noMatchStart == NULL)
 				noMatchStart = str;
-			int c; str += utf8_tounicode(str, &c);
+			int c; UNUSED_SYMBOL(c); str += utf8_tounicode(str, &c);
 			strLen--;
 		}
 	}
@@ -10906,7 +10906,7 @@ badcompareargs:
 		char *buf = (char *)Jim_Alloc(len + 1);
 		char *p = buf + len;
 		*p = 0;
-		for (int i = 0; i < len; ) { int c; int l = utf8_tounicode(str, &c); memcpy(p - l, str, l); p -= l; i += l; str += l; }
+		for (int i = 0; i < len; ) { int c; UNUSED_SYMBOL(c); int l = utf8_tounicode(str, &c); memcpy(p - l, str, l); p -= l; i += l; str += l; }
 		Jim_SetResult(interp, Jim_NewStringObjNoAlloc(interp, buf, len));
 		return JIM_OK; }
 	case OPT_INDEX:{
@@ -10929,7 +10929,7 @@ badcompareargs:
 		else {
 			
 			int i = utf8_index(str, idx);
-			int c; Jim_SetResultString(interp, str + i, utf8_tounicode(str + i, &c));
+			int c; UNUSED_SYMBOL(c); Jim_SetResultString(interp, str + i, utf8_tounicode(str + i, &c));
 		}
 		return JIM_OK; }
 	case OPT_FIRST:
@@ -12184,12 +12184,12 @@ static __device__ int Jim_InterpCoreCommand(ClientData dummy, Jim_Interp *interp
 	switch (cmd) {
 	case INTERP_CREATE: {
 		const char *arg;
-		bool safe = false;
+		//bool safe = false;
 		if (argc == 4) {
 			arg = Jim_String(argv[1]);
 			if (!strcmp(arg, "-safe")) {
 				argc--;
-				safe = true;
+				//safe = true;
 			}
 		}
 		if (argc < 3) {

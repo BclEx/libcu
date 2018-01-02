@@ -41,7 +41,7 @@
 */
 
 //#include <ctype.h>
-//#include <string.h>
+#include <stringcu.h>
 #include "jim.h"
 #include "utf8.h"
 

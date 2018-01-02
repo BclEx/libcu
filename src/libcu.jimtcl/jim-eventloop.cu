@@ -46,7 +46,7 @@
 #include <timecu.h>
 //#include <sys/time.h>
 //#include <sys/types.h>
-//#include <string.h>
+#include <stringcu.h>
 #include <unistdcu.h>
 //#include <errno.h>
 #ifdef __CUDA_ARCH__

@@ -1,6 +1,5 @@
 #include "jim-interactive.cu"
 #include "init.cu"
-#include "jim.cu"
 #include "jim-aio.cu"
 #include "jim-array.cu"
 #include "jim-clock.cu"

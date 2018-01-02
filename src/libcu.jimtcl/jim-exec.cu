@@ -22,7 +22,7 @@
 */
 #pragma endregion
 
-//#include <string.h>
+#include <stringcu.h>
 //#include <ctype.h>
 #include "jimautoconf.h"
 #include "jim.h"

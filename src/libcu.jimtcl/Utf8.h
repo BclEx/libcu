@@ -1,6 +1,10 @@
 #ifndef UTF8_UTIL_H
 #define UTF8_UTIL_H
 
+#ifndef JIM_UTF8
+#include <ctypecu.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,8 +23,6 @@ extern "C" {
 	__device__ int utf8_fromunicode(char *p, unsigned uc);
 
 #ifndef JIM_UTF8
-#include <ctypecu.h>
-
 	// No utf-8 support. 1 byte = 1 char
 #define utf8_strlen(S, B) ((B) < 0 ? (int)strlen(S) : (B))
 #define utf8_tounicode(S, CP) (*(CP) = (unsigned char)*(S), 1)

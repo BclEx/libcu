@@ -32,14 +32,10 @@ static __device__ int clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *co
 		return JIM_ERROR;
 	time_t t = seconds;
 	char buf[100];
-#if __CUDACC__
-	memcpy(buf, "TIME", 5);
-#else
 	if (!strftime(buf, sizeof(buf), format, localtime(&t))) {
 		Jim_SetResultString(interp, "format string too long", -1);
 		return JIM_ERROR;
 	}
-#endif
 	Jim_SetResultString(interp, buf, -1);
 	return JIM_OK;
 }

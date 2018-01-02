@@ -6,7 +6,6 @@
  * See LICENCE for licence details.
  */
 
-#include <cuda_runtimecu.h>
 #include <assert.h>
 #include "utf8.h"
 
