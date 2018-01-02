@@ -111,7 +111,7 @@ __device__ const char *jim_tt_name(int type);
 static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va);
 #define JimPanic JimPanicDump
 #else
-#define JimPanic
+#define JimPanic(c, msg, ...) (void *)0
 #endif
 
 #pragma endregion
@@ -171,7 +171,7 @@ static __device__ int utf8_tounicode_case(const char *s, int *uc, int upper)
 // Returns NULL on no match.
 static __device__ const char *JimCharsetMatch(const char *pattern, int c, int flags)
 {
-	int not = 0;
+	int not_ = 0;
 	int pchar;
 	int match = 0;
 	int nocase = 0;
@@ -181,7 +181,7 @@ static __device__ const char *JimCharsetMatch(const char *pattern, int c, int fl
 	}
 	if (flags & JIM_CHARSET_SCAN) {
 		if (*pattern == '^') {
-			not++;
+			not_++;
 			pattern++;
 		}
 		// Special case. If the first char is ']', it is part of the set
@@ -214,7 +214,7 @@ first:
 		if (pchar == c)
 			match = 1;
 	}
-	if (not)
+	if (not_)
 		match = !match;
 	return (match ? pattern : nullptr);
 }
@@ -12531,7 +12531,7 @@ __device__ int Jim_GetCommandInfo(Jim_Interp *interp, Jim_Obj *objPtr, Jim_CmdIn
 	}
 	cmdInfo->objProc = cmdPtr->u.native.cmdProc;
 	cmdInfo->objClientData = cmdPtr->u.native.privData;
-	cmdInfo->deleteProc = cmdPtr->u.native.delProc;
+	cmdInfo->deleteProc = (void *)cmdPtr->u.native.delProc;
 	return 1;
 }
 

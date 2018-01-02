@@ -27,7 +27,7 @@
     <ClInclude Include="jim.h" />
     <ClInclude Include="jimautoconf.h" />
     <ClInclude Include="jim-config.h" />
-    <ClInclude Include="jim-eventLoop.h" />
+    <ClInclude Include="jim-eventloop.h" />
     <ClInclude Include="jim-signal.h" />
     <ClInclude Include="jim-subcmd.h" />
     <ClInclude Include="jim-win32compat.h" />

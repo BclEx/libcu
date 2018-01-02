@@ -5,11 +5,11 @@
     <ClInclude Include="jim-win32compat.h" />
     <ClInclude Include="jim-config.h" />
     <ClInclude Include="jim-subcmd.h" />
-    <ClInclude Include="jim-eventLoop.h" />
     <ClInclude Include="jim-signal.h" />
     <ClInclude Include="jimex.h" />
     <ClInclude Include="utf8.h" />
     <ClInclude Include="jimautoconf.h" />
+    <ClInclude Include="jim-eventloop.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="_content\TclContext.cu.h">
@@ -23,7 +23,35 @@
     </None>
     <None Include="libcu.jimtcl.native.targets" />
     <None Include="libcu.jimtcl.native.nuspec" />
-    <None Include="libcu.jimtcl.cu" />
+    <None Include="jim.cu" />
+    <None Include="jim-aio.cu" />
+    <None Include="jim-array.cu" />
+    <None Include="jim-clock.cu" />
+    <None Include="jim-eventloop.cu" />
+    <None Include="jim-exec.cu" />
+    <None Include="jim-file.cu" />
+    <None Include="jim-format.cu" />
+    <None Include="jim-gpu.cu" />
+    <None Include="jim-history.cu" />
+    <None Include="jim-interactive.cu" />
+    <None Include="jim-load.cu" />
+    <None Include="jim-namespace.cu" />
+    <None Include="jim-pack.cu" />
+    <None Include="jim-package.cu" />
+    <None Include="jim-posix.cu" />
+    <None Include="jim-readdir.cu" />
+    <None Include="jim-readline.cu" />
+    <None Include="jim-regexp.cu" />
+    <None Include="jim-sdl.cu" />
+    <None Include="jim-signal.cu" />
+    <None Include="jim-sqlite3.cu" />
+    <None Include="jim-subcmd.cu" />
+    <None Include="jim-syslog.cu" />
+    <None Include="jim-tclprefix.cu" />
+    <None Include="jim-win32compat.cu" />
+    <None Include="jimex.cu" />
+    <None Include="init.cu" />
+    <None Include="utf8.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">
@@ -31,34 +59,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="jim-interactive.cu" />
-    <CudaCompile Include="jim.cu" />
-    <CudaCompile Include="jim-aio.cu" />
-    <CudaCompile Include="jim-array.cu" />
-    <CudaCompile Include="jim-clock.cu" />
-    <CudaCompile Include="jim-eventloop.cu" />
-    <CudaCompile Include="jim-exec.cu" />
-    <CudaCompile Include="jim-file.cu" />
-    <CudaCompile Include="jim-format.cu" />
-    <CudaCompile Include="jim-gpu.cu" />
-    <CudaCompile Include="jim-history.cu" />
-    <CudaCompile Include="jim-load.cu" />
-    <CudaCompile Include="jim-namespace.cu" />
-    <CudaCompile Include="jim-pack.cu" />
-    <CudaCompile Include="jim-package.cu" />
-    <CudaCompile Include="jim-readdir.cu" />
-    <CudaCompile Include="jim-regexp.cu" />
-    <CudaCompile Include="jim-subcmd.cu" />
-    <CudaCompile Include="jim-tclprefix.cu" />
-    <CudaCompile Include="jim-win32compat.cu" />
-    <CudaCompile Include="jimex.cu" />
-    <CudaCompile Include="init.cu" />
-    <CudaCompile Include="utf8.cu" />
-    <CudaCompile Include="jim-posix.cu" />
-    <CudaCompile Include="jim-readline.cu" />
-    <CudaCompile Include="jim-sdl.cu" />
-    <CudaCompile Include="jim-signal.cu" />
-    <CudaCompile Include="jim-sqlite3.cu" />
-    <CudaCompile Include="jim-syslog.cu" />
+    <CudaCompile Include="libcu.jimtcl.cu" />
   </ItemGroup>
 </Project>
