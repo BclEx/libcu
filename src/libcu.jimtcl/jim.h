@@ -78,7 +78,7 @@ extern "C" {
 	// -----------------------------------------------------------------------------
 	// System configuration autoconf (configure) will set these
 	// -----------------------------------------------------------------------------
-#include "jim-win32Compat.h"
+#include "jim-win32compat.h"
 #ifndef HAVE_NO_AUTOCONF
 #include "jim-config.h"
 #endif
