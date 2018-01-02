@@ -7,7 +7,7 @@ set(COMPILE_FLAGS "-Xcudafe \"--diag_suppress=set_but_not_used --diag_suppress=b
 set(COMPILE_FLAGSO2 "-Xcicc -O0 -Xcudafe \"--diag_suppress=set_but_not_used --diag_suppress=branch_past_initialization\"")
 set(arch 60)
 include(CTest)
-#enable_testing()
+enable_testing()
 
 include_directories(include)
 
@@ -41,7 +41,7 @@ add_library(libcu.${arch} STATIC
   #libcu/fsystem.cu
   #libcu/fcntlcu.cu
   )
-  set_source_files_properties(libcu/stringcu.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS}")
+  set_source_files_properties(libcu/stringcu.cu libcu/libcu.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS}")
 
 add_library(libcu.falloc.${arch} STATIC
   libcu.falloc/libcu.falloc.cu
@@ -96,7 +96,8 @@ add_library(libcu.jimtcl.${arch} STATIC
   #libcu.jimtcl/jimex.cu
   #libcu.jimtcl/utf8.cu
   )
-  set_source_files_properties(libcu.jimtcl/jim.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
+  set_source_files_properties(libcu.jimtcl/jim.cu libcu.jimtcl/libcu.jimtcl.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
+  target_compile_definitions(libcu.jimtcl.${arch} PRIVATE jim_ext_aio jim_ext_namespace jim_ext_package JIM_MAINTAINER JIM_REFERENCES)
   target_link_libraries(libcu.jimtcl.${arch} PRIVATE libcu.${arch})
 
 include_directories(libcu.jimtcl)
@@ -136,6 +137,7 @@ add_library(libcu.tinytcl.${arch} STATIC
   #libcu.tinytcl/tclMod.cu
   )
   set_source_files_properties(libcu.tinytcl/libcu.tinytcl.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
+  target_compile_definitions(libcu.jimtcl.${arch} PRIVATE TCL_MEM_DEBUG)
   target_link_libraries(libcu.tinytcl.${arch} PRIVATE libcu.${arch})
 
 include_directories(libcu.tinytcl)

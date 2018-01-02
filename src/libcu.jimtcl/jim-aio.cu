@@ -63,7 +63,7 @@
 #define JIM_ANSIC
 #endif
 
-#include "jim-eventLoop.h"
+#include "jim-eventloop.h"
 #include "jim-subcmd.h"
 
 #define AIO_CMD_LEN 32      /* e.g. aio.handleXXXXXX */
