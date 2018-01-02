@@ -9,7 +9,7 @@
 #define __TCLMOD_H__
 
 #ifndef __TCL_H__
-#include "Tcl.h"
+#include "tcl.h"
 #endif
 
 #define TCL_MODFLAG_HIDDEN  0x0001

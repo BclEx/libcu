@@ -1068,7 +1068,7 @@ __device__ int Tcl_ArrayCmd(ClientData dummy, register Tcl_Interp *interp, int a
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " exists arrayName\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		interp->result = (notArray ? "0" : "1");
+		interp->result = (char *)(notArray ? "0" : "1");
 	} else if (c == 'g' && !strncmp(args[1], "get", length)) {
 		if (argc != 3 && argc != 4) {
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " get arrayName ?pattern?\"", (char *)NULL);

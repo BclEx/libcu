@@ -223,7 +223,7 @@ __device__ int Tcl_HistoryCmd(ClientData dummy, Tcl_Interp *interp, int argc, co
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " event ?event?\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		eventPtr = GetEvent(iPtr, argc==2 ? "-1" : args[2]);
+		eventPtr = GetEvent(iPtr, (char *)(argc==2 ? "-1" : args[2]));
 		if (eventPtr == NULL) {
 			return TCL_ERROR;
 		}
@@ -342,7 +342,7 @@ infoCmd:
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " redo ?event?\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		eventPtr = GetEvent(iPtr, (argc == 2 ? "-1" : args[2]));
+		eventPtr = GetEvent(iPtr, (char *)(argc == 2 ? "-1" : args[2]));
 		if (eventPtr == NULL) {
 			return TCL_ERROR;
 		}
@@ -353,7 +353,7 @@ infoCmd:
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " substitute old new ?event?\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		eventPtr = GetEvent(iPtr, (argc == 4 ? "-1" : (char *)args[4]));
+		eventPtr = GetEvent(iPtr, (char *)(argc == 4 ? "-1" : args[4]));
 		if (eventPtr == NULL) {
 			return TCL_ERROR;
 		}
@@ -363,7 +363,7 @@ infoCmd:
 			Tcl_AppendResult(interp, "wrong # args: should be \"", args[0], " words num-num/pat ?event?\"", (char *)NULL);
 			return TCL_ERROR;
 		}
-		eventPtr = GetEvent(iPtr, (argc == 3 ? "-1" : (char *)args[3]));
+		eventPtr = GetEvent(iPtr, (char *)(argc == 3 ? "-1" : args[3]));
 		if (eventPtr == NULL) {
 			return TCL_ERROR;
 		}

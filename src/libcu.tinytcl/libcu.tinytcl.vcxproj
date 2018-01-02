@@ -32,7 +32,7 @@
     <ClInclude Include="tclLoad.h" />
     <ClInclude Include="tclEx.h" />
     <ClInclude Include="tclExInt.h" />
-    <ClInclude Include="TclMod.h" />
+    <ClInclude Include="tclMod.h" />
   </ItemGroup>
   <ItemGroup Condition="'$(CUARCH)'!='cpu'">
     <CudaCompile Include="libcu.tinytcl.cu" />
