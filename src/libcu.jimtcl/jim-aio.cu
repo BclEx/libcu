@@ -43,10 +43,14 @@
 //#include <stdiocu.h>
 //#include <stringcu.h>
 #include <errnocu.h>
-#include <fcntl.h>
+#include <fcntlcu.h>
 #ifdef HAVE_UNISTD_H
 #include <unistdcu.h>
 #include <sys/statcu.h>
+#endif
+#if __OS_UNIX
+#define HAVE_FTELLO
+#define HAVE_FSEEKO
 #endif
 
 #include "jim.h"
@@ -740,7 +744,7 @@ static __device__ int aio_cmd_filename(Jim_Interp *interp, int argc, Jim_Obj *co
 #ifdef O_NDELAY
 static __device__ int aio_cmd_ndelay(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
-	AioFile *af = Jim_CmdPrivData(interp);
+	AioFile *af = (AioFile *)Jim_CmdPrivData(interp);
 
 	int fmode = fcntl(af->fd, F_GETFL);
 

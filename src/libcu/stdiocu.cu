@@ -369,7 +369,7 @@ __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FIL
 /* Seek to a certain position on STREAM.  */
 __device__ int fseek_(FILE *stream, long int off, int whence)
 {
-	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, off, whence); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, off, 0, 0, whence, 0); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -377,7 +377,7 @@ __device__ int fseek_(FILE *stream, long int off, int whence)
 /* Return the current position of STREAM.  */
 __device__ long int ftell_(FILE *stream)
 {
-	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 0); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -390,10 +390,28 @@ __device__ void rewind_(FILE *stream)
 	return;
 }
 
+#if __USE_FILE_OFFSET64
+/* Seek to a certain position on STREAM.   */
+__device__ int fseeko_(FILE *stream, __off_t off, int whence)
+{
+	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, 0, off, 0, whence, 1); return msg.RC; }
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Return the current position of STREAM.  */
+__device__ __off_t ftello_(FILE *stream)
+{
+	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 1); return msg.RCO64; }
+	panic("Not Implemented");
+	return 0;
+}
+#endif
+
 /* Get STREAM's position.  */
 __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos)
 {
-	if (ISHOSTFILE(stream)) { stdio_fgetpos msg(stream, pos); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fgetpos msg(stream, pos, nullptr, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -401,10 +419,44 @@ __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos)
 /* Set STREAM's position.  */
 __device__ int fsetpos_(FILE *stream, const fpos_t *pos)
 {
-	if (ISHOSTFILE(stream)) { stdio_fsetpos msg(stream, pos); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fsetpos msg(stream, pos, nullptr, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
+
+#ifdef __USE_LARGEFILE64
+/* Seek to a certain position on STREAM.   */
+__device__ int fseeko64_(FILE *stream, __off64_t off, int whence)
+{
+	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, 0, 0, off, whence, 2); return msg.RC; }
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Return the current position of STREAM.  */
+__device__ __off64_t ftello64_(FILE *stream)
+{
+	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 2); return msg.RC64; }
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Get STREAM's position.  */
+__device__ int fgetpos64_(FILE *__restrict stream, fpos64_t *__restrict pos)
+{
+	if (ISHOSTFILE(stream)) { stdio_fgetpos msg(stream, nullptr, pos, true); return msg.RC; }
+	panic("Not Implemented");
+	return 0;
+}
+
+/* Set STREAM's position.  */
+__device__ int fsetpos64_(FILE *stream, const fpos64_t *pos)
+{
+	if (ISHOSTFILE(stream)) { stdio_fsetpos msg(stream, nullptr, pos, true); return msg.RC; }
+	panic("Not Implemented");
+	return 0;
+}
+#endif
 
 /* Clear the error and EOF indicators for STREAM.  */
 __device__ void clearerr_(FILE *stream)

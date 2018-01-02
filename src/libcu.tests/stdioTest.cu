@@ -213,10 +213,15 @@ here:
 	//extern __device__ int fsetpos_(FILE *stream, const fpos_t *pos); #sentinel-branch
 	//skipped: fseeko(s, 0, 0);
 	//skipped: ftello(s);
+	//skipped: fseeko64(s, 0, 0);
+	//skipped: ftello64(s);
+	//skipped: fgetpos64_(s);
+	//skipped: fsetpos64_(s);
 	/* Host Absolute */
 	makeAFile(HostDir"test.txt");
 	FILE *w0a = fopen(HostDir"test.txt", "r"); long int w0b = ftell(w0a); int w0c = fseek(w0a, 2, 0); long int w0d = ftell(w0a); rewind(w0a); long int w0e = ftell(w0a); fclose(w0a); assert(w0b == 0 && w0c && w0d == 2 && w0e == 0);
 	FILE *w1a = fopen(HostDir"test.txt", "r"); fpos_t w1b; int w1c = fgetpos(w1a, &w1b); fseek(w1a, 2, 0); fpos_t w1d; fgetpos(w1a, &w1d); int w1e = fsetpos(w1a, &w1d); fpos_t w1f; int w1g = fgetpos(w1a, &w1f); fclose(w1a); assert(w1b == 0 && w1c && w1d == 2 && w1e && w1g == 2 && w1g);
+	// TODO: skipped
 
 	/* Device Absolute */
 	makeAFile(DeviceDir"test.txt");
