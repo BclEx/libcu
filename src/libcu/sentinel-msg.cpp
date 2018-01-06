@@ -74,6 +74,20 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case STDIO_FSEEK: { stdio_fseek *msg = (stdio_fseek *)data; msg->RC = fseek(msg->File, msg->Offset, msg->Origin); return true; }
 	case STDIO_FTELL: { stdio_ftell *msg = (stdio_ftell *)data; msg->RC = ftell(msg->File); return true; }
 	case STDIO_REWIND: { stdio_rewind *msg = (stdio_rewind *)data; rewind(msg->File); return true; }
+#if defined(__USE_LARGEFILE)
+	case STDIO_FSEEKO: { stdio_fseeko *msg = (stdio_fseeko *)data;
+		if (!msg->Bit64) msg->RC = fseeko(msg->File, msg->Offset, msg->Origin);
+#ifdef __USE_LARGEFILE64
+		else msg->RC = fseeko64(msg->File, msg->Offset64, msg->Origin);
+#endif
+		return true; }
+	case STDIO_FTELLO: { stdio_ftello *msg = (stdio_ftello *)data;
+		if (!msg->Bit64) msg->RC = ftello(msg->File);
+#ifdef __USE_LARGEFILE64
+		else msg->RC64 = ftello64(msg->File);
+#endif
+		return true; }
+#endif
 	case STDIO_FGETPOS: { stdio_fgetpos *msg = (stdio_fgetpos *)data; msg->RC = fgetpos(msg->File, msg->Pos); return true; }
 	case STDIO_FSETPOS: { stdio_fsetpos *msg = (stdio_fsetpos *)data; msg->RC = fsetpos(msg->File, msg->Pos); return true; }
 	case STDIO_CLEARERR: { stdio_clearerr *msg = (stdio_clearerr *)data; clearerr(msg->File); return true; }

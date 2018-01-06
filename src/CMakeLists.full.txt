@@ -137,14 +137,14 @@ add_library(libcu.tinytcl.${arch} STATIC
   #libcu.tinytcl/tclMod.cu
   )
   set_source_files_properties(libcu.tinytcl/libcu.tinytcl.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
-  target_compile_definitions(libcu.jimtcl.${arch} PRIVATE TCL_MEM_DEBUG)
+  target_compile_definitions(libcu.tinytcl.${arch} PRIVATE TCL_MEM_DEBUG)
   target_link_libraries(libcu.tinytcl.${arch} PRIVATE libcu.${arch})
 
 include_directories(libcu.tinytcl)
 add_executable(tinytcl.${arch}
 	tinytcl/tinySh.cu
   )
-  target_link_libraries(tinytcl.${arch} PRIVATE libcu.jimtcl.${arch})
+  target_link_libraries(tinytcl.${arch} PRIVATE libcu.tinytcl.${arch})
 
 # Request that libcu be built with -std=c++11. As this is a public compile feature anything that links to particles will also build with -std=c++11
 target_compile_features(libcu.jimtcl.${arch} PUBLIC cxx_std_11)

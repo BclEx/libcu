@@ -369,7 +369,7 @@ __device__ size_t fwrite_(const void *__restrict ptr, size_t size, size_t n, FIL
 /* Seek to a certain position on STREAM.  */
 __device__ int fseek_(FILE *stream, long int off, int whence)
 {
-	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, off, 0, 0, whence, 0); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, off, whence); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -377,7 +377,7 @@ __device__ int fseek_(FILE *stream, long int off, int whence)
 /* Return the current position of STREAM.  */
 __device__ long int ftell_(FILE *stream)
 {
-	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 0); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -390,11 +390,12 @@ __device__ void rewind_(FILE *stream)
 	return;
 }
 
-#if __USE_FILE_OFFSET64
+#if defined(__USE_LARGEFILE)
+#ifndef __USE_FILE_OFFSET64
 /* Seek to a certain position on STREAM.   */
 __device__ int fseeko_(FILE *stream, __off_t off, int whence)
 {
-	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, 0, off, 0, whence, 1); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fseeko msg(true, stream, off, 0, whence, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -402,12 +403,14 @@ __device__ int fseeko_(FILE *stream, __off_t off, int whence)
 /* Return the current position of STREAM.  */
 __device__ __off_t ftello_(FILE *stream)
 {
-	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 1); return msg.RCO64; }
+	if (ISHOSTFILE(stream)) { stdio_ftello msg(stream, false); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
 #endif
+#endif
 
+#ifndef __USE_FILE_OFFSET64
 /* Get STREAM's position.  */
 __device__ int fgetpos_(FILE *__restrict stream, fpos_t *__restrict pos)
 {
@@ -423,12 +426,13 @@ __device__ int fsetpos_(FILE *stream, const fpos_t *pos)
 	panic("Not Implemented");
 	return 0;
 }
+#endif
 
 #ifdef __USE_LARGEFILE64
 /* Seek to a certain position on STREAM.   */
 __device__ int fseeko64_(FILE *stream, __off64_t off, int whence)
 {
-	if (ISHOSTFILE(stream)) { stdio_fseek msg(true, stream, 0, 0, off, whence, 2); return msg.RC; }
+	if (ISHOSTFILE(stream)) { stdio_fseeko msg(true, stream, 0, off, whence, true); return msg.RC; }
 	panic("Not Implemented");
 	return 0;
 }
@@ -436,7 +440,7 @@ __device__ int fseeko64_(FILE *stream, __off64_t off, int whence)
 /* Return the current position of STREAM.  */
 __device__ __off64_t ftello64_(FILE *stream)
 {
-	if (ISHOSTFILE(stream)) { stdio_ftell msg(stream, 2); return msg.RC64; }
+	if (ISHOSTFILE(stream)) { stdio_ftello msg(stream, true); return msg.RC64; }
 	panic("Not Implemented");
 	return 0;
 }

@@ -48,6 +48,8 @@ enum {
 	STDIO_FSEEK,
 	STDIO_FTELL,
 	STDIO_REWIND,
+	STDIO_FSEEKO,
+	STDIO_FTELLO,
 	STDIO_FGETPOS,
 	STDIO_FSETPOS,
 	STDIO_CLEARERR,
@@ -251,33 +253,20 @@ struct stdio_fwrite {
 	size_t RC;
 };
 
-#if !__USE_FILE_OFFSET64
-#define __off_t char
-#endif
-#if !__USE_LARGEFILE64
-#define __off64_t char
-#define fpos64_t char
-#endif
 struct stdio_fseek {
 	sentinelMessage Base;
-	FILE *File; long int Offset; __off_t Offseto64; __off64_t Offset64; int Origin; char Bit64;
-	__device__ stdio_fseek(bool wait, FILE *file, long int offset, __off_t offseto64, __off64_t offset64, int origin, char bit64)
-		: Base(wait, STDIO_FSEEK), File(file), Offset(offset), Offseto64(offseto64), Offset64(offset64), Origin(origin), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(stdio_fseek)); }
+	FILE *File; long int Offset; int Origin;
+	__device__ stdio_fseek(bool wait, FILE *file, long int offset, int origin)
+		: Base(wait, STDIO_FSEEK), File(file), Offset(offset), Origin(origin) { sentinelDeviceSend(&Base, sizeof(stdio_fseek)); }
 	int RC;
 };
 
 struct stdio_ftell {
 	sentinelMessage Base;
-	FILE *File; char Bit64;
-	__device__ stdio_ftell(FILE *file, char bit64)
-		: Base(true, STDIO_FTELL), File(file), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(stdio_ftell)); }
+	FILE *File;
+	__device__ stdio_ftell(FILE *file)
+		: Base(true, STDIO_FTELL), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_ftell)); }
 	int RC;
-#if __USE_FILE_OFFSET64
-	__off_t RCO64;
-#endif
-#if !__USE_LARGEFILE64
-	__off64_t RC64;
-#endif
 };
 
 struct stdio_rewind {
@@ -287,6 +276,33 @@ struct stdio_rewind {
 		: Base(true, STDIO_REWIND), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_rewind)); }
 };
 
+#if defined(__USE_LARGEFILE)
+#ifndef __USE_LARGEFILE64
+#define __off64_t char
+#endif
+struct stdio_fseeko {
+	sentinelMessage Base;
+	FILE *File; __off_t Offset; __off64_t Offset64; int Origin; bool Bit64;
+	__device__ stdio_fseeko(bool wait, FILE *file, __off_t offset, __off64_t offset64, int origin, bool bit64)
+		: Base(wait, STDIO_FSEEKO), File(file), Offset(offset), Offset64(offset64), Origin(origin), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(stdio_fseeko)); }
+	int RC;
+};
+
+struct stdio_ftello {
+	sentinelMessage Base;
+	FILE *File; bool Bit64;
+	__device__ stdio_ftello(FILE *file, bool bit64)
+		: Base(true, STDIO_FTELLO), File(file), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(stdio_ftello)); }
+	__off_t RC;
+#if __USE_LARGEFILE64
+	__off64_t RC64;
+#endif
+};
+#endif
+
+#ifndef __USE_LARGEFILE64
+#define fpos64_t char
+#endif
 struct stdio_fgetpos {
 	sentinelMessage Base;
 	FILE *File; fpos_t *Pos; fpos64_t *Pos64; bool Bit64;

@@ -21,8 +21,7 @@ add_library(libcu.${arch} STATIC
   libcu/libcu.cu
   libcu/libcu.stdlib.cu
   )
-  set_source_files_properties(libcu/stringcu.cu libcu/libcu.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
-
+  set_source_files_properties(libcu/stringcu.cu libcu/libcu.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS}")
 
 # Request that libcu be built with -std=c++11. As this is a public compile feature anything that links to particles will also build with -std=c++11
 target_compile_features(libcu.${arch} PUBLIC cxx_std_11)
@@ -32,34 +31,4 @@ set_target_properties(libcu.${arch} PROPERTIES PREFIX "" CUDA_SEPARABLE_COMPILAT
 if (M)
   set_target_properties(libcu.${arch} PROPERTIES COMPILE_FLAGS "-m${M}" LINK_FLAGS "-m${M}" CUDA_64_BIT_DEVICE_CODE ${C64})
 endif()
-
-
-# TCL
-add_library(libcu.jimtcl.${arch} STATIC
-  libcu.jimtcl/jim.cu
-  libcu.jimtcl/libcu.jimtcl.cu
-  )
-  set_source_files_properties(libcu.jimtcl/jim.cu libcu.jimtcl/libcu.jimtcl.cu PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGSO2}")
-  target_compile_definitions(libcu.jimtcl.${arch} PRIVATE jim_ext_aio jim_ext_namespace jim_ext_package JIM_MAINTAINER JIM_REFERENCES)
-  target_link_libraries(libcu.jimtcl.${arch} PRIVATE libcu.${arch})
-
-include_directories(libcu.jimtcl)
-add_executable(jimtcl.${arch}
-	jimtcl/jimsh.cu
-  )
-  target_link_libraries(jimtcl.${arch} PRIVATE libcu.jimtcl.${arch})
-
-
-# Request that libcu be built with -std=c++11. As this is a public compile feature anything that links to particles will also build with -std=c++11
-target_compile_features(libcu.jimtcl.${arch} PUBLIC cxx_std_11)
-target_compile_features(jimtcl.${arch} PUBLIC cxx_std_11)
-
-# We need to explicitly state that we need all CUDA files in the particle library to be built with -dc as the member functions could be called by other libraries and executables
-set_target_properties(libcu.jimtcl.${arch} PROPERTIES COMPILE_FLAGS "-Djim_ext_aio -Djim_ext_namespace -Djim_ext_package -DJIM_MAINTAINER -DJIM_REFERENCES" PREFIX "" CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(jimtcl.${arch} PROPERTIES PREFIX "" CUDA_SEPARABLE_COMPILATION ON)
-if (M)
-  set_target_properties(libcu.jimtcl.${arch} PROPERTIES COMPILE_FLAGS "-Djim_ext_aio -Djim_ext_namespace -Djim_ext_package -DJIM_MAINTAINER -DJIM_REFERENCES -m${M}" LINK_FLAGS "-m${M}" CUDA_64_BIT_DEVICE_CODE ${C64})
-  set_target_properties(jimtcl.${arch} PROPERTIES COMPILE_FLAGS "-m${M}" LINK_FLAGS "-m${M}" CUDA_64_BIT_DEVICE_CODE ${C64})
-endif()
-
 
