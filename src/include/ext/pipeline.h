@@ -1,5 +1,5 @@
 /*
-errno.h - Errors
+pipeline.h - xxx
 The MIT License
 
 Copyright (c) 2016 Sky Morey
@@ -23,44 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//#pragma once
-#ifndef _ERRNOCU_H
-#define _ERRNOCU_H
-#include <crtdefscu.h>
-
-#include <errno.h>
-#if defined(__CUDA_ARCH__)
-__BEGIN_DECLS;
-
-#undef errno
-#define errno (*_errno())
-extern __device__ int *_errno_(void);
-#define _errno _errno_
-extern __device__ int _set_errno_(int value);
-#define _set_errno _set_errno_
-extern __device__ int _get_errno_(int *value);
-#define _get_errno _get_errno_
-
-__END_DECLS;
-#else
-#if __OS_UNIX
-#define _set_errno(err) (errno = (err))
-#define _get_errno(err) (errno)
+#ifndef _EXT_PIPELINE_H
+#define _EXT_PIPELINE_H
+#ifdef  __cplusplus
+extern "C" {
 #endif
-#endif  /* __CUDA_ARCH__ */
 
-// PORTABILITY
-#pragma region PORTABILITY 
-__BEGIN_DECLS;
-
-#if __OS_WIN
-extern int __Errno();
-#elif __OS_UNIX
-#define __Errno() errno
+#ifdef  __cplusplus
+}
 #endif
-extern const char *__Strerror();
-
-__END_DECLS;
-#pragma endregion
-
-#endif  /* _ERRNOCU_H */
+#endif  /* _EXT_PIPELINE_H */

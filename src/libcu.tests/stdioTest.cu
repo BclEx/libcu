@@ -228,6 +228,9 @@ here:
 	FILE *x0a = fopen(DeviceDir"test.txt", "r"); long int x0b = ftell(x0a); int x0c = fseek(x0a, 2, 0); long int x0d = ftell(x0a); rewind(x0a); long int x0e = ftell(x0a); fclose(x0a); assert(x0b == 0 && x0c && x0d == 2 && x0e == 0);
 	FILE *x1a = fopen(DeviceDir"test.txt", "r"); fpos_t x1b; int x1c = fgetpos(x1a, &x1b); fseek(x1a, 2, 0); fpos_t x1d; fgetpos(x1a, &x1d); int x1e = fsetpos(x1a, &x1d); fpos_t x1f; int x1g = fgetpos(x1a, &x1f); fclose(x1a); assert(x1b == 0 && x1c && x1d == 2 && x1e && x1g == 2 && x1g);
 
+#if defined(__USE_LARGEFILE)
+#endif
+
 	//// CLEARERR, FERROR, PERROR ////
 	//extern __device__ void clearerr_(FILE *stream); #sentinel-branch
 	//extern __device__ int ferror_(FILE *stream); #sentinel-branch

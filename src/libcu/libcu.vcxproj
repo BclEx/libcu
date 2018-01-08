@@ -33,6 +33,7 @@
     <ClInclude Include="..\include\cuda_runtimecu.h" />
     <ClInclude Include="..\include\ext\hash.h" />
     <ClInclude Include="..\include\ext\memfile.h" />
+    <ClInclude Include="..\include\ext\pipeline.h" />
     <ClInclude Include="..\include\fcntlcu.h" />
     <ClInclude Include="..\include\grpcu.h" />
     <ClInclude Include="..\include\pwdcu.h" />
@@ -69,6 +70,7 @@
     <None Include="sys\timecu.cu" />
     <None Include="pwdcu.cu" />
     <None Include="ext\hash.cu" />
+    <CudaCompile Include="ext\pipeline.cu" />
     <None Include="ext\memfile.cu" />
     <None Include="fsystem.cu" />
     <None Include="fcntlcu.cu" />

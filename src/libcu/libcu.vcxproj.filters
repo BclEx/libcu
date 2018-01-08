@@ -104,12 +104,18 @@
     <ClInclude Include="..\include\_unistd.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\ext\pipeline.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="libcu.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.stdlib.cu" />
     <CudaCompile Include="stringcu.cu" />
+    <CudaCompile Include="ext\pipeline.cu">
+      <Filter>ext</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="_content">

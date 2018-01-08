@@ -15,11 +15,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	printf("Kernel\n");
 }
 
-void mainPause(char *message = nullptr)
-{
-	printf(message ? message : "\nPress any key to continue.\n");
-	int c; scanf("%c", &c);
-}
+#define mainPause(fmt) { printf(fmt"\n"); char c; scanf("%c", &c); }
 
 int main()
 {
@@ -44,7 +40,7 @@ int main()
 		c[0], c[1], c[2], c[3], c[4]);
 
 	// finish
-	mainPause();
+	mainPause("Press any key to continue.");
 
 	sentinelServerShutdown();
 
