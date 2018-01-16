@@ -1,4 +1,33 @@
-﻿
+﻿/*
+vsystem.h - xxx
+The MIT License
+
+Copyright (c) 2016 Sky Morey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+#include <ext\global.h>
+#ifndef _EXT_VSYSTEM_H
+#define _EXT_VSYSTEM_H
+__BEGIN_DECLS;
+
 // CAPI3REF: Flags For File Open Operations
 #define VSYS_OPEN_READONLY         0x00000001  // Ok for sqlite3_open_v2()
 #define VSYS_OPEN_READWRITE        0x00000002  // Ok for sqlite3_open_v2()
@@ -160,7 +189,74 @@ struct vsystem {
 #define VSYS_SHM_NLOCK        8
 
 // CAPI3REF: Initialize The SQLite Library
-int sqlite3_initialize();
-int sqlite3_shutdown();
-int sqlite3_os_init();
-int sqlite3_os_end();
+//int sqlite3_initialize();
+//int sqlite3_shutdown();
+//int sqlite3_os_init();
+//int sqlite3_os_end();
+
+/* If the SET_FULLSYNC macro is not defined above, then make it a no-op */
+#ifndef SET_FULLSYNC
+#define SET_FULLSYNC(x, y)
+#endif
+
+/* The default size of a disk sector */
+#ifndef LIBCU_DEFAULT_SECTOR_SIZE
+#define LIBCU_DEFAULT_SECTOR_SIZE 4096
+#endif
+
+/* Wrapper around OS specific sqlite3_os_init() function. */
+//int sqlite3OsInit();
+
+/* Functions for accessing vsystemfile methods */
+extern __host_device__ void vsys_close(vsystemfile *); //: sqlite3OsClose 
+extern __host_device__ RC vsys_read(vsystemfile *, void *, int amount, int64_t offset); //: sqlite3OsRead
+extern __host_device__ RC vsys_write(vsystemfile *, const void *, int amount, int64_t offset); //: sqlite3OsWrite
+extern __host_device__ RC vsys_truncate(vsystemfile *, int64_t size); //: sqlite3OsTruncate
+extern __host_device__ RC vsys_sync(vsystemfile *, int); //: sqlite3OsSync
+extern __host_device__ RC vsys_fileSize(vsystemfile *, int64_t *size); //: sqlite3OsFileSize
+extern __host_device__ RC vsys_lock(vsystemfile *, int); //: sqlite3OsLock
+extern __host_device__ RC vsys_unlock(vsystemfile *, int); //: sqlite3OsUnlock
+extern __host_device__ RC vsys_checkReservedLock(vsystemfile *, int *); //: sqlite3OsCheckReservedLock
+extern __host_device__ RC vsys_fileControl(vsystemfile *, int, void *); //: sqlite3OsFileControl
+extern __host_device__ void vsys_fileControlHint(vsystemfile *, int, void *); //: sqlite3OsFileControlHint
+#define FCNTL_DB_UNCHANGED 0xca093fa0
+extern __host_device__ int vsys_sectorSize(vsystemfile *); //: sqlite3OsSectorSize
+extern __host_device__ int vsys_deviceCharacteristics(vsystemfile *); //: sqlite3OsDeviceCharacteristics
+#ifndef NO_WAL
+extern __host_device__ RC vsys_shmMap(vsystemfile *, int, int, int, void volatile **); //: sqlite3OsShmMap
+extern __host_device__ RC vsys_shmLock(vsystemfile *, int, int, int); //: sqlite3OsShmLock
+extern __host_device__ void vsys_shmBarrier(vsystemfile *); //: sqlite3OsShmBarrier
+extern __host_device__ RC vsys_shmUnmap(vsystemfile *, int); //: sqlite3OsShmUnmap
+#endif
+extern __host_device__ RC vsys_fetch(vsystemfile *, int64_t, int, void **); //: sqlite3OsFetch
+extern __host_device__ RC vsys_unfetch(vsystemfile *, int64_t, void *); //: sqlite3OsUnfetch
+
+/* Functions for accessing vsystem methods */
+extern __host_device__ RC vsys_open(vsystem *, const char *, vsystemfile*, int, int *); //: sqlite3OsOpen
+extern __host_device__ RC vsys_delete(vsystem *, const char *, int); //: sqlite3OsDelete
+extern __host_device__ RC vsys_access(vsystem *, const char *, int, int *pResOut); //: sqlite3OsAccess
+extern __host_device__ RC vsys_fullPathname(vsystem *, const char *, int, char *); //: sqlite3OsFullPathname
+#ifndef NO_LOAD_EXTENSION
+extern __host_device__ void *vsys_dlOpen(vsystem *, const char *); //: sqlite3OsDlOpen
+extern __host_device__ void vsys_dlError(vsystem *, int, char *); //: sqlite3OsDlError
+extern __host_device__ void (*vsys_dlSym(vsystem *, void *, const char *))(void); //: sqlite3OsDlSym
+extern __host_device__ void vsys_dlClose(vsystem *, void *); //: sqlite3OsDlClose
+#endif
+extern __host_device__ RC vsys_randomness(vsystem *, int, char *);
+extern __host_device__ RC vsys_sleep(vsystem *, int);
+extern __host_device__ int vsys_getLastError(vsystem *);
+extern __host_device__ RC vsys_currentTimeInt64(vsystem *, int64_t *);
+
+/* Convenience functions for opening and closing files using alloc() to obtain space for the file-handle structure. */
+extern __host_device__ RC vsys_openMalloc(vsystem *, const char *, vsystemfile **, int, int *);
+extern __host_device__ void vsys_closeAndFree(vsystemfile *);
+
+/* Locate a VFS by name.  If no name is given, simply return the first VFS on the list. */
+extern __host_device__ vsystem *vsystemFind(const char *name);
+/* Register a VFS with the system.  It is harmless to register the same VFS multiple times.  The new VFS becomes the default if makeDflt is true. */
+extern __host_device__ RC vsystemRegister(vsystem *p, int makeDefault);
+/* Unregister a VFS so that it is no longer accessible. */
+extern __host_device__ RC vsystemUnregister(vsystem *p);
+
+__END_DECLS;
+#endif	/* _EXT_VSYSTEM_H */

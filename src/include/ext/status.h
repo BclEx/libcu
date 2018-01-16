@@ -26,11 +26,9 @@ THE SOFTWARE.
 #include <ext\global.h>
 #ifndef _EXT_STATUS_H
 #define _EXT_STATUS_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS;
 
-	// CAPI3REF: Status Parameters
+// CAPI3REF: Status Parameters
 #define STATUS int
 #define STATUS_MEMORY_USED			0
 #define STATUS_PAGECACHE_USED       1
@@ -43,13 +41,13 @@ extern "C" {
 #define STATUS_SCRATCH_SIZE         8
 #define STATUS_MALLOC_COUNT         9
 
-	// CAPI3REF: Libcu Runtime Status
-	/* Query status information. */
-	extern __host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFlag);
-	/* Query status information. */
-	extern __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag);
+// CAPI3REF: Libcu Runtime Status
+/* Query status information. */
+extern __host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFlag);
+/* Query status information. */
+extern __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag);
 
-	// CAPI3REF: Status Parameters for tag objects
+// CAPI3REF: Status Parameters for tag objects
 #define TAGSTATUS_LOOKASIDE_USED       0
 //#define TAGSTATUS_CACHE_USED           1
 //#define TAGSTATUS_SCHEMA_USED          2
@@ -64,19 +62,17 @@ extern "C" {
 //#define TAGSTATUS_CACHE_USED_SHARED   11
 #define TAGSTATUS_MAX                 11   // Largest defined TAGSTATUS
 
-	// CAPI3REF: Database Connection Status
-	extern __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highwater, bool resetFlag);
+// CAPI3REF: Database Connection Status
+extern __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highwater, bool resetFlag);
 
-	/* Return the current value of a status parameter. */
-	extern __host_device__ int64_t status_now(STATUS op);
-	/* Add N to the value of a status record. */
-	extern __host_device__ void status_inc(STATUS op, int n);
-	/* Dec N to the value of a status record. */
-	extern __host_device__ void status_dec(STATUS op, int n);
-	/* Adjust the highwater mark if necessary. */
-	extern __host_device__ void status_max(STATUS op, int x);
+/* Return the current value of a status parameter. */
+extern __host_device__ int64_t status_now(STATUS op);
+/* Add N to the value of a status record. */
+extern __host_device__ void status_inc(STATUS op, int n);
+/* Dec N to the value of a status record. */
+extern __host_device__ void status_dec(STATUS op, int n);
+/* Adjust the highwater mark if necessary. */
+extern __host_device__ void status_max(STATUS op, int x);
 
-#ifdef  __cplusplus
-}
-#endif
+__END_DECLS;
 #endif	/* _EXT_STATUS_H */

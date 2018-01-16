@@ -1,4 +1,4 @@
-﻿#include <ext/status.h>
+﻿#include <ext/status.h> //: status.c
 #include <assert.h>
 
 /* Variables in which to record status information. */
@@ -28,10 +28,10 @@ static __host_constant__ const char MutexStatics[] = {
 
 /* The "_status" macro will resolve to the status information state vector.  If writable static data is unsupported on the target,
 ** we have to locate the state vector at run-time.  In the more common case where writable static data is supported, _status can refer directly
-** to the "g_status" state vector declared above.
+** to the "_status" state vector declared above.
 */
 #ifdef OMIT_WSD
-#define _statusInit statusValue_t *x = &GLOBAL(statusValue_t, h_status)
+#define _statusInit statusValue_t *x = &_GLOBAL(statusValue_t, _status)
 #define _status x[0]
 #else
 #define _statusInit

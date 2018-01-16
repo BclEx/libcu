@@ -26,9 +26,7 @@ THE SOFTWARE.
 #pragma once
 #ifndef _EXT_UTF_H
 #define _EXT_UTF_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS;
 
 #define _strskiputf8(z) { if ((*(z++)) >= 0xc0) while ((*z & 0xc0) == 0x80) { z++; } }
 //template <typename T> __device__ inline void _strskiputf8(const T *z) { if (*(z++) >= 0xc0) while ((*z & 0xc0) == 0x80) { z++; } }
@@ -71,8 +69,5 @@ extern "C" __device__ void _runtime_utfselftest();
 #define utf8_charlen(C) 1
 #define utf8_prev_len(S, L) 1
 
-
-#ifdef  __cplusplus
-}
-#endif
+__END_DECLS;
 #endif	/* _EXT_UTF_H */

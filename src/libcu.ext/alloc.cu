@@ -1,4 +1,4 @@
-#include <ext/alloc.h>
+#include <ext/alloc.h> //: malloc.c
 #include <stringcu.h>
 #include <assert.h>
 
@@ -9,7 +9,7 @@
 __host_device__ int alloc_releasememory(int n) //: sqlite3_release_memory
 {
 #ifdef ENABLE_MEMORY_MANAGEMENT
-	return alloc_cachereleasememory(n);
+	return alloc_pcachereleasememory(n);
 #else
 	// IMPLEMENTATION-OF: R-34391-24921 The alloc_releasememory() routine is a no-op returning zero if Libcu is not compiled with ENABLE_MEMORY_MANAGEMENT.
 	UNUSED_SYMBOL(n);
@@ -17,23 +17,13 @@ __host_device__ int alloc_releasememory(int n) //: sqlite3_release_memory
 #endif
 }
 
-/* An instance of the following object records the location of each unused scratch buffer. */
-typedef struct ScratchFreeslot {
-	struct ScratchFreeslot *next; // Next unused scratch buffer
-} ScratchFreeslot;
-
 /* State information local to the memory allocation subsystem. */
 static __hostb_device__ _WSD struct Mem0Global {
 	mutex *mutex;				// Mutex to serialize access
 	int64_t alarmThreshold;		// The soft heap limit
-	// Pointers to the end of __allocsystem.Scratch memory (so that a range test can be used to determine if an allocation
-	// being freed came from Scratch) and a pointer to the list of unused scratch allocations.
-	void *scratchEnd;
-	ScratchFreeslot *scratchFree;
-	uint32_t scratchFreeLength;
 	// True if heap is nearly "full" where "full" is defined by the soft_heap_limit() setting.
 	bool nearlyFull;
-} _mem0 = { nullptr, 0, nullptr, nullptr, 0, false };
+} _mem0 = { nullptr, 0, false };
 #define mem0 _GLOBAL(struct Mem0Global, _mem0)
 
 /* Return the memory allocator mutex. sqlite3_status() needs it. */
@@ -63,18 +53,18 @@ __host_device__ int64_t alloc_softheaplimit64(int64_t size) //: sqlite3_soft_hea
 	}
 	mem0.alarmThreshold = size;
 	int64_t used = status_now(STATUS_MEMORY_USED);
-	mem0.nearlyFull = (size > 0 && size <= used);
+	mem0.nearlyFull = size > 0 && size <= used;
 	mutex_leave(mem0.mutex);
 	int64_t excess = alloc_memoryused() - size;
 	if (excess > 0) alloc_releasememory((int)(excess & 0x7fffffff));
 	return priorLimit;
 }
 
-//__host_device__ void alloc_softheaplimit(int size) //: sqlite3_soft_heap_limit
-//{
-//	if (size < 0) size = 0;
-//	alloc_softheaplimit64(size);
-//}
+__host_device__ void alloc_softheaplimit(int size) //: sqlite3_soft_heap_limit
+{
+	if (size < 0) size = 0;
+	alloc_softheaplimit64(size);
+}
 
 /* Initialize the memory allocation subsystem. */
 __host_device__ RC allocInitialize() //: sqlite3MallocInit
@@ -83,26 +73,6 @@ __host_device__ RC allocInitialize() //: sqlite3MallocInit
 		__allocsystemSetDefault();
 	memset(&mem0, 0, sizeof(mem0));
 	mem0.mutex = mutex_alloc(MUTEX_STATIC_MEM);
-	if (_runtimeConfig.scratch && _runtimeConfig.scratchSize >= 100 && _runtimeConfig.scratchs > 0) {
-		int size = _ROUNDDOWN8(_runtimeConfig.scratchSize);
-		_runtimeConfig.scratchSize = size;
-		ScratchFreeslot *slot = (ScratchFreeslot *)_runtimeConfig.scratch;
-		int n = _runtimeConfig.scratchs;
-		mem0.scratchFree = slot;
-		mem0.scratchFreeLength = n;
-		for (int i = 0; i < n-1; i++) {
-			slot->next = (ScratchFreeslot *)(size + (char *)slot);
-			slot = slot->next;
-		}
-		slot->next = nullptr;
-		mem0.scratchEnd = (void *)&slot[1];
-	}
-	else {
-		mem0.scratchEnd = nullptr;
-		_runtimeConfig.scratch = nullptr;
-		_runtimeConfig.scratchSize = 0;
-		_runtimeConfig.scratchs = 0;
-	}
 	if (!_runtimeConfig.page || _runtimeConfig.pageSize < 512 || _runtimeConfig.pages <= 0) {
 		_runtimeConfig.page = nullptr;
 		_runtimeConfig.pageSize = 0;
@@ -162,7 +132,7 @@ static __host_device__ void allocWithAlarm(int size, void **pp)
 	// In Firefox (circa 2017-02-08), xRoundup() is remapped to an internal implementation of malloc_good_size(), which must be called in debug
 	// mode and specifically when the DMD "Dark Matter Detector" is enabled or else a crash results.  Hence, do not attempt to optimize out the
 	// following xRoundup() call.
-	size_t fullSize = __allocsystem.roundup(size);
+	int fullSize = __allocsystem.roundup(size);
 
 #ifdef MAX_MEMORY
 	if (status_now(STATUS_MEMORY_USED) + fullSize > MAX_MEMORY) {
@@ -227,93 +197,6 @@ __host_device__ void *alloc64(uint64_t n) //: sqlite3_malloc64
 	if (runtimeInitialize()) return nullptr;
 #endif
 	return alloc(n);
-}
-
-/*
-** Each thread may only have a single outstanding allocation from _.scratchMalloc().  We verify this constraint in the single-threaded
-** case by setting scratchAllocOut to 1 when an allocation is outstanding clearing it when the allocation is freed.
-*/
-#if LIBCU_THREADSAFE == 0 && !defined(NDEBUG)
-static __hostb_device__ int _scratchAllocOut = 0;
-#endif
-
-/*
-** Allocate memory that is to be used and released right away. This routine is similar to alloca() in that it is not intended
-** for situations where the memory might be held long-term.  This routine is intended to get memory to old large transient data
-** structures that would not normally fit on the stack of an embedded processor.
-*/
-__host_device__ void *scratchAlloc(int size) //: sqlite3ScratchMalloc
-{
-	assert(size > 0);
-	mutex_enter(mem0.mutex);
-	void *p;
-	status_max(STATUS_SCRATCH_SIZE, size);
-	if (mem0.scratchFreeLength && _runtimeConfig.scratchSize >= size) {
-		p = mem0.scratchFree;
-		mem0.scratchFree = mem0.scratchFree->next;
-		mem0.scratchFreeLength--;
-		status_inc(STATUS_SCRATCH_USED, 1);
-		mutex_leave(mem0.mutex);
-	}
-	else {
-		mutex_leave(mem0.mutex);
-		p = alloc(size);
-		if (_runtimeConfig.memstat && p) {
-			mutex_enter(mem0.mutex);
-			status_inc(STATUS_SCRATCH_OVERFLOW, allocSize(p));
-			mutex_leave(mem0.mutex);
-		}
-		memdbg_settype(p, MEMTYPE_SCRATCH);
-	}
-	assert(mutex_notheld(mem0.mutex));
-#if LIBCU_THREADSAFE == 0 && !defined(NDEBUG)
-	/* EVIDENCE-OF: R-12970-05880 Libcu will not use more than one scratch buffers per thread.
-	**
-	** This can only be checked in single-threaded mode.
-	*/
-	assert(!_scratchAllocOut);
-	if (p) _scratchAllocOut++;
-#endif
-	return p;
-}
-
-__host_device__ void scratchFree(void *p) //: sqlite3ScratchFree
-{
-	if (p) {
-#if LIBCU_THREADSAFE == 0 && !defined(NDEBUG)
-		// Verify that no more than two scratch allocation per thread is outstanding at one time.  (This is only checked in the
-		// single-threaded case since checking in the multi-threaded case would be much more complicated.)
-		assert(_scratchAllocOut >= 1 && _scratchAllocOut <= 2);
-		_scratchAllocOut--;
-#endif
-		if (_WITHIN(p, _runtimeConfig.scratch, mem0.scratchEnd)) {
-			// Release memory from the CONFIG_SCRATCH allocation
-			ScratchFreeslot *slot = (ScratchFreeslot *)p;
-			mutex_enter(mem0.mutex);
-			slot->next = mem0.scratchFree;
-			mem0.scratchFree = slot;
-			mem0.scratchFreeLength++;
-			assert(mem0.scratchFreeLength <= (uint32_t)_runtimeConfig.scratchs);
-			status_dec(STATUS_SCRATCH_USED, 1);
-			mutex_leave(mem0.mutex);
-		}
-		else {
-			// Release memory back to the heap
-			assert(memdbg_hastype(p, MEMTYPE_SCRATCH));
-			assert(memdbg_nottype(p, (uint8_t)~MEMTYPE_SCRATCH));
-			memdbg_settype(p, MEMTYPE_HEAP);
-			if (_runtimeConfig.memstat) {
-				size_t size = allocSize(p);
-				mutex_enter(mem0.mutex);
-				status_dec(STATUS_SCRATCH_OVERFLOW, size);
-				status_dec(STATUS_MEMORY_USED, size);
-				status_dec(STATUS_MALLOC_COUNT, 1);
-				__allocsystem.free(p);
-				mutex_leave(mem0.mutex);
-			}
-			else __allocsystem.free(p);
-		}
-	}
 }
 
 /* TRUE if p is a lookaside memory allocation from tag */
@@ -399,7 +282,6 @@ __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
 #endif
 			b->next = tag->lookaside.free;
 			tag->lookaside.free = b;
-			tag->lookaside.outs--;
 			return;
 		}
 	}
@@ -425,10 +307,10 @@ __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Rea
 	if (!prior) return alloc(newSize); // IMP: R-04300-56712
 	if (!newSize) { mfree(prior); return nullptr; } // IMP: R-26507-47431
 	if (newSize >= 0x7fffff00) return nullptr; // The 0x7ffff00 limit term is explained in comments on alloc()
-	size_t oldSize = allocSize(prior);
+	int oldSize = allocSize(prior);
 	// IMPLEMENTATION-OF: R-46199-30249 Libcu guarantees that the second argument to _.xRealloc is always a value returned by a prior call to _.Roundup.
 	void *p;
-	size_t newSize2 = __allocsystem.roundup((int)newSize);
+	int newSize2 = __allocsystem.roundup((int)newSize);
 	if (oldSize == newSize2)
 		p = prior;
 	else if (_runtimeConfig.memstat) {
@@ -533,16 +415,17 @@ __host_device__ void *tagallocRawNN(tagbase_t *tag, uint64_t size) //: sqlite3Db
 		assert(!tag->mallocFailed);
 		if (size > tag->lookaside.size)
 			tag->lookaside.stats[1]++;
-		else if (!(b = tag->lookaside.free))
-			tag->lookaside.stats[2]++;
-		else {
+		else if (!(b = tag->lookaside.free)) {
 			tag->lookaside.free = b->next;
-			tag->lookaside.outs++;
 			tag->lookaside.stats[0]++;
-			if (tag->lookaside.outs > tag->lookaside.maxOuts)
-				tag->lookaside.maxOuts = tag->lookaside.outs;
 			return (void *)b;
 		}
+		else if ((b = tag->lookaside.init)) {
+			tag->lookaside.init = b->next;
+			tag->lookaside.stats[0]++;
+			return (void *)b;
+		}
+		else tag->lookaside.stats[2]++;
 	}
 	else if (tag->mallocFailed)
 		return nullptr;

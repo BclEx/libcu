@@ -58,7 +58,7 @@ struct bitvec_t {
 __device__ bitvec_t *bitvecNew(uint32_t size) //: sqlite3BitvecCreate
 {
 	assert(sizeof(bitvec_t) == BITVEC_SZ);
-	bitvec_t *p = (bitvec_t *)mallocZero(sizeof(bitvec_t));
+	bitvec_t *p = (bitvec_t *)allocZero(sizeof(bitvec_t));
 	if (p)
 		p->size = size;
 	return p;
@@ -71,10 +71,10 @@ __device__ bitvec_t *bitvecNew(uint32_t size) //: sqlite3BitvecCreate
 __device__ bool bitvecGet(bitvec_t *p, uint32_t index) //: sqlite3BitvecTestNotNull
 {
 	assert(p);
-	if (index > p->size)
+	index--;
+	if (index >= p->size)
 		return false;
-	while (p->divisor)
-	{
+	while (p->divisor) {
 		uint32_t bin = index / p->divisor;
 		index %= p->divisor;
 		p = p->u.sub[bin];
@@ -82,7 +82,7 @@ __device__ bool bitvecGet(bitvec_t *p, uint32_t index) //: sqlite3BitvecTestNotN
 			return false;
 	}
 	if (p->size <= BITVEC_NBIT)
-		return ((p->u.bitmap[index / BITVEC_SZELEM] & (1 << (index & (BITVEC_SZELEM - 1)))) != 0);
+		return (p->u.bitmap[index / BITVEC_SZELEM] & (1 << (index & (BITVEC_SZELEM - 1)))) != 0;
 	uint32_t h = BITVEC_HASH(index++);
 	while (p->u.hash[h]) {
 		if (p->u.hash[h] == index)
@@ -201,7 +201,7 @@ __device__ void bitvecDestroy(bitvec_t *p) //: sqlite3BitvecDestroy
 	if (p->divisor)
 		for (unsigned int i = 0; i < BITVEC_NPTR; i++)
 			bitvecDestroy(p->u.sub[i]);
-	free(p);
+	mfree(p);
 }
 
 /*
@@ -212,7 +212,6 @@ __device__ uint32_t bitvecSize(bitvec_t *p) //: sqlite3BitvecSize
 	return p->size;
 }
 
-#if 0
 #ifndef LIBCU_UNTESTABLE
 
 /*
@@ -259,8 +258,8 @@ __device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTes
 
 	// Allocate the Bitvec to be tested and a linear array of bits to act as the reference
 	bitvec_t *bitvec = bitvecNew(size);
-	unsigned char *v = (unsigned char *)mallocZero((size+7)/8+1);
-	void *tmpSpace = malloc((size_t)BITVEC_SZ);
+	unsigned char *v = (unsigned char *)allocZero((size+7)/8+1);
+	void *tmpSpace = alloc64((size_t)BITVEC_SZ);
 	if (!bitvec || !v || !tmpSpace) goto bitvec_end;
 
 	// NULL pBitvec tests
@@ -269,7 +268,7 @@ __device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTes
 
 	// Run the program
 	int nx, op, pc = 0;
-	while ((op = ops[pc])) {
+	while (op = ops[pc]) {
 		switch (op) {
 		case 1:
 		case 2:
@@ -282,7 +281,7 @@ __device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTes
 		case 4: 
 		default: {
 			nx = 2;
-			randomness(sizeof(i), &i);
+			randomness_(sizeof(i), &i);
 			break; }
 		}
 		if ((--ops[pc+1]) > 0) nx = 0;
@@ -299,12 +298,11 @@ __device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTes
 		}
 	}
 
-	/* Test to make sure the linear array exactly matches the Bitvec object.  Start with the assumption that they do
-	** match (rc==0).  Change rc to non-zero if a discrepancy is found.
-	*/
+	// Test to make sure the linear array exactly matches the Bitvec object.  Start with the assumption that they do
+	// match (rc==0).  Change rc to non-zero if a discrepancy is found.
 	rc = bitvecGet(nullptr, 0) + bitvecGet(bitvec, size+1) + bitvecGet(bitvec, 0) + (bitvecSize(bitvec) - size);
 	for (i = 1; i <= size; i++) {
-		if ((TESTBIT(v, i)) != bitvecGet(bitvec, i)) {
+		if (TESTBIT(v, i) != bitvecGet(bitvec, i)) {
 			rc = i;
 			break;
 		}
@@ -312,11 +310,10 @@ __device__ int bitvecBuiltinTest(int size, int *ops) //: sqlite3BitvecBuiltinTes
 
 	/* Free allocated structure */
 bitvec_end:
-	free(tmpSpace);
-	free(v);
+	mfree(tmpSpace);
+	mfree(v);
 	bitvecDestroy(bitvec);
 	return rc;
 }
 
 #endif /* LIBCU_UNTESTABLE */
-#endif

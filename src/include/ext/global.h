@@ -180,9 +180,9 @@ struct Lookaside {
 	uint32_t disable;       // Only operate the lookaside when zero */
 	uint16_t size;          // Size of each buffer in bytes */
 	bool malloced;			// True if Start obtained from alloc32()
-	int outs;				// Number of buffers currently checked out
-	int maxOuts;			// Highwater mark for Outs
+	int slots;				// Number of lookaside slots allocated
 	int stats[3];			// 0: hits.  1: size misses.  2: full misses
+	LookasideSlot *init;	// List of buffers not previously used
 	LookasideSlot *free;	// List of available buffers
 	void *start;			// First byte of available memory space
 	void *end;				// First byte past end of available space
@@ -213,6 +213,9 @@ struct tagbase_t {
 #include "mutex.h"
 #include "alloc.h"
 #include "status.h"
+
+// CAPI3REF: Pseudo-Random Number Generator
+extern __device__ void randomness_(int n, void *p);
 
 // CAPI3REF: Configuration Options
 #define CONFIG int
@@ -268,9 +271,6 @@ struct RuntimeConfig {
 	int minHeapSize, maxHeapSize;	// Min and max heap requests sizes
 	int64_t sizeMmap;				// mmap() space per open file
 	int64_t maxMmap;				// Maximum value for szMmap
-	void *scratch;					// Scratch memory
-	int scratchSize;				// Size of each scratch buffer
-	int scratchs;					// Number of scratch buffers
 	void *page;                     // Page cache memory
 	int pageSize;                   // Size of each page in page[]
 	int pages;                      // Number of pages in page[]

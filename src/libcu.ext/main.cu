@@ -320,11 +320,6 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		_runtimeConfig.memstat = va_arg(va, int);
 		break; }
 	case CONFIG_SCRATCH: {
-		/* EVIDENCE-OF: R-08404-60887 There are three arguments to SQLITE_CONFIG_SCRATCH: A pointer an 8-byte aligned memory buffer from
-		** which the scratch allocations will be drawn, the size of each scratch allocation (sz), and the maximum number of scratch allocations (N). */
-		_runtimeConfig.scratch = va_arg(va, void *);
-		_runtimeConfig.scratchSize = va_arg(va, int);
-		_runtimeConfig.scratchs = va_arg(va, int);
 		break; }
 	case CONFIG_PAGECACHE: {
 		/* EVIDENCE-OF: R-18761-36601 There are three arguments to SQLITE_CONFIG_PAGECACHE: A pointer to 8-byte aligned memory (pMem),

@@ -27,25 +27,21 @@ THE SOFTWARE.
 #ifndef _EXT_MATH_H
 #define _EXT_MATH_H
 #include <stdint.h>
-#ifdef  __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS;
 
-	extern __device__ bool math_add(int64_t *aRef, int64_t b);
-	extern __device__ bool math_sub(int64_t *aRef, int64_t b);
-	extern __device__ bool math_mul(int64_t *aRef, int64_t b);
+extern __device__ bool math_add(int64_t *aRef, int64_t b);
+extern __device__ bool math_sub(int64_t *aRef, int64_t b);
+extern __device__ bool math_mul(int64_t *aRef, int64_t b);
 #ifndef OMIT_INLINEMATH
-	__forceinline __device__ int math_abs(int x)
-	{
-		if (x >= 0) return x;
-		if (x == (int)0x8000000) return 0x7fffffff;
-		return -x;
-	}
+__forceinline __device__ int math_abs(int x)
+{
+	if (x >= 0) return x;
+	if (x == (int)0x8000000) return 0x7fffffff;
+	return -x;
+}
 #else
-	extern __device__ int math_abs(int x);
+extern __device__ int math_abs(int x);
 #endif
 
-#ifdef  __cplusplus
-}
-#endif
+__END_DECLS;
 #endif	/* _EXT_MATH_H */

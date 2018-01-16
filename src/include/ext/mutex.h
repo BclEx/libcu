@@ -26,11 +26,7 @@ THE SOFTWARE.
 #include <ext\global.h>
 #ifndef _EXT_MUTEX_H
 #define _EXT_MUTEX_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-#define OS_WIN 1
+__BEGIN_DECLS;
 
 	/*
 	** The LIBCU_THREADSAFE macro must be defined as 0, 1, or 2. 0 means mutexes are permanently disable and the library is never
@@ -64,11 +60,11 @@ extern "C" {
 #define LIBCU_MUTEX_OMIT
 #endif
 #if LIBCU_THREADSAFE && !defined(LIBCU_MUTEX_NOOP)
-# if OS_GPU
+# if __OS_GPU
 # define LIBCU_MUTEX_GPU
-# elif OS_UNIX
+# elif __OS_UNIX
 # define LIBCU_MUTEX_PTHREADS
-# elif OS_WIN
+# elif __OS_WIN
 # define LIBCU_MUTEX_W32
 # else
 # define LIBCU_MUTEX_NOOP
@@ -156,7 +152,5 @@ extern "C" {
 #define MUTEX_LOGIC(X) X
 #endif
 
-#ifdef  __cplusplus
-}
-#endif
+__END_DECLS;
 #endif	/* _EXT_MUTEX_H */

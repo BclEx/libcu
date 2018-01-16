@@ -26,23 +26,19 @@ THE SOFTWARE.
 #include <ext\global.h>
 #ifndef _EXT_UTIL_H
 #define _EXT_UTIL_H
-#ifdef  __cplusplus
-extern "C" {
-#endif
+__BEGIN_DECLS;
 
 #ifdef LIBCU_UNTESTABLE
 #define sqlite3FaultSim(X) RC_OK
 #else
-	__host_device__ RC sqlite3FaultSim(int);
+__host_device__ RC sqlite3FaultSim(int);
 #endif
 
-	//__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...)
-	__host_device__ void tagError(tagbase_t *tag, int errCode);
-	__host_device__ void tagSystemError(tagbase_t *tag, RC rc);
-	__host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
-	__host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
+//__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...)
+__host_device__ void tagError(tagbase_t *tag, int errCode);
+__host_device__ void tagSystemError(tagbase_t *tag, RC rc);
+__host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
+__host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
 
-#ifdef  __cplusplus
-}
-#endif
+__END_DECLS;
 #endif	/* _EXT_UTIL_H */

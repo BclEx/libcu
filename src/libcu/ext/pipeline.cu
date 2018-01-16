@@ -282,6 +282,16 @@ static struct WaitInfoTable_t {
 	int used;                   // Number of entries in use
 } _waitInfo = { nullptr, 0, 0 };
 
+typedef struct OpenFile {
+	FILE *f;			// Stdio file to use for reading and/or writing.
+	FILE *f2;			// Normally NULL.  In the special case of a command pipeline with pipes for both input and output, this is a stdio file to use for writing to the pipeline.
+	int readable;		// Non-zero means file may be read.
+	int writable;		// Non-zero means file may be written.
+	int numPids;		// If this is a connection to a process pipeline, gives number of processes in pidPtr array below;  otherwise it is 0.
+	int *pidPtr;		// Pointer to malloc-ed array of child process ids (numPids of them), or NULL if this isn't a connection to a process pipeline.
+	int errorId;		// File id of file that receives error output from pipeline.  -1 means not used (i.e. this is a normal file).
+} OpenFile_t;
+
 /* Create a new process using the vfork system call, and keep track of it for "safe" waiting with Tcl_WaitPids. */
 PIDTYPE StartProcess(char **argv, char *env, FDTYPE inputId, FDTYPE outputId, FDTYPE errorId)
 {

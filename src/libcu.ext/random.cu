@@ -1,134 +1,82 @@
-/*
-** 2001 September 15
-**
-** The author disclaims copyright to this source code.  In place of
-** a legal notice, here is a blessing:
-**
-**    May you do good and not evil.
-**    May you find forgiveness for yourself and forgive others.
-**    May you share freely, never taking more than you give.
-**
-*************************************************************************
-** This file contains code to implement a pseudo-random number
-** generator (PRNG) for SQLite.
-**
-** Random numbers are used by some of the database backends in order
-** to generate random integer keys for tables or random filenames.
-*/
-#include "sqliteInt.h"
+#include <ext/global.h>
+#include <assert.h>
 
 
-/* All threads share a single random number generator.
-** This structure is the current state of the generator.
-*/
-static SQLITE_WSD struct sqlite3PrngType {
-	unsigned char isInit;          /* True if initialized */
-	unsigned char i, j;            /* State variables */
-	unsigned char s[256];          /* State variables */
-} sqlite3Prng;
+/* All threads share a single random number generator. This structure is the current state of the generator. */
+static __hostb_device__ _WSD struct PrngGlobal {
+	bool isInit;  // True if initialized
+	unsigned char i, j;         // State variables
+	unsigned char s[256];       // State variables
+} _prng;
+#define prng _GLOBAL(struct PrngGlobal, _prng)
 
-/*
-** Return N random bytes.
-*/
-void sqlite3_randomness(int N, void *pBuf){
-	unsigned char t;
-	unsigned char *zBuf = pBuf;
-
-	/* The "wsdPrng" macro will resolve to the pseudo-random number generator
-	** state vector.  If writable static data is unsupported on the target,
-	** we have to locate the state vector at run-time.  In the more common
-	** case where writable static data is supported, wsdPrng can refer directly
-	** to the "sqlite3Prng" state vector declared above.
-	*/
-#ifdef SQLITE_OMIT_WSD
-	struct sqlite3PrngType *p = &GLOBAL(struct sqlite3PrngType, sqlite3Prng);
-# define wsdPrng p[0]
-#else
-# define wsdPrng sqlite3Prng
+/* Return N random bytes. */
+__device__ void _randomness(int n, void *p)
+{
+#ifndef OMIT_AUTOINIT
+	if (runtimeInitialize()) return;
 #endif
-
-#if SQLITE_THREADSAFE
-	sqlite3_mutex *mutex;
+#if LIBCU_THREADSAFE
+	mutex *mutex = mutex_alloc(MUTEX_STATIC_PRNG);
 #endif
-
-#ifndef SQLITE_OMIT_AUTOINIT
-	if( sqlite3_initialize() ) return;
-#endif
-
-#if SQLITE_THREADSAFE
-	mutex = sqlite3MutexAlloc(SQLITE_MUTEX_STATIC_PRNG);
-#endif
-
-	sqlite3_mutex_enter(mutex);
-	if( N<=0 || pBuf==0 ){
-		wsdPrng.isInit = 0;
-		sqlite3_mutex_leave(mutex);
+	mutex_enter(mutex);
+	if (n <= 0 || !p) {
+		prng.isInit = false;
+		mutex_leave(mutex);
 		return;
 	}
 
-	/* Initialize the state of the random number generator once,
-	** the first time this routine is called.  The seed value does
-	** not need to contain a lot of randomness since we are not
-	** trying to do secure encryption or anything like that...
-	**
-	** Nothing in this file or anywhere else in SQLite does any kind of
-	** encryption.  The RC4 algorithm is being used as a PRNG (pseudo-random
-	** number generator) not as an encryption device.
-	*/
-	if( !wsdPrng.isInit ){
-		int i;
+	// Initialize the state of the random number generator once, the first time this routine is called.  The seed value does
+	// not need to contain a lot of randomness since we are not trying to do secure encryption or anything like that...
+	//
+	// Nothing in this file or anywhere else in SQLite does any kind of encryption.  The RC4 algorithm is being used as a PRNG (pseudo-random
+	// number generator) not as an encryption device.
+	unsigned char t;
+	unsigned char *z = (unsigned char *)p;
+	if (!prng.isInit) {
 		char k[256];
-		wsdPrng.j = 0;
-		wsdPrng.i = 0;
-		sqlite3OsRandomness(sqlite3_vfs_find(0), 256, k);
-		for(i=0; i<256; i++){
-			wsdPrng.s[i] = (u8)i;
+		prng.j = 0;
+		prng.i = 0;
+		vsys_randomness(vsystemFind(nullptr), 256, k);
+		int i;
+		for (i = 0; i < 256; i++)
+			prng.s[i] = (uint8_t)i;
+		for (i = 0; i < 256; i++) {
+			prng.j += prng.s[i] + k[i];
+			t = prng.s[prng.j];
+			prng.s[prng.j] = prng.s[i];
+			prng.s[i] = t;
 		}
-		for(i=0; i<256; i++){
-			wsdPrng.j += wsdPrng.s[i] + k[i];
-			t = wsdPrng.s[wsdPrng.j];
-			wsdPrng.s[wsdPrng.j] = wsdPrng.s[i];
-			wsdPrng.s[i] = t;
-		}
-		wsdPrng.isInit = 1;
+		prng.isInit = true;
 	}
-
-	assert( N>0 );
-	do{
-		wsdPrng.i++;
-		t = wsdPrng.s[wsdPrng.i];
-		wsdPrng.j += t;
-		wsdPrng.s[wsdPrng.i] = wsdPrng.s[wsdPrng.j];
-		wsdPrng.s[wsdPrng.j] = t;
-		t += wsdPrng.s[wsdPrng.i];
-		*(zBuf++) = wsdPrng.s[t];
-	}while( --N );
-	sqlite3_mutex_leave(mutex);
+	assert(n > 0);
+	do {
+		prng.i++;
+		t = prng.s[prng.i];
+		prng.j += t;
+		prng.s[prng.i] = prng.s[prng.j];
+		prng.s[prng.j] = t;
+		t += prng.s[prng.i];
+		*(z++) = prng.s[t];
+	} while (--n);
+	mutex_leave(mutex);
 }
 
-#ifndef SQLITE_UNTESTABLE
+#ifndef LIBCU_UNTESTABLE
 /*
-** For testing purposes, we sometimes want to preserve the state of
-** PRNG and restore the PRNG to its saved state at a later time, or
-** to reset the PRNG to its initial state.  These routines accomplish
-** those tasks.
+** For testing purposes, we sometimes want to preserve the state of PRNG and restore the PRNG to its saved state at a later time, or
+** to reset the PRNG to its initial state.  These routines accomplish those tasks.
 **
-** The sqlite3_test_control() interface calls these routines to
-** control the PRNG.
+** The sqlite3_test_control() interface calls these routines to control the PRNG.
 */
-static SQLITE_WSD struct sqlite3PrngType sqlite3SavedPrng;
-void sqlite3PrngSaveState(void){
-	memcpy(
-		&GLOBAL(struct sqlite3PrngType, sqlite3SavedPrng),
-		&GLOBAL(struct sqlite3PrngType, sqlite3Prng),
-		sizeof(sqlite3Prng)
-		);
+static __hostb_device__ _WSD struct PrngGlobal _prngSaved;
+void sqlite3PrngSaveState()
+{
+	memcpy(&_GLOBAL(struct PrngGlobal, _prngSaved), &_GLOBAL(struct PrngGlobal, _prng), sizeof(_prng));
 }
-void sqlite3PrngRestoreState(void){
-	memcpy(
-		&GLOBAL(struct sqlite3PrngType, sqlite3Prng),
-		&GLOBAL(struct sqlite3PrngType, sqlite3SavedPrng),
-		sizeof(sqlite3Prng)
-		);
+
+void sqlite3PrngRestoreState()
+{
+	memcpy(&_GLOBAL(struct PrngGlobal, _prng), &_GLOBAL(struct PrngGlobal, _prngSaved), sizeof(_prng));
 }
-#endif /* SQLITE_UNTESTABLE */
+#endif /* LIBCU_UNTESTABLE */

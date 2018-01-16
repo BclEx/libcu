@@ -72,9 +72,6 @@ _WSD struct RuntimeConfig _runtimeConfig = {
 	0, 0,						// minHeapSize, maxHeapSize
 	LIBCU_DEFAULTMMAPSIZE,		// sizeMmap
 	LIBCU_MAXMMAPSIZE,			// maxMmap
-	(void *)nullptr,            // scratch
-	0,							// scratchSize
-	0,							// scratchs
 	(void *)nullptr,			// page
 	0,							// pageSize
 	LIBCU_DEFAULTPCACHEINITSZ,	// pages

@@ -28,15 +28,15 @@ THE SOFTWARE.
 #define	_SYS_TIMECU_H
 #include <crtdefscu.h>
 
-#if __OS_UNIX
+#if __OS_WIN
+#ifndef _WINSOCKAPI_
+struct timeval { long tv_sec; long tv_usec; };
+#endif
+#elif __OS_UNIX
 #include <sys/time.h>
 #endif
 #if defined(__CUDA_ARCH__)
 __BEGIN_DECLS;
-
-#if __OS_WIN
-struct timeval { long tv_sec; long tv_usec; };
-#endif
 
 /* Get the current time of day and timezone information, putting it into *TV and *TZ.  If TZ is NULL, *TZ is not filled. Returns 0 on success, -1 on errors. */
 extern __device__ int gettimeofday_(struct timeval *__restrict tv, void *tz);
@@ -44,17 +44,12 @@ extern __device__ int gettimeofday_(struct timeval *__restrict tv, void *tz);
 
 __END_DECLS;
 #else
-
 #if __OS_WIN
-#ifndef _WINSOCKAPI_
-struct timeval { long tv_sec; long tv_usec; };
-#endif
 __BEGIN_DECLS;
 int gettimeofday(struct timeval *tv, void *unused);
 __END_DECLS;
 //#define gettimeofday(tp, tz) 0
 #endif
-
 #endif /* __CUDA_ARCH__  */
 
 #endif /* _SYS_TIMECU_H  */
