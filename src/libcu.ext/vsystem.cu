@@ -64,22 +64,22 @@ int libcu_memdebug_vfs_oom_test = 1;
 ** The following routines are convenience wrappers around methods of the vsystemfile object.  This is mostly just syntactic sugar. All
 ** of this would be completely automatic if SQLite were coded using C++ instead of plain old C.
 */
-__host_device__ void vsys_close(vsystemfile *p) { if (p->methods) { p->methods->close(p); p->methods = nullptr; } }
-__host_device__ RC vsys_read(vsystemfile *p, void *buf, int amount, int64_t offset) { DO_OS_MALLOC_TEST(p); return p->methods->read(p, buf, amount, offset); }
-__host_device__ RC vsys_write(vsystemfile *p, const void *buf, int amount, int64_t offset){ DO_OS_MALLOC_TEST(p); return p->methods->write(p, buf, amount, offset); }
-__host_device__ RC vsys_truncate(vsystemfile *p, int64_t size) { return p->methods->truncate(p, size); }
-__host_device__ RC vsys_sync(vsystemfile *p, int flags) { DO_OS_MALLOC_TEST(id); return flags ? p->methods->sync(p, flags) : RC_OK; }
-__host_device__ RC vsys_fileSize(vsystemfile *p, int64_t *size) { DO_OS_MALLOC_TEST(p); return p->methods->fileSize(p, size); }
-__host_device__ RC vsys_lock(vsystemfile *p, int lockType) { DO_OS_MALLOC_TEST(p); return p->methods->lock(p, lockType); }
-__host_device__ RC vsys_unlock(vsystemfile *p, int lockType) { return p->methods->unlock(p, lockType); }
-__host_device__ RC vsys_checkReservedLock(vsystemfile *p, int *res) { DO_OS_MALLOC_TEST(id); return p->methods->checkReservedLock(p, res); }
+__host_device__ void vsys_close(vsystemfile *p) { if (p->methods) { p->methods->close(p); p->methods = nullptr; } } //: sqlite3OsClose
+__host_device__ RC vsys_read(vsystemfile *p, void *buf, int amount, int64_t offset) { DO_OS_MALLOC_TEST(p); return p->methods->read(p, buf, amount, offset); } //: sqlite3OsRead
+__host_device__ RC vsys_write(vsystemfile *p, const void *buf, int amount, int64_t offset){ DO_OS_MALLOC_TEST(p); return p->methods->write(p, buf, amount, offset); } //: sqlite3OsWrite
+__host_device__ RC vsys_truncate(vsystemfile *p, int64_t size) { return p->methods->truncate(p, size); } //: sqlite3OsTruncate
+__host_device__ RC vsys_sync(vsystemfile *p, int flags) { DO_OS_MALLOC_TEST(id); return flags ? p->methods->sync(p, flags) : RC_OK; } //: sqlite3OsSync
+__host_device__ RC vsys_fileSize(vsystemfile *p, int64_t *size) { DO_OS_MALLOC_TEST(p); return p->methods->fileSize(p, size); } //: sqlite3OsFileSize
+__host_device__ RC vsys_lock(vsystemfile *p, int lockType) { DO_OS_MALLOC_TEST(p); return p->methods->lock(p, lockType); } //: sqlite3OsLock
+__host_device__ RC vsys_unlock(vsystemfile *p, int lockType) { return p->methods->unlock(p, lockType); } //: sqlite3OsUnlock
+__host_device__ RC vsys_checkReservedLock(vsystemfile *p, int *res) { DO_OS_MALLOC_TEST(id); return p->methods->checkReservedLock(p, res); } //: sqlite3OsCheckReservedLock
 
 /*
 ** Use sqlite3OsFileControl() when we are doing something that might fail and we need to know about the failures.  Use sqlite3OsFileControlHint()
 ** when simply tossing information over the wall to the VFS and we do not really care if the VFS receives and understands the information since it
 ** is only a hint and can be safely ignored.  The sqlite3OsFileControlHint() routine has no return value since the return value would be meaningless.
 */
-__host_device__ RC vsys_fileControl(vsystemfile *p, int op, void *arg)
+__host_device__ RC vsys_fileControl(vsystemfile *p, int op, void *arg) //: sqlite3OsFileControl
 {
 #ifdef _TEST
 	if (op != VSYS_FCNTL_COMMIT_PHASETWO) {
@@ -94,47 +94,47 @@ __host_device__ RC vsys_fileControl(vsystemfile *p, int op, void *arg)
 #endif
 	return p->methods->fileControl(p, op, arg);
 }
-__host_device__ void vsys_fileControlHint(vsystemfile *p, int op, void *arg) { p->methods->fileControl(p, op, arg); }
-__host_device__ int vsys_sectorSize(vsystemfile *p) { int (*sectorSize)(vsystemfile *) = p->methods->sectorSize; return sectorSize ? sectorSize(p) : LIBCU_DEFAULT_SECTOR_SIZE; }
-__host_device__ int vsys_deviceCharacteristics(vsystemfile *p) { return p->methods->deviceCharacteristics(p); }
+__host_device__ void vsys_fileControlHint(vsystemfile *p, int op, void *arg) { p->methods->fileControl(p, op, arg); } //: sqlite3OsFileControlHint
+__host_device__ int vsys_sectorSize(vsystemfile *p) { int (*sectorSize)(vsystemfile *) = p->methods->sectorSize; return sectorSize ? sectorSize(p) : LIBCU_DEFAULT_SECTOR_SIZE; } //: sqlite3OsSectorSize
+__host_device__ int vsys_deviceCharacteristics(vsystemfile *p) { return p->methods->deviceCharacteristics(p); } //: sqlite3OsDeviceCharacteristics
 #ifndef NO_WAL
-__host_device__ RC vsys_shmLock(vsystemfile *p, int offset, int n, int flags){ return p->methods->shmLock(p, offset, n, flags); }
-__host_device__ void vsys_shmBarrier(vsystemfile *p) { p->methods->shmBarrier(p); }
-__host_device__ RC vsys_shmUnmap(vsystemfile *p, int deleteFlag) { return p->methods->shmUnmap(p, deleteFlag); }
-__host_device__ RC vsys_shmMap(vsystemfile *p, int pageId, int pageSize, int extend, void volatile **pages) { DO_OS_MALLOC_TEST(p); return p->methods->shmMap(p, pageId, pageSize, extend, pages); }
+__host_device__ RC vsys_shmLock(vsystemfile *p, int offset, int n, int flags){ return p->methods->shmLock(p, offset, n, flags); } //: sqlite3OsShmLock
+__host_device__ void vsys_shmBarrier(vsystemfile *p) { p->methods->shmBarrier(p); } //: sqlite3OsShmBarrier
+__host_device__ RC vsys_shmUnmap(vsystemfile *p, int deleteFlag) { return p->methods->shmUnmap(p, deleteFlag); } //: sqlite3OsShmUnmap
+__host_device__ RC vsys_shmMap(vsystemfile *p, int pageId, int pageSize, int extend, void volatile **pages) { DO_OS_MALLOC_TEST(p); return p->methods->shmMap(p, pageId, pageSize, extend, pages); } //: sqlite3OsShmMap
 #endif
 
 #if LIBCU_MAX_MMAP_SIZE > 0
 /* The real implementation of xFetch and xUnfetch */
-__host_device__ RC vsys_fetch(vsystemfile *p, int64_t offset, int amount, void **pages) { DO_OS_MALLOC_TEST(p); return p->methods->fetch(p, offset, amount, pages); }
-__host_device__ RC vsys_unfetch(vsystemfile *p, int64_t offset, void *pages) { return p->methods->unfetch(p, offset, pages); }
+__host_device__ RC vsys_fetch(vsystemfile *p, int64_t offset, int amount, void **pages) { DO_OS_MALLOC_TEST(p); return p->methods->fetch(p, offset, amount, pages); } //: sqlite3OsFetch
+__host_device__ RC vsys_unfetch(vsystemfile *p, int64_t offset, void *pages) { return p->methods->unfetch(p, offset, pages); } //: sqlite3OsUnfetch
 #else
 /* No-op stubs to use when memory-mapped I/O is disabled */
-__host_device__ RC vsys_fetch(vsystemfile *p, int64_t offset, int amount, void **pages){ *pages = nullptr; return RC_OK; }
-__host_device__ RC vsys_unfetch(vsystemfile *p, int64_t offset, void *pages) { return RC_OK; }
+__host_device__ RC vsys_fetch(vsystemfile *p, int64_t offset, int amount, void **pages){ *pages = nullptr; return RC_OK; } //: sqlite3OsFetch
+__host_device__ RC vsys_unfetch(vsystemfile *p, int64_t offset, void *pages) { return RC_OK; } //: sqlite3OsUnfetch
 #endif
 
 /* The next group of routines are convenience wrappers around the VFS methods. */
-__host_device__ RC vsys_open(vsystem *p, const char *path, vsystemfile *file, int flags, int *flagsOut) { DO_OS_MALLOC_TEST(nullptr); RC rc = p->open(p, path, file, flags & 0x87f7f, flagsOut); assert(rc == RC_OK || !file->methods); return rc; }
+__host_device__ RC vsys_open(vsystem *p, const char *path, vsystemfile *file, int flags, int *flagsOut) { DO_OS_MALLOC_TEST(nullptr); RC rc = p->open(p, path, file, flags & 0x87f7f, flagsOut); assert(rc == RC_OK || !file->methods); return rc; } //: sqlite3OsOpen
 /* 0x87f7f is a mask of SQLITE_OPEN_ flags that are valid to be passed down into the VFS layer.  Some SQLITE_OPEN_ flags (for example,
 ** SQLITE_OPEN_FULLMUTEX or SQLITE_OPEN_SHAREDCACHE) are blocked before reaching the VFS. */
-__host_device__ RC vsys_delete(vsystem *p, const char *path, int dirSync) { DO_OS_MALLOC_TEST(nullptr); assert(dirSync == 0 || dirSync == 1); return p->delete_(p, path, dirSync); }
-__host_device__ RC vsys_access(vsystem *p, const char *path, int flags, int *resOut) { DO_OS_MALLOC_TEST(nullptr); return p->access(p, path, flags, resOut); }
-__host_device__ RC vsys_fullPathname(vsystem *p, const char *path, int pathOutSize, char *pathOut) { DO_OS_MALLOC_TEST(0); pathOut[0] = 0; return p->fullPathname(p, path, pathOutSize, pathOut); }
+__host_device__ RC vsys_delete(vsystem *p, const char *path, int dirSync) { DO_OS_MALLOC_TEST(nullptr); assert(dirSync == 0 || dirSync == 1); return p->delete_(p, path, dirSync); } //: sqlite3OsDelete
+__host_device__ RC vsys_access(vsystem *p, const char *path, int flags, int *resOut) { DO_OS_MALLOC_TEST(nullptr); return p->access(p, path, flags, resOut); } //: sqlite3OsAccess
+__host_device__ RC vsys_fullPathname(vsystem *p, const char *path, int pathOutSize, char *pathOut) { DO_OS_MALLOC_TEST(0); pathOut[0] = 0; return p->fullPathname(p, path, pathOutSize, pathOut); } //: sqlite3OsFullPathname
 #ifndef NO_LOAD_EXTENSION
-__host_device__ void *vsys_dlOpen(vsystem *p, const char *path) { return p->dlOpen(p, path); }
-__host_device__ void vsys_dlError(vsystem *p, int bytes, char *bufOut) { p->dlError(p, bytes, bufOut); }
-__host_device__ void (*vsys_dlSym(vsystem *p, void *handle, const char *sym))() { return p->dlSym(p, handle, sym); }
-__host_device__ void vsys_dlClose(vsystem *p, void *handle) { p->dlClose(p, handle); }
+__host_device__ void *vsys_dlOpen(vsystem *p, const char *path) { return p->dlOpen(p, path); } //: sqlite3OsDlOpen
+__host_device__ void vsys_dlError(vsystem *p, int bytes, char *bufOut) { p->dlError(p, bytes, bufOut); } //: sqlite3OsDlError
+__host_device__ void (*vsys_dlSym(vsystem *p, void *handle, const char *sym))() { return p->dlSym(p, handle, sym); } //: sqlite3OsDlSym
+__host_device__ void vsys_dlClose(vsystem *p, void *handle) { p->dlClose(p, handle); } //: sqlite3OsDlClose
 #endif
-__host_device__ RC vsys_Randomness(vsystem *p, int bytes, char *bufOut) { return p->randomness(p, bytes, bufOut); }
-__host_device__ RC vsys_Sleep(vsystem *p, int microseconds) { return p->sleep(p, microseconds); }
-__host_device__ int vsys_GetLastError(vsystem *p) { return p->getLastError ? p->getLastError(p, 0, 0) : 0; }
-__host_device__ RC vsys_CurrentTimeInt64(vsystem *p, int64_t *timeOut) { if (p->version >= 2 && p->currentTimeInt64) return p->currentTimeInt64(p, timeOut); double r; RC rc = p->currentTime(p, &r); *timeOut = (int64_t)(r*86400000.0); return rc; }
+__host_device__ RC vsys_randomness(vsystem *p, int bytes, char *bufOut) { return p->randomness(p, bytes, bufOut); } //: sqlite3OsRandomness
+__host_device__ RC vsys_sleep(vsystem *p, int microseconds) { return p->sleep(p, microseconds); } //: sqlite3OsSleep
+__host_device__ int vsys_getLastError(vsystem *p) { return p->getLastError ? p->getLastError(p, 0, 0) : 0; } //: sqlite3OsGetLastError
+__host_device__ RC vsys_currentTimeInt64(vsystem *p, int64_t *timeOut) { if (p->version >= 2 && p->currentTimeInt64) return p->currentTimeInt64(p, timeOut); double r; RC rc = p->currentTime(p, &r); *timeOut = (int64_t)(r*86400000.0); return rc; } //: sqlite3OsCurrentTimeInt64
 /* IMPLEMENTATION-OF: R-49045-42493 SQLite will use the xCurrentTimeInt64() method to get the current date and time if that method is available
 ** (if iVersion is 2 or greater and the function pointer is not NULL) and will fall back to xCurrentTime() if xCurrentTimeInt64() is unavailable.
 */
-__host_device__ RC vsys_openMalloc(vsystem *p, const char *fileName, vsystemfile **file, int flags, int *flagsOut)
+__host_device__ RC vsys_openMalloc(vsystem *p, const char *fileName, vsystemfile **file, int flags, int *flagsOut) //: sqlite3OsOpenMalloc
 {
 	vsystemfile *newFile = (vsystemfile *)allocZero(p->sizeOsFile);
 	if (newFile) {
@@ -145,13 +145,13 @@ __host_device__ RC vsys_openMalloc(vsystem *p, const char *fileName, vsystemfile
 	}
 	return RC_NOMEM_BKPT;
 }
-__host_device__ void vsys_closeAndFree(vsystemfile *p) { assert(p); vsys_close(p); mfree(p); }
+__host_device__ void vsys_closeAndFree(vsystemfile *p) { assert(p); vsys_close(p); mfree(p); } // : sqlite3OsCloseFree
 
 /*
 ** This function is a wrapper around the OS specific implementation of sqlite3_os_init(). The purpose of the wrapper is to provide the
 ** ability to simulate a malloc failure, so that the handling of an error in sqlite3_os_init() by the upper layers can be tested.
 */
-__host_device__ RC vsystemFakeInit()
+__host_device__ RC vsystemFakeInit() //: sqlite3OsInit
 {
 	//void *p = alloc(10);
 	//if (!p) return RC_NOMEM_BKPT;
@@ -165,7 +165,7 @@ static __hostb_device__ vsystem * _WSD _vfsGlobal = nullptr;
 #define vfs _GLOBAL(vsystem *, _vfsGlobal)
 
 /* Locate a VFS by name.  If no name is given, simply return the first VFS on the list. */
-__host_device__ vsystem *vsystemFind(const char *name)
+__host_device__ vsystem *vsystemFind(const char *name) //: sqlite3_vfs_find
 {
 #ifndef OMIT_AUTOINIT
 	RC rc = runtimeInitialize();
@@ -198,7 +198,7 @@ static __host_device__ void vsystemUnlink(vsystem *p)
 }
 
 /* Register a VFS with the system.  It is harmless to register the same VFS multiple times.  The new VFS becomes the default if makeDflt is true. */
-__host_device__ RC vsystemRegister(vsystem *p, int makeDefault)
+__host_device__ RC vsystemRegister(vsystem *p, int makeDefault) //: sqlite3_vfs_register
 {
 #ifndef OMIT_AUTOINIT
 	RC rc = runtimeInitialize();
@@ -220,7 +220,7 @@ __host_device__ RC vsystemRegister(vsystem *p, int makeDefault)
 }
 
 /* Unregister a VFS so that it is no longer accessible. */
-__host_device__ RC vsystemUnregister(vsystem *p)
+__host_device__ RC vsystemUnregister(vsystem *p) //: sqlite3_vfs_unregister
 {
 #if LIBCU_THREADSAFE
 	mutex *mutex = mutex_alloc(MUTEX_STATIC_MASTER);

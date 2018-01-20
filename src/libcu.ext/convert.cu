@@ -1,24 +1,8 @@
 #include <ctypecu.h>
 #include <stringcu.h>
+#include <ext/global.h>
 #include <ext/convert.h>
 #include <assert.h>
-
-//////#ifndef OMIT_BLOB_LITERAL
-//////__device__ void *_taghextoblob(TagBase *tag, const char *z, size_t size)
-//////{
-//////	char *b = (char *)_tagalloc(tag, size / 2 + 1);
-//////	size--;
-//////	if (b)
-//////	{
-//////		int bIdx = 0;
-//////		for (int i = 0; i < size; i += 2, bIdx++)
-//////			b[bIdx] = (_hextobyte(z[i]) << 4) | _hextobyte(z[i + 1]);
-//////		b[bIdx] = 0;
-//////	}
-//////	return b;
-//////}
-//////#endif
-
 
 #pragma region ATOX
 
@@ -43,19 +27,16 @@ __device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE e
 #ifndef OMIT_FLOATING_POINT
 	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
 	*r = 0.0; // Default return value, in case of an error
-	const char *end = z + length;
-	// get size
-	int incr;
-	bool nonNum = false;
+	const char *end = z + length; int incr; bool nonNum = false;
 	if (encode == TEXTENCODE_UTF8)
 		incr = 1;
 	else {
 		incr = 2;
 		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
 		int i; for (i = 3 - encode; i < length && !z[i]; i += 2) { }
-		nonNum = (i < length);
+		nonNum = i < length;
 		end = &z[i ^ 1];
-		z += (encode & 1);
+		z += encode & 1;
 	}
 
 	// skip leading spaces
@@ -67,16 +48,13 @@ __device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE e
 	if (*z == '-') { sign = -1; z += incr; }
 	else if (*z == '+') z += incr;
 
-	int64_t s = 0; // significand
-	int digits = 0; 	
-	int d = 0; // adjust exponent for shifting decimal point
-	bool eValid = true;  // True exponent is either not used or is well-formed
-	int e = 0; // exponent
-	int esign = 1; // sign of exponent
-
 	// copy max significant digits to significand
-	while (z < end && isdigit(*z) && s < ((INT64_MAX - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++; }
+	int64_t s = 0; // significand
+	int digits = 0;
+	while (z < end && isdigit(*z) && s < ((INT64_MAX - 9) / 10)) { s = s*10 + (*z - '0'); z += incr, digits++; }
+
 	// skip non-significant significand digits (increase exponent by d to shift decimal left)
+	int d = 0; // adjust exponent for shifting decimal point
 	while (z < end && isdigit(*z)) { z += incr, digits++, d++; }
 	if (z >= end) goto do_atof_calc;
 
@@ -84,23 +62,30 @@ __device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE e
 	if (*z == '.') {
 		z += incr;
 		// copy digits from after decimal to significand (decrease exponent by d to shift decimal right)
-		while (z < end && isdigit(*z) && s < ((INT64_MAX - 9) / 10)) { s = s * 10 + (*z - '0'); z += incr, digits++, d--; }
+		while (z < end && isdigit(*z)) {
+			if (s < (INT64_MAX - 9) / 10) { s = s*10 + (*z - '0'); d--; }
+			z += incr, digits++;
+		}
 	}
 	if (z >= end) goto do_atof_calc;
 
 	// if exponent is present
-	if (*z == 'e' || *z == 'E')
-	{
+	int e = 0; // exponent
+	int esign = 1; // sign of exponent
+	bool evalid = true;  // True exponent is either not used or is well-formed
+	if (*z == 'e' || *z == 'E') {
 		z += incr;
-		eValid = false;
+		evalid = false;
 		// This branch is needed to avoid a (harmless) buffer overread.  The special comment alerts the mutation tester that the correct answer
 		// is obtained even if the branch is omitted
 		if (z >= end) goto do_atof_calc; /* PREVENTS-HARMLESS-OVERREAD */
+
 		// get sign of exponent
 		if (*z == '-') { esign = -1; z += incr; }
 		else if (*z == '+') z += incr;
+
 		// copy digits to exponent
-		while (z < end && isdigit(*z)) { e = (e < 10000 ? e * 10 + (*z - '0') : 10000); z += incr; eValid = true; }
+		while (z < end && isdigit(*z)) { e = e < 10000 ? e*10 + (*z - '0') : 10000; z += incr; evalid = true; }
 	}
 
 	// skip trailing spaces
@@ -113,8 +98,7 @@ do_atof_calc:
 	else esign = 1;
 
 	double result;
-	if (!s) // In the IEEE 754 standard, zero is signed.
-		result = (sign < 0 ? -(double)0 : (double)0);
+	if (!s) result = sign < 0 ? -(double)0 : (double)0; // In the IEEE 754 standard, zero is signed.
 	else {
 		// Attempt to reduce exponent.
 		//
@@ -127,7 +111,7 @@ do_atof_calc:
 		}
 
 		// adjust the sign of significand
-		s = (sign < 0 ? -s : s);
+		s = sign < 0 ? -s : s;
 
 		if (!e) result = (double)s;
 		else {
@@ -136,29 +120,36 @@ do_atof_calc:
 			if (e > 307) {
 				if (e < 342) {
 					while (e % 308) { scale *= 1.0e+1; e -= 1; }
-					if (esign < 0) { result = s / scale; result /= 1.0e+308; }
-					else { result = s * scale; result *= 1.0e+308; }
+					if (esign < 0) { result = s/scale; result /= 1.0e+308; }
+					else { result = s*scale; result *= 1.0e+308; }
 				}
 				else {
 					assert(e >= 342);
-					result = (esign < 0 ? 0.0 * s : /*Infinity*/1e308*1e308 * s);
+					result = esign < 0 ? 0.0*s :
+#ifdef INFINITY
+						INFINITY*s;
+#else
+						1e308*1e308*s; // Infinity
+#endif
 				}
 			}
 			else {
 				// 1.0e+22 is the largest power of 10 than can be represented exactly.
 				while (e % 22) { scale *= 1.0e+1; e -= 1; }
 				while (e > 0) { scale *= 1.0e+22; e -= 22; }
-				result = (esign < 0 ? s / scale : s * scale);
+				result = esign < 0 ? s/scale : s*scale;
 			}
 		}
 	}
+
 	// store the result
 	*r = result;
+
 	// return true if number and no extra non-whitespace chracters after
-	return (z > end && digits > 0 && eValid && !nonNum);
+	return z == end && digits > 0 && evalid && !nonNum;
 #else
 	return !convert_atoi64e(z, r, length, encode);
-#endif
+#endif /* OMIT_FLOATING_POINT */
 }
 
 /*
@@ -176,9 +167,8 @@ static __device__ int compare2pow63(const char *z, int incr)
 {
 	const char *pow63 = "922337203685477580"; // 012345678901234567
 	int c = 0;
-	for (int i = 0; !c && i < 18; i++)
-		c = (z[i * incr] - pow63[i]) * 10;
-	if (c == 0) {
+	for (int i = 0; !c && i < 18; i++) c = (z[i * incr] - pow63[i])*10;
+	if (!c) {
 		c = z[18 * incr] - '8';
 		ASSERTCOVERAGE(c == -1);
 		ASSERTCOVERAGE(c == 0);
@@ -205,7 +195,6 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 	const char *start;
 	const char *end = z + length;
 	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
-	// get size
 	int incr;
 	bool nonNum = false;
 	if (encode == TEXTENCODE_UTF8)
@@ -214,9 +203,9 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 		incr = 2;
 		assert(TEXTENCODE_UTF16LE == 2 && TEXTENCODE_UTF16BE == 3);
 		int i; for (i = 3 - encode; i < length && !z[i]; i += 2) { }
-		nonNum = (i < length);
+		nonNum = i < length;
 		end = &z[i ^ 1];
-		z += (encode & 1);
+		z += encode & 1;
 	}
 
 	// skip leading spaces
@@ -233,28 +222,28 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 	// skip leading zeros
 	while (z < end && z[0] == '0') z += incr;
 
-	uint64_t u = 0;
-	int c = 0;
-	int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) { u = u * 10 + c - '0'; }
-	if (u > INT64_MAX) *r = (neg ? INT64_MIN : INT64_MAX);
-	else *r = (neg ? -(int64_t)u : (int64_t)u);
-
+	// convert
+	uint64_t u = 0; int c = 0; int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) { u = u*10 + c - '0'; }
+	if (u > INT64_MAX) *r = neg ? INT64_MIN : INT64_MAX;
+	else *r = neg ? -(int64_t)u : (int64_t)u;
 	ASSERTCOVERAGE(i == 18);
 	ASSERTCOVERAGE(i == 19);
 	ASSERTCOVERAGE(i == 20);
-	// r is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
-	if (&z[i] < end || (!i && start == z) || i > 19 * incr || nonNum) return 1;
+
+	int rc = (&z[i] < end || (!i && start == z) || nonNum ? 1 : 0; // || i > 19 * incr 
+	// z is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
+	if (i > 19 * incr) return 2; // Too many digits
 	// Less than 19 digits, so we know that it fits in 64 bits
-	else if (i < 19 * incr) { assert(u <= INT64_MAX); return 0; }
-	// z is a 19-digit numbers.  Compare it against 9223372036854775808.
+	else if (i < 19 * incr) { assert(u <= INT64_MAX); return rc; } 
 	else {
+		// z is a 19-digit numbers.  Compare it against 9223372036854775808.
 		c = compare2pow63(z, incr);
 		// z is less than 9223372036854775808 so it fits
-		if (c < 0) { assert(u <= INT64_MAX); return 0; }
+		if (c < 0) { assert(u <= INT64_MAX); return rc; }
 		// z is greater than 9223372036854775808 so it overflows
-		else if (c > 0) return 1;
-		// z is exactly 9223372036854775808. Fits if negative. The special case 2 overflow if positive */
-		else { assert(u - 1 == INT64_MAX); return (neg ? 0 : 2); }
+		else if (c > 0) return 2;
+		// z is exactly 9223372036854775808. Fits if negative. The special case 2 overflow if positive
+		else { assert(u - 1 == INT64_MAX); return neg ? rc : 3; }
 	}
 }
 
@@ -270,13 +259,12 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 __device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHexToI64
 #ifndef LIBCU_OMIT_HEX_INTEGER
 	if (z[0] == '0' && (z[1] == 'x' || z[1] == 'X')) {
-		uint64_t u = 0;
 		int i; for (i = 2; z[i] == '0'; i++) { }
-		int k; for (k = i; isxdigit(z[k]); k++) { u = u*16 + convert_xtoi(z[k]); }
+		uint64_t u = 0; int k; for (k = i; isxdigit(z[k]); k++) { u = u*16 + convert_xtoi(z[k]); }
 		memcpy(r, &u, 8);
-		return (!z[k] && k - i <= 16 ? 0 : 1);
+		return !z[k] && k - i <= 16 ? 0 : 2;
 	} else
-#endif
+#endif /* LIBCU_OMIT_HEX_INTEGER */
 	{ return convert_atoi64e(z, r, strlen(z), TEXTENCODE_UTF8); }
 }
 
@@ -297,18 +285,16 @@ __device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
 	else if (z[0] == '+') z++;
 #ifndef LIBCU_OMIT_HEX_INTEGER
 	else if (z[0] == '0' && (z[1] == 'x' || z[1] == 'X') && isxdigit(z[2])) {
-		uint32_t u = 0;
-		z += 2;
-		while (z[0] == '0') z++;
-		for (i = 0; isxdigit(z[i]) && i < 8; i++) { u = u*16 + convert_xtoi(z[i]); }
+		z += 2; while (z[0] == '0') z++;
+		uint32_t u = 0; for (i = 0; isxdigit(z[i]) && i < 8; i++) { u = u*16 + convert_xtoi(z[i]); }
 		if (!(u & 0x80000000) && !isxdigit(z[i])) { memcpy(r, &u, 4); return true; }
 		else return false;
 	}
-#endif
+#endif /* LIBCU_OMIT_HEX_INTEGER */
+	if (!isdigit(z[0])) return false;
 	// skip leading zeros
 	while (z[0] == '0') z++;
-	int64_t v = 0;
-	for (i = 0; i < 11 && (c = z[i] - '0') >= 0 && c <= 9; i++) { v = v*10 + c; }
+	int64_t v = 0; for (i = 0; i < 11 && (c = z[i] - '0') >= 0 && c <= 9; i++) { v = v*10 + c; }
 	// The longest decimal representation of a 32 bit integer is 10 digits:
 	//             1234567890
 	//     2^31 -> 2147483648
@@ -320,7 +306,9 @@ __device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
 	return true;
 }
 
-// inline: convert_atoi(z) //: sqlite3Atoi
+/* Return a 32-bit integer value extracted from a string.  If the string is not an integer, just return 0. */
+// inline: convert_atoi(z)
+__device__ int convert_atoi(const char *z) { int r = 0; if (z) convert_atoie(z, &r); return r; } //: sqlite3Atoi
 
 /* Translate a single byte of Hex into an integer. This routine only works if h really is a valid hexadecimal character:  0..9a..fA..F */
 __device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
@@ -333,6 +321,24 @@ __device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
 #endif
 	return (uint8_t)(h & 0xf);
 }
+
+#if !defined(OMIT_BLOB_LITERAL) || defined(LIBCU_HAS_CODEC)
+/*
+** Convert a BLOB literal of the form "x'hhhhhh'" into its binary value.  Return a pointer to its binary value.  Space to hold the
+** binary value has been obtained from malloc and must be freed by the calling routine.
+*/
+__device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) // (size_t size) //: sqlite3HexToBlob
+{
+	char *b = (char *)tagallocRawNN(tag, size / 2 + 1);
+	size--;
+	if (b) {
+		int i; for (i = 0; i < size; i += 2)
+			b[i/2] = (convert_xtoi(z[i]) << 4) | convert_xtoi(z[i + 1]);
+		b[i/2] = 0;
+	}
+	return b;
+}
+#endif /* !OMIT_BLOB_LITERAL || LIBCU_HAS_CODEC */
 
 //static __constant__ char const __convert_digits[] = "0123456789";
 //__device__ char *convert_itoa64(int64_t i, char *b) //: sky
@@ -387,7 +393,7 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVar
 		p[1] = v & 0x7f;
 		return 2;
 	}
-	//
+	//: from putVarint64
 	int i, j, n;
 	if (v & (((uint64_t)0xff000000) << 32)) {
 		p[8] = (uint8_t)v;
@@ -434,6 +440,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = a;
 		return 1;
 	}
+
 	p++;
 	b = *p;
 	// b: p1 (unmasked)
@@ -444,9 +451,11 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = a;
 		return 2;
 	}
+
 	// Verify that constants are precomputed correctly
 	assert(SLOT_2_0 == ((0x7f << 14) | 0x7f));
 	assert(SLOT_4_2_0 == ((0xfU << 28) | (0x7f << 14) | 0x7f));
+
 	p++;
 	a = a << 14;
 	a |= *p;
@@ -459,6 +468,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = a;
 		return 3;
 	}
+
 	// CSE1 from below
 	a &= SLOT_2_0;
 	p++;
@@ -474,6 +484,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = a;
 		return 4;
 	}
+	
 	// a: p0 << 14 | p2 (masked)
 	// b: p1 << 14 | p3 (unmasked)
 	// 1: save off p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
@@ -482,6 +493,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 	b &= SLOT_2_0;
 	s = a;
 	// s: p0 << 14 | p2 (masked)
+
 	p++;
 	a = a << 14;
 	a |= *p;
@@ -496,10 +508,12 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = ((uint64_t)s) << 32 | a;
 		return 5;
 	}
+
 	// 2: save off p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
 	s = s << 7;
 	s |= b;
 	// s: p0 << 21 | p1 << 14 | p2 << 7 | p3 (masked)
+
 	p++;
 	b = b << 14;
 	b |= *p;
@@ -514,6 +528,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = ((uint64_t)s) << 32 | a;
 		return 6;
 	}
+
 	p++;
 	a = a << 14;
 	a |= *p;
@@ -527,6 +542,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = ((uint64_t)s) << 32 | a;
 		return 7;
 	}
+
 	// CSE2 from below
 	a &= SLOT_2_0;
 	p++;
@@ -543,20 +559,24 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 		*v = ((uint64_t)s) << 32 | a;
 		return 8;
 	}
+
 	p++;
 	a = a << 15;
 	a |= *p;
 	// a: p4 << 29 | p6 << 15 | p8 (unmasked)
+
 	// moved CSE2 up
 	// a &= (0x7f << 29) | (0x7f << 15) | 0xff;
 	b &= SLOT_2_0;
 	b = b << 8;
 	a |= b;
+
 	s = s << 4;
 	b = p[-4];
 	b &= 0x7f;
 	b = b >> 3;
 	s |= b;
+
 	*v = ((uint64_t)s) << 32 | a;
 	return 9;
 }
@@ -582,6 +602,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 		return 1;
 	}
 #endif
+
 	// The 2-byte case
 	p++;
 	b = *p;
@@ -593,6 +614,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 		*v = a | b;
 		return 2;
 	}
+
 	// The 3-byte case
 	p++;
 	a = a << 14;
@@ -616,10 +638,9 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 		p -= 2;
 		uint64_t v64; uint8_t n = convert_getvarint(p, &v64);
 		assert(n > 3 && n <= 9);
-		*v = ((v64 & UINT32_MAX) != v64 ? 0xffffffff : (uint32_t)v64);
+		*v = (v64 & UINT32_MAX) != v64 ? 0xffffffff : (uint32_t)v64;
 		return n;
 	}
-
 #else
 	// For following code (kept for historical record only) shows an unrolling for the 3- and 4-byte varint cases.  This code is
 	// slightly faster, but it is also larger and much harder to test.
@@ -635,6 +656,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 		*v = a | b;
 		return 4;
 	}
+
 	p++;
 	a = a << 14;
 	a |= *p;
@@ -647,6 +669,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 		*v = a | b;
 		return 5;
 	}
+
 	// We can only reach this point when reading a corrupt database file.  In that case we are not in any hurry.
 	// Use the (relatively slow) general-purpose convert_getvarint() routine to extract the value.
 	{
@@ -659,7 +682,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 #endif
 }
 
-__device__ int _convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
+__device__ int convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 {
 	int i; for (i = 1; v >>= 7; i++) { assert(i < 10); }
 	return i;
@@ -668,6 +691,35 @@ __device__ int _convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 #pragma endregion
 
 
+
+/* Read or write a four-byte big-endian integer value. */
+__device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
+{
+#if LIBCU_BYTEORDER==4321
+  uint32_t x; memcpy(&x, p, 4); return x;
+#elif LIBCU_BYTEORDER==1234 && GCC_VERSION>=4003000
+  uint32_t x; memcpy(&x, p, 4); return __builtin_bswap32(x);
+#elif LIBCU_BYTEORDER==1234 && MSVC_VERSION>=1300
+  uint32_t x; memcpy(&x, p, 4); return _byteswap_ulong(x);
+#else
+  ASSERTCOVERAGE(p[0] & 0x80); return ((unsigned)p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3];
+#endif
+}
+__device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
+{
+#if LIBCU_BYTEORDER==4321
+  memcpy(p, &v, 4);
+#elif LIBCU_BYTEORDER==1234 && GCC_VERSION>=4003000
+  uint32_t x = __builtin_bswap32(v); memcpy(p, &x, 4);
+#elif LIBCU_BYTEORDER==1234 && MSVC_VERSION>=1300
+  uint32_t x = _byteswap_ulong(v); memcpy(p, &x, 4);
+#else
+  p[0] = (uint8_t)(v>>24);
+  p[1] = (uint8_t)(v>>16);
+  p[2] = (uint8_t)(v>>8);
+  p[3] = (uint8_t)v;
+#endif
+}
 
 #ifdef OMIT_INLINECONVERT
 
@@ -678,14 +730,14 @@ __device__ void convert_put2(unsigned char *p, uint32_t v)
 	p[0] = (uint8_t)(v>>8);
 	p[1] = (uint8_t)v;
 }
-__device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
-__device__ void convert_put4(unsigned char *p, uint32 v)
-{
-	p[0] = (uint8_t)(v>>24);
-	p[1] = (uint8_t)(v>>16);
-	p[2] = (uint8_t)(v>>8);
-	p[3] = (uint8_t)v;
-}
+//__device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
+//__device__ void convert_put4(unsigned char *p, uint32 v)
+//{
+//	p[0] = (uint8_t)(v>>24);
+//	p[1] = (uint8_t)(v>>16);
+//	p[2] = (uint8_t)(v>>8);
+//	p[3] = (uint8_t)v;
+//}
 
 #endif
 

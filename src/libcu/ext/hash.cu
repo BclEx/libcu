@@ -8,7 +8,7 @@
 **
 ** "h" is a pointer to the hash table that is to be initialized.
 */
-__device__ void hashInit(hash_t *h)
+__device__ void hashInit(hash_t *h) //: sqlite3HashInit
 {
 	assert(h);
 	h->first = nullptr;
@@ -20,7 +20,7 @@ __device__ void hashInit(hash_t *h)
 /* Remove all entries from a hash table.  Reclaim all memory. Call this routine to delete a hash table or to reset a hash table
 ** to the empty state.
 */
-__device__ void hashClear(hash_t *h)
+__device__ void hashClear(hash_t *h) //: sqlite3HashClear
 {
 	hashElem_t *elem = h->first; // For looping over all elements of the table
 	h->first = nullptr;
@@ -156,7 +156,7 @@ static __device__ void removeElementGivenHash(hash_t *h, hashElem_t *elem, unsig
 /* Attempt to locate an element of the hash table "h" with a key that matches pKey.  Return the data for this element if it is
 ** found, or nullptr if there is no match.
 */
-__device__ void *hashFind(hash_t *h, const char *key)
+__device__ void *hashFind(hash_t *h, const char *key) //: sqlite3HashFind
 {
 	assert(h);
 	assert(key);
@@ -174,7 +174,7 @@ __device__ void *hashFind(hash_t *h, const char *key)
 **
 ** If the "data" parameter to this function is NULL, then the element corresponding to "key" is removed from the hash table.
 */
-__device__ void *hashInsert(hash_t *h, const char *key, void *data)
+__device__ void *hashInsert(hash_t *h, const char *key, void *data) //: sqlite3HashInsert
 {
 	assert(h);
 	assert(key);

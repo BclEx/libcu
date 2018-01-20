@@ -173,6 +173,7 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 /* Returns the length of an array at compile time (via math) */
+// _ARRAYSIZE
 #define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
 /* Removes compiler warning for unused parameter(s) */
 #define UNUSED_SYMBOL(x) (void)(x)

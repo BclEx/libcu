@@ -13,8 +13,8 @@
 **
 ** This routines provide no mutual exclusion or error checking.
 */
-static __host_device__ RC noopMutexInitialize() { return 0; }
-static __host_device__ RC noopMutexShutdown() { return 0; }
+static __host_device__ RC noopMutexInitialize() { return RC_OK; }
+static __host_device__ RC noopMutexShutdown() { return RC_OK; }
 
 static __host_device__ mutex *noopMutexAlloc(MUTEX id) { UNUSED_SYMBOL(id); return (mutex *)8;  }
 static __host_device__ void noopMutexFree(mutex *m) { UNUSED_SYMBOL(m); }
@@ -49,12 +49,11 @@ static __host_device__ bool noopMutexHeld(mutex *m) { return (!m || m->refs); }
 static __host_device__ bool noopMutexNotHeld(mutex *m) { return (!m || !m->refs); }
 
 /* Initialize and deinitialize the mutex subsystem. */
-static __hostb_device__ mutex noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
-
-static __host_device__ int noopMutexInitialize() { return 0; }
-static __host_device__ int noopMutexShutdown() { return 0; }
+static __host_device__ RC noopMutexInitialize() { return RC_OK; }
+static __host_device__ RC noopMutexShutdown() { return RC_OK; }
 
 /* The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL that means that a mutex could not be allocated. */
+static __hostb_device__ mutex noopMutexStatics[MUTEX_STATIC_VFS3 - 1];
 static __host_device__ mutex *noopMutexAlloc(MUTEX id)
 {
 	mutex *m = nullptr;
@@ -87,11 +86,9 @@ static __host_device__ void noopMutexFree(mutex *m)
 	assert(!m->refs);
 	if (m->id == MUTEX_FAST || m->id == MUTEX_RECURSIVE)
 		mfree(m);
-	else {
 #ifdef ENABLE_API_ARMOR
-		(void)RC_MISUSE_BKPT;
+	else (void)RC_MISUSE_BKPT;
 #endif
-	}
 }
 
 /*

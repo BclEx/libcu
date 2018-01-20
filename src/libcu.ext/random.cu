@@ -11,7 +11,7 @@ static __hostb_device__ _WSD struct PrngGlobal {
 #define prng _GLOBAL(struct PrngGlobal, _prng)
 
 /* Return N random bytes. */
-__device__ void _randomness(int n, void *p)
+__device__ void randomness_(int n, void *p) //: sqlite3_randomness
 {
 #ifndef OMIT_AUTOINIT
 	if (runtimeInitialize()) return;
@@ -70,12 +70,12 @@ __device__ void _randomness(int n, void *p)
 ** The sqlite3_test_control() interface calls these routines to control the PRNG.
 */
 static __hostb_device__ _WSD struct PrngGlobal _prngSaved;
-void sqlite3PrngSaveState()
+void randomness_save() //: sqlite3PrngSaveState
 {
 	memcpy(&_GLOBAL(struct PrngGlobal, _prngSaved), &_GLOBAL(struct PrngGlobal, _prng), sizeof(_prng));
 }
 
-void sqlite3PrngRestoreState()
+void randomness_restore() //: sqlite3PrngRestoreState
 {
 	memcpy(&_GLOBAL(struct PrngGlobal, _prng), &_GLOBAL(struct PrngGlobal, _prngSaved), sizeof(_prng));
 }

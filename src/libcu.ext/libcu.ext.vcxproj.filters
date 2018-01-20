@@ -20,6 +20,7 @@
     <CudaCompile Include="vsystem.cu" />
     <CudaCompile Include="vsystem-gpu.cu" />
     <CudaCompile Include="vsystem-map.cu" />
+    <CudaCompile Include="math.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -87,6 +88,7 @@
     <ClInclude Include="sqlite\sqliteInt.h">
       <Filter>sqlite</Filter>
     </ClInclude>
+    <ClInclude Include="libcu.sqlite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mutex-unix.cpp" />

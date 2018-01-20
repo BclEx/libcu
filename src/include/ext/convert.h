@@ -51,7 +51,8 @@ extern __device__ int convert_axtoi64e(const char *z, int64_t *r); //: sqlite3De
 /* If z represents an integer that will fit in 32-bits, then set *r to that integer and return true.  Otherwise return false. */
 extern __device__ bool convert_atoie(const char *z, int *r); //: sqlite3GetInt32
 /* Return a 32-bit integer value extracted from a string.  If the string is not an integer, just return 0. */
-__forceinline __device__ int convert_atoi(const char *z) { int r = 0; if (z) convert_atoie(z, &r); return r; } //: sqlite3Atoi
+//__forceinline __device__ int convert_atoi(const char *z) { int r = 0; if (z) convert_atoie(z, &r); return r; } //: sqlite3Atoi
+extern __device__ int convert_atoi(const char *z); //: sqlite3Atoi
 /* sqlite3HexToInt: Translate a single byte of Hex into an integer. */
 extern __device__ uint8_t convert_xtoi(int h); //: sqlite3HexToInt
 

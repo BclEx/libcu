@@ -11,7 +11,7 @@ static __hostb_device__ _WSD bool _mutexIsInit = false;
 #endif
 
 /* Initialize the mutex system. */
-__host_device__ RC mutexInitialize()
+__host_device__ RC mutexInitialize() //: sqlite3MutexInit
 { 
 	// If the _.alloc method has not been set, then the user did not install a mutex implementation via sqlite3_config() prior to 
 	// systemInitialize() being called. This block copies pointers to the default implementation into the sqlite3GlobalConfig structure.
@@ -38,7 +38,7 @@ __host_device__ RC mutexInitialize()
 }
 
 /* Shutdown the mutex system. This call frees resources allocated by mutex_initialize(). */
-__host_device__ RC mutexShutdown()
+__host_device__ RC mutexShutdown() //: sqlite3MutexEnd
 {
 	RC rc = 0;
 	if (__mutexsystem.shutdown)
@@ -50,7 +50,7 @@ __host_device__ RC mutexShutdown()
 }
 
 /* Retrieve a pointer to a static mutex or allocate a new dynamic one. */
-__host_device__ mutex *mutex_alloc(MUTEX id)
+__host_device__ mutex *mutex_alloc(MUTEX id) //: sqlite3_mutex_alloc
 {
 #ifndef OMIT_AUTOINIT
 	if (id <= MUTEX_RECURSIVE && runtimeInitialize()) return nullptr;
@@ -59,7 +59,7 @@ __host_device__ mutex *mutex_alloc(MUTEX id)
 	assert(__mutexsystem.alloc);
 	return __mutexsystem.alloc(id);
 }
-__host_device__ mutex *mutexAlloc(MUTEX id)
+__host_device__ mutex *mutexAlloc(MUTEX id) //: sqlite3MutexAlloc
 {
 	if (!_runtimeConfig.coreMutex)
 		return nullptr;
@@ -68,7 +68,7 @@ __host_device__ mutex *mutexAlloc(MUTEX id)
 }
 
 /* Free a dynamic mutex. */
-__host_device__ void mutex_free(mutex *m)
+__host_device__ void mutex_free(mutex *m) //: sqlite3_mutex_free
 {
 	if (m) {
 		assert(__mutexsystem.free);
@@ -77,7 +77,7 @@ __host_device__ void mutex_free(mutex *m)
 }
 
 /* Obtain the mutex m. If some other thread already has the mutex, block until it can be obtained. */
-__host_device__ void mutex_enter(mutex *m)
+__host_device__ void mutex_enter(mutex *m) //: sqlite3_mutex_enter
 {
 	if (m) {
 		assert(__mutexsystem.enter);
@@ -86,7 +86,7 @@ __host_device__ void mutex_enter(mutex *m)
 }
 
 /* Obtain the mutex p. If successful, return true. Otherwise, if another thread holds the mutex and it cannot be obtained, return false. */
-__host_device__ bool mutex_tryenter(mutex *m)
+__host_device__ bool mutex_tryenter(mutex *m) //: sqlite3_mutex_try
 {
 	if (m) {
 		assert(__mutexsystem.tryEnter);
@@ -99,7 +99,7 @@ __host_device__ bool mutex_tryenter(mutex *m)
 ** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
 ** is not currently entered. If a NULL pointer is passed as an argument this function is a no-op.
 */
-__host_device__ void mutex_leave(mutex *m)
+__host_device__ void mutex_leave(mutex *m) //: sqlite3_mutex_leave
 {
 	if (m) {
 		assert(__mutexsystem.leave);
@@ -109,12 +109,12 @@ __host_device__ void mutex_leave(mutex *m)
 
 #ifdef _DEBUG
 /* The mutex_held() and mutex_notheld() routine are intended for use inside assert() statements. */
-__host_device__ bool mutex_held(mutex *m)
+__host_device__ bool mutex_held(mutex *m) //: sqlite3_mutex_held
 {
 	assert(!m || __mutexsystem.held);
 	return !m || __mutexsystem.held(m);
 }
-__host_device__ bool mutex_notheld(mutex *m)
+__host_device__ bool mutex_notheld(mutex *m) //: sqlite3_mutex_notheld
 {
 	assert(!m || __mutexsystem.notheld);
 	return !m || __mutexsystem.notheld(m);

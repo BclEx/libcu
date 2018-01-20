@@ -5,6 +5,8 @@
 #include "convert.cu"
 #include "global.cu"
 //#include "main.cu"
+#include "mutex-gpu.cu"
+#include "mutex-noop.cu"
 #include "mutex.cu"
 #include "random.cu"
 

@@ -4,7 +4,6 @@
 // MUTEX PTHREADS
 #pragma region MUTEX PTHREADS
 #ifdef LIBCU_MUTEX_PTHREADS
-
 #include <pthread.h>
 
 /*
@@ -17,18 +16,16 @@
 #define MUTEX_NREF 0
 #endif
 
-/*
-** Each recursive mutex is an instance of the following structure.
-*/
+/* Each recursive mutex is an instance of the following structure. */
 struct mutex {
-	pthread_mutex_t Mutex;		// Mutex controlling the lock
+	pthread_mutex_t mutex;		// Mutex controlling the lock
 #if MUTEX_NREF || defined(ENABLE_API_ARMOR)
-	int Id;						// Mutex type
+	MUTEX id;					// Mutex type
 #endif
 #if MUTEX_NREF
-	volatile int Refs;			// Number of entrances
-	volatile pthread_t Owner;	// Thread that is within this mutex
-	bool Trace;					// True to trace changes
+	volatile int refs;			// Number of entrances
+	volatile pthread_t owner;	// Thread that is within this mutex
+	bool trace;					// True to trace changes
 #endif
 };
 
@@ -39,7 +36,7 @@ struct mutex {
 #else
 #define MUTEX_INITIALIZER { PTHREAD_MUTEX_INITIALIZER }
 #endif
-static mutex MutexStatics[] = {
+static mutex unixMutexStatics[] = {
 	MUTEX_INITIALIZER,
 	MUTEX_INITIALIZER,
 	MUTEX_INITIALIZER,
@@ -66,8 +63,8 @@ static mutex MutexStatics[] = {
 ** make sure no assert() statements are evaluated and hence these routines are never called.
 */
 #if !defined(NDEBUG) || defined(_DEBUG)
-static bool MutexHeld(mutex *m) { return m->Refs && pthread_equal(m->Owner, pthread_self()); }
-static bool MutexNotHeld(mutex *m) { return !m->Refs || !pthread_equal(m->Owner, pthread_self()); }
+static bool unixMutexHeld(mutex *m) { return m->refs && pthread_equal(m->owner, pthread_self()); }
+static bool unixMutexNotHeld(mutex *m) { return !m->refs || !pthread_equal(m->owner, pthread_self()); }
 #endif
 
 /*
@@ -86,8 +83,8 @@ void mutexMemoryBarrier()
 /*
 ** Initialize and deinitialize the mutex subsystem.
 */
-static int MutexInitialize() { return 0; }
-static int MutexShutdown() { return 0; }
+static RC unixMutexInitialize() { return RC_OK; }
+static RC unixMutexShutdown() { return RC_OK; }
 
 /*
 ** The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL
@@ -126,7 +123,7 @@ static int MutexShutdown() { return 0; }
 ** returns a different mutex on every call.  But for the static mutex types, the same mutex is returned on every call that has
 ** the same type number.
 */
-static mutex *MutexAlloc(MUTEX id)
+static mutex *unixMutexAlloc(MUTEX id)
 {
 	mutex *m;
 	switch (id) {
@@ -135,7 +132,7 @@ static mutex *MutexAlloc(MUTEX id)
 		if (m) {
 #ifdef HOMEGROWN_RECURSIVE_MUTEX
 			// If recursive mutexes are not available, we will have to build our own.  See below.
-			pthread_mutex_init(&m->Mutex, 0);
+			pthread_mutex_init(&m->mutex, 0);
 #else
 			// Use a recursive mutex if it is available
 			pthread_mutexattr_t recursiveAttr;
@@ -149,43 +146,38 @@ static mutex *MutexAlloc(MUTEX id)
 	case MUTEX_FAST: {
 		m = (mutex *)allocZero(sizeof(*m));
 		if (m)
-			pthread_mutex_init(&m->Mutex, 0);
+			pthread_mutex_init(&m->mutex, 0);
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= lengthof(MutexStatics)) {
-			(void)MISUSE_BKPT;
+		if (id-2 < 0 || id-2 >= _LENGTHOF(unixMutexStatics)) {
+			(void)RC_MISUSE_BKPT;
 			return 0;
 		}
 #endif
-		m = &MutexStatics[id-2];
+		m = &unixMutexStatics[id-2];
 		break; }
 	}
 #if MUTEX_NREF || defined(ENABLE_API_ARMOR)
-	if (m) m->Id = id;
+	if (m) m->id = id;
 #endif
 	return m;
 }
 
-/*
-** This routine deallocates a previously allocated mutex.  Libcu is careful to deallocate every mutex that it allocates.
-*/
-static void MutexFree(mutex *m)
+/* This routine deallocates a previously allocated mutex.  Libcu is careful to deallocate every mutex that it allocates. */
+static void unixMutexFree(mutex *m)
 {
-	assert(!m->Refs);
+	assert(!m->refs);
 #if ENABLE_API_ARMOR
-	if (m->Id == MUTEX_FAST || m->Id == MUTEX_RECURSIVE)
+	if (m->id == MUTEX_FAST || m->id == MUTEX_RECURSIVE)
 #endif
 	{
-		pthread_mutex_destroy(&m->Mutex);
-		free(p);
+		pthread_mutex_destroy(&m->mutex);
+		mfree(p);
 	}
 #ifdef ENABLE_API_ARMOR
-	else {
-		(void)MISUSE_BKPT;
-	}
+	else (void)RC_MISUSE_BKPT;
 #endif
-
 }
 
 /*
@@ -195,9 +187,9 @@ static void MutexFree(mutex *m)
 ** mutex must be exited an equal number of times before another thread can enter.  If the same thread tries to enter any other kind of mutex
 ** more than once, the behavior is undefined.
 */
-static void MutexEnter(mutex *m)
+static void unixMutexEnter(mutex *m)
 {
-	assert(m->Id == MUTEX_RECURSIVE || MutexNotheld(m));
+	assert(m->id == MUTEX_RECURSIVE || unixMutexNotheld(m));
 #ifdef HOMEGROWN_RECURSIVE_MUTEX
 	// If recursive mutexes are not available, then we have to grow our own.  This implementation assumes that pthread_equal()
 	// is atomic - that it cannot be deceived into thinking self and m->Owner are equal if m->Owner changes between two values
@@ -206,33 +198,33 @@ static void MutexEnter(mutex *m)
 	// are not met, then the mutexes will fail and problems will result.
 	{
 		pthread_t self = pthread_self();
-		if (p->Refs && pthread_equal(p->Owner, self))
-			p->Refs++;
+		if (p->Refs && pthread_equal(p->owner, self))
+			p->refs++;
 		else {
-			pthread_mutex_lock(&m->Mutex);
-			assert(!m->Refs);
-			m->Owner = self;
-			m->Refs = 1;
+			pthread_mutex_lock(&m->mutex);
+			assert(!m->refs);
+			m->owner = self;
+			m->refs = 1;
 		}
 	}
 #else
 	// Use the built-in recursive mutexes if they are available.
-	pthread_mutex_lock(&m->Mutex);
+	pthread_mutex_lock(&m->mutex);
 #if MUTEX_NREF
-	assert(m->Refs || !m->Owner);
-	m->Owner = pthread_self();
-	m->Refs++;
+	assert(m->refs || !m->owner);
+	m->owner = pthread_self();
+	m->refs++;
 #endif
 #endif
 #ifdef _DEBUG
-	if (m->Trace)
-		printf("enter mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
+	if (m->trace)
+		printf("enter mutex %p (%d) with refs=%d\n", m, m->trace, m->refs);
 #endif
 }
 
-static bool MutexTryEnter(mutex *m)
+static bool unixMutexTryEnter(mutex *m)
 {
-	assert(m->Id == MUTEX_RECURSIVE || MutexNotheld(m));
+	assert(m->id == MUTEX_RECURSIVE || unixMutexNotheld(m));
 	bool rc;
 #ifdef HOMEGROWN_RECURSIVE_MUTEX
 	// If recursive mutexes are not available, then we have to grow our own.  This implementation assumes that pthread_equal()
@@ -242,24 +234,24 @@ static bool MutexTryEnter(mutex *m)
 	// are not met, then the mutexes will fail and problems will result.
 	{
 		pthread_t self = pthread_self();
-		if (m->Refs && pthread_equal(m->Owner, self)) {
-			m->Refs++;
+		if (m->refs && pthread_equal(m->owner, self)) {
+			m->refs++;
 			rc = false;
 		}
-		else if (!pthread_mutex_trylock(&m->Mutex)) {
-			assert(!m->Refs);
-			m->Owner = self;
-			m->Refs = 1;
+		else if (!pthread_mutex_trylock(&m->mutex)) {
+			assert(!m->refs);
+			m->owner = self;
+			m->refs = 1;
 			rc = false;
 		}
 		else rc = true;
 	}
 #else
 	// Use the built-in recursive mutexes if they are available.
-	if (!pthread_mutex_trylock(&m->Mutex)) {
+	if (!pthread_mutex_trylock(&m->mutex)) {
 #if MUTEX_NREF
-		m->Owner = pthread_self();
-		m->Refs++;
+		m->owner = pthread_self();
+		m->refs++;
 #endif
 		rc = false;
 	}
@@ -267,8 +259,8 @@ static bool MutexTryEnter(mutex *m)
 #endif
 
 #ifdef _DEBUG
-	if (!rc && m->Trace)
-		printf("enter mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
+	if (!rc && m->trace)
+		printf("enter mutex %p (%d) with refs=%d\n", m, m->trace, m->refs);
 #endif
 	return rc;
 }
@@ -277,44 +269,44 @@ static bool MutexTryEnter(mutex *m)
 ** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
 ** is undefined if the mutex is not currently entered or is not currently allocated.  Libcu will never do either.
 */
-static void MutexLeave(mutex *m)
+static void unixMutexLeave(mutex *m)
 {
-	assert(MutexHeld(p));
+	assert(unixMutexHeld(p));
 #if MUTEX_NREF
-	m->Refs--;
-	if (!m->Refs) m->Owner = 0;
+	m->refs--;
+	if (!m->refs) m->owner = 0;
 #endif
-	assert(!m->Refs || m->Id == MUTEX_RECURSIVE);
+	assert(!m->refs || m->id == MUTEX_RECURSIVE);
 #ifdef HOMEGROWN_RECURSIVE_MUTEX
 	if (!m->Refs)
 		pthread_mutex_unlock(&m->Mutex);
 #else
-	pthread_mutex_unlock(&m->Mutex);
+	pthread_mutex_unlock(&m->mutex);
 #endif
 #ifdef _DEBUG
-	if (m->Trace)
-		printf("leave mutex %p (%d) with Refs=%d\n", m, m->Trace, m->Refs);
+	if (m->trace)
+		printf("leave mutex %p (%d) with refs=%d\n", m, m->trace, m->refs);
 #endif
 }
 
-static const mutex_methods DefaultMethods = {
-	MutexInit,
-	MutexEnd,
-	MutexAlloc,
-	MutexFree,
-	MutexEnter,
-	MutexTry,
-	MutexLeave,
+static const mutex_methods _unixDefaultMethods = {
+	unixMutexInit,
+	unixMutexEnd,
+	unixMutexAlloc,
+	unixMutexFree,
+	unixMutexEnter,
+	unixMutexTry,
+	unixMutexLeave,
 #ifdef _DEBUG
-	MutexHeld,
-	MutexNotheld
+	unixMutexHeld,
+	unixMutexNotheld
 #else
 	nullptr,
 	nullptr
 #endif
 };
 
-__host_device__ mutex_methods const *__mutexsystemDefault() { return &DefaultMethods; }
+__host_device__ mutex_methods const *__mutexsystemDefault() { return &_unixDefaultMethods; }
 
 #endif
 #pragma endregion
