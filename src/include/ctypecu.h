@@ -87,12 +87,40 @@ extern __forceinline__ __device__ int isblank_(int c) { return c == '\t' || c ==
 extern __forceinline__ __device__ int isidchar_(int c) { return (__curtCtypeMap[(unsigned char)c]&0x46)!=0; }
 #define isidchar isidchar_
 
+/*EXT*/
+extern __forceinline__ __device__ int isquote(int c) { return (__curtCtypeMap[(unsigned char)c]&0x80)!=0; }
+#define isquote isquote_
+
 __END_DECLS;
 #else
 #define __curtUpperToLower ((unsigned char *)nullptr)
 #define isctype(c, type) 0
 #define isidchar(c) 0
 #define isblank(c) ((c) == '\t' || (c) == ' ')
+
+///* The following macros mimic the standard library functions toupper(), isspace(), isalnum(), isdigit() and isxdigit(), respectively. The
+//** libcu versions only work for ASCII characters, regardless of locale.
+//*/
+//#ifdef LIBCU_ASCII
+//# define toupper(x)   ((x)&~(__curtCtypeMap[(unsigned char)(x)]&0x20))
+//# define isspace(x)   (__curtCtypeMap[(unsigned char)(x)]&0x01)
+//# define isalnum(x)   (__curtCtypeMap[(unsigned char)(x)]&0x06)
+//# define isalpha(x)   (__curtCtypeMap[(unsigned char)(x)]&0x02)
+//# define isdigit(x)   (__curtCtypeMap[(unsigned char)(x)]&0x04)
+//# define isxdigit(x)  (__curtCtypeMap[(unsigned char)(x)]&0x08)
+//# define tolower(x)   (__curtUpperToLower[(unsigned char)(x)])
+//# define isquote(x)   (__curtCtypeMap[(unsigned char)(x)]&0x80)
+//#else
+//# define toupper(x)   toupper((unsigned char)(x))
+//# define isspace(x)   isspace((unsigned char)(x))
+//# define isalnum(x)   isalnum((unsigned char)(x))
+//# define isalpha(x)   isalpha((unsigned char)(x))
+//# define isdigit(x)   isdigit((unsigned char)(x))
+//# define isxdigit(x)  isxdigit((unsigned char)(x))
+//# define tolower(x)   tolower((unsigned char)(x))
+//# define isquote(x)   ((x)=='"'||(x)=='\''||(x)=='['||(x)=='`')
+//#endif
+
 #endif  /* __CUDA_ARCH__ */
 
 #endif  /* _CTYPECU_H */

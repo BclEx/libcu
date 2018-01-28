@@ -56,6 +56,37 @@ THE SOFTWARE.
 # endif
 #endif
 
+/*
+** Macros to determine whether the machine is big or little endian, and whether or not that determination is run-time or compile-time.
+**
+** For best performance, an attempt is made to guess at the byte-order using C-preprocessor macros.  If that is unsuccessful, or if
+** -DLIBCU_BYTEORDER=0 is set, then byte-order is determined at run-time.
+*/
+#ifndef LIBCU_BYTEORDER
+#if defined(i386) || defined(__i386__) || defined(_M_IX86) || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) || \
+	defined(_M_AMD64) || defined(_M_ARM) || defined(__x86) || defined(__arm__)
+#define LIBCU_BYTEORDER 1234
+#elif defined(sparc) || defined(__ppc__)
+#define LIBCU_BYTEORDER 4321
+#else
+#define LIBCU_BYTEORDER 0
+#endif
+#endif
+#if LIBCU_BYTEORDER == 4321
+#define LIBCU_BIGENDIAN 1
+#define LIBCU_LITTLEENDIAN 0
+#define LIBCU_UTF16NATIVE TEXTENCODE_UTF16BE
+#elif LIBCU_BYTEORDER == 1234
+#define LIBCU_BIGENDIAN 0
+#define LIBCU_LITTLEENDIAN 1
+#define LIBCU_UTF16NATIVE TEXTENCODE_UTF16LE
+#else
+extern __host_constant__ const int __libcuone;
+#define LIBCU_BIGENDIAN (*(char *)(&__libcuone)==0)
+#define LIBCU_LITTLEENDIAN (*(char *)(&__libcuone)==1)
+#define LIBCU_UTF16NATIVE (SQLITE_BIGENDIAN?TEXTENCODE_UTF16BE:TEXTENCODE_UTF16LE)
+#endif
+
 #if __OS_WIN
 #include <crtdefs.h>
 //#include <corecrt_io.h>
@@ -327,20 +358,54 @@ extern "C" __device__ void libcuReset();
 #undef NDEBUG
 #endif
 
-#ifndef NDEBUG
-#define ASSERTONLY(X) X
+/* The testcase() macro is used to aid in coverage testing.  When doing coverage testing, the condition inside the argument to
+** testcase() must be evaluated both true and false in order to get full branch coverage.  The testcase() macro is inserted
+** to help ensure adequate test coverage in places where simple condition/decision coverage is inadequate.  For example, testcase()
+** can be used to make sure boundary values are tested.  For bitmask tests, testcase() can be used to make sure each bit
+** is significant and used at least once.  On switch statements where multiple cases go to the same block of code, testcase()
+** can insure that all cases are evaluated.
+**
+*/
+#ifdef _COVERAGE_TEST
 #if defined(__CUDA_ARCH__)
-__forceinline__ __device__ void Coverage(int line) { }
+__device__ void __coverage(int line);
 #else
-__forceinline__ void Coverage(int line) { }
+void __coverage(int line);
 #endif
-#define ASSERTCOVERAGE(X) if (X) { Coverage(__LINE__); }
+# define ASSERTCOVERAGE(X)  if (X) { __coverage(__LINE__); }
 #else
-#define ASSERTONLY(X)
-#define ASSERTCOVERAGE(X)
+# define ASSERTCOVERAGE(X)
 #endif
-#define _ALWAYS(X) (X)
-#define _NEVER(X) (X)
+
+/* The TESTONLY macro is used to enclose variable declarations or other bits of code that are needed to support the arguments
+** within testcase() and assert() macros.
+*/
+#if !defined(NDEBUG) || defined(_COVERAGE_TEST)
+# define ASSERTONLY(X)  X
+#else
+# define ASSERTONLY(X)
+#endif
+
+/* The ALWAYS and NEVER macros surround boolean expressions which are intended to always be true or false, respectively.  Such
+** expressions could be omitted from the code completely.  But they are included in a few cases in order to enhance the resilience
+** of SQLite to unexpected behavior - to make the code "self-healing" or "ductile" rather than being "brittle" and crashing at the first
+** hint of unplanned behavior.
+**
+** In other words, ALWAYS and NEVER are added for defensive code.
+**
+** When doing coverage testing ALWAYS and NEVER are hard-coded to be true and false so that the unreachable code they specify will
+** not be counted as untested code.
+*/
+#if defined(_COVERAGE_TEST) || defined(_MUTATION_TEST)
+# define _ALWAYS(X)      (1)
+# define _NEVER(X)       (0)
+#elif !defined(NDEBUG)
+# define _ALWAYS(X)      ((X)?1:(assert(0),0))
+# define _NEVER(X)       ((X)?(assert(0),1):0)
+#else
+# define _ALWAYS(X)      (X)
+# define _NEVER(X)       (X)
+#endif
 
 #pragma endregion
 

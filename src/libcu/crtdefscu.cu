@@ -51,6 +51,14 @@ __device__ void __hostptrFree(hostptr_t *p)
 
 #pragma endregion
 
+__host_constant__ const int __libcuone = 1;
+
+/* Routine needed to support the testcase() macro. */
+#ifdef _COVERAGE_TEST
+static __host_device__ unsigned dummy = 0;
+__host_device__ void __coverage(int x) { dummy += (unsigned)x; }
+#endif
+
 __device__ void fsystemReset();
 __device__ void libcuReset()
 {

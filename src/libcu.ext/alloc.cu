@@ -271,8 +271,8 @@ __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
 			// Trash all content in the buffer being freed
 			memset(p, 0xaa, tag->lookaside.size);
 #endif
-			b->next = tag->lookaside.free;
-			tag->lookaside.free = b;
+			b->next = tag->lookaside.free_;
+			tag->lookaside.free_ = b;
 			return;
 		}
 	}
@@ -404,8 +404,8 @@ __host_device__ void *tagallocRawNN(tagbase_t *tag, uint64_t size) //: sqlite3Db
 		assert(!tag->mallocFailed);
 		if (size > tag->lookaside.size)
 			tag->lookaside.stats[1]++;
-		else if (!(b = tag->lookaside.free)) {
-			tag->lookaside.free = b->next;
+		else if (!(b = tag->lookaside.free_)) {
+			tag->lookaside.free_ = b->next;
 			tag->lookaside.stats[0]++;
 			return (void *)b;
 		}

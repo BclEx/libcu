@@ -155,14 +155,18 @@ __host_device__ RC runtimeInitialize()
 #endif
 		//memset(&sqlite3BuiltinFunctions, 0, sizeof(sqlite3BuiltinFunctions));
 		//sqlite3RegisterBuiltinFunctions();
+#if defined(__CUDA_ARCH__)
 		if (!_runtimeConfig.isPcacheInit)
 			rc = pcacheInitialize();
+#endif
 		if (rc == RC_OK) {
 			_runtimeConfig.isPcacheInit = true;
 			rc = vsystemInitialize();
 		}
 		if (rc == RC_OK) {
+#if defined(__CUDA_ARCH__)
 			pcacheBufferSetup(_runtimeConfig.page, _runtimeConfig.pageSize, _runtimeConfig.pages);
+#endif
 			_runtimeConfig.isInit = true;
 #ifdef LIBCU_EXTRAINIT
 			runExtraInit = true;
@@ -227,10 +231,12 @@ __host_device__ RC runtimeShutdown() //: sqlite3_shutdown
 		//sqlite3_reset_auto_extension();
 		_runtimeConfig.isInit = false;
 	}
+#if defined(__CUDA_ARCH__)
 	if (_runtimeConfig.isPcacheInit) {
 		pcacheShutdown();
 		_runtimeConfig.isPcacheInit = false;
 	}
+#endif
 	if (_runtimeConfig.isMallocInit) {
 		allocShutdown();
 		_runtimeConfig.isMallocInit = false;
@@ -309,10 +315,10 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va) //: sqlite3_config
 	case CONFIG_MEMSTATUS: {
 		/* EVIDENCE-OF: R-61275-35157 The SQLITE_CONFIG_MEMSTATUS option takes single argument of type int, interpreted as a boolean, which enables
 		** or disables the collection of memory allocation statistics. */
-		_runtimeConfig.memstat = va_arg(va, int);
+		_runtimeConfig.memstat = va_arg(va, int) != 0;
 		break; }
 	case CONFIG_SMALL_MALLOC: {
-		_runtimeConfig.smallMalloc = va_arg(va, int);
+		_runtimeConfig.smallMalloc = va_arg(va, int) != 0;
 		break; }
 	case CONFIG_PAGECACHE: {
 		/* EVIDENCE-OF: R-18761-36601 There are three arguments to SQLITE_CONFIG_PAGECACHE: A pointer to 8-byte aligned memory (pMem),
@@ -333,21 +339,24 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va) //: sqlite3_config
 		/* now an error */
 		rc = RC_ERROR;
 		break; }
-						   //case CONFIG_PCACHE2: {
-						   //	/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-						   //	** object. This object specifies the interface to a custom page cache implementation. */
-						   //	_runtimeConfig.pcache2System = *va_arg(va, pcache_methods2 *);
-						   //	break; }
-						   //case CONFIG_GETPCACHE2: {
-						   //	/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-						   //	** object. Libcu copies of the current page cache implementation into that object. */
-						   //	if (!_runtimeConfig.pcache2System.initialize)
-						   //		sqlite3PCacheSetDefault();
-						   //	*va_arg(va, pcache_methods2 *) = _runtimeConfig.pcache2System;
-						   //	break; }
-						   /* EVIDENCE-OF: R-06626-12911 The SQLITE_CONFIG_HEAP option is only available if Libcu is compiled with either SQLITE_ENABLE_MEMSYS3 or
-						   ** SQLITE_ENABLE_MEMSYS5 and returns SQLITE_ERROR if invoked otherwise. */
+	case CONFIG_PCACHE2: {
+		/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+		** object. This object specifies the interface to a custom page cache implementation. */
+#if defined(__CUDA_ARCH__)
+		_runtimeConfig.pcache2System = *va_arg(va, pcache_methods *);
+#endif
+		break; }
+	case CONFIG_GETPCACHE2: {
+		/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+		** object. Libcu copies of the current page cache implementation into that object. */
+#if defined(__CUDA_ARCH__)
+		if (!_runtimeConfig.pcache2System.init) __pcachesystemSetDefault();
+		*va_arg(va, pcache_methods *) = _runtimeConfig.pcache2System;
+#endif
+		break; }
 #if defined(LIBCU_ENABLE_MEMSYS3) || defined(LIBCU_ENABLE_MEMSYS5)
+							/* EVIDENCE-OF: R-06626-12911 The CONFIG_HEAP option is only available if Libcu is compiled with either LIBCU_ENABLE_MEMSYS3 or
+							** LIBCU_ENABLE_MEMSYS5 and returns RC_ERROR if invoked otherwise. */
 	case CONFIG_HEAP: {
 		/* EVIDENCE-OF: R-19854-42126 There are three arguments to SQLITE_CONFIG_HEAP: An 8-byte aligned pointer to the memory, the
 		** number of bytes in the memory buffer, and the minimum allocation size.
@@ -398,12 +407,12 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va) //: sqlite3_config
 	case CONFIG_URI: {
 		/* EVIDENCE-OF: R-25451-61125 The SQLITE_CONFIG_URI option takes a single argument of type int. If non-zero, then URI handling is globally
 		** enabled. If the parameter is zero, then URI handling is globally disabled. */
-		_runtimeConfig.openUri = va_arg(va, int);
+		_runtimeConfig.openUri = va_arg(va, int) != 0;
 		break; }
 	case CONFIG_COVERING_INDEX_SCAN: {
 		/* EVIDENCE-OF: R-36592-02772 The SQLITE_CONFIG_COVERING_INDEX_SCAN option takes a single integer argument which is interpreted as a
 		** boolean in order to enable or disable the use of covering indices for full table scans in the query optimizer. */
-		_runtimeConfig.useCis = va_arg(va, int);
+		_runtimeConfig.useCis = va_arg(va, int) != 0;
 		break; }
 #ifdef LIBCU_ENABLE_SQLLOG
 	case CONFIG_SQLLOG: {
@@ -485,7 +494,7 @@ static __host_device__ RC setupLookaside(tagbase_t *tag, void *buf, int size, in
 	else start = buf;
 	tag->lookaside.start = start;
 	tag->lookaside.init = nullptr;
-	tag->lookaside.free = nullptr;
+	tag->lookaside.free_ = nullptr;
 	tag->lookaside.size = (uint16_t)size;
 	if (start) {
 		assert(size > (int)sizeof(LookasideSlot *));

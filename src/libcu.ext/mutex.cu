@@ -19,7 +19,7 @@ __host_device__ RC mutexInitialize() //: sqlite3MutexInit
 		mutex_methods *to = &__mutexsystem;
 		to->initialize = from->initialize;
 		to->shutdown = from->shutdown;
-		to->free = from->free;
+		to->free_ = from->free_;
 		to->enter = from->enter;
 		to->tryEnter = from->tryEnter;
 		to->leave = from->leave;
@@ -70,8 +70,8 @@ __host_device__ mutex *mutexAlloc(MUTEX id) //: sqlite3MutexAlloc
 __host_device__ void mutex_free(mutex *m) //: sqlite3_mutex_free
 {
 	if (m) {
-		assert(__mutexsystem.free);
-		__mutexsystem.free(m);
+		assert(__mutexsystem.free_);
+		__mutexsystem.free_(m);
 	}
 }
 

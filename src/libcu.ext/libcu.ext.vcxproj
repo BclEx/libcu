@@ -29,7 +29,7 @@
     <CudaCompile Include="random.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
-    <CudaCompile Include="sentinel-vsystem.cu">
+    <CudaCompile Include="sentinel-vsystem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
     <CudaCompile Include="status.cu" />

@@ -1,227 +1,248 @@
-﻿#if OS_MAP
+﻿#ifndef _SENTINEL_VSYSTEM_H
+#define _SENTINEL_VSYSTEM_H
+#include <sentinel.h>
+#include <ext\vsystem.h>
+#undef RC
 
-namespace CoreS
-{
-	struct VSystemSentinel
-	{
-	public:
-		static void Initialize();
-		static void Shutdown();
-	};
-}
+enum {
+	VSYSFILE_CLOSE = 500,
+	VSYSFILE_READ,
+	VSYSFILE_WRITE,
+	VSYSFILE_TRUNCATE,
+	VSYSFILE_SYNC,
+	VSYSFILE_FILESIZE,
+	VSYSFILE_LOCK,
+	VSYSFILE_UNLOCK,
+	VSYSFILE_CHECKRESERVEDLOCK,
+	VSYSFILE_FILECONTROL,
+	VSYSFILE_SECTORSIZE,
+	VSYSFILE_DEVICECHARACTERISTICS,
+	VSYSFILE_SHMMAP,
+	VSYSFILE_SHMLOCK,
+	VSYSFILE_SHMBARRIER,
+	VSYSFILE_SHMUNMAP,
+	VSYSFILE_FETCH,
+	VSYSFILE_UNFETCH,
+	VSYSTEM_OPEN,
+	VSYSTEM_DELETE,
+	VSYSTEM_ACCESS,
+	VSYSTEM_FULLPATHNAME,
+	VSYSTEM_DLOPEN,
+	VSYSTEM_DLERROR,
+	VSYSTEM_DLSYM,
+	VSYSTEM_DLCLOSE,
+	VSYSTEM_RANDOMNESS,
+	VSYSTEM_SLEEP,
+	VSYSTEM_CURRENTTIME,
+	VSYSTEM_GETLASTERROR,
+	VSYSTEM_CURRENTTIMEINT64,
+	VSYSTEM_SETSYSTEMCALL,
+	VSYSTEM_GETSYSTEMCALL,
+	VSYSTEM_NEXTSYSTEMCALL,
+};
 
-namespace LIBCU_NAME { namespace Messages
-{
-#pragma region File
+struct vsysfile_close {
+	sentinelMessage Base;
+	vsysfile *F;
+	__device__ vsysfile_close(vsysfile *f)
+		: Base(true, VSYSFILE_CLOSE), F(f) { sentinelDeviceSend(&Base, sizeof(vsysfile_close)); }
+};
 
-	struct File_Close
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F;
-		__device__ File_Close(VFile *f)
-			: Base(false, 10, 0, nullptr), F(f) { RuntimeSentinel::Send(this, sizeof(File_Close)); }
-		RC RC;
-	};
+struct vsysfile_read {
+	static __forceinline__ __device__ char *Prepare(vsysfile_read *t, char *data, char *dataEnd, intptr_t offset) {
+		char *buf = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += 1024);
+		if (end > dataEnd) return nullptr;
+		t->Buf = buf + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	vsysfile *F; int Amount; int64_t Offset;
+	__device__ vsysfile_read(vsysfile *f, int amount, int64_t offset)
+		: Base(true, VSYSFILE_READ, 1024, SENTINELPREPARE(Prepare)), F(f), Amount(amount), Offset(offset) { sentinelDeviceSend(&Base, sizeof(vsysfile_read)); }
+	int RC;
+	char *Buf;
+};
 
-	struct File_Read
-	{
-		__device__ inline static char *Prepare(File_Read *t, char *data, char *dataEnd)
-		{
-			t->Buffer  = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += 1024);
-			if (end > dataEnd) return nullptr;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		VFile *F; int Amount; int64 Offset;
-		__device__ File_Read(VFile *f, int amount, int64 offset)
-			: Base(false, 11, 1024, RUNTIMESENTINELPREPARE(Prepare)), F(f), Amount(amount), Offset(offset) { RuntimeSentinel::Send(this, sizeof(File_Read)); }
-		RC RC;
-		char *Buffer;
-	};
+struct vsysfile_write {
+	static __forceinline__ __device__ char *Prepare(vsysfile_write *t, char *data, char *dataEnd, intptr_t offset) {
+		char *buf = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += 1024);
+		if (end > dataEnd) return nullptr;
+		memcpy(buf, t->Buf, t->Amount);
+		t->Buf = buf + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	vsysfile *F; const void *Buf; int Amount; int64_t Offset;
+	__device__ vsysfile_write(vsysfile *f, const void *buf, int amount, int64_t offset)
+		: Base(true, VSYSFILE_WRITE, 1024, SENTINELPREPARE(Prepare)), F(f), Buf(buf), Amount(amount), Offset(offset) { sentinelDeviceSend(&Base, sizeof(vsysfile_write)); }
+	int RC;
+};
 
-	struct File_Write
-	{
-		__device__ inline static char *Prepare(File_Write *t, char *data, char *dataEnd)
-		{
-			char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += 1024);
-			if (end > dataEnd) return nullptr;
-			memcpy(buffer, t->Buffer, t->Amount);
-			t->Buffer = buffer;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		VFile *F; const void *Buffer; int Amount; int64 Offset;
-		__device__ File_Write(VFile *f, const void *buffer, int amount, int64 offset)
-			: Base(false, 12, 1024, RUNTIMESENTINELPREPARE(Prepare)), F(f), Buffer(buffer), Amount(amount), Offset(offset) { RuntimeSentinel::Send(this, sizeof(File_Write)); }
-		RC RC;
-	};
+struct vsysfile_truncate {
+	sentinelMessage Base;
+	vsysfile *F; int64_t Size;
+	__device__ vsysfile_truncate(vsysfile *f, int64_t size)
+		: Base(true, VSYSFILE_TRUNCATE), F(f), Size(size) { sentinelDeviceSend(&Base, sizeof(vsysfile_truncate)); }
+	int RC;
+};
 
-	struct File_Truncate
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F; int64 Size;
-		__device__ File_Truncate(VFile *f, int64 size)
-			: Base(false, 13, 0, nullptr), F(f), Size(size) { RuntimeSentinel::Send(this, sizeof(File_Truncate)); }
-		RC RC;
-	};
+struct vsysfile_sync {
+	sentinelMessage Base;
+	vsysfile *F; int Flags;
+	__device__ vsysfile_sync(vsysfile *f, int flags)
+		: Base(true, VSYSFILE_SYNC), F(f), Flags(flags) { sentinelDeviceSend(&Base, sizeof(vsysfile_sync)); }
+	int RC;
+};
 
-	struct File_Sync
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F; VFile::SYNC Flags;
-		__device__ File_Sync(VFile *f, VFile::SYNC flags)
-			: Base(false, 14, 0, nullptr), F(f), Flags(flags) { RuntimeSentinel::Send(this, sizeof(File_Sync)); }
-		RC RC;
-	};
+struct vsysfile_fileSize {
+	sentinelMessage Base;
+	vsysfile *F;
+	__device__ vsysfile_fileSize(vsysfile *f)
+		: Base(true, VSYSFILE_FILESIZE), F(f) { sentinelDeviceSend(&Base, sizeof(vsysfile_fileSize)); }
+	int64_t Size;
+	int RC;
+};
 
-	struct File_get_FileSize
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F;
-		__device__ File_get_FileSize(VFile *f)
-			: Base(false, 15, 0, nullptr), F(f) { RuntimeSentinel::Send(this, sizeof(File_get_FileSize)); }
-		int64 Size;
-		RC RC;
-	};
+struct vsysfile_lock {
+	sentinelMessage Base;
+	vsysfile *F; int Lock;
+	__device__ vsysfile_lock(vsysfile *f, int lock)
+		: Base(true, VSYSFILE_LOCK), F(f), Lock(lock) { sentinelDeviceSend(&Base, sizeof(vsysfile_lock)); }
+	int RC;
+};
 
-	struct File_Lock
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F; VFile::LOCK Lock;
-		__device__ File_Lock(VFile *f, VFile::LOCK lock)
-			: Base(false, 16, 0, nullptr), F(f), Lock(lock) { RuntimeSentinel::Send(this, sizeof(File_Lock)); }
-		RC RC;
-	};
+struct vsysfile_unlock {
+	sentinelMessage Base;
+	vsysfile *F; int Lock;
+	__device__ vsysfile_unlock(vsysfile *f, int lock)
+		: Base(true, VSYSFILE_UNLOCK), F(f), Lock(lock) { sentinelDeviceSend(&Base, sizeof(vsysfile_unlock)); }
+	int RC;
+};
 
-	struct File_CheckReservedLock
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F;
-		__device__ File_CheckReservedLock(VFile *f)
-			: Base(false, 17, 0, nullptr), F(f) { RuntimeSentinel::Send(this, sizeof(File_CheckReservedLock)); }
-		int Lock;
-		RC RC;
-	};
+struct vsysfile_checkReservedLock {
+	sentinelMessage Base;
+	vsysfile *F;
+	__device__ vsysfile_checkReservedLock(vsysfile *f)
+		: Base(true, VSYSFILE_CHECKRESERVEDLOCK), F(f) { sentinelDeviceSend(&Base, sizeof(vsysfile_checkReservedLock)); }
+	int Lock;
+	int RC;
+};
 
-	struct File_Unlock
-	{
-		RuntimeSentinelMessage Base;
-		VFile *F; VFile::LOCK Lock;
-		__device__ File_Unlock(VFile *f, VFile::LOCK lock)
-			: Base(false, 18, 0, nullptr), F(f), Lock(lock) { RuntimeSentinel::Send(this, sizeof(File_Unlock)); }
-		RC RC;
-	};
+// fileControl
+// sectorSize
+// deviceCharacteristics
+// shmMap
+// shmLock
+// shmBarrier
+// shmUnmap
+// fetch
+// unfetch
 
-#pragma endregion
+struct vsystem_open {
+	static __forceinline__ __device__ char *Prepare(vsystem_open *t, char *data, char *dataEnd, intptr_t offset) {
+		// filenames are double-zero terminated if they are not URIs with parameters.
+		int nameLength;
+		if (t->Name) { nameLength = strlen(t->Name) + 1; nameLength += strlen((const char *)t->Name[nameLength]) + 1; }
+		else nameLength = 0;
+		char *name = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += nameLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(name, t->Name, nameLength);
+		t->Name = name + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Name; int Flags;
+	__device__ vsystem_open(const char *name, int flags)
+		: Base(true, VSYSTEM_OPEN, 1024, SENTINELPREPARE(Prepare)), Name(name), Flags(flags) { sentinelDeviceSend(&Base, sizeof(vsystem_open)); }
+	vsysfile *F;
+	int OutFlags;
+	int RC;
+};
 
-#pragma region System
+struct vsystem_delete {
+	static __forceinline__ __device__ char *Prepare(vsystem_delete *t, char *data, char *dataEnd, intptr_t offset) {
+		int filenameLength = t->Filename ? strlen(t->Filename) + 1 : 0;
+		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += filenameLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(filename, t->Filename, filenameLength);
+		t->Filename = filename + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Filename; bool SyncDir;
+	__device__ vsystem_delete(const char *filename, bool syncDir)
+		: Base(true, VSYSTEM_DELETE, 1024, SENTINELPREPARE(Prepare)), Filename(filename), SyncDir(syncDir) { sentinelDeviceSend(&Base, sizeof(vsystem_delete)); }
+	int RC;
+};
 
-	struct System_Open
-	{
-		__device__ inline static char *Prepare(System_Open *t, char *data, char *dataEnd)
-		{
-			// filenames are double-zero terminated if they are not URIs with parameters.
-			int nameLength;
-			if (t->Name) { nameLength = _strlen(t->Name) + 1; nameLength += _strlen((const char *)t->Name[nameLength]) + 1; }
-			else nameLength = 0;
-			char *name = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += nameLength);
-			if (end > dataEnd) return nullptr;
-			memcpy(name, t->Name, nameLength);
-			t->Name = name;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		const char *Name; VSystem::OPEN Flags;
-		__device__ System_Open(const char *name, VSystem::OPEN flags)
-			: Base(false, 21, 1024, RUNTIMESENTINELPREPARE(Prepare)), Name(name), Flags(flags) { RuntimeSentinel::Send(this, sizeof(System_Open)); }
-		VFile *F;
-		VSystem::OPEN OutFlags;
-		RC RC;
-	};
+struct vsystem_access {
+	static __forceinline__ __device__ char *Prepare(vsystem_access *t, char *data, char *dataEnd, intptr_t offset) {
+		int filenameLength = t->Filename ? strlen(t->Filename) + 1 : 0;
+		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += filenameLength);
+		if (end > dataEnd) return nullptr;
+		memcpy(filename, t->Filename, filenameLength);
+		t->Filename = filename + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Filename; int Flags;
+	__device__ vsystem_access(const char *filename, int flags)
+		: Base(true, VSYSTEM_ACCESS, 1024, SENTINELPREPARE(Prepare)), Filename(filename), Flags(flags) { sentinelDeviceSend(&Base, sizeof(vsystem_access)); }
+	int ResOut;
+	int RC;
+};
 
-	struct System_Delete
-	{
-		__device__ inline static char *Prepare(System_Delete *t, char *data, char *dataEnd)
-		{
-			int filenameLength = (t->Filename ? _strlen(t->Filename) + 1 : 0);
-			char *filename = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += filenameLength);
-			if (end > dataEnd) return nullptr;
-			memcpy(filename, t->Filename, filenameLength);
-			t->Filename = filename;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		const char *Filename; bool SyncDir;
-		__device__ System_Delete(const char *filename, bool syncDir)
-			: Base(false, 22, 1024, RUNTIMESENTINELPREPARE(Prepare)), Filename(filename), SyncDir(syncDir) { RuntimeSentinel::Send(this, sizeof(System_Delete)); }
-		RC RC;
-	};
+struct vsystem_fullPathname {
+	static __forceinline__ __device__ char *Prepare(vsystem_fullPathname *t, char *data, char *dataEnd, intptr_t offset) {
+		int relativeLength = t->Relative ? strlen(t->Relative) + 1 : 0;
+		char *relative = (char *)(data += _ROUND8(sizeof(*t)));
+		char *full = (char *)(data += relativeLength);
+		char *end = (char *)(data += 1024);
+		if (end > dataEnd) return nullptr;
+		memcpy(relative, t->Relative, relativeLength);
+		t->Relative = relative + offset;
+		t->Full = full + offset;
+		return end;
+	}
+	sentinelMessage Base;
+	const char *Relative; int FullLength;
+	__device__ vsystem_fullPathname(const char *relative, int fullLength)
+		: Base(true, VSYSTEM_FULLPATHNAME, 2024, SENTINELPREPARE(Prepare)), Relative(relative), FullLength(fullLength) { sentinelDeviceSend(&Base, sizeof(vsystem_fullPathname)); }
+	char *Full;
+	int RC;
+};
 
-	struct System_Access
-	{
-		__device__ inline static char *Prepare(System_Access *t, char *data, char *dataEnd)
-		{
-			int filenameLength = (t->Filename ? _strlen(t->Filename) + 1 : 0);
-			char *filename = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += filenameLength);
-			if (end > dataEnd) return nullptr;
-			memcpy(filename, t->Filename, filenameLength);
-			t->Filename = filename;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		const char *Filename; VSystem::ACCESS Flags;
-		__device__ System_Access(const char *filename, VSystem::ACCESS flags)
-			: Base(false, 23, 1024, RUNTIMESENTINELPREPARE(Prepare)), Filename(filename), Flags(flags) { RuntimeSentinel::Send(this, sizeof(System_Access)); }
-		int ResOut;
-		RC RC;
-	};
+// dlOpen
+// dlError
+// dlSym
+// dlClose
+// randomness
+// sleep
+// currentTime
 
-	struct System_FullPathname
-	{
-		__device__ inline static char *Prepare(System_FullPathname *t, char *data, char *dataEnd)
-		{
-			int relativeLength = (t->Relative ? _strlen(t->Relative) + 1 : 0);
-			char *relative = (char *)(data += _ROUND8(sizeof(*t)));
-			char *full = (char *)(data += relativeLength);
-			char *end = (char *)(data += 1024);
-			if (end > dataEnd) return nullptr;
-			memcpy(relative, t->Relative, relativeLength);
-			t->Relative = relative;
-			t->Full = full;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		const char *Relative; int FullLength;
-		__device__ System_FullPathname(const char *relative, int fullLength)
-			: Base(false, 24, 2024, RUNTIMESENTINELPREPARE(Prepare)), Relative(relative), FullLength(fullLength) { RuntimeSentinel::Send(this, sizeof(System_FullPathname)); }
-		char *Full;
-		RC RC;
-	};
+struct vsystem_getLastError {
+	static __forceinline__ __device__ char *Prepare(vsystem_getLastError *t, char *data, char *dataEnd, intptr_t offset) {
+		t->Buf = (char *)(data += _ROUND8(sizeof(*t)));
+		char *end = (char *)(data += 1024);
+		if (end > dataEnd) return nullptr;
+		return end;
+	}
+	sentinelMessage Base;
+	int BufLength;
+	__device__ vsystem_getLastError(int bufLength)
+		: Base(true, VSYSTEM_GETLASTERROR, 2024, SENTINELPREPARE(Prepare)), BufLength(bufLength) { sentinelDeviceSend(&Base, sizeof(vsystem_getLastError)); }
+	char *Buf;
+	int RC;
+};
 
-	struct System_GetLastError
-	{
-		__device__ inline static char *Prepare(System_GetLastError *t, char *data, char *dataEnd)
-		{
-			t->Buf = (char *)(data += _ROUND8(sizeof(*t)));
-			char *end = (char *)(data += 1024);
-			if (end > dataEnd) return nullptr;
-			return end;
-		}
-		RuntimeSentinelMessage Base;
-		int BufLength;
-		__device__ System_GetLastError(int bufLength)
-			: Base(false, 25, 2024, RUNTIMESENTINELPREPARE(Prepare)), BufLength(bufLength) { RuntimeSentinel::Send(this, sizeof(System_GetLastError)); }
-		char *Buf;
-		RC RC;
-	};
+// currentTimeInt64
+// setSystemCall
+// getSystemCall
+// nextSystemCall
 
-#pragma endregion
-} }
-
-#endif
-;
+#endif  /* _SENTINEL_VSYSTEM_H */

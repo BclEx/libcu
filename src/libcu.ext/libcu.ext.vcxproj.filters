@@ -13,7 +13,6 @@
     <CudaCompile Include="mutex-gpu.cu" />
     <CudaCompile Include="mutex-noop.cu" />
     <CudaCompile Include="random.cu" />
-    <CudaCompile Include="sentinel-vsystem.cu" />
     <CudaCompile Include="status.cu" />
     <CudaCompile Include="utf.cu" />
     <CudaCompile Include="util.cu" />
@@ -22,6 +21,7 @@
     <CudaCompile Include="vsystem-map.cu" />
     <CudaCompile Include="math.cu" />
     <CudaCompile Include="pcache1.cu" />
+    <CudaCompile Include="sentinel-vsystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />

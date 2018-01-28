@@ -26,19 +26,31 @@ THE SOFTWARE.
 #pragma once
 #ifndef _EXT_UTF_H
 #define _EXT_UTF_H
+#include <crtdefscu.h>
 __BEGIN_DECLS;
 
-#define _strskiputf8(z) { if ((*(z++)) >= 0xc0) while ((*z & 0xc0) == 0x80) { z++; } }
-//template <typename T> __device__ inline void _strskiputf8(const T *z) { if (*(z++) >= 0xc0) while ((*z & 0xc0) == 0x80) { z++; } }
-extern "C" __device__ unsigned int _utf8read(const unsigned char **z);
-extern "C" __device__ int _utf8charlength(const char *z, int bytes);
-#if _DEBUG
-extern "C" __device__ int _utf8to8(unsigned char *z);
+#pragma region X
+
+// CAPI3REF: Text Encodings
+#define TEXTENCODE_UTF8           1    /* IMP: R-37514-35566 */
+#define TEXTENCODE_UTF16LE        2    /* IMP: R-03371-37637 */
+#define TEXTENCODE_UTF16BE        3    /* IMP: R-51971-34154 */
+#define TEXTENCODE_UTF16          4    /* Use native byte order */
+#define TEXTENCODE_ANY            5    /* Deprecated */
+#define TEXTENCODE_UTF16_ALIGNED  8    /* sqlite3_create_collation only */
+
+#pragma endregion
+
+#define _STRSKIPUTF8(z) { if ((*(z++)) >= 0xc0) while ((*z & 0xc0) == 0x80) z++; }
+extern __device__ unsigned int utf8read(const unsigned char **z);
+extern __device__ int utf8charlen(const char *z, int bytes);
+#if defined(_TEST) && defined(_DEBUG)
+extern __device__ int utf8to8(unsigned char *z);
 #endif
 #ifndef OMIT_UTF16
-extern "C" __device__ int _utf16bytelength(const void *z, int chars);
+extern __device__ int utf16bytelen(const void *z, int chars);
 #ifdef _TEST
-extern "C" __device__ void _runtime_utfselftest();
+extern __device__ void utfselftest();
 #endif
 #endif
 

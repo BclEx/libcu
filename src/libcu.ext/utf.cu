@@ -1,8 +1,9 @@
 #include <ext/utf.h> //: utf.c
+#include <assert.h>
 
 #pragma region UTF Macros
 
-static __device__ const unsigned char _utf8Trans1[] =
+static __constant__ const unsigned char __utf8Trans1[] =
 {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 	0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -79,7 +80,7 @@ static __device__ const unsigned char _utf8Trans1[] =
 #define READ_UTF8(z, term, c) \
 	c = *(z++); \
 	if (c >= 0xc0) { \
-	c = _utf8Trans1[c-0xc0]; \
+	c = __utf8Trans1[c-0xc0]; \
 	while (z != term && (*z & 0xc0) == 0x80) { \
 	c = (c<<6) + (0x3f & *(z++)); \
 	} \
@@ -88,13 +89,18 @@ static __device__ const unsigned char _utf8Trans1[] =
 
 #pragma endregion
 
-__device__ unsigned int _utf8read(const unsigned char **z)
+/* Translate a single UTF-8 character.  Return the unicode value.
+**
+** During translation, assume that the byte that zTerm points is a 0x00.
+**
+** Write a pointer to the next unread byte back into *pzNext.
+*/
+__device__ unsigned int utf8read(const unsigned char **z) //: sqlite3Utf8Read
 {
 	// Same as READ_UTF8() above but without the zTerm parameter. For this routine, we assume the UTF8 string is always zero-terminated.
 	unsigned int c = *((*z)++);
-	if (c >= 0xc0)
-	{
-		c = _utf8Trans1[c-0xc0];
+	if (c >= 0xc0) {
+		c = __utf8Trans1[c-0xc0];
 		while ((*(*z) & 0xc0) == 0x80)
 			c = (c<<6) + (0x3f & *((*z)++));
 		if (c < 0x80 || (c&0xFFFFF800) == 0xD800 || (c&0xFFFFFFFE) == 0xFFFE) c = 0xFFFD;
@@ -102,108 +108,125 @@ __device__ unsigned int _utf8read(const unsigned char **z)
 	return c;
 }
 
-__device__ int _utf8charlength(const char *z, int bytes)
+/* pZ is a UTF-8 encoded unicode string. If nByte is less than zero, return the number of unicode characters in pZ up to (but not including)
+** the first 0x00 byte. If nByte is not less than zero, return the number of unicode characters in the first nByte of pZ (or up to 
+** the first 0x00, whichever comes first).
+*/
+__device__ int utf8charlen(const char *z, int bytes) //: sqlite3Utf8CharLen
 {
-	const char *term = (bytes >= 0 ? &z[bytes] : (const char *)-1);
-	_assert(z <= term);
-	int r = 0;
-	while (*z != 0 && z < term)
-	{
-		_strskiputf8(z);
-		r++;
-	}
+	const char *term = bytes >= 0 ? &z[bytes] : (const char *)-1;
+	assert(z <= term);
+	int r = 0; while (*z != 0 && z < term) { _STRSKIPUTF8(z); r++; }
 	return r;
 }
 
-#if _DEBUG
-__device__ int _utf8to8(unsigned char *z)
+#if defined(_TEST) && defined(_DEBUG)
+/* Translate UTF-8 to UTF-8.
+**
+** This has the effect of making sure that the string is well-formed UTF-8.  Miscoded characters are removed.
+**
+** The translation is done in-place and aborted if the output overruns the input.
+*/
+__device__ int utf8to8(unsigned char *z) //: sqlite3Utf8To8
 {
-	unsigned char *z2 = z;
+	unsigned char *r = z;
 	unsigned char *start = z;
-	while (z[0] && z2 <= z)
-	{
-		unsigned int c = _utf8read((const unsigned char **)&z);
-		if (c != 0xfffd)
-			WRITE_UTF8(z2, c);
+	while (z[0] && r <= z) {
+		unsigned int c = utf8read((const unsigned char **)&z);
+		if (c != 0xfffd) WRITE_UTF8(r, c);
 	}
-	*z2 = 0;
-	return (int)(z2 - start);
+	*r = 0;
+	return (int)(r - start);
 }
 #endif
 
 #ifndef OMIT_UTF16
-__device__ int _utf16bytelength(const void *z, int chars)
+/*
+** Convert a UTF-16 string in the native encoding into a UTF-8 string.
+** Memory to hold the UTF-8 string is obtained from sqlite3_malloc and must
+** be freed by the calling function.
+**
+** NULL is returned if there is an allocation error.
+*/
+//__device__ char *utf16to8(sqlite3 *db, const void *z, int bytes, TEXTENCODE encode)
+//{
+//	Mem m;
+//	memset(&m, 0, sizeof(m));
+//	m.db = db;
+//	sqlite3VdbeMemSetStr(&m, z, bytes, encode, SQLITE_STATIC);
+//	sqlite3VdbeChangeEncoding(&m, TEXTENCODE_UTF8);
+//	if (db->mallocFailed) {
+//		sqlite3VdbeMemRelease(&m);
+//		m.z = 0;
+//	}
+//	assert((m.flags & MEM_Term) || db->mallocFailed);
+//	assert((m.flags & MEM_Str) || db->mallocFailed);
+//	assert(m.z || db->mallocFailed);
+//	return m.z;
+//}
+
+
+/* zIn is a UTF-16 encoded unicode string at least nChar characters long. Return the number of bytes in the first nChar unicode characters
+** in pZ.  nChar must be non-negative.
+*/
+__device__ int utf16bytelen(const void *z, int chars) //: sqlite3Utf16ByteLen
 {
 	int c;
-	unsigned char const *z2 = (unsigned char const *)z;
+	unsigned char const *r = (unsigned char const *)z;
 	int n = 0;
-	if (TYPE_BIGENDIAN)
-	{
-		while (n < chars)
-		{
-			READ_UTF16BE(z2, 1, c);
-			n++;
-		}
-	}
-	else
-	{
-		while (n < chars)
-		{
-			READ_UTF16LE(z2, 1, c);
-			n++;
-		}
-	}
-	return (int)(z2 - (unsigned char const *)z);
+	if (LIBCU_UTF16NATIVE == TEXTENCODE_UTF16BE) while (n < chars) { READ_UTF16BE(r, 1, c); n++; }
+	else while (n < chars) { READ_UTF16LE(r, 1, c); n++; }
+	return (int)(r - (unsigned char const *)z);
 }
 
 #ifdef _TEST
-__device__ void _runtime_utfselftest()
+/* This routine is called from the TCL test function "translate_selftest". It checks that the primitives for serializing and deserializing
+** characters in each encoding are inverses of each other.
+*/
+__device__ void utfselftest() //: sqlite3UtfSelfTest
 {
 	unsigned int i, t;
 	unsigned char buf[20];
 	unsigned char *z;
 	int n;
 	unsigned int c;
-	for (i = 0; i < 0x00110000; i++)
-	{
+	for (i = 0; i < 0x00110000; i++) {
 		z = buf;
 		WRITE_UTF8(z, i);
 		n = (int)(z - buf);
-		_assert(n > 0 && n <= 4);
+		assert(n > 0 && n <= 4);
 		z[0] = 0;
 		z = buf;
-		c = _utf8read((const unsigned char **)&z);
+		c = utf8read((const unsigned char **)&z);
 		t = i;
 		if (i >= 0xD800 && i <= 0xDFFF) t = 0xFFFD;
 		if ((i&0xFFFFFFFE) == 0xFFFE) t = 0xFFFD;
-		_assert(c == t);
-		_assert((z - buf) == n);
+		assert(c == t);
+		assert((z - buf) == n);
 	}
-	for (i = 0; i < 0x00110000; i++)
-	{
+	for (i = 0; i < 0x00110000; i++) {
 		if (i >= 0xD800 && i < 0xE000) continue;
 		z = buf;
 		WRITE_UTF16LE(z, i);
 		n = (int)(z - buf);
-		_assert(n > 0 && n <= 4);
+		assert(n > 0 && n <= 4);
 		z[0] = 0;
 		z = buf;
 		READ_UTF16LE(z, 1, c);
-		_assert(c == i);
-		_assert((z - buf) == n);
+		assert(c == i);
+		assert((z - buf) == n);
 	}
-	for (i = 0; i < 0x00110000; i++)
-	{
+	for (i = 0; i < 0x00110000; i++) {
 		if (i >= 0xD800 && i < 0xE000) continue;
 		z = buf;
 		WRITE_UTF16BE(z, i);
 		n = (int)(z - buf);
-		_assert(n > 0 && n <= 4);
+		assert(n > 0 && n <= 4);
 		z[0] = 0;
 		z = buf;
 		READ_UTF16BE(z, 1, c);
-		_assert(c == i);
-		_assert((z - buf) == n);
+		assert(c == i);
+		assert((z - buf) == n);
 	}
 }
 #endif

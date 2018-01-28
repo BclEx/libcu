@@ -127,6 +127,12 @@ __BEGIN_DECLS;
 
 extern __host_device__ RC runtimeInitialize();
 
+// CAPI3REF: Initialize The SQLite Library
+extern __host_device__ RC runtimeInitialize(); //: sqlite3_initialize
+extern __host_device__ RC runtimeShutdown(); //: sqlite3_shutdown
+extern __host_device__ int vsystemInitialize(); //: sqlite3_os_init
+extern __host_device__ int vsystemShutdown(); //: sqlite3_os_end
+
 /* Forward references to structures */
 typedef struct mutex mutex;
 typedef struct Lookaside Lookaside;
@@ -183,7 +189,7 @@ struct Lookaside {
 	int slots;				// Number of lookaside slots allocated
 	int stats[3];			// 0: hits.  1: size misses.  2: full misses
 	LookasideSlot *init;	// List of buffers not previously used
-	LookasideSlot *free;	// List of available buffers
+	LookasideSlot *free_;	// List of available buffers
 	void *start;			// First byte of available memory space
 	void *end;				// First byte past end of available space
 };
@@ -194,9 +200,11 @@ struct LookasideSlot {
 /* Each Tag object is an instance of the following structure. */
 //typedef struct tagbase_t tagbase_t;
 struct tagbase_t {
+	vsystem *vsys;          // OS Interface
 	mutex *mutex;			// Connection mutex
 	int errCode;            // Most recent error code (RC_*)
 	int errMask;            // & result codes with this before returning
+	int sysErrno;           // Errno value from last system error
 	int vdbeExecs;			// Number of nested calls to VdbeExec()
 	union {
 		volatile int isInterrupted; // True if sqlite3_interrupt has been called
@@ -206,13 +214,17 @@ struct tagbase_t {
 	bool mallocFailed;      // True if we have seen a malloc failure
 	bool benignMalloc;      // Do not require OOMs if true
 	int *bytesFreed;		// If not NULL, increment this in DbFree()
+	uint32_t magic;         // Magic number for detect library misuse
+	void *err;				// Most recent error message
 };
 
 #include "vsystem.h"
 #include "util.h"
+#include "math.h"
 #include "mutex.h"
 #include "alloc.h"
 #include "status.h"
+#include "pcache.h"
 
 // CAPI3REF: Pseudo-Random Number Generator
 extern __device__ void randomness_(int n, void *p);
@@ -258,6 +270,7 @@ struct RuntimeConfig {
 	bool fullMutex;                 // True to enable full mutexing
 	bool openUri;                   // True to interpret filenames as URIs
 	bool useCis;                    // Use covering indices for full-scans
+	bool smallMalloc;               // Avoid large memory allocations if true
 	int maxStrlen;                  // Maximum string length
 	bool neverCorrupt;              // Database is always well-formed
 	int lookasideSize;              // Default lookaside buffer size
@@ -265,7 +278,7 @@ struct RuntimeConfig {
 	int stmtSpills;                 // Stmt-journal spill-to-disk threshold
 	alloc_methods allocSystem;		// Low-level memory allocation interface
 	mutex_methods mutexSystem;		// Low-level mutex interface
-	void *pcache2System;			// Low-level page-cache interface
+	pcache_methods pcache2System;	// Low-level page-cache interface
 	void *heap;						// Heap storage space
 	int heapSize;                   // Size of heap[]
 	int minHeapSize, maxHeapSize;	// Min and max heap requests sizes

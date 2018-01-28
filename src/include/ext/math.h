@@ -26,22 +26,40 @@ THE SOFTWARE.
 #pragma once
 #ifndef _EXT_MATH_H
 #define _EXT_MATH_H
+#include <crtdefscu.h>
 #include <stdint.h>
 __BEGIN_DECLS;
 
-extern __device__ bool math_add(int64_t *aRef, int64_t b);
-extern __device__ bool math_sub(int64_t *aRef, int64_t b);
-extern __device__ bool math_mul(int64_t *aRef, int64_t b);
-#ifndef OMIT_INLINEMATH
-__forceinline __device__ int math_abs(int x)
-{
-	if (x >= 0) return x;
-	if (x == (int)0x8000000) return 0x7fffffff;
-	return -x;
-}
-#else
-extern __device__ int math_abs(int x);
-#endif
+/*
+** Estimated quantities used for query planning are stored as 16-bit logarithms.  For quantity X, the value stored is 10*log2(X).  This
+** gives a possible range of values of approximately 1.0e986 to 1e-986. But the allowed values are "grainy".  Not every value is representable.
+** For example, quantities 16 and 17 are both represented by a logest_t of 40.  However, since logest_t quantities are suppose to be estimates,
+** not exact values, this imprecision is not a problem.
+**
+** "logest_t" is short for "Logarithmic Estimate".
+**
+** Examples:
+**      1 -> 0              20 -> 43          10000 -> 132
+**      2 -> 10             25 -> 46          25000 -> 146
+**      3 -> 16            100 -> 66        1000000 -> 199
+**      4 -> 20           1000 -> 99        1048576 -> 200
+**     10 -> 33           1024 -> 100    4294967296 -> 320
+**
+** The logest_t can be negative to indicate fractional values.
+** Examples:
+**
+**    0.5 -> -10           0.1 -> -33        0.0625 -> -40
+*/
+typedef int16_t logest_t;
+
+extern __host_device__ int math_isnan(double x); //: sqlite3IsNaN
+extern __host_device__ bool math_add64(int64_t *ao, int64_t b); //: sqlite3AddInt64
+extern __host_device__ bool math_sub64(int64_t *ao, int64_t b); //: sqlite3SubInt64
+extern __host_device__ bool math_mul64(int64_t *ao, int64_t b); //: sqlite3MulInt64
+extern __host_device__ int math_abs32(int x); //: sqlite3AbsInt32
+extern __host_device__ logest_t math_addLogest(logest_t a, logest_t b); //: sqlite3LogEstAdd
+extern __host_device__ logest_t math_logest(uint64_t x); //: sqlite3LogEst
+extern __host_device__ logest_t math_logestFromDouble(double x); //: sqlite3LogEstFromDouble
 
 __END_DECLS;
 #endif	/* _EXT_MATH_H */

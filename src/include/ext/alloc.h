@@ -98,7 +98,7 @@ __host_device__ int64_t alloc_memoryhighwater(bool resetFlag);
 
 /* Access to mutexes used by sqlite3_status() */
 __host_device__ mutex *allocMutex();
-__host_device__ mutex *allocCacheMutex();
+__host_device__ mutex *pcacheMutex();
 
 __host_device__ RC allocInitialize();
 __host_device__ RC allocShutdown();

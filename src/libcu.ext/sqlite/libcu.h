@@ -161,7 +161,7 @@
 #define SQLITE_SYNC_DATAONLY VSYS_SYNC_DATAONLY
 
 // CAPI3REF: OS Interface Open File Handle
-#define vsystemfile sqlite3_file
+#define vsysfile sqlite3_file
 #	define pMethods methods
 
 // CAPI3REF: OS Interface File Virtual Methods Object

@@ -80,8 +80,8 @@ __BEGIN_DECLS;
 #define VSYS_SYNC_DATAONLY      0x00010
 
 // CAPI3REF: OS Interface Open File Handle
-typedef struct vsystemfile vsystemfile;
-struct vsystemfile {
+typedef struct vsysfile vsysfile;
+struct vsysfile {
 	const struct vsystemfile_methods *methods;  // Methods for an open file
 };
 
@@ -89,24 +89,24 @@ struct vsystemfile {
 typedef struct vsystemfile_methods vsystemfile_methods;
 struct vsystemfile_methods {
 	int version;
-	int (*close)(vsystemfile *);
-	int (*read)(vsystemfile *, void *, int amount, int64_t offset);
-	int (*write)(vsystemfile *, const void *, int amount, int64_t offset);
-	int (*truncate)(vsystemfile *, int64_t size);
-	int (*sync)(vsystemfile *, int flags);
-	int (*fileSize)(vsystemfile *, int64_t *size);
-	int (*lock)(vsystemfile *, int);
-	int (*unlock)(vsystemfile *, int);
-	int (*checkReservedLock)(vsystemfile *, int *resOut);
-	int (*fileControl)(vsystemfile *, int op, void *args);
-	int (*sectorSize)(vsystemfile *);
-	int (*deviceCharacteristics)(vsystemfile *);
-	int (*shmMap)(vsystemfile *, int page, int pageSize, int, void volatile**);
-	int (*shmLock)(vsystemfile *, int offset, int n, int flags);
-	void (*shmBarrier)(vsystemfile *);
-	int (*shmUnmap)(vsystemfile *, int deleteFlag);
-	int (*fetch)(vsystemfile *, int64_t offset, int amount, void **p);
-	int (*unfetch)(vsystemfile *, int64_t offset, void *p);
+	int (*close)(vsysfile *);
+	int (*read)(vsysfile *, void *, int amount, int64_t offset);
+	int (*write)(vsysfile *, const void *, int amount, int64_t offset);
+	int (*truncate)(vsysfile *, int64_t size);
+	int (*sync)(vsysfile *, int flags);
+	int (*fileSize)(vsysfile *, int64_t *size);
+	int (*lock)(vsysfile *, int);
+	int (*unlock)(vsysfile *, int);
+	int (*checkReservedLock)(vsysfile *, int *resOut);
+	int (*fileControl)(vsysfile *, int op, void *args);
+	int (*sectorSize)(vsysfile *);
+	int (*deviceCharacteristics)(vsysfile *);
+	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile**);
+	int (*shmLock)(vsysfile *, int offset, int n, int flags);
+	void (*shmBarrier)(vsysfile *);
+	int (*shmUnmap)(vsysfile *, int deleteFlag);
+	int (*fetch)(vsysfile *, int64_t offset, int amount, void **p);
+	int (*unfetch)(vsysfile *, int64_t offset, void *p);
 };
 
 // CAPI3REF: Standard File Control Opcodes
@@ -151,12 +151,12 @@ typedef struct vsystem vsystem;
 typedef void (*vsystemcall_ptr)();
 struct vsystem {
 	int version;			// Structure version number (currently 3)
-	int sizeOsFile;			// Size of subclassed vsystemfile
+	int sizeOsFile;			// Size of subclassed vsysfile
 	int maxPathname;		// Maximum file pathname length
 	vsystem *next;			// Next registered VFS
 	const char *name;		// Name of this virtual file system
 	void *appData;			// Pointer to application-specific data
-	int (*open)(vsystem *, const char *name, vsystemfile *, int flags, int *outFlags);
+	int (*open)(vsystem *, const char *name, vsysfile *, int flags, int *outFlags);
 	int (*delete_)(vsystem *, const char *name, int syncDir);
 	int (*access)(vsystem *, const char *name, int flags, int *resOut);
 	int (*fullPathname)(vsystem *, const char *name, int outLength, char *out);
@@ -188,12 +188,6 @@ struct vsystem {
 // CAPI3REF: Maximum xShmLock index
 #define VSYS_SHM_NLOCK        8
 
-// CAPI3REF: Initialize The SQLite Library
-//int sqlite3_initialize();
-//int sqlite3_shutdown();
-//int sqlite3_os_init();
-//int sqlite3_os_end();
-
 /* If the SET_FULLSYNC macro is not defined above, then make it a no-op */
 #ifndef SET_FULLSYNC
 #define SET_FULLSYNC(x, y)
@@ -205,34 +199,34 @@ struct vsystem {
 #endif
 
 /* Wrapper around OS specific sqlite3_os_init() function. */
-//int sqlite3OsInit();
+//int vsystemFakeInit(); //: sqlite3OsInit
 
-/* Functions for accessing vsystemfile methods */
-extern __host_device__ void vsys_close(vsystemfile *); //: sqlite3OsClose 
-extern __host_device__ RC vsys_read(vsystemfile *, void *, int amount, int64_t offset); //: sqlite3OsRead
-extern __host_device__ RC vsys_write(vsystemfile *, const void *, int amount, int64_t offset); //: sqlite3OsWrite
-extern __host_device__ RC vsys_truncate(vsystemfile *, int64_t size); //: sqlite3OsTruncate
-extern __host_device__ RC vsys_sync(vsystemfile *, int); //: sqlite3OsSync
-extern __host_device__ RC vsys_fileSize(vsystemfile *, int64_t *size); //: sqlite3OsFileSize
-extern __host_device__ RC vsys_lock(vsystemfile *, int); //: sqlite3OsLock
-extern __host_device__ RC vsys_unlock(vsystemfile *, int); //: sqlite3OsUnlock
-extern __host_device__ RC vsys_checkReservedLock(vsystemfile *, int *); //: sqlite3OsCheckReservedLock
-extern __host_device__ RC vsys_fileControl(vsystemfile *, int, void *); //: sqlite3OsFileControl
-extern __host_device__ void vsys_fileControlHint(vsystemfile *, int, void *); //: sqlite3OsFileControlHint
+/* Functions for accessing vsysfile methods */
+extern __host_device__ void vsys_close(vsysfile *); //: sqlite3OsClose 
+extern __host_device__ RC vsys_read(vsysfile *, void *, int amount, int64_t offset); //: sqlite3OsRead
+extern __host_device__ RC vsys_write(vsysfile *, const void *, int amount, int64_t offset); //: sqlite3OsWrite
+extern __host_device__ RC vsys_truncate(vsysfile *, int64_t size); //: sqlite3OsTruncate
+extern __host_device__ RC vsys_sync(vsysfile *, int); //: sqlite3OsSync
+extern __host_device__ RC vsys_fileSize(vsysfile *, int64_t *size); //: sqlite3OsFileSize
+extern __host_device__ RC vsys_lock(vsysfile *, int); //: sqlite3OsLock
+extern __host_device__ RC vsys_unlock(vsysfile *, int); //: sqlite3OsUnlock
+extern __host_device__ RC vsys_checkReservedLock(vsysfile *, int *); //: sqlite3OsCheckReservedLock
+extern __host_device__ RC vsys_fileControl(vsysfile *, int, void *); //: sqlite3OsFileControl
+extern __host_device__ void vsys_fileControlHint(vsysfile *, int, void *); //: sqlite3OsFileControlHint
 #define FCNTL_DB_UNCHANGED 0xca093fa0
-extern __host_device__ int vsys_sectorSize(vsystemfile *); //: sqlite3OsSectorSize
-extern __host_device__ int vsys_deviceCharacteristics(vsystemfile *); //: sqlite3OsDeviceCharacteristics
+extern __host_device__ int vsys_sectorSize(vsysfile *); //: sqlite3OsSectorSize
+extern __host_device__ int vsys_deviceCharacteristics(vsysfile *); //: sqlite3OsDeviceCharacteristics
 #ifndef NO_WAL
-extern __host_device__ RC vsys_shmMap(vsystemfile *, int, int, int, void volatile **); //: sqlite3OsShmMap
-extern __host_device__ RC vsys_shmLock(vsystemfile *, int, int, int); //: sqlite3OsShmLock
-extern __host_device__ void vsys_shmBarrier(vsystemfile *); //: sqlite3OsShmBarrier
-extern __host_device__ RC vsys_shmUnmap(vsystemfile *, int); //: sqlite3OsShmUnmap
+extern __host_device__ RC vsys_shmMap(vsysfile *, int, int, int, void volatile **); //: sqlite3OsShmMap
+extern __host_device__ RC vsys_shmLock(vsysfile *, int, int, int); //: sqlite3OsShmLock
+extern __host_device__ void vsys_shmBarrier(vsysfile *); //: sqlite3OsShmBarrier
+extern __host_device__ RC vsys_shmUnmap(vsysfile *, int); //: sqlite3OsShmUnmap
 #endif
-extern __host_device__ RC vsys_fetch(vsystemfile *, int64_t, int, void **); //: sqlite3OsFetch
-extern __host_device__ RC vsys_unfetch(vsystemfile *, int64_t, void *); //: sqlite3OsUnfetch
+extern __host_device__ RC vsys_fetch(vsysfile *, int64_t, int, void **); //: sqlite3OsFetch
+extern __host_device__ RC vsys_unfetch(vsysfile *, int64_t, void *); //: sqlite3OsUnfetch
 
 /* Functions for accessing vsystem methods */
-extern __host_device__ RC vsys_open(vsystem *, const char *, vsystemfile*, int, int *); //: sqlite3OsOpen
+extern __host_device__ RC vsys_open(vsystem *, const char *, vsysfile*, int, int *); //: sqlite3OsOpen
 extern __host_device__ RC vsys_delete(vsystem *, const char *, int); //: sqlite3OsDelete
 extern __host_device__ RC vsys_access(vsystem *, const char *, int, int *pResOut); //: sqlite3OsAccess
 extern __host_device__ RC vsys_fullPathname(vsystem *, const char *, int, char *); //: sqlite3OsFullPathname
@@ -248,8 +242,8 @@ extern __host_device__ int vsys_getLastError(vsystem *);
 extern __host_device__ RC vsys_currentTimeInt64(vsystem *, int64_t *);
 
 /* Convenience functions for opening and closing files using alloc() to obtain space for the file-handle structure. */
-extern __host_device__ RC vsys_openMalloc(vsystem *, const char *, vsystemfile **, int, int *);
-extern __host_device__ void vsys_closeAndFree(vsystemfile *);
+extern __host_device__ RC vsys_openMalloc(vsystem *, const char *, vsysfile **, int, int *);
+extern __host_device__ void vsys_closeAndFree(vsysfile *);
 
 /* Locate a VFS by name.  If no name is given, simply return the first VFS on the list. */
 extern __host_device__ vsystem *vsystemFind(const char *name);

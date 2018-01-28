@@ -98,13 +98,13 @@ struct pcache_methods {
 //#define PGHDR_WAL_APPEND      0x040  // Appended to wal file
 //
 ///* Initialize and shutdown the page cache subsystem */
-//int sqlite3PcacheInitialize();
-//void sqlite3PcacheShutdown();
+__device__ RC pcacheInitialize(); //: sqlite3PcacheInitialize
+__device__ void pcacheShutdown(); //: sqlite3PcacheShutdown
 //
 ///* Page cache buffer management:
 //** These routines implement SQLITE_CONFIG_PAGECACHE.
 //*/
-__device__ void pcache1BufferSetup(void *, int size, int n); // sqlite3PCacheBufferSetup
+__device__ void pcacheBufferSetup(void *, int size, int n); // sqlite3PCacheBufferSetup
 //
 ///* Create a new pager cache.
 //** Under memory stress, invoke xStress to try to make pages clean.
@@ -117,7 +117,7 @@ __device__ void pcache1BufferSetup(void *, int size, int n); // sqlite3PCacheBuf
 //
 ///* Return the size in bytes of a PCache object.  Used to preallocate storage space.
 //*/
-//int sqlite3PcacheSize(void);
+//__device__ int sqlite3PcacheSize(); //: sqlite3PcacheSize
 //
 ///* One release per successful fetch.  Page is pinned until released. Reference counted. 
 //*/
@@ -195,20 +195,20 @@ __device__ void pcache1BufferSetup(void *, int size, int n); // sqlite3PCacheBuf
 ///* Free up as much memory as possible from the page cache */
 //void sqlite3PcacheShrink(PCache*);
 //
-//#ifdef SQLITE_ENABLE_MEMORY_MANAGEMENT
-///* Try to return memory used by the pcache module to the main memory heap */
-//int sqlite3PcacheReleaseMemory(int);
-//#endif
+#ifdef ENABLE_MEMORY_MANAGEMENT
+/* Try to return memory used by the pcache module to the main memory heap */
+__device__ int pcacheReleaseMemory(int); //: sqlite3PcacheReleaseMemory
+#endif
 //
-//#ifdef SQLITE_TEST
-//void sqlite3PcacheStats(int*,int*,int*,int*);
-//#endif
+#ifdef _TEST
+__device__ void pcacheStats(int*,int*,int*,int*); //: sqlite3PcacheStats
+#endif
 //
-//void sqlite3PCacheSetDefault(void);
+__device__ void __pcachesystemSetDefault();  //: sqlite3PCacheSetDefault
 //
 ///* Return the header size */
 //int sqlite3HeaderSizePcache(void);
-//int sqlite3HeaderSizePcache1(void);
+__device__ int pcache1HeaderSize(); //: sqlite3HeaderSizePcache1
 //
 ///* Number of dirty pages as a percentage of the configured cache size */
 //int sqlite3PCachePercentDirty(PCache*);

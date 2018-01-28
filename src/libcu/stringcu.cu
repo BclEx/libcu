@@ -1761,7 +1761,7 @@ __device__ void strbldReset(strbld_t *b) //: sqlite3StrAccumReset
 ** capacity: Size of zBase in bytes.  If total space requirements never exceed n then no memory allocations ever occur.
 ** maxSize: Maximum number of bytes to accumulate.  If mx==0 then no memory allocations will ever occur.
 */
-__device__ void strbldInit(strbld_t *b, void *tag, char *base, int capacity, int maxSize)
+__device__ void strbldInit(strbld_t *b, void *tag, char *base, int capacity, int maxSize) //: sqlite3StrAccumInit
 {
 	b->text = b->base = base;
 	b->tag = tag;

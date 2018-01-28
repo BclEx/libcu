@@ -60,7 +60,7 @@ __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 	_statusInit;
 	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
-	assert(mutex_held(statusMutexStatics[op] ? allocCacheMutex() : allocMutex()));
+	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	_status.nowValue[op] += n;
 	if (_status.nowValue[op] > _status.maxValue[op])
 		_status.maxValue[op] = _status.nowValue[op];
@@ -84,7 +84,7 @@ __host_device__ void status_max(STATUS op, int x) //: sqlite3StatusHighwater
 	statusValue_t newValue = (statusValue_t)x;
 	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
 	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
-	assert(mutex_held(statusMutexStatics[op] ? allocCacheMutex() : allocMutex()));
+	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	assert(op == STATUS_MALLOC_SIZE || op == STATUS_PAGECACHE_SIZE || op == STATUS_PARSER_STACK);
 	if (newValue > _status.maxValue[op])
 		_status.maxValue[op] = newValue;

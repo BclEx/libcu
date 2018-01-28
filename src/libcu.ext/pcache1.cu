@@ -110,7 +110,7 @@ __device__ static _WSD PCacheGlobal g_pcache1;
 
 #pragma region Page Allocation/CONFIG_PCACHE Related Functions
 
-__device__ void pcache1BufferSetup(void *buf, int size, int n) // sqlite3PCacheBufferSetup
+__device__ void pcacheBufferSetup(void *buf, int size, int n) // sqlite3PCacheBufferSetup
 {
 	if (_pcache1.isInit) {
 		if (!buf) size = n = 0;
@@ -826,7 +826,7 @@ static __constant__ const pcache_methods _pcache1DefaultMethods = {
 __device__ void __pcachesystemSetDefault() //: sqlite3PCacheSetDefault
 {
 	//sqlite3_config(CONFIG_PCACHE2, &defaultMethods);
-	__pcachesystem = (void *)&_pcache1DefaultMethods;
+	__pcachesystem = (pcache_methods *)&_pcache1DefaultMethods;
 }
 
 /* Return the size of the header on each page of this PCACHE implementation. */
@@ -864,38 +864,12 @@ __device__ int pcacheReleaseMemory(int required) //: sqlite3PcacheReleaseMemory
 }
 #endif /* ENABLE_MEMORY_MANAGEMENT */
 
-#ifdef ENABLE_MEMORY_MANAGEMENT
-__device__ int PCache::ReleaseMemory(int required)
-{
-	_assert(_mutex_notheld(_pcache1.Group.mutex));
-	_assert(_mutex_notheld(_pcache1.mutex));
-	int free = 0;
-	if (_pcache1.Start == nullptr)
-	{
-		PgHdr1 *p;
-		_mutex_enter(_pcache1.Group.mutex);
-		while ((required < 0 || free < required) && ((p = _pcache1.Group.LruTail) != nullptr))
-		{
-			free += MemSize(p->Page.Buffer);
-#ifdef PCACHE_SEPARATE_HEADER
-			free += MemSize(p);
-#endif
-			PinPage(p);
-			RemoveFromHash(p);
-			FreePage(p);
-		}
-		_mutex_leave(_pcache1.Group.mutex);
-	}
-	return free;
-}
-#endif
-
 #pragma endregion
 
 #pragma	region Tests
 #ifndef _TEST
 /* This function is used by test procedures to inspect the internal state of the global cache. */
-__device__ void sqlite3PcacheStats(int *current, int *max, int *min, int *recyclables) // : sqlite3PcacheStats
+__device__ void pcacheStats(int *current, int *max, int *min, int *recyclables) // : sqlite3PcacheStats
 {
 	int recyclables2 = 0;
 	for (PgHdr1 *p = _pcache1.group.lru.lruNext; p && !p->isAnchor; p = p->lruNext) { assert(PAGE_IS_UNPINNED(p)); recyclables2++; }

@@ -59,13 +59,14 @@ _WSD struct RuntimeConfig _runtimeConfig = {
 	LIBCU_THREADSAFE == 1,		// fullMutex
 	LIBCU_USEURI,				// openUri
 	LIBCU_ALLOWCOVERINGINDEXSCAN, // useCis
+	false,						// smallMalloc
 	0x7ffffffe,					// maxStrlen
 	0,							// neverCorrupt
 	LIBCU_DEFAULTLOOKASIDE,		// lookasideSize, lookasides
 	LIBCU_STMTJRNLSPILL,		// stmtSpills
 	{0,0,0,0,0,0,0,0},			// allocSystem
 	{0,0,0,0,0,0,0,0,0},		// mutexSystem
-	nullptr, //{0,0,0,0,0,0,0,0,0,0,0,0,0},// pcache2System
+	{0,0,0,0,0,0,0,0,0,0,0,0,0},// pcache2System
 	(void *)nullptr,            // heap
 	0,							// heapSize
 	0, 0,						// minHeapSize, maxHeapSize

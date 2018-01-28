@@ -40,5 +40,7 @@ __host_device__ void tagSystemError(tagbase_t *tag, RC rc);
 __host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
 __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
 
+typedef int vlist_t;
+
 __END_DECLS;
 #endif	/* _EXT_UTIL_H */

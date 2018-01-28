@@ -18,6 +18,14 @@
 
 #pragma region from x
 
+#define SQLITE_PTRSIZE _PTRSIZE
+#define SQLITE_WITHIN _WITHIN
+
+#define SQLITE_BYTEORDER LIBCU_BYTEORDER
+#define SQLITE_BIGENDIAN LIBCU_BIGENDIAN 
+#define SQLITE_LITTLEENDIAN LIBCU_LITTLEENDIAN
+#define SQLITE_UTF16NATIVE LIBCU_UTF16NATIVE
+
 // CAPI3REF: Result Codes
 #define SQLITE_OK RC_OK	// Successful result
 /* beginning-of-error-codes */
@@ -110,6 +118,14 @@
 #define SQLITE_AUTH_USER RC_AUTH_USER
 #define SQLITE_OK_LOAD_PERMANENTLY RC_OK_LOAD_PERMANENTLY
 
+// CAPI3REF: Text Encodings
+#define SQLITE_UTF8 TEXTENCODE_UTF8
+#define SQLITE_UTF16LE TEXTENCODE_UTF16LE
+#define SQLITE_UTF16BE TEXTENCODE_UTF16BE
+#define SQLITE_UTF16 TEXTENCODE_UTF16
+#define SQLITE_ANY TEXTENCODE_ANY
+#define SQLITE_UTF16_ALIGNED TEXTENCODE_UTF16_ALIGNED
+
 #pragma endregion
 
 #pragma region vsystem
@@ -166,7 +182,7 @@
 #define SQLITE_SYNC_DATAONLY VSYS_SYNC_DATAONLY
 
 // CAPI3REF: OS Interface Open File Handle
-#define sqlite3_file vsystemfile 
+#define sqlite3_file vsysfile 
 //#	define pMethods methods
 
 // CAPI3REF: OS Interface File Virtual Methods Object
@@ -273,7 +289,7 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: hwtime.c
-#define sqlite3Hwtime()
+#define sqlite3Hwtime() panic("NEED")
 #pragma endregion
 
 #pragma region From: main.c
@@ -282,7 +298,7 @@ RC vsystemShutdown();
 #define sqlite3_sourceid() libcu_sourceid()
 #define sqlite3_libversion_number() libcu_libversion_number()
 #define sqlite3_threadsafe() libcu_threadsafe()
-#define sqlite3IoTrace panic("")
+#define sqlite3IoTrace panic("NEED")
 #define sqlite3_temp_directory libcu_tempDirectory
 #define sqlite3_data_directory libcu_dataDirectory
 #define sqlite3_initialize() runtimeInitialize()
@@ -436,9 +452,6 @@ RC vsystemShutdown();
 #define sqlite3_mutex_notheld(p) mutex_notheld(p)
 #pragma endregion
 
-#pragma region From: pcache1.c
-#pragma endregion
-
 #pragma region From: notify.c
 #pragma endregion
 
@@ -494,31 +507,26 @@ RC vsystemShutdown();
 #define sqlite3_vfs_unregister(pVfs) vsystemUnregister(pVfs)
 #pragma endregion
 
-#pragma region From: pcache1.c?
-#define PgHdr1
-#define PAGE_IS_PINNED(p) PAGE_IS_PINNED(p)
-#define PAGE_IS_UNPINNED(p) PAGE_IS_UNPINNED(p)
-#define PGroup
-#define PCache1
-#define sqlite3PCacheBufferSetup(pBuf, sz, n)
-#define sqlite3PageMalloc(sz)
-#define sqlite3PageFree(p)
-#define sqlite3PCacheSetDefault()
-#define sqlite3HeaderSizePcache1()
-#define sqlite3Pcache1Mutex()
-#define sqlite3PcacheReleaseMemory(nReq)
-#define sqlite3PcacheStats(pnCurrent, pnMax, pnMin, pnRecyclable)
+#pragma region From: pcache1.c
+#define sqlite3PCacheBufferSetup(pBuf, sz, n) pcacheBufferSetup(pBuf, sz, n)
+#define sqlite3PageMalloc(sz) sqlite3PageMalloc(sz)
+#define sqlite3PageFree(p) sqlite3PageFree(p)
+#define sqlite3PCacheSetDefault() __pcachesystemSetDefault()
+#define sqlite3HeaderSizePcache1() pcache1HeaderSize()
+#define sqlite3Pcache1Mutex() pcache1Mutex()
+#define sqlite3PcacheReleaseMemory(nReq) pcacheReleaseMemory(nReq)
+#define sqlite3PcacheStats(pnCurrent, pnMax, pnMin, pnRecyclable) pcacheStats(pnCurrent, pnMax, pnMin, pnRecyclable)
 #pragma endregion
 
 #pragma region From: printf.c
 #define StrAccum strbuf_t
-#define sqlite3VXPrintf(pAccum, fmt, ap)
-#define sqlite3AppendChar(p, N, c)
-#define sqlite3StrAccumAppend(p, z, N)
-#define sqlite3StrAccumAppendAll(p, z)
-#define sqlite3StrAccumFinish(p)
-#define sqlite3StrAccumReset(p)
-#define sqlite3StrAccumInit(p, db, zBase, n, mx)
+#define sqlite3VXPrintf(pAccum, fmt, ap) strbldAppendFormat(pAccum, fmt, ap)
+#define sqlite3AppendChar(p, N, c) strbldAppendChar(p, N, c)
+#define sqlite3StrAccumAppend(p, z, N) strbldAppend(p, z, N)
+#define sqlite3StrAccumAppendAll(p, z) strbldAppendAll(p, z)
+#define sqlite3StrAccumFinish(p) strbldToString(p)
+#define sqlite3StrAccumReset(p) strbldReset(p)
+#define sqlite3StrAccumInit(p, db, zBase, n, mx) strbldInit(p, db, zBase, n, mx)
 #define sqlite3VMPrintf(db, zFormat, ap)
 #define sqlite3MPrintf(db, zFormat, ...)
 #define sqlite3_vmprintf(zFormat, ap)
@@ -554,32 +562,31 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: utf.c
-#define sqlite3Utf8Read(pz)
-#define sqlite3VdbeMemTranslate(pMem, desiredEnc)
-#define sqlite3VdbeMemHandleBom(pMem)
-#define sqlite3Utf8CharLen(zIn, nByte)
-#define sqlite3Utf8To8(zIn)
-#define sqlite3Utf16to8(db, z, nByte, enc)
-#define sqlite3Utf16ByteLen(zIn, nChar)
-#define sqlite3UtfSelfTest()
+#define sqlite3Utf8Read(pz) utf8read(pz)
+#define sqlite3VdbeMemTranslate(pMem, desiredEnc) panic("NEED")
+#define sqlite3VdbeMemHandleBom(pMem) panic("NEED")
+#define sqlite3Utf8CharLen(zIn, nByte) utf8charlen(zIn, nByte)
+#define sqlite3Utf8To8(zIn) utf8to8(zIn)
+#define sqlite3Utf16to8(db, z, nByte, enc) panic("NEED")
+#define sqlite3Utf16ByteLen(zIn, nChar) utf16bytelen(zIn, nChar)
+#define sqlite3UtfSelfTest() utfselftest()
 #pragma endregion
 
 #pragma region From: util.c
-#define sqlite3Coverage(x)
-#define sqlite3FaultSim(iTest)
-#define sqlite3IsNaN(x)
-#define sqlite3Strlen30(z)
-#define sqlite3ColumnType(pCol, zDflt)
-#define sqlite3ErrorFinish(db, err_code)
-#define sqlite3Error(db, err_code);
-#define sqlite3SystemError(db, rc);
-#define sqlite3ErrorWithMsg(db, err_code, zFormat, ...)
+#define sqlite3Coverage(x) __coverage(x)
+#define sqlite3FaultSim(iTest) sqlite3FaultSim(iTest)
+#define sqlite3IsNaN(x) math_isNaN(x)
+#define sqlite3Strlen30(z) strlen(z)
+#define sqlite3ColumnType(pCol, zDflt) panic("NEED")
+#define sqlite3Error(db, err_code) tagError(db, err_code)
+#define sqlite3SystemError(db, rc) tagSystemError(db, rc)
+#define sqlite3ErrorWithMsg(db, err_code, zFormat, ...) tagErrorWithMsg(db, err_code, zFormat, __VAR_ARGS__)
 #define sqlite3ErrorMsg(pParse, zFormat, ...)
-#define sqlite3Dequote(z)
-#define sqlite3TokenInit(p, z)
-#define sqlite3_stricmp(zLeft, zRight)
-#define sqlite3StrICmp(zLeft, zRight)
-#define sqlite3_strnicmp(zLeft, zRight, N)
+#define sqlite3Dequote(z) dequote(z)
+#define sqlite3TokenInit(p, z) panic("NEED")
+#define sqlite3_stricmp(zLeft, zRight) stricmp(zLeft, zRight)
+#define sqlite3StrICmp(zLeft, zRight) stricmp(zLeft, zRight)
+#define sqlite3_strnicmp(zLeft, zRight, N) strnicmp(zLeft, zRight, N)
 #define sqlite3AtoF(z, pResult, length, enc) convert_atofe(z, pResult, length, enc)
 #define sqlite3Atoi64(zNum, pNum, length, enc) convert_atoi64e(zNum, pNum, length, enc)
 #define sqlite3DecOrHexToI64(z, pOut) convert_axtoi64e(z, pOut)
@@ -593,20 +600,20 @@ RC vsystemShutdown();
 #define sqlite3Put4byte(p, v) convert_put4(p, v)
 #define sqlite3HexToInt(h) convert_xtoi(h)
 #define sqlite3HexToBlob(db, z, n) convert_taghextoblob(db, z, n)
-#define sqlite3SafetyCheckOk(db)
-#define sqlite3SafetyCheckSickOrOk(db)
-#define sqlite3AddInt64(pA, iB)
-#define sqlite3SubInt64(pA, iB)
-#define sqlite3MulInt64(pA, iB)
-#define sqlite3AbsInt32(x)
-#define sqlite3FileSuffix3(zBaseFilename, z)
-#define sqlite3LogEstAdd(a, b)
-#define sqlite3LogEst(x)
-#define sqlite3LogEstFromDouble(x)
-#define sqlite3LogEstToInt(x)
-#define sqlite3VListAdd(db, pIn, zName, nName, iVal)
-#define sqlite3VListNumToName(pIn, iVal)
-#define sqlite3VListNameToNum(pIn, zName, nName)
+#define sqlite3SafetyCheckOk(db) tagSafetyCheckOk(db)
+#define sqlite3SafetyCheckSickOrOk(db) sqlite3SafetyCheckSickOrOk(db)
+#define sqlite3AddInt64(pA, iB) math_add64(pA, iB)
+#define sqlite3SubInt64(pA, iB) math_sub64(pA, iB)
+#define sqlite3MulInt64(pA, iB) math_mul64(pA, iB)
+#define sqlite3AbsInt32(x) math_abs32(x)
+#define sqlite3FileSuffix3(zBaseFilename, z) util_fileSuffix3(zBaseFilename, z)
+#define sqlite3LogEstAdd(a, b) math_addLogest(a, b)
+#define sqlite3LogEst(x) math_logest(x)
+#define sqlite3LogEstFromDouble(x) math_logestFromDouble(x)
+#define sqlite3LogEstToInt(x) panic("NEED")
+#define sqlite3VListAdd(db, pIn, zName, nName, iVal) util_vlistadd(db, pIn, zName, nName, iVal)
+#define sqlite3VListNumToName(pIn, iVal) util_vlistIdToName(pIn, iVal)
+#define sqlite3VListNameToNum(pIn, zName, nName) util_vlistNameToId(pIn, zName, nName)
 #pragma endregion
 
 #endif /* SQLITE_LIBCU_H */
