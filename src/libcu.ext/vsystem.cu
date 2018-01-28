@@ -1,5 +1,5 @@
-﻿#include <stringcu.h>
-#include <ext/global.h> //: os.c
+﻿#include <stringcu.h> //: os.c
+#include <ext/global.h>
 #include <assert.h>
 
 //#if defined(_TEST) || defined(_DEBUG)
@@ -9,8 +9,7 @@
 //#define OSTRACE(X, ...)
 //#endif
 
-/*
-** If we compile with the SQLITE_TEST macro set, then the following block of code will give us the ability to simulate a disk I/O error.  This
+/* If we compile with the SQLITE_TEST macro set, then the following block of code will give us the ability to simulate a disk I/O error.  This
 ** is used for testing the I/O recovery logic.
 */
 #ifdef _TEST
@@ -28,8 +27,7 @@ __device__ int libcu_diskfull = 0;
 int libcu_open_file_count = 0;
 #endif
 
-/*
-** The default SQLite sqlite3_vfs implementations do not allocate memory (actually, os_unix.c allocates a small amount of memory
+/* The default SQLite sqlite3_vfs implementations do not allocate memory (actually, os_unix.c allocates a small amount of memory
 ** from within OsOpen()), but some third-party implementations may. So we test the effects of a malloc() failing and the sqlite3OsXXX()
 ** function returning SQLITE_IOERR_NOMEM using the DO_OS_MALLOC_TEST macro.
 **
@@ -60,8 +58,7 @@ int libcu_memdebug_vfs_oom_test = 1;
 #define DO_OS_MALLOC_TEST(x)
 #endif
 
-/*
-** The following routines are convenience wrappers around methods of the vsystemfile object.  This is mostly just syntactic sugar. All
+/* The following routines are convenience wrappers around methods of the vsystemfile object.  This is mostly just syntactic sugar. All
 ** of this would be completely automatic if SQLite were coded using C++ instead of plain old C.
 */
 __host_device__ void vsys_close(vsystemfile *p) { if (p->methods) { p->methods->close(p); p->methods = nullptr; } } //: sqlite3OsClose
@@ -74,8 +71,7 @@ __host_device__ RC vsys_lock(vsystemfile *p, int lockType) { DO_OS_MALLOC_TEST(p
 __host_device__ RC vsys_unlock(vsystemfile *p, int lockType) { return p->methods->unlock(p, lockType); } //: sqlite3OsUnlock
 __host_device__ RC vsys_checkReservedLock(vsystemfile *p, int *res) { DO_OS_MALLOC_TEST(id); return p->methods->checkReservedLock(p, res); } //: sqlite3OsCheckReservedLock
 
-/*
-** Use sqlite3OsFileControl() when we are doing something that might fail and we need to know about the failures.  Use sqlite3OsFileControlHint()
+/* Use sqlite3OsFileControl() when we are doing something that might fail and we need to know about the failures.  Use sqlite3OsFileControlHint()
 ** when simply tossing information over the wall to the VFS and we do not really care if the VFS receives and understands the information since it
 ** is only a hint and can be safely ignored.  The sqlite3OsFileControlHint() routine has no return value since the return value would be meaningless.
 */
@@ -147,8 +143,7 @@ __host_device__ RC vsys_openMalloc(vsystem *p, const char *fileName, vsystemfile
 }
 __host_device__ void vsys_closeAndFree(vsystemfile *p) { assert(p); vsys_close(p); mfree(p); } // : sqlite3OsCloseFree
 
-/*
-** This function is a wrapper around the OS specific implementation of sqlite3_os_init(). The purpose of the wrapper is to provide the
+/* This function is a wrapper around the OS specific implementation of sqlite3_os_init(). The purpose of the wrapper is to provide the
 ** ability to simulate a malloc failure, so that the handling of an error in sqlite3_os_init() by the upper layers can be tested.
 */
 __host_device__ RC vsystemFakeInit() //: sqlite3OsInit

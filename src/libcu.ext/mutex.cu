@@ -1,10 +1,9 @@
-#include <ext/mutex.h>
+#include <ext/mutex.h> //: mutex.c
 #include <assert.h>
 #ifndef LIBCU_MUTEX_OMIT
 
 #if defined(_DEBUG)
-/*
-** For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
+/* For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
 ** allocate a mutex while the system is uninitialized.
 */
 static __hostb_device__ _WSD bool _mutexIsInit = false;
@@ -95,8 +94,7 @@ __host_device__ bool mutex_tryenter(mutex *m) //: sqlite3_mutex_try
 	return true;
 }
 
-/*
-** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
+/* The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior is undefined if the mutex 
 ** is not currently entered. If a NULL pointer is passed as an argument this function is a no-op.
 */
 __host_device__ void mutex_leave(mutex *m) //: sqlite3_mutex_leave

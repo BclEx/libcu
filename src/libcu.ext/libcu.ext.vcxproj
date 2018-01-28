@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <CudaCompile Include="math.cu" />
+    <CudaCompile Include="pcache1.cu" />
     <CudaCompile Include="random.cu">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </CudaCompile>
@@ -69,6 +70,7 @@
     <ClInclude Include="..\include\ext\global.h" />
     <ClInclude Include="..\include\ext\math.h" />
     <ClInclude Include="..\include\ext\mutex.h" />
+    <ClInclude Include="..\include\ext\pcache.h" />
     <ClInclude Include="..\include\ext\status.h" />
     <ClInclude Include="..\include\ext\utf.h" />
     <ClInclude Include="..\include\ext\util.h" />
@@ -114,12 +116,6 @@
     </ClCompile>
     <ClCompile Include="sqlite\os_win.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="vsystem-unix.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="vsystem-win.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">

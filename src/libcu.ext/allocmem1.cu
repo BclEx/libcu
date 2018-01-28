@@ -1,4 +1,4 @@
-#include <stdlibcu.h>
+#include <stdlibcu.h> //: mem1.c
 #include <ext/alloc.h>
 #include <assert.h>
 
@@ -38,8 +38,7 @@ static malloc_zone_t *_sqliteZone_;
 #define LIBCU_USEMSIZE
 #endif
 
-/*
-** Include the malloc.h header file, if necessary.  Also set define macro LIBCU_MALLOCSIZE to the appropriate function name, which is _msize()
+/* Include the malloc.h header file, if necessary.  Also set define macro LIBCU_MALLOCSIZE to the appropriate function name, which is _msize()
 ** for MSVC and malloc_usable_size() for most other systems (e.g. Linux). The memory size function can always be overridden manually by defining
 ** the macro LIBCU_MALLOCSIZE to the desired function name.
 */
@@ -58,8 +57,7 @@ static malloc_zone_t *_sqliteZone_;
 
 #endif /* __APPLE__ or not __APPLE__ */
 
-/*
-** Like malloc(), but remember the size of the allocation so that we can find it later using sqlite3MemSize().
+/* Like malloc(), but remember the size of the allocation so that we can find it later using sqlite3MemSize().
 **
 ** For this low-level routine, we are guaranteed that nByte>0 because cases of nByte<=0 will be intercepted and dealt with by higher level routines.
 */
@@ -89,8 +87,7 @@ static __host_device__ void *memoryMalloc(int size)
 #endif
 }
 
-/*
-** Like free() but works for allocations obtained from sqlite3MemMalloc() or sqlite3MemRealloc().
+/* Like free() but works for allocations obtained from sqlite3MemMalloc() or sqlite3MemRealloc().
 **
 ** For this low-level routine, we already know that prior!=0 since cases where prior==0 will have been intecepted and dealt with
 ** by higher-level routines.
@@ -121,8 +118,7 @@ static __host_device__ int memorySize(void *prior)
 #endif
 }
 
-/*
-** Like realloc().  Resize an allocation previously obtained from sqlite3MemMalloc().
+/* Like realloc().  Resize an allocation previously obtained from sqlite3MemMalloc().
 **
 ** For this low-level interface, we know that pPrior!=0.  Cases where pPrior==0 while have been intercepted by higher-level routine and
 ** redirected to xMalloc.  Similarly, we know that nByte>0 because cases where nByte<=0 will have been intercepted by higher-level
@@ -161,9 +157,6 @@ static __host_device__ int memoryRoundup(int size)
 	return _ROUND8(size);
 }
 
-// Round up a request size to the next valid allocation size.
-__device__ size_t MemRoundup(size_t size) { return _ROUND8(size); }
-
 /* Initialize this module. */
 static __host_device__ RC memoryInitialize(void *notUsed)
 {
@@ -191,9 +184,11 @@ static __host_device__ RC memoryShutdown(void *notUsed)
 	return RC_OK;
 }
 
-// This routine is the only routine in this file with external linkage.
-// Populate the low-level memory allocation function pointers in sqlite3GlobalConfig.m with pointers to the routines in this file.
-static __host_constant__ const alloc_methods _defaultMethods = {
+/* This routine is the only routine in this file with external linkage.
+**
+** Populate the low-level memory allocation function pointers in sqlite3GlobalConfig.m with pointers to the routines in this file.
+*/
+static __host_constant__ const alloc_methods _mem1DefaultMethods = {
 	memoryMalloc,
 	memoryFree,
 	memoryRealloc,
@@ -203,11 +198,10 @@ static __host_constant__ const alloc_methods _defaultMethods = {
 	memoryShutdown,
 	nullptr
 };
-
 __device__ void __allocsystemSetDefault()
 {
 	//sqlite3_config(CONFIG_MALLOC, &defaultMethods);
-	__allocsystem = _defaultMethods;
+	__allocsystem = _mem1DefaultMethods;
 }
 
 #endif /* LIBCU_SYSTEM_MALLOC */

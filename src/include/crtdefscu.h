@@ -74,6 +74,7 @@ typedef unsigned int _uintptr_t;
 
 #include <cuda_runtime.h>
 #include <stdint.h>
+#define uint unsigned int
 #define __LIBCU__
 
 #define HAS_STDIO_BUFSIZ_NONE__

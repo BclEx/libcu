@@ -33,12 +33,12 @@ __BEGIN_DECLS;
 #define STATUS_MEMORY_USED			0
 #define STATUS_PAGECACHE_USED       1
 #define STATUS_PAGECACHE_OVERFLOW   2
-#define STATUS_SCRATCH_USED         3
-#define STATUS_SCRATCH_OVERFLOW     4
+//#define STATUS_SCRATCH_USED         3
+//#define STATUS_SCRATCH_OVERFLOW     4
 #define STATUS_MALLOC_SIZE          5
 #define STATUS_PARSER_STACK         6
 #define STATUS_PAGECACHE_SIZE       7
-#define STATUS_SCRATCH_SIZE         8
+//#define STATUS_SCRATCH_SIZE         8
 #define STATUS_MALLOC_COUNT         9
 
 // CAPI3REF: Libcu Runtime Status
@@ -73,6 +73,9 @@ extern __host_device__ void status_inc(STATUS op, int n);
 extern __host_device__ void status_dec(STATUS op, int n);
 /* Adjust the highwater mark if necessary. */
 extern __host_device__ void status_max(STATUS op, int x);
+
+/* Count the number of slots of lookaside memory that are outstanding */
+extern __host_device__ int taglookasideUsed(tagbase_t *tag, int *highwater);
 
 __END_DECLS;
 #endif	/* _EXT_STATUS_H */

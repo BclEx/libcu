@@ -21,6 +21,7 @@
     <CudaCompile Include="vsystem-gpu.cu" />
     <CudaCompile Include="vsystem-map.cu" />
     <CudaCompile Include="math.cu" />
+    <CudaCompile Include="pcache1.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -89,12 +90,13 @@
       <Filter>sqlite</Filter>
     </ClInclude>
     <ClInclude Include="libcu.sqlite.h" />
+    <ClInclude Include="..\include\ext\pcache.h">
+      <Filter>include\ext</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mutex-unix.cpp" />
     <ClCompile Include="mutex-win.cpp" />
-    <ClCompile Include="vsystem-unix.cpp" />
-    <ClCompile Include="vsystem-win.cpp" />
     <ClCompile Include="sqlite\mutex_unix.c">
       <Filter>sqlite</Filter>
     </ClCompile>

@@ -1,6 +1,5 @@
-#include <ext/global.h>
+#include <ext/global.h> //: random.c
 #include <assert.h>
-
 
 /* All threads share a single random number generator. This structure is the current state of the generator. */
 static __hostb_device__ _WSD struct PrngGlobal {
@@ -63,8 +62,7 @@ __device__ void randomness_(int n, void *p) //: sqlite3_randomness
 }
 
 #ifndef LIBCU_UNTESTABLE
-/*
-** For testing purposes, we sometimes want to preserve the state of PRNG and restore the PRNG to its saved state at a later time, or
+/* For testing purposes, we sometimes want to preserve the state of PRNG and restore the PRNG to its saved state at a later time, or
 ** to reset the PRNG to its initial state.  These routines accomplish those tasks.
 **
 ** The sqlite3_test_control() interface calls these routines to control the PRNG.

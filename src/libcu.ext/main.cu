@@ -1,4 +1,4 @@
-#include <ext/global.h>
+#include <ext/global.h> //: main.c
 #include <stringcu.h>
 #include <stdargcu.h>
 #include <assert.h>
@@ -28,8 +28,7 @@ __host_device__ int libcu_libversion_number() { return LIBCU_VERSION_NUMBER; }
 */
 __host_device__ int libcu_threadsafe() { return LIBCU_THREADSAFE; }
 
-/*
-** When compiling the test fixture or with debugging enabled (on Win32), this variable being set to non-zero will cause OSTRACE macros to emit
+/* When compiling the test fixture or with debugging enabled (on Win32), this variable being set to non-zero will cause OSTRACE macros to emit
 ** extra diagnostic information.
 */
 #ifdef LIBCU_HAVE_OSTRACE
@@ -40,31 +39,27 @@ bool _runtimeOSTrace = LIBCU_DEBUG_OSTRACE;
 #endif
 
 #if !defined(LIBCU_OMIT_TRACE) && defined(LIBCU_ENABLE_IOTRACE)
-/*
-** If the following function pointer is not NULL and if SQLITE_ENABLE_IOTRACE is enabled, then messages describing
+/* If the following function pointer is not NULL and if SQLITE_ENABLE_IOTRACE is enabled, then messages describing
 ** I/O active are written using this function.  These messages are intended for debugging activity only.
 */
 //void (*sqlite3IoTrace)(const char*, ...) = 0;
 #endif
 
-/*
-** If the following global variable points to a string which is the name of a directory, then that directory will be used to store
+/* If the following global variable points to a string which is the name of a directory, then that directory will be used to store
 ** temporary files.
 **
 ** See also the "PRAGMA temp_store_directory" SQL command.
 */
 __hostb_device__ char *libcu_tempDirectory = nullptr;
 
-/*
-** If the following global variable points to a string which is the name of a directory, then that directory will be used to store
+/* If the following global variable points to a string which is the name of a directory, then that directory will be used to store
 ** all database files specified with a relative pathname.
 **
 ** See also the "PRAGMA data_store_directory" SQL command.
 */
 __hostb_device__ char *libcu_dataDirectory = nullptr;
 
-/*
-** Initialize Libcu.  
+/* Initialize Libcu.  
 **
 ** This routine must be called to initialize the memory allocation, VFS, and mutex subsystems prior to doing any serious work with
 ** Libcu.  But as long as you do not compile with SQLITE_OMIT_AUTOINIT this routine will be called automatically by key routines such as
@@ -115,8 +110,8 @@ __host_device__ RC runtimeInitialize()
 	** MutexAlloc() is called for a static mutex prior to initializing the malloc subsystem - this implies that the allocation of a static
 	** mutex must not require support from the malloc subsystem.
 	*/
-	MUTEX_LOGIC(mutex *master = mutexAlloc(MUTEX_STATIC_MASTER);)
-		mutex_enter(master);
+	MUTEX_LOGIC(mutex *master = mutexAlloc(MUTEX_STATIC_MASTER));
+	mutex_enter(master);
 	_runtimeConfig.isMutexInit = true;
 	if (!_runtimeConfig.isMallocInit)
 		rc = allocInitialize();
@@ -160,14 +155,14 @@ __host_device__ RC runtimeInitialize()
 #endif
 		//memset(&sqlite3BuiltinFunctions, 0, sizeof(sqlite3BuiltinFunctions));
 		//sqlite3RegisterBuiltinFunctions();
-		if (!_runtimeConfig.isPCacheInit)
-			//rc = allocCacheInitialize();
+		if (!_runtimeConfig.isPcacheInit)
+			rc = pcacheInitialize();
 		if (rc == RC_OK) {
-			_runtimeConfig.isPCacheInit = true;
-			//rc = vsystemInitialize();
+			_runtimeConfig.isPcacheInit = true;
+			rc = vsystemInitialize();
 		}
 		if (rc == RC_OK) {
-			//allocCacheBufferSetup(_runtimeConfig.page, _runtimeConfig.pageSize, _runtimeConfig.pages);
+			pcacheBufferSetup(_runtimeConfig.page, _runtimeConfig.pageSize, _runtimeConfig.pages);
 			_runtimeConfig.isInit = true;
 #ifdef LIBCU_EXTRAINIT
 			runExtraInit = true;
@@ -198,7 +193,7 @@ __host_device__ RC runtimeInitialize()
 		assert(sizeof(x) == 8);
 		assert(sizeof(x) == sizeof(y));
 		memcpy(&y, &x, 8);
-		assert(isnan(y));
+		assert(math_isnan(y));
 	}
 #endif
 #endif
@@ -209,16 +204,14 @@ __host_device__ RC runtimeInitialize()
 	if (runExtraInit)
 		rc = LIBCU_EXTRAINIT(nullptr);
 #endif
-
 	return rc;
 }
 
-/*
-** Undo the effects of sqlite3_initialize().  Must not be called while there are outstanding database connections or memory allocations or
+/* Undo the effects of sqlite3_initialize().  Must not be called while there are outstanding database connections or memory allocations or
 ** while any part of Libcu is otherwise in use in any thread.  This routine is not threadsafe.  But it is safe to invoke this routine
 ** on when Libcu is already shut down.  If Libcu is already shut down when this routine is invoked, then this routine is a harmless no-op.
 */
-__host_device__ RC runtimeShutdown()
+__host_device__ RC runtimeShutdown() //: sqlite3_shutdown
 {
 #ifdef OMIT_WSD
 	int rc = wsdinit(4096, 24);
@@ -230,13 +223,13 @@ __host_device__ RC runtimeShutdown()
 		void LIBCU_EXTRASHUTDOWN();
 		LIBCU_EXTRASHUTDOWN();
 #endif
-		//vsystemShutdown();
+		vsystemShutdown();
 		//sqlite3_reset_auto_extension();
 		_runtimeConfig.isInit = false;
 	}
-	if (_runtimeConfig.isPCacheInit) {
-		//allocCacheShutdown();
-		_runtimeConfig.isPCacheInit = false;
+	if (_runtimeConfig.isPcacheInit) {
+		pcacheShutdown();
+		_runtimeConfig.isPcacheInit = false;
 	}
 	if (_runtimeConfig.isMallocInit) {
 		allocShutdown();
@@ -256,13 +249,12 @@ __host_device__ RC runtimeShutdown()
 	return RC_OK;
 }
 
-/*
-** This API allows applications to modify the global configuration of the Libcu library at run-time.
+/* This API allows applications to modify the global configuration of the Libcu library at run-time.
 **
 ** This routine should only be called when there are no outstanding database connections or memory allocations.  This routine is not
 ** threadsafe.  Failure to heed these warnings can lead to unpredictable behavior.
 */
-__host_device__ RC runtimeConfigv(CONFIG op, va_list va)
+__host_device__ RC runtimeConfigv(CONFIG op, va_list va) //: sqlite3_config
 {
 	RC rc = RC_OK;
 	/* runtimeConfig() shall return RC_MISUSE if it is invoked while the Libcu library is in use. */
@@ -319,7 +311,8 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		** or disables the collection of memory allocation statistics. */
 		_runtimeConfig.memstat = va_arg(va, int);
 		break; }
-	case CONFIG_SCRATCH: {
+	case CONFIG_SMALL_MALLOC: {
+		_runtimeConfig.smallMalloc = va_arg(va, int);
 		break; }
 	case CONFIG_PAGECACHE: {
 		/* EVIDENCE-OF: R-18761-36601 There are three arguments to SQLITE_CONFIG_PAGECACHE: A pointer to 8-byte aligned memory (pMem),
@@ -340,20 +333,20 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		/* now an error */
 		rc = RC_ERROR;
 		break; }
-	//case CONFIG_PCACHE2: {
-	//	/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-	//	** object. This object specifies the interface to a custom page cache implementation. */
-	//	_runtimeConfig.pcache2System = *va_arg(va, pcache_methods2 *);
-	//	break; }
-	//case CONFIG_GETPCACHE2: {
-	//	/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
-	//	** object. Libcu copies of the current page cache implementation into that object. */
-	//	if (!_runtimeConfig.pcache2System.initialize)
-	//		sqlite3PCacheSetDefault();
-	//	*va_arg(va, pcache_methods2 *) = _runtimeConfig.pcache2System;
-	//	break; }
-							/* EVIDENCE-OF: R-06626-12911 The SQLITE_CONFIG_HEAP option is only available if Libcu is compiled with either SQLITE_ENABLE_MEMSYS3 or
-							** SQLITE_ENABLE_MEMSYS5 and returns SQLITE_ERROR if invoked otherwise. */
+						   //case CONFIG_PCACHE2: {
+						   //	/* EVIDENCE-OF: R-63325-48378 The SQLITE_CONFIG_PCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+						   //	** object. This object specifies the interface to a custom page cache implementation. */
+						   //	_runtimeConfig.pcache2System = *va_arg(va, pcache_methods2 *);
+						   //	break; }
+						   //case CONFIG_GETPCACHE2: {
+						   //	/* EVIDENCE-OF: R-22035-46182 The SQLITE_CONFIG_GETPCACHE2 option takes a single argument which is a pointer to an sqlite3_pcache_methods2
+						   //	** object. Libcu copies of the current page cache implementation into that object. */
+						   //	if (!_runtimeConfig.pcache2System.initialize)
+						   //		sqlite3PCacheSetDefault();
+						   //	*va_arg(va, pcache_methods2 *) = _runtimeConfig.pcache2System;
+						   //	break; }
+						   /* EVIDENCE-OF: R-06626-12911 The SQLITE_CONFIG_HEAP option is only available if Libcu is compiled with either SQLITE_ENABLE_MEMSYS3 or
+						   ** SQLITE_ENABLE_MEMSYS5 and returns SQLITE_ERROR if invoked otherwise. */
 #if defined(LIBCU_ENABLE_MEMSYS3) || defined(LIBCU_ENABLE_MEMSYS5)
 	case CONFIG_HEAP: {
 		/* EVIDENCE-OF: R-19854-42126 There are three arguments to SQLITE_CONFIG_HEAP: An 8-byte aligned pointer to the memory, the
@@ -407,12 +400,11 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		** enabled. If the parameter is zero, then URI handling is globally disabled. */
 		_runtimeConfig.openUri = va_arg(va, int);
 		break; }
-
-					 //case CONFIG_COVERING_INDEX_SCAN: {
-					 //	/* EVIDENCE-OF: R-36592-02772 The SQLITE_CONFIG_COVERING_INDEX_SCAN option takes a single integer argument which is interpreted as a
-					 //	** boolean in order to enable or disable the use of covering indices for full table scans in the query optimizer. */
-					 //	_runtimeConfig.bUseCis = va_arg(va, int);
-					 //	break; }
+	case CONFIG_COVERING_INDEX_SCAN: {
+		/* EVIDENCE-OF: R-36592-02772 The SQLITE_CONFIG_COVERING_INDEX_SCAN option takes a single integer argument which is interpreted as a
+		** boolean in order to enable or disable the use of covering indices for full table scans in the query optimizer. */
+		_runtimeConfig.useCis = va_arg(va, int);
+		break; }
 #ifdef LIBCU_ENABLE_SQLLOG
 	case CONFIG_SQLLOG: {
 		typedef void(*SQLLOGFUNC_t)(void*,tagbase_t*,const char*,int);
@@ -430,14 +422,13 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va)
 		** EVIDENCE-OF: R-34993-45031 The maximum allowed mmap size will be silently truncated if necessary so that it does not exceed the
 		** compile-time maximum mmap size set by the SQLITE_MAX_MMAP_SIZE compile-time option.
 		*/
-		if (maxMmap < 0 || maxMmap > LIBCU_MAXMMAPSIZE)
-			maxMmap = LIBCU_MAXMMAPSIZE;
+		if (maxMmap < 0 || maxMmap > LIBCU_MAXMMAPSIZE) maxMmap = LIBCU_MAXMMAPSIZE;
 		if (sizeMmap < 0) sizeMmap = LIBCU_DEFAULTMMAPSIZE;
 		if (sizeMmap > maxMmap) sizeMmap = maxMmap;
 		_runtimeConfig.maxMmap = maxMmap;
 		_runtimeConfig.sizeMmap = sizeMmap;
 		break; }
-#if LIBCU_OS_WIN && defined(LIBCU_WIN32_MALLOC) // IMP: R-04780-55815
+#if __OS_WIN && defined(LIBCU_WIN32_MALLOC) // IMP: R-04780-55815
 	case CONFIG_WIN32_HEAPSIZE: {
 		/* EVIDENCE-OF: R-34926-03360 SQLITE_CONFIG_WIN32_HEAPSIZE takes a 32-bit unsigned integer value that specifies the maximum size of the created heap. */
 		_runtimeConfig.heaps = va_arg(va, int);
@@ -461,19 +452,18 @@ __host_device__ RC runtimeConfig(CONFIG op, ...) { va_list va; va_start(va, op);
 STDARG(RC, runtimeConfig, runtimeConfigv(op, va), CONFIG op);
 #endif
 
-/*
-** Set up the lookaside buffers for a database connection. Return SQLITE_OK on success.  
+/* Set up the lookaside buffers for a database connection. Return SQLITE_OK on success.  
 ** If lookaside is already active, return SQLITE_BUSY.
 **
 ** The size parameter is the number of bytes in each lookaside slot. The count parameter is the number of slots.  If pStart is NULL the
 ** space for the lookaside memory is obtained from sqlite3_malloc(). If pStart is not NULL then it is size*count bytes of memory to use for
 ** the lookaside memory.
 */
-static __host_device__ bool setupLookaside(tagbase_t *tag, void *buf, int size, int count)
+static __host_device__ RC setupLookaside(tagbase_t *tag, void *buf, int size, int count)
 {
 #ifndef OMIT_LOOKASIDE
-	if (tag->lookaside.outs)
-		return false;
+	if (taglookasideUsed(tag, 0) > 0) return RC_BUSY;
+
 	// Free any existing lookaside buffer for this handle before allocating a new one so we don't have to have space for both at the same time.
 	if (tag->lookaside.malloced)
 		mfree(tag->lookaside.start);
@@ -494,14 +484,15 @@ static __host_device__ bool setupLookaside(tagbase_t *tag, void *buf, int size, 
 	}
 	else start = buf;
 	tag->lookaside.start = start;
+	tag->lookaside.init = nullptr;
 	tag->lookaside.free = nullptr;
 	tag->lookaside.size = (uint16_t)size;
 	if (start) {
 		assert(size > (int)sizeof(LookasideSlot *));
 		LookasideSlot *p = (LookasideSlot *)start;
 		for (int i = count-1; i >= 0; i--) {
-			p->next = tag->lookaside.free;
-			tag->lookaside.free = p;
+			p->next = tag->lookaside.init;
+			tag->lookaside.init = p;
 			p = (LookasideSlot *)&((uint8_t *)p)[size];
 		}
 		tag->lookaside.end = p;
@@ -513,13 +504,13 @@ static __host_device__ bool setupLookaside(tagbase_t *tag, void *buf, int size, 
 		tag->lookaside.end = tag;
 		tag->lookaside.disable = 1;
 		tag->lookaside.malloced = false;
+		tag->lookaside.slots = 0;
 	}
 #endif
-	return true;
+	return RC_OK;
 }
 
-/*
-** This is the routine that actually formats the sqlite3_log() message. We house it in a separate routine from sqlite3_log() to avoid using
+/* This is the routine that actually formats the sqlite3_log() message. We house it in a separate routine from sqlite3_log() to avoid using
 ** stack space on small-stack systems when logging is disabled.
 **
 ** sqlite3_log() must render into a static buffer.  It cannot dynamically allocate memory because it might be called while the memory allocator
@@ -546,8 +537,7 @@ __host_device__ void runtimeLogv(int errCode, const char *format, va_list va)
 
 
 #if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-/*
-** A version of printf() that understands %lld.  Used for debugging. The printf() built into some versions of windows does not understand %lld
+/* A version of printf() that understands %lld.  Used for debugging. The printf() built into some versions of windows does not understand %lld
 ** and segfaults if you give it a long long int.
 */
 //void sqlite3DebugPrintf(const char *zFormat, ...)
@@ -565,8 +555,7 @@ __host_device__ void runtimeLogv(int errCode, const char *format, va_list va)
 //}
 #endif
 
-/*
-** The following routines are substitutes for constants SQLITE_CORRUPT, SQLITE_MISUSE, SQLITE_CANTOPEN, SQLITE_NOMEM and possibly other error
+/* The following routines are substitutes for constants SQLITE_CORRUPT, SQLITE_MISUSE, SQLITE_CANTOPEN, SQLITE_NOMEM and possibly other error
 ** constants.  They serve two purposes:
 **
 **   1.  Serve as a convenient place to set a breakpoint in a debugger to detect when version error conditions occurs.

@@ -76,22 +76,12 @@ extern __device__ int convert_getvarintLength(uint64_t v);
 
 #pragma endregion
 
-#ifndef OMIT_INLINECONVERT
+#if 0
 __forceinline __device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
 __forceinline __device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
-__forceinline __device__ void convert_put2(unsigned char *p, uint32_t v)
-{
-	p[0] = (uint8_t)(v>>8);
-	p[1] = (uint8_t)v;
-}
+__forceinline __device__ void convert_put2(unsigned char *p, uint32_t v) { p[0] = (uint8_t)(v>>8); p[1] = (uint8_t)v; }
 __forceinline __device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
-__forceinline __device__ void convert_put4(unsigned char *p, uint32_t v)
-{
-	p[0] = (uint8_t)(v>>24);
-	p[1] = (uint8_t)(v>>16);
-	p[2] = (uint8_t)(v>>8);
-	p[3] = (uint8_t)v;
-}
+__forceinline __device__ void convert_put4(unsigned char *p, uint32_t v) { p[0] = (uint8_t)(v>>24); p[1] = (uint8_t)(v>>16); p[2] = (uint8_t)(v>>8); p[3] = (uint8_t)v; }
 #else
 extern __device__ uint16_t convert_get2nz(const uint8_t *p);
 extern __device__ uint16_t convert_get2(const uint8_t *p);

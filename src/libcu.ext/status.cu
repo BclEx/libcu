@@ -13,7 +13,7 @@ static __hostb_device__ _WSD struct Status {
 } _status = { {0,}, {0,} };
 
 /* Elements of _status[] are protected by either the memory allocator mutex, or by the pcache1 mutex.  The following array determines which. */
-static __host_constant__ const char MutexStatics[] = {
+static __host_constant__ const char statusMutexStatics[] = {
 	0,  // STATUS_MEMORY_USED
 	1,  // STATUS_PAGECACHE_USED
 	1,  // STATUS_PAGECACHE_OVERFLOW
@@ -43,13 +43,12 @@ __host_device__ int64_t status_now(STATUS op) //: sqlite3StatusValue
 {
 	_statusInit;
 	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
+	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	return _status.nowValue[op];
 }
 
-/*
-** Add N to the value of a status record.  The caller must hold the appropriate mutex.  (Locking is checked by assert()).
+/* Add N to the value of a status record.  The caller must hold the appropriate mutex.  (Locking is checked by assert()).
 **
 ** The status_inc() routine can accept positive or negative values for N. The value of N is added to the current status value and the high-water
 ** mark is adjusted if necessary.
@@ -60,8 +59,8 @@ __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 {
 	_statusInit;
 	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
+	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(mutex_held(statusMutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	_status.nowValue[op] += n;
 	if (_status.nowValue[op] > _status.maxValue[op])
 		_status.maxValue[op] = _status.nowValue[op];
@@ -70,27 +69,29 @@ __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 __host_device__ void status_dec(STATUS op, int n) //: sqlite3StatusDown
 {
 	_statusInit;
+	assert(n >= 0);
+	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
 	_status.nowValue[op] -= n;
 }
 
 /* Adjust the highwater mark if necessary. The caller must hold the appropriate mutex. */
-__host_device__ void status_max(STATUS op, int x)
+__host_device__ void status_max(STATUS op, int x) //: sqlite3StatusHighwater
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(MutexStatics));
-	assert(mutex_held(MutexStatics[op] ? allocCacheMutex() : allocMutex()));
-	assert(op == STATUS_MALLOC_SIZE || op == STATUS_PAGECACHE_SIZE || op == STATUS_SCRATCH_SIZE || op == STATUS_PARSER_STACK);
+	assert(x >= 0);
 	statusValue_t newValue = (statusValue_t)x;
+	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
+	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(mutex_held(statusMutexStatics[op] ? allocCacheMutex() : allocMutex()));
+	assert(op == STATUS_MALLOC_SIZE || op == STATUS_PAGECACHE_SIZE || op == STATUS_PARSER_STACK);
 	if (newValue > _status.maxValue[op])
 		_status.maxValue[op] = newValue;
 }
 
 /* Query status information. */
-__host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag)
+__host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag) //: sqlite3_status64
 {
 	_statusInit;
 	if (op < 0 || op >= _LENGTHOF(_status.nowValue))
@@ -98,7 +99,7 @@ __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, boo
 #ifdef ENABLE_API_ARMOR
 	if (!current || !highwater) return RC_MISUSE_BKPT;
 #endif
-	mutex *mutex = MutexStatics[op] ? allocCacheMutex() : allocMutex();
+	mutex *mutex = statusMutexStatics[op] ? pcacheMutex() : allocMutex();
 	mutex_enter(mutex);
 	*current = _status.nowValue[op];
 	*highwater = _status.maxValue[op];
@@ -108,7 +109,7 @@ __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, boo
 	(void)mutex; // Prevent warning when LIBCU_THREADSAFE = 0
 	return RC_OK;
 }
-__host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFlag)
+__host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFlag) //: sqlite3_status
 {
 #ifdef ENABLE_API_ARMOR
 	if (!current || !highwater) return RC_MISUSE_BKPT;
@@ -117,6 +118,23 @@ __host_device__ RC status(STATUS op, int *current, int *highwater, bool resetFla
 	RC rc = status64(op, &current2, &highwater2, resetFlag);
 	if (!rc) { *current = (int)current2; *highwater = (int)highwater2; }
 	return rc;
+}
+
+/* Return the number of LookasideSlot elements on the linked list */
+__host_device__ static uint32_t countLookasideSlots(LookasideSlot *p)
+{
+	uint32_t cnt = 0;
+	while (p) { p = p->next; cnt++; }
+	return cnt;
+}
+
+/* Count the number of slots of lookaside memory that are outstanding */
+__host_device__ int taglookasideUsed(tagbase_t *tag, int *highwater) //: sqlite3LookasideUsed
+{
+	uint32_t inits = countLookasideSlots(tag->lookaside.init);
+	uint32_t frees = countLookasideSlots(tag->lookaside.free);
+	if (highwater) *highwater = tag->lookaside.slots - inits;
+	return tag->lookaside.slots - inits + frees;
 }
 
 /* Query status information for a single tag object */
@@ -130,10 +148,16 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 	mutex_enter(tag->mutex);
 	switch (op) {
 	case TAGSTATUS_LOOKASIDE_USED: {
-		*current = tag->lookaside.outs;
-		*highwater = tag->lookaside.maxOuts;
-		if (resetFlag)
-			tag->lookaside.maxOuts = tag->lookaside.outs;
+		*current = taglookasideUsed(tag, highwater);
+		if (resetFlag) {
+			LookasideSlot *p = tag->lookaside.free;
+			if (p) {
+				while (p->next) p = p->next;
+				p->next = tag->lookaside.init;
+				tag->lookaside.init = tag->lookaside.free;
+				tag->lookaside.free = nullptr;
+			}
+		}
 		break; }
 	case TAGSTATUS_LOOKASIDE_HIT:
 	case TAGSTATUS_LOOKASIDE_MISS_SIZE:
@@ -148,120 +172,8 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 		if (resetFlag)
 			tag->lookaside.stats[op - TAGSTATUS_LOOKASIDE_HIT] = 0;
 		break; }
-	default: { rc = 1; }
+	default: { rc = RC_ERROR; }
 	}
 	mutex_leave(tag->mutex);
 	return rc;
 }
-
-//case TAGSTATUS_CACHE_USED_SHARED:
-//case TAGSTATUS_CACHE_USED: {
-//	/* 
-//	** Return an approximation for the amount of memory currently used by all pagers associated with the given tag object.  The
-//	** highwater mark is meaningless and is returned as zero.
-//	*/
-//	int totalUsed = 0;
-//	int i;
-//	sqlite3BtreeEnterAll(db);
-//	for(i=0; i<db->nDb; i++){
-//		Btree *pBt = db->aDb[i].pBt;
-//		if( pBt ){
-//			Pager *pPager = sqlite3BtreePager(pBt);
-//			int nByte = sqlite3PagerMemUsed(pPager);
-//			if( op==SQLITE_DBSTATUS_CACHE_USED_SHARED ){
-//				nByte = nByte / sqlite3BtreeConnectionCount(pBt);
-//			}
-//			totalUsed += nByte;
-//		}
-//	}
-//	sqlite3BtreeLeaveAll(db);
-//	*current = totalUsed;
-//	*highwater = 0;
-//	break; }
-//case TAGSTATUS_SCHEMA_USED: {
-//	/*
-//	** *current gets an accurate estimate of the amount of memory used to store the schema for all databases (main, temp, and any ATTACHed
-//	** databases.  *highwater is set to zero.
-//	*/
-//	int i; // Used to iterate through schemas
-//	int nByte = 0; // Used to accumulate return value
-//	sqlite3BtreeEnterAll(db);
-//	db->pnBytesFreed = &nByte;
-//	for(i=0; i<db->nDb; i++){
-//		Schema *pSchema = db->aDb[i].pSchema;
-//		if( ALWAYS(pSchema!=0) ){
-//			HashElem *p;
-
-//			nByte += sqlite3GlobalConfig.m.xRoundup(sizeof(HashElem)) * (
-//				pSchema->tblHash.count 
-//				+ pSchema->trigHash.count
-//				+ pSchema->idxHash.count
-//				+ pSchema->fkeyHash.count
-//				);
-//			nByte += sqlite3_msize(pSchema->tblHash.ht);
-//			nByte += sqlite3_msize(pSchema->trigHash.ht);
-//			nByte += sqlite3_msize(pSchema->idxHash.ht);
-//			nByte += sqlite3_msize(pSchema->fkeyHash.ht);
-
-//			for(p=sqliteHashFirst(&pSchema->trigHash); p; p=sqliteHashNext(p)){
-//				sqlite3DeleteTrigger(db, (Trigger*)sqliteHashData(p));
-//			}
-//			for(p=sqliteHashFirst(&pSchema->tblHash); p; p=sqliteHashNext(p)){
-//				sqlite3DeleteTable(db, (Table *)sqliteHashData(p));
-//			}
-//		}
-//	}
-//	db->pnBytesFreed = 0;
-//	sqlite3BtreeLeaveAll(db);
-//	*highwater = 0;
-//	*current = bytes;
-//	break; }
-//case TAGSTATUS_STMT_USED: {
-//	/*
-//	** *pCurrent gets an accurate estimate of the amount of memory used to store all prepared statements.
-//	** *pHighwater is set to zero.
-//	*/
-//	struct Vdbe *pVdbe;         /* Used to iterate through VMs */
-//	int nByte = 0;              /* Used to accumulate return value */
-
-//	db->pnBytesFreed = &nByte;
-//	for(pVdbe=db->pVdbe; pVdbe; pVdbe=pVdbe->pNext){
-//		sqlite3VdbeClearObject(db, pVdbe);
-//		sqlite3DbFree(db, pVdbe);
-//	}
-//	db->pnBytesFreed = 0;
-
-//	*pHighwater = 0;  /* IMP: R-64479-57858 */
-//	*pCurrent = nByte;
-//	break; }
-//case SQLITE_DBSTATUS_CACHE_HIT:
-//case SQLITE_DBSTATUS_CACHE_MISS:
-//case SQLITE_DBSTATUS_CACHE_WRITE: {
-//	/*
-//	** Set *pCurrent to the total cache hits or misses encountered by all
-//	** pagers the database handle is connected to. *pHighwater is always set 
-//	** to zero.
-//	*/
-//	int i;
-//	int nRet = 0;
-//	assert( SQLITE_DBSTATUS_CACHE_MISS==SQLITE_DBSTATUS_CACHE_HIT+1 );
-//	assert( SQLITE_DBSTATUS_CACHE_WRITE==SQLITE_DBSTATUS_CACHE_HIT+2 );
-
-//	for(i=0; i<db->nDb; i++){
-//		if( db->aDb[i].pBt ){
-//			Pager *pPager = sqlite3BtreePager(db->aDb[i].pBt);
-//			sqlite3PagerCacheStat(pPager, op, resetFlag, &nRet);
-//		}
-//	}
-//	*pHighwater = 0; /* IMP: R-42420-56072 */
-//	/* IMP: R-54100-20147 */
-//	/* IMP: R-29431-39229 */
-//	*pCurrent = nRet;
-//	break; }
-//case TAGSTATUS_DEFERRED_FKS: {
-//	/* Set *pCurrent to non-zero if there are unresolved deferred foreign key constraints.  Set *pCurrent to zero if all foreign key constraints
-//	** have been satisfied.  The *pHighwater is always set to zero.
-//	*/
-//	*pHighwater = 0;  /* IMP: R-11967-56545 */
-//	*pCurrent = db->nDeferredImmCons>0 || db->nDeferredCons>0;
-//	break; }

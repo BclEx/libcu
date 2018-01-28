@@ -1,4 +1,4 @@
-#include <ext/global.h>
+#include <ext/global.h> //: mutex_unix.c
 
 //////////////////////
 // MUTEX PTHREADS
@@ -6,8 +6,7 @@
 #ifdef LIBCU_MUTEX_PTHREADS
 #include <pthread.h>
 
-/*
-** The mutex.Id, mutex.Refs, and mutex.Owner fields are necessary under two condidtions:  (1) Debug builds and (2) using
+/* The mutex.Id, mutex.Refs, and mutex.Owner fields are necessary under two condidtions:  (1) Debug builds and (2) using
 ** home-grown mutexes.  Encapsulate these conditions into a single #define.
 */
 #if defined(_DEBUG) || defined(HOMEGROWN_RECURSIVE_MUTEX)
@@ -52,8 +51,7 @@ static mutex unixMutexStatics[] = {
 };
 #undef MUTEX_INITIALIZER
 
-/*
-** The mutex_held() and mutex_notheld() routine are intended for use only inside assert() statements.  On some platforms,
+/* The mutex_held() and mutex_notheld() routine are intended for use only inside assert() statements.  On some platforms,
 ** there might be race conditions that can cause these routines to deliver incorrect results.  In particular, if pthread_equal() is
 ** not an atomic operation, then these routines might delivery incorrect results.  On most platforms, pthread_equal() is a 
 ** comparison of two integers and is therefore atomic.  But we are told that HPUX is not such a platform.  If so, then these routines
@@ -67,8 +65,7 @@ static bool unixMutexHeld(mutex *m) { return m->refs && pthread_equal(m->owner, 
 static bool unixMutexNotHeld(mutex *m) { return !m->refs || !pthread_equal(m->owner, pthread_self()); }
 #endif
 
-/*
-** Try to provide a memory barrier operation, needed for initialization and also for the implementation of xShmBarrier in the VFS in cases
+/* Try to provide a memory barrier operation, needed for initialization and also for the implementation of xShmBarrier in the VFS in cases
 ** where Libcu is compiled without mutexes.
 */
 void mutexMemoryBarrier()
@@ -80,14 +77,11 @@ void mutexMemoryBarrier()
 #endif
 }
 
-/*
-** Initialize and deinitialize the mutex subsystem.
-*/
+/* Initialize and deinitialize the mutex subsystem. */
 static RC unixMutexInitialize() { return RC_OK; }
 static RC unixMutexShutdown() { return RC_OK; }
 
-/*
-** The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL
+/* The mutex_alloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL
 ** that means that a mutex could not be allocated.  Libcu will unwind its stack and return an error.  The argument
 ** to mutex_alloc() is one of these integer constants:
 **
@@ -180,8 +174,7 @@ static void unixMutexFree(mutex *m)
 #endif
 }
 
-/*
-** The mutex_enter() and mutex_tryenter() routines attempt to enter a mutex.  If another thread is already within the mutex,
+/* The mutex_enter() and mutex_tryenter() routines attempt to enter a mutex.  If another thread is already within the mutex,
 ** mutex_enter() will block and mutex_tryenter() will return true.  The mutex_tryenter() interface returns false
 ** upon successful entry.  Mutexes created using MUTEX_RECURSIVE can be entered multiple times by the same thread.  In such cases the,
 ** mutex must be exited an equal number of times before another thread can enter.  If the same thread tries to enter any other kind of mutex
@@ -265,8 +258,7 @@ static bool unixMutexTryEnter(mutex *m)
 	return rc;
 }
 
-/*
-** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
+/* The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
 ** is undefined if the mutex is not currently entered or is not currently allocated.  Libcu will never do either.
 */
 static void unixMutexLeave(mutex *m)

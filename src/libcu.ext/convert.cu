@@ -1,4 +1,4 @@
-#include <ctypecu.h>
+#include <ctypecu.h> //: util.c
 #include <stringcu.h>
 #include <ext/global.h>
 #include <ext/convert.h>
@@ -6,8 +6,7 @@
 
 #pragma region ATOX
 
-/*
-** The string z[] is an text representation of a real number. Convert this string to a double and write it into *r.
+/* The string z[] is an text representation of a real number. Convert this string to a double and write it into *r.
 **
 ** The string z[] is length bytes in length (bytes, not characters) and uses the encoding enc.  The string is not necessarily zero-terminated.
 **
@@ -152,8 +151,7 @@ do_atof_calc:
 #endif /* OMIT_FLOATING_POINT */
 }
 
-/*
-** Compare the 19-character string z against the text representation value 2^63:  9223372036854775808.  Return negative, zero, or positive
+/* Compare the 19-character string z against the text representation value 2^63:  9223372036854775808.  Return negative, zero, or positive
 ** if z is less than, equal to, or greater than the string. Note that z must contain exactly 19 characters.
 **
 ** Unlike memcmp() this routine is guaranteed to return the difference in the values of the last digit if the only difference is in the
@@ -177,8 +175,7 @@ static __device__ int compare2pow63(const char *z, int incr)
 	return c;
 }
 
-/*
-** Convert z to a 64-bit signed integer.  z must be decimal. This routine does *not* accept hexadecimal notation.
+/* Convert z to a 64-bit signed integer.  z must be decimal. This routine does *not* accept hexadecimal notation.
 **
 ** If the z value is representable as a 64-bit twos-complement integer, then write that value into *pNum and return 0.
 **
@@ -230,7 +227,7 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 	ASSERTCOVERAGE(i == 19);
 	ASSERTCOVERAGE(i == 20);
 
-	int rc = (&z[i] < end || (!i && start == z) || nonNum ? 1 : 0; // || i > 19 * incr 
+	int rc = &z[i] < end || (!i && start == z) || nonNum ? 1 : 0;
 	// z is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
 	if (i > 19 * incr) return 2; // Too many digits
 	// Less than 19 digits, so we know that it fits in 64 bits
@@ -247,8 +244,7 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 	}
 }
 
-/*
-** Transform a UTF-8 integer literal, in either decimal or hexadecimal, into a 64-bit signed integer.  This routine accepts hexadecimal literals, whereas convert_atoi64e() does not.
+/* Transform a UTF-8 integer literal, in either decimal or hexadecimal, into a 64-bit signed integer.  This routine accepts hexadecimal literals, whereas convert_atoi64e() does not.
 **
 ** Returns:
 **
@@ -268,8 +264,7 @@ __device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHex
 	{ return convert_atoi64e(z, r, strlen(z), TEXTENCODE_UTF8); }
 }
 
-/*
-** If z represents an integer that will fit in 32-bits, then set *r to that integer and return true.  Otherwise return false.
+/* If z represents an integer that will fit in 32-bits, then set *r to that integer and return true.  Otherwise return false.
 **
 ** This routine accepts both decimal and hexadecimal notation for integers.
 **
@@ -323,8 +318,7 @@ __device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
 }
 
 #if !defined(OMIT_BLOB_LITERAL) || defined(LIBCU_HAS_CODEC)
-/*
-** Convert a BLOB literal of the form "x'hhhhhh'" into its binary value.  Return a pointer to its binary value.  Space to hold the
+/* Convert a BLOB literal of the form "x'hhhhhh'" into its binary value.  Return a pointer to its binary value.  Space to hold the
 ** binary value has been obtained from malloc and must be freed by the calling routine.
 */
 __device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) // (size_t size) //: sqlite3HexToBlob
@@ -356,8 +350,7 @@ __device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) /
 
 #pragma region VARINT
 
-/*
-** The variable-length integer encoding is as follows:
+/* The variable-length integer encoding is as follows:
 **
 ** KEY:
 **         A = 0xxxxxxx    7 bits of data and one flag bit
@@ -375,8 +368,7 @@ __device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) /
 ** 64 bits - BBBBBBBBC
 */
 
-/*
-** Write a 64-bit variable-length integer to memory starting at p[0]. The length of data write will be between 1 and 9 bytes.  The number
+/* Write a 64-bit variable-length integer to memory starting at p[0]. The length of data write will be between 1 and 9 bytes.  The number
 ** of bytes written is returned.
 **
 ** A variable-length integer consists of the lower 7 bits of each byte for all bytes that have the 8th bit set and one byte with the 8th
@@ -417,8 +409,7 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVar
 	return n;
 }
 
-/*
-** Bitmasks used by convert_getvarint().  These precomputed constants are defined here rather than simply putting the constant expressions
+/* Bitmasks used by convert_getvarint().  These precomputed constants are defined here rather than simply putting the constant expressions
 ** inline in order to work around bugs in the RVT compiler.
 **
 ** SLOT_2_0     A mask for  (0x7f<<14) | 0x7f
@@ -428,9 +419,7 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVar
 #define SLOT_2_0     0x001fc07f
 #define SLOT_4_2_0   0xf01fc07f
 
-/*
-** Read a 64-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v.
-*/
+/* Read a 64-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v. */
 __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sqlite3GetVarint
 {
 	uint32_t a, b, s;
@@ -581,8 +570,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 	return 9;
 }
 
-/*
-** Read a 32-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v.
+/* Read a 32-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v.
 **
 ** If the varint stored in p[0] is larger than can fit in a 32-bit unsigned integer, then set *v to 0xffffffff.
 **
@@ -690,7 +678,10 @@ __device__ int convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 
 #pragma endregion
 
-
+/* not sure where these are */ //: Sky
+__device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
+__device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
+__device__ void convert_put2(unsigned char *p, uint32_t v) { p[0] = (uint8_t)(v>>8); p[1] = (uint8_t)v; }
 
 /* Read or write a four-byte big-endian integer value. */
 __device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
@@ -705,6 +696,7 @@ __device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
   ASSERTCOVERAGE(p[0] & 0x80); return ((unsigned)p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3];
 #endif
 }
+//__device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
 __device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
 {
 #if LIBCU_BYTEORDER==4321
@@ -720,30 +712,10 @@ __device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
   p[3] = (uint8_t)v;
 #endif
 }
+//__device__ void convert_put4(unsigned char *p, uint32 v) { p[0] = (uint8_t)(v>>24); p[1] = (uint8_t)(v>>16); p[2] = (uint8_t)(v>>8); p[3] = (uint8_t)v; }
 
-#ifdef OMIT_INLINECONVERT
+#pragma region From: pragma.c
 
-__device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
-__device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
-__device__ void convert_put2(unsigned char *p, uint32_t v)
-{
-	p[0] = (uint8_t)(v>>8);
-	p[1] = (uint8_t)v;
-}
-//__device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
-//__device__ void convert_put4(unsigned char *p, uint32 v)
-//{
-//	p[0] = (uint8_t)(v>>24);
-//	p[1] = (uint8_t)(v>>16);
-//	p[2] = (uint8_t)(v>>8);
-//	p[3] = (uint8_t)v;
-//}
-
-#endif
-
-#pragma region From: Pragma_c
-
-// 123456789 123456789
 static __constant__ const char __safetyLevelText[] = "onoffalseyestruefull";
 static __constant__ const uint8_t __safetyLevelOffset[] = {0, 1, 2, 4, 9, 12, 16};
 static __constant__ const uint8_t __safetyLevelLength[] = {2, 2, 3, 5, 3, 4, 4};
@@ -762,7 +734,7 @@ __device__ uint8_t convert_atolevel(const char *z, int omitFull, uint8_t dflt)
 
 __device__ bool convert_atob(const char *z, uint8_t dflt)
 {
-	return (convert_atolevel(z, 1, dflt) != 0);
+	return convert_atolevel(z, 1, dflt) != 0;
 }
 
 #pragma endregion

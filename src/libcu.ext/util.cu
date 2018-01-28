@@ -1,8 +1,7 @@
-﻿#include <ext/util.h>
+﻿#include <ext/util.h> //: util.c
 #include <assert.h>
 
-/*
-** Give a callback to the test harness that can be used to simulate faults in places where it is difficult or expensive to do so purely by means
+/* Give a callback to the test harness that can be used to simulate faults in places where it is difficult or expensive to do so purely by means
 ** of inputs.
 **
 ** The intent of the integer argument is to let the fault simulator know which of multiple sqlite3FaultSim() calls has been hit.
@@ -24,8 +23,7 @@ __host_device__ RC sqlite3FaultSim(int test) //: sqlite3FaultSim
 //	tagSystemError(tag, errCode);
 //}
 
-/*
-** Set the current error code to errCode and clear any prior error message. Also set tag.sysErrno (by calling tagSystem) if the errCode indicates
+/* Set the current error code to errCode and clear any prior error message. Also set tag.sysErrno (by calling tagSystem) if the errCode indicates
 ** that would be appropriate.
 */
 __host_device__ void tagError(tagbase_t *tag, int errCode) //: sqlite3Error
@@ -44,8 +42,7 @@ __host_device__ void tagSystemError(tagbase_t *tag, RC rc) //: sqlite3SystemErro
 	//	tag->SysErrno = sqlite3OsGetLastError(tag->vsystem);
 }
 
-/*
-** Set the most recent error code and error string for the sqlite handle "db". The error code is set to "err_code".
+/* Set the most recent error code and error string for the sqlite handle "db". The error code is set to "err_code".
 **
 ** If it is not NULL, string zFormat specifies the format of the error string in the style of the printf functions: The following
 ** format characters are allowed:
@@ -76,8 +73,7 @@ __host_device__ void tagSystemError(tagbase_t *tag, RC rc) //: sqlite3SystemErro
 //	//}
 //}
 
-/*
-** Log an error that is an API call on a connection pointer that should not have been used.  The "type" of connection pointer is given as the
+/* Log an error that is an API call on a connection pointer that should not have been used.  The "type" of connection pointer is given as the
 ** argument.  The zType is a word like "NULL" or "closed" or "invalid".
 */
 static __host_device__ void logBadConnection(const char *type)
@@ -85,8 +81,7 @@ static __host_device__ void logBadConnection(const char *type)
 	//sqlite3_log(RC_MISUSE, "API call with %s database connection pointer", type);
 }
 
-/*
-** Check to make sure we have a valid db pointer.  This test is not foolproof but it does provide some measure of protection against
+/* Check to make sure we have a valid db pointer.  This test is not foolproof but it does provide some measure of protection against
 ** misuse of the interface such as passing in db pointers that are NULL or which have been previously closed.  If this routine returns
 ** 1 it means that the db pointer is valid and 0 if it should not be dereferenced for any reason.  The calling function should invoke
 ** SQLITE_MISUSE immediately.

@@ -241,13 +241,13 @@ extern __device__ void randomness_(int n, void *p);
 #define CONFIG_COVERING_INDEX_SCAN 20  // int
 #define CONFIG_SQLLOG       21  // xSqllog, void*
 #define CONFIG_MMAP_SIZE    22  // int64_t, int64_t
-#define CONFIG_WIN32_HEAPSIZE      23  // int nByte
-#define CONFIG_PCACHE_HDRSZ        24  // int *psz
-#define CONFIG_PMASZ               25  // unsigned int szPma
-#define CONFIG_STMTJRNL_SPILL      26  // int nByte
+#define CONFIG_WIN32_HEAPSIZE	23  // int nByte
+#define CONFIG_PCACHE_HDRSZ		24  // int *psz
+#define CONFIG_PMASZ			25  // unsigned int szPma
+#define CONFIG_STMTJRNL_SPILL	26  // int nByte
+#define CONFIG_SMALL_MALLOC		27  // boolean
 
-/*
-** Structure containing global configuration data for the Lib library.
+/* Structure containing global configuration data for the Lib library.
 **
 ** This structure also contains some state information.
 */
@@ -282,7 +282,7 @@ struct RuntimeConfig {
 	bool inProgress;				// True while initialization in progress
 	bool isMutexInit;				// True after mutexes are initialized
 	bool isMallocInit;				// True after malloc is initialized
-	bool isPCacheInit;              // True after malloc is initialized
+	bool isPcacheInit;              // True after malloc is initialized
 	int initMutexRefs;				// Number of users of initMutex
 	mutex *initMutex;				// Mutex used by runtimeInitialize()
 	void (*log)(void*,int,const char*); // Function for logging
@@ -304,8 +304,8 @@ struct RuntimeConfig {
 };
 extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
 #define _runtimeConfig _GLOBAL(RuntimeConfig, _runtimeConfig)
-/*
-** This macro is used inside of assert() statements to indicate that the assert is only valid on a well-formed database.  Instead of:
+
+/* This macro is used inside of assert() statements to indicate that the assert is only valid on a well-formed database.  Instead of:
 **
 **     assert(X);
 **
@@ -319,8 +319,7 @@ extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
 */
 #define CORRUPT_DB (!_runtimeConfig.neverCorrupt)
 
-/*
-** The LIBCU_*_BKPT macros are substitutes for the error codes with the same name but without the _BKPT suffix.  These macros invoke
+/* The LIBCU_*_BKPT macros are substitutes for the error codes with the same name but without the _BKPT suffix.  These macros invoke
 ** routines that report the line-number on which the error originated using sqlite3_log().  The routines also provide a convenient place
 ** to set a debugger breakpoint.
 */

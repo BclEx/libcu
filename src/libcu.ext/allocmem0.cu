@@ -1,4 +1,4 @@
-#include <ext/alloc.h>
+#include <ext/alloc.h> //: mem0.c
 #include <assert.h>
 
 /* This version of the memory allocator is the default.  It is used when no other memory allocator is specified using compile-time macros. */
@@ -13,12 +13,11 @@ static __host_device__ int memoryRoundup(int size) { return n; }
 static __host_device__ RC memoryInitialize(void *notUsed) { return RC_OK; }
 static __host_device__ RC memoryShutdown(void *notUsed) { return RC_OK; }
 
-/*
-** This routine is the only routine in this file with external linkage.
+/* This routine is the only routine in this file with external linkage.
 **
 ** Populate the low-level memory allocation function pointers in _.alloc with pointers to the routines in this file.
 */
-static __host_constant__ const alloc_methods _defaultMethods = {
+static __host_constant__ const alloc_methods _mem0DefaultMethods = {
 	memoryAlloc,
 	memoryFree,
 	memoryRealloc,
@@ -30,8 +29,8 @@ static __host_constant__ const alloc_methods _defaultMethods = {
 };
 __host_constant__ void __allocsystemSetDefault()
 {
-	//sqlite3_config(SQLITE_CONFIG_MALLOC, &defaultMethods);
-	__allocsystem = _defaultMethods;
+	//sqlite3_config(CONFIG_MALLOC, &defaultMethods);
+	__allocsystem = _mem0DefaultMethods;
 }
 
 #endif /* LIBCU_ZERO_MALLOC */

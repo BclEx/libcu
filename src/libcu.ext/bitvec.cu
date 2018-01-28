@@ -1,4 +1,4 @@
-﻿#include <stdlibcu.h>
+﻿#include <stdlibcu.h> //: bitvec.c
 #include <ext/global.h>
 #include <ext/bitvec.h>
 #include <assert.h>
@@ -25,8 +25,7 @@
 #define BITVEC_HASH(X)   (((X)*1)%BITVEC_NINT)
 #define BITVEC_NPTR      (BITVEC_USIZE / sizeof(bitvec_t *))
 
-/*
-** A bitmap is an instance of the following structure.
+/* A bitmap is an instance of the following structure.
 **
 ** This bitmap records the existence of zero or more bits with values between 1 and iSize, inclusive.
 **
@@ -51,8 +50,7 @@ struct bitvec_t {
 	} u;
 };
 
-/*
-** Create a new bitmap object able to handle bits between 0 and "size", inclusive.  Return a pointer to the new object.  Return NULL if 
+/* Create a new bitmap object able to handle bits between 0 and "size", inclusive.  Return a pointer to the new object.  Return NULL if 
 ** malloc fails.
 */
 __device__ bitvec_t *bitvecNew(uint32_t size) //: sqlite3BitvecCreate
@@ -64,9 +62,8 @@ __device__ bitvec_t *bitvecNew(uint32_t size) //: sqlite3BitvecCreate
 	return p;
 }
 
-/*
-** Check to see if the i-th bit is set.  Return true or false. If p is NULL (if the bitmap has not been created) or if
-** i is out of range, then return false.
+/* Check to see if the i-th bit is set.  Return true or false. If p is NULL (if the bitmap has not been created) or if
+** index is out of range, then return false.
 */
 __device__ bool bitvecGet(bitvec_t *p, uint32_t index) //: sqlite3BitvecTestNotNull
 {
@@ -92,8 +89,7 @@ __device__ bool bitvecGet(bitvec_t *p, uint32_t index) //: sqlite3BitvecTestNotN
 	return false;
 }
 
-/*
-** Set the i-th bit.  Return 0 on success and an error code if anything goes wrong.
+/* Set the i-th bit.  Return 0 on success and an error code if anything goes wrong.
 **
 ** This routine might cause sub-bitmaps to be allocated.  Failing to get the memory needed to hold the sub-bitmap is the only
 ** that can go wrong with an insert, assuming p and i are valid.
@@ -152,8 +148,7 @@ bitvec_set_end:
 		return true;
 }
 
-/*
-** Clear the i-th bit.
+/* Clear the i-th bit.
 **
 ** pBuf must be a pointer to at least BITVEC_SZ bytes of temporary storage
 ** that BitvecClear can use to rebuilt its hash table.
@@ -191,9 +186,7 @@ __device__ void bitvecClear(bitvec_t *p, uint32_t index, void *buffer) //: sqlit
 	}
 }
 
-/*
-** Destroy a bitmap object.  Reclaim all memory used.
-*/
+/* Destroy a bitmap object.  Reclaim all memory used. */
 __device__ void bitvecDestroy(bitvec_t *p) //: sqlite3BitvecDestroy
 {
 	if (!p)
@@ -204,9 +197,7 @@ __device__ void bitvecDestroy(bitvec_t *p) //: sqlite3BitvecDestroy
 	mfree(p);
 }
 
-/*
-** Return the value of the iSize parameter specified when Bitvec *p was created.
-*/
+/* Return the value of the iSize parameter specified when Bitvec *p was created. */
 __device__ uint32_t bitvecSize(bitvec_t *p) //: sqlite3BitvecSize
 {
 	return p->size;
@@ -214,16 +205,14 @@ __device__ uint32_t bitvecSize(bitvec_t *p) //: sqlite3BitvecSize
 
 #ifndef LIBCU_UNTESTABLE
 
-/*
-** Let V[] be an array of unsigned characters sufficient to hold up to N bits.  Let I be an integer between 0 and N.  0<=I<N.
+/* Let V[] be an array of unsigned characters sufficient to hold up to N bits.  Let I be an integer between 0 and N.  0<=I<N.
 ** Then the following macros can be used to set, clear, or test individual bits within V.
 */
 #define SETBIT(V,I)      V[I>>3] |= (1<<(I&7))
 #define CLEARBIT(V,I)    V[I>>3] &= ~(1<<(I&7))
 #define TESTBIT(V,I)     (V[I>>3]&(1<<(I&7)))!=0
 
-/*
-** This routine runs an extensive test of the Bitvec code.
+/* This routine runs an extensive test of the Bitvec code.
 **
 ** The input is an array of integers that acts as a program
 ** to test the Bitvec.  The integers are opcodes followed

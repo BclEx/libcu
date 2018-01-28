@@ -1,4 +1,4 @@
-#include <ext/global.h>
+#include <ext/global.h> //: mutex_w32.c
 #include <stdio.h>
 #include <assert.h>
 
@@ -111,8 +111,7 @@ static RC winMutexShutdown()
 	return RC_OK;
 }
 
-/*
-** The mutexAlloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL
+/* The mutexAlloc() routine allocates a new mutex and returns a pointer to it.  If it returns NULL
 ** that means that a mutex could not be allocated.  Libcu will unwind its stack and return an error.  The argument
 ** to mutexAlloc() is one of these integer constants:
 **
@@ -200,8 +199,7 @@ static void winMutexFree(mutex *m)
 #endif
 }
 
-/*
-** The mutex_enter() and mutex_tryenter() routines attempt to enter a mutex.  If another thread is already within the mutex,
+/* The mutex_enter() and mutex_tryenter() routines attempt to enter a mutex.  If another thread is already within the mutex,
 ** mutex_enter() will block and mutex_tryenter() will return true.  The mutex_tryenter() interface returns false
 ** upon successful entry.  Mutexes created using MUTEX_RECURSIVE can be entered multiple times by the same thread.  In such cases the,
 ** mutex must be exited an equal number of times before another thread can enter.  If the same thread tries to enter any other kind of mutex
@@ -264,8 +262,7 @@ static bool winMutexTryEnter(mutex *m)
 	return rc;
 }
 
-/*
-** The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
+/* The mutex_leave() routine exits a mutex that was previously entered by the same thread.  The behavior
 ** is undefined if the mutex is not currently entered or is not currently allocated.  Libcu will never do either.
 */
 static void winMutexLeave(mutex *m)

@@ -14,6 +14,7 @@
 */
 #ifndef SQLITE_LIBCU_H
 #define SQLITE_LIBCU_H
+#include <ext/global.h>
 
 #pragma region from x
 
@@ -233,10 +234,10 @@
 #define SQLITE_SHM_NLOCK VSYS_SHM_NLOCK
 
 // CAPI3REF: Initialize The SQLite Library
-int sqlite3_initialize();
-int sqlite3_shutdown();
-int sqlite3_os_init();
-int sqlite3_os_end();
+RC runtimeInitialize();
+RC runtimeShutdown();
+RC vsystemInitialize();
+RC vsystemShutdown();
 
 #pragma endregion
 
@@ -253,9 +254,10 @@ int sqlite3_os_end();
 #pragma endregion
 
 #pragma region From: fault.c
-#define sqlite3BenignMallocHooks(xBenignBegin, xBenignEnd)
-#define sqlite3BeginBenignMalloc()
-#define sqlite3EndBenignMalloc()
+#define BenignMallocHooks BenignMallocHooks
+#define sqlite3BenignMallocHooks(xBenignBegin, xBenignEnd) allocBenignHook(xBenignBegin, xBenignEnd)
+#define sqlite3BeginBenignMalloc() allocBenignBegin()
+#define sqlite3EndBenignMalloc() allocBenignEnd()
 #pragma endregion
 
 #pragma region From: global.c
@@ -275,17 +277,17 @@ int sqlite3_os_end();
 #pragma endregion
 
 #pragma region From: main.c
-#define sqlite3_version
-#define sqlite3_libversion()
-#define sqlite3_sourceid()
-#define sqlite3_libversion_number()
-#define sqlite3_threadsafe()
-#define sqlite3IoTrace
-#define sqlite3_temp_directory
-#define sqlite3_data_directory
-#define sqlite3_initialize()
-#define sqlite3_shutdown()
-#define sqlite3_config(op, ...)
+#define sqlite3_version libcu_version
+#define sqlite3_libversion() libcu_libversion()
+#define sqlite3_sourceid() libcu_sourceid()
+#define sqlite3_libversion_number() libcu_libversion_number()
+#define sqlite3_threadsafe() libcu_threadsafe()
+#define sqlite3IoTrace panic("")
+#define sqlite3_temp_directory libcu_tempDirectory
+#define sqlite3_data_directory libcu_dataDirectory
+#define sqlite3_initialize() runtimeInitialize()
+#define sqlite3_shutdown() runtimeShutdown()
+#define sqlite3_config(op, ...) runtimeConfig(op, __VA_ARGS__)
 #define sqlite3_db_mutex(db)
 #define sqlite3_db_release_memory(db)
 #define sqlite3_db_cacheflush(db)
@@ -367,40 +369,40 @@ int sqlite3_os_end();
 #pragma endregion
 
 #pragma region From: malloc.c
-#define sqlite3_release_memory(n)
-#define sqlite3MallocMutex()
+#define sqlite3_release_memory(n) alloc_releasememory(n)
+#define sqlite3MallocMutex() allocMutex()
 #define sqlite3_memory_alarm(xCallback, pArg, iThreshold) panic("DEPRECATED")
-#define sqlite3_soft_heap_limit64(n)
-#define sqlite3_soft_heap_limit(n)
-#define sqlite3MallocInit()
-#define sqlite3HeapNearlyFull()
-#define sqlite3MallocEnd()
-#define sqlite3_memory_used()
-#define sqlite3_memory_highwater(resetFlag)
-#define sqlite3Malloc(n)
-#define sqlite3_malloc(n)
-#define sqlite3_malloc64(n)
-#define sqlite3MallocSize(p)
-#define sqlite3DbMallocSize(db, p)
-#define sqlite3_msize(p)
-#define sqlite3_free(p)
-#define sqlite3DbFreeNN(db, p)
-#define sqlite3DbFree(db, p)
-#define sqlite3Realloc(pOld, nBytes)
-#define sqlite3_realloc(pOld, n)
-#define sqlite3_realloc64(pOld, n)
-#define sqlite3MallocZero(n)
-#define sqlite3DbMallocZero(db, n)
-#define sqlite3DbMallocRaw(db, n)
-#define sqlite3DbMallocRawNN(db, n)
-#define sqlite3DbRealloc(db, p, n)
-#define sqlite3DbReallocOrFree(db, p, n)
-#define sqlite3DbStrDup(db, z)
-#define sqlite3DbStrNDup(db, z, n)
-#define sqlite3SetString(pz, db, zNew)
-#define sqlite3OomFault(db)
-#define sqlite3OomClear(db)
-#define sqlite3ApiExit(db, rc)
+#define sqlite3_soft_heap_limit64(n) alloc_softheaplimit64()
+#define sqlite3_soft_heap_limit(n) alloc_softheaplimit()
+#define sqlite3MallocInit() allocInitialize()
+#define sqlite3HeapNearlyFull() allocHeapNearlyFull()
+#define sqlite3MallocEnd() allocShutdown()
+#define sqlite3_memory_used() alloc_memoryused()
+#define sqlite3_memory_highwater(resetFlag) alloc_memoryhighwater(resetFlag)
+#define sqlite3Malloc(n) alloc(n)
+#define sqlite3_malloc(n) alloc32(n)
+#define sqlite3_malloc64(n) alloc64(n)
+#define sqlite3MallocSize(p) allocSize(p)
+#define sqlite3DbMallocSize(db, p) tagallocSize(db, p)
+#define sqlite3_msize(p) alloc_msize(p)
+#define sqlite3_free(p) mfree(p)
+#define sqlite3DbFreeNN(db, p) tagfreeNN(db, p)
+#define sqlite3DbFree(db, p) tagfree(db, p)
+#define sqlite3Realloc(pOld, nBytes) allocRealloc(pOld, nBytes)
+#define sqlite3_realloc(pOld, n) alloc_realloc32(pOld, n)
+#define sqlite3_realloc64(pOld, n) alloc_realloc64(pOld, n)
+#define sqlite3MallocZero(n) allocZero(n)
+#define sqlite3DbMallocZero(db, n) tagallocZero(db, n)
+#define sqlite3DbMallocRaw(db, n) tagallocRaw(db, n)
+#define sqlite3DbMallocRawNN(db, n) tagallocRawNN(db, n)
+#define sqlite3DbRealloc(db, p, n) tagrealloc(db, p, n)
+#define sqlite3DbReallocOrFree(db, p, n) tagreallocOrFree(db, p, n)
+#define sqlite3DbStrDup(db, z) tagstrdup(db, z)
+#define sqlite3DbStrNDup(db, z, n) tagstrndup(db, z, n)
+#define sqlite3SetString(pz, db, zNew) tagstrset(pz, db, zNew)
+#define sqlite3OomFault(db) tagOomFault(db)
+#define sqlite3OomClear(db) tagOomClear(db)
+#define sqlite3ApiExit(db, rc) tagApiExit(db, rc)
 #pragma endregion
 
 #pragma region From: mem0.c, mem1.c
@@ -432,6 +434,9 @@ int sqlite3_os_end();
 #define sqlite3_mutex_leave(p) mutex_leave(p)
 #define sqlite3_mutex_held(p) mutex_held(p)
 #define sqlite3_mutex_notheld(p) mutex_notheld(p)
+#pragma endregion
+
+#pragma region From: pcache1.c
 #pragma endregion
 
 #pragma region From: notify.c
@@ -532,12 +537,13 @@ int sqlite3_os_end();
 #pragma endregion
 
 #pragma region From: status.c
-#define sqlite3StatusValue(op)
-#define sqlite3StatusUp(op, N)
-#define sqlite3StatusDown(op, N)
-#define sqlite3StatusHighwater(op, X)
-#define sqlite3_status64(op, pCurrent, pHighwater, resetFlag)
-#define sqlite3LookasideUsed(db, pHighwater)
+#define sqlite3StatusValue(op) status_now(op)
+#define sqlite3StatusUp(op, N) status_inc(op, N)
+#define sqlite3StatusDown(op, N) status_dec(op, N)
+#define sqlite3StatusHighwater(op, X) status_max(op, X)
+#define sqlite3_status64(op, pCurrent, pHighwater, resetFlag) status64(op, pCurrent, pHighwater, resetFlag)
+#define sqlite3_status(op, pCurrent, pHighwater, resetFlag) status(op, pCurrent, pHighwater, resetFlag)
+#define sqlite3LookasideUsed(db, pHighwater) taglookasideUsed(db, pHighwater)
 #define sqlite3_db_status(db, op, pCurrent, pHighwater, resetFlag)
 #pragma endregion
 

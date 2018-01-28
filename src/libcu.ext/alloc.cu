@@ -2,14 +2,13 @@
 #include <stringcu.h>
 #include <assert.h>
 
-/*
-** Attempt to release up to n bytes of non-essential memory currently held by Libcu. An example of non-essential memory is memory used to
+/* Attempt to release up to n bytes of non-essential memory currently held by Libcu. An example of non-essential memory is memory used to
 ** cache database pages that are not currently in use.
 */
 __host_device__ int alloc_releasememory(int n) //: sqlite3_release_memory
 {
 #ifdef ENABLE_MEMORY_MANAGEMENT
-	return alloc_pcachereleasememory(n);
+	return pcacheReleaseMemory(n);
 #else
 	// IMPLEMENTATION-OF: R-34391-24921 The alloc_releasememory() routine is a no-op returning zero if Libcu is not compiled with ENABLE_MEMORY_MANAGEMENT.
 	UNUSED_SYMBOL(n);
@@ -30,12 +29,6 @@ static __hostb_device__ _WSD struct Mem0Global {
 __host_device__ mutex *allocMutex() //: sqlite3MallocMutex
 {
 	return mem0.mutex;
-}
-
-/* Pathway to pcacheMutex */
-__host_device__ mutex *allocCacheMutex() //: pathway:sqlite3Pcache1Mutex
-{
-	return nullptr;
 }
 
 /* Set the soft heap-size limit for the library. Passing a zero or negative value indicates no limit. */
@@ -78,8 +71,8 @@ __host_device__ RC allocInitialize() //: sqlite3MallocInit
 		_runtimeConfig.pageSize = 0;
 	}
 	RC rc = __allocsystem.initialize(__allocsystem.appData);
-	if (rc) memset(&mem0, 0, sizeof(mem0));
-	return rc; 
+	if (rc != RC_OK) memset(&mem0, 0, sizeof(mem0)); //?
+	return rc;
 }
 
 /* Return true if the heap is currently under memory pressure - in other words if the amount of heap used is close to the limit set by alloc_softheaplimit(). */
@@ -117,7 +110,7 @@ __host_device__ int64_t alloc_memoryhighwater(bool resetFlag) //: sqlite3_memory
 /* Trigger the alarm */
 static __host_device__ void allocAlarm(int bytes)
 {
-	if ( mem0.alarmThreshold <= 0) return;
+	if (mem0.alarmThreshold <= 0) return;
 	mutex_leave(mem0.mutex);
 	alloc_releasememory(bytes);
 	mutex_enter(mem0.mutex);
@@ -133,7 +126,6 @@ static __host_device__ void allocWithAlarm(int size, void **pp)
 	// mode and specifically when the DMD "Dark Matter Detector" is enabled or else a crash results.  Hence, do not attempt to optimize out the
 	// following xRoundup() call.
 	int fullSize = __allocsystem.roundup(size);
-
 #ifdef MAX_MEMORY
 	if (status_now(STATUS_MEMORY_USED) + fullSize > MAX_MEMORY) {
 		*pp = nullptr;
@@ -203,7 +195,7 @@ __host_device__ void *alloc64(uint64_t n) //: sqlite3_malloc64
 #ifndef LIBCU_OMITLOOKASIDE
 static __host_device__ bool isLookaside(tagbase_t *tag, void *p) { return _WITHIN(p, tag->lookaside.start, tag->lookaside.end); }
 #else
-#define isLookaside(tag, p) 0
+#define isLookaside(tag, p) false
 #endif
 
 /* Return the size of a memory allocation previously obtained from alloc() or alloc32(). */
@@ -261,8 +253,7 @@ __host_device__ void mfree(void *p) //: sqlite3_free
 /* Add the size of memory allocation "p" to the count in *tag->BytesFreed. */
 static __host_device__ void measureAllocationSize(tagbase_t *tag, void *p) { *tag->bytesFreed += tagallocSize(tag, p); }
 
-/*
-** Free memory that might be associated with a particular database connection.  Calling alloc_tagfree(D,X) for X==0 is a harmless no-op.
+/* Free memory that might be associated with a particular database connection.  Calling alloc_tagfree(D,X) for X==0 is a harmless no-op.
 ** The alloc_tagfreeNN(D,X) version requires that X be non-NULL.
 */
 __host_device__ void tagfreeNN(tagbase_t *tag, void *p) //: sqlite3DbFreeNN
@@ -297,7 +288,6 @@ __host_device__ void tagfree(tagbase_t *tag, void *p) //: sqlite3DbFree
 	assert(!tag || mutex_held(tag->mutex));
 	if (p) tagfreeNN(tag, p);
 }
-
 
 /* Change the size of an existing memory allocation */
 __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Realloc
@@ -345,7 +335,7 @@ __host_device__ void *alloc_realloc32(void *prior, int newSize) //: sqlite3_real
 	return allocRealloc(prior, newSize);
 }
 
-__host_device__ void *alloc_realloc64(void *prior, uint64_t newSize)
+__host_device__ void *alloc_realloc64(void *prior, uint64_t newSize) //: sqlite3_realloc64
 {
 #ifndef OMIT_AUTOINIT
 	if (runtimeInitialize()) return nullptr;
@@ -380,8 +370,7 @@ static __host_device__ void *tagallocRawFinish(tagbase_t *tag, uint64_t size)
 	return p;
 }
 
-/*
-** Allocate memory, either lookaside (if possible) or heap.   If the allocation fails, set the MallocFailed flag in
+/* Allocate memory, either lookaside (if possible) or heap.   If the allocation fails, set the MallocFailed flag in
 ** the tag object.
 **
 ** If tag!=0 and tag->MallocFailed is true (indicating a prior malloc failure on the same tag object) then always return nullptr.
@@ -486,8 +475,7 @@ __host_device__ void *tagreallocOrFree(tagbase_t *tag, void *prior, uint64_t new
 	return p;
 }
 
-/*
-** Make a copy of a string in memory obtained from sqliteMalloc(). These functions call sqlite3MallocRaw() directly instead of sqliteMalloc(). This
+/* Make a copy of a string in memory obtained from sqliteMalloc(). These functions call sqlite3MallocRaw() directly instead of sqliteMalloc(). This
 ** is because when memory debugging is turned on, these two functions are called via macros that record the current file and line number in the ThreadData structure.
 */
 __host_device__ char *tagstrdup(tagbase_t *tag, const char *z) //: sqlite3DbStrDup
@@ -517,8 +505,7 @@ __host_device__ void tagstrset(char **z, tagbase_t *tag, const char *newZ) //: s
 	*z = tagstrdup(tag, newZ);
 }
 
-/*
-** Call this routine to record the fact that an OOM (out-of-memory) error has happened.  This routine will set tag->MallocFailed, and also
+/* Call this routine to record the fact that an OOM (out-of-memory) error has happened.  This routine will set tag->MallocFailed, and also
 ** temporarily disable the lookaside memory allocator and interrupt any running VDBEs.
 */
 __host_device__ void tagOomFault(tagbase_t *tag)
@@ -531,8 +518,7 @@ __host_device__ void tagOomFault(tagbase_t *tag)
 	}
 }
 
-/*
-** This routine reactivates the memory allocator and clears the tag->MallocFailed flag as necessary.
+/* This routine reactivates the memory allocator and clears the tag->MallocFailed flag as necessary.
 **
 ** The memory allocator is not restarted if there are running VDBEs.
 */
@@ -554,8 +540,7 @@ static __host_device__ RC tagOomError(tagbase_t *tag)
 	return RC_NOMEM_BKPT;
 }
 
-/*
-** This function must be called before exiting any API function (i.e. returning control to the user) that has called sqlite3_malloc or sqlite3_realloc.
+/* This function must be called before exiting any API function (i.e. returning control to the user) that has called sqlite3_malloc or sqlite3_realloc.
 **
 ** The returned value is normally a copy of the second argument to this function. However, if a malloc() failure has occurred since the previous
 ** invocation SQLITE_NOMEM is returned instead. 
@@ -590,25 +575,24 @@ static __hostb_device__ _WSD struct BenignMallocHooks {
 #endif
 
 /* Register hooks to call when allocBenignBbegin() and allocBenignEnd() are called, respectively */
-__host_device__ void allocBenignHook(void (*benignBegin)(), void (*benignEnd)())
+__host_device__ void allocBenignHook(void (*benignBegin)(), void (*benignEnd)()) //: sqlite3BenignMallocHooks
 {
 	_benignMallocHooksInit;
 	_benignMallocHooks.benignBegin = benignBegin;
 	_benignMallocHooks.benignEnd = benignEnd;
 }
 
-/*
-** This (allocBenignEnd()) is called by Libcu code to indicate that subsequent malloc failures are benign. A call to allocBenignBegin()
+/* This (allocBenignEnd()) is called by Libcu code to indicate that subsequent malloc failures are benign. A call to allocBenignBegin()
 ** indicates that subsequent malloc failures are non-benign.
 */
-__host_device__ void allocBenignBegin()
+__host_device__ void allocBenignBegin() //: sqlite3BeginBenignMalloc
 {
 	_benignMallocHooksInit;
 	if (_benignMallocHooks.benignBegin)
 		_benignMallocHooks.benignBegin();
 }
 
-__host_device__ void allocBenignEnd()
+__host_device__ void allocBenignEnd() //: sqlite3EndBenignMalloc
 {
 	_benignMallocHooksInit;
 	if (_benignMallocHooks.benignEnd)
@@ -618,39 +602,3 @@ __host_device__ void allocBenignEnd()
 #endif
 
 #pragma endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//__host_device__ char *__strdupG(const char *z)
-//{
-//	if (!z) return nullptr;
-//	size_t n = _strlen(z) + 1;
-//	_assert((n & 0x7fffffff) == n);
-//	char *newZ = (char *)_allocG((int)n);
-//	if (newZ) memcpy(newZ, (char *)z, n);
-//	return newZ;
-//}
-//
-//__host_device__ char *_strndupG(const char *z, int n)
-//{
-//	if (!z) return nullptr;
-//	_assert((n & 0x7fffffff) == n);
-//	char *newZ = (char *)_allocG(n + 1);
-//	if (newZ) { memcpy(newZ, (char *)z, n); newZ[n] = 0; }
-//	return newZ;
-//}

@@ -1,5 +1,4 @@
-﻿// os_gpu.c
-#include "Core.cu.h"
+﻿#include <ext/global.h> //: new.c
 #include <new.h>
 
 #if OS_GPUx
