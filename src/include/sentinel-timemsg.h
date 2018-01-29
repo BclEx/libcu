@@ -55,7 +55,7 @@ struct time_mktime {
 struct time_strftime {
 	static __forceinline__ __device__ char *Prepare(time_strftime *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int fmtLength = (t->Fmt ? (int)strlen(t->Fmt) + 1 : 0);
+		int fmtLength = t->Fmt ? (int)strlen(t->Fmt) + 1 : 0;
 		char *fmt = (char *)(data += _ROUND8(sizeof(*t)));
 		char *ptr = (char *)(data += fmtLength);
 		char *end = (char *)(data += 1024-fmtLength);

@@ -1108,10 +1108,6 @@ __device__ char *strerror_(int errnum)
 
 #pragma region strbld
 
-#define BUFSIZE PRINT_BUF_SIZE  // Size of the output buffer
-
-/* An "etByte" is an 8-bit unsigned value. */
-typedef unsigned char etByte;
 #define TYPE_RADIX		0 // non-decimal integer types.  %x %o
 #define TYPE_FLOAT		1 // Floating point.  %f
 #define TYPE_EXP		2 // Exponentional notation. %e and %E
@@ -1130,16 +1126,13 @@ typedef unsigned char etByte;
 #define TYPE_SQLESCAPE3 14 // %w -> Strings with '\"' doubled
 #define TYPE_ORDINAL	15 // %r -> 1st, 2nd, 3rd, 4th, etc.  English only
 #define TYPE_DECIMAL	16 // %d or %u, but not %x, %o
-//
 #define TYPE_INVALID	17 // Any unrecognized conversion type
 
-/* Allowed values for et_info.flags */
-#define FLAG_SIGNED	1 // True if the value to convert is signed
-#define FLAG_STRING	4 // Allow infinite precision
+/* An "etByte" is an 8-bit unsigned value. */
+typedef unsigned char etByte;
 
-// Each builtin conversion character (ex: the 'd' in "%d") is described by an instance of the following structure
-typedef struct info_t {
-	// Information about each format field
+/* Each builtin conversion character (ex: the 'd' in "%d") is described by an instance of the following structure */
+typedef struct info_t { // Information about each format field
 	char fmtType;	// The format field code letter
 	etByte base;	// The base for radix conversion
 	etByte flags;	// One or more of FLAG_ constants below
@@ -1148,10 +1141,14 @@ typedef struct info_t {
 	etByte prefix;	// Offset into aPrefix[] of the prefix string
 } info_t;
 
+/* Allowed values for et_info.flags */
+#define FLAG_SIGNED	1 // True if the value to convert is signed
+#define FLAG_STRING	4 // Allow infinite precision
+
 // The following table is searched linearly, so it is good to put the most frequently used conversion types first.
-__device__ static const char _digits[] = "0123456789ABCDEF0123456789abcdef";
-__device__ static const char _prefix[] = "-x0\000X0";
-__device__ static const info_t _info[] = {
+static __host_constant__ const char _digits[] = "0123456789ABCDEF0123456789abcdef";
+static __host_constant__ const char _prefix[] = "-x0\000X0";
+static __host_constant__ const info_t _info[] = {
 	{ 'd', 10, 1, TYPE_DECIMAL,    0,  0 },
 	{ 's',  0, 4, TYPE_STRING,     0,  0 },
 	{ 'g',  0, 1, TYPE_GENERIC,    30, 0 },
@@ -1181,7 +1178,17 @@ __device__ static const info_t _info[] = {
 };
 
 #ifndef OMIT_FLOATING_POINT
-static __device__ char getDigit(long_double *val, int *cnt)
+/* "*val" is a double such that 0.1 <= *val < 10.0 Return the ascii code for the leading digit of *val, then
+** multiply "*val" by 10.0 to renormalize.
+**
+** Example:
+**     input:     *val = 3.14159
+**     output:    *val = 1.4159    function return = '3'
+**
+** The counter *cnt is incremented each time.  After counter exceeds 16 (the number of significant digits in a 64-bit float) '0' is
+** always returned.
+*/
+static __host_device__ char getDigit(long_double *val, int *cnt)
 {
 	if (*cnt <= 0) return '0';
 	(*cnt)--;
@@ -1194,16 +1201,17 @@ static __device__ char getDigit(long_double *val, int *cnt)
 #endif
 
 /* Set the StrAccum object to an error mode. */
-static __device__ void strbldSetError(strbld_t *b, unsigned char error)
+static __host_device__ void strbldSetError(strbld_t *b, unsigned char error)
 {
 	assert(error == STRACCUM_NOMEM || error == STRACCUM_TOOBIG);
 	b->error = error;
 	b->size = 0;
 }
 
+#define BUFSIZE PRINT_BUF_SIZE  // Size of the output buffer
+
 /* Render a string given by "fmt" into the strbld_t object. */
-static __constant__ const char _ord[] = "thstndrd";
-__device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //: sqlite3VXPrintf
+__host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list va) //: sqlite3VXPrintf
 {
 	char buf[BUFSIZE]; // Conversion buffer
 	char *bufpt = nullptr; // Pointer to the conversion buffer
@@ -1227,7 +1235,11 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 	for (; (c = *fmt); ++fmt) {
 		if (c != '%') {
 			bufpt = (char *)fmt;
+#if HAVE_STRCHRNUL
+			fmt = strchrnul(fmt, '%');
+#else
 			do { fmt++; } while (*fmt && *fmt != '%');
+#endif
 			strbldAppend(b, bufpt, (int)(fmt - bufpt));
 			if (!*fmt) break;
 		}
@@ -1314,8 +1326,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 		// Fetch the info entry for the field
 		const info_t *info = &_info[0]; // Pointer to the appropriate info structure
 		type = TYPE_INVALID; // Conversion paradigm
-		int idx;
-		for (idx = 0; idx < _LENGTHOF(_info); idx++) {
+		int idx; for (idx = 0; idx < _LENGTHOF(_info); idx++) {
 			if (c == _info[idx].fmtType) {
 				info = &_info[idx];
 				type = info->type;
@@ -1349,8 +1360,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 #endif
 		switch (type) {
 		case TYPE_POINTER:
-			flag_long = sizeof(char *) == sizeof(int64_t) ? 2 :
-				sizeof(char *) == sizeof(long int) ? 1 : 0;
+			flag_long = sizeof(char *) == sizeof(int64_t) ? 2 : sizeof(char *) == sizeof(long int) ? 1 : 0;
 			// Fall through into the next case
 		case TYPE_ORDINAL:
 		case TYPE_RADIX:
@@ -1358,16 +1368,12 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			// Fall through into the next case
 		case TYPE_DECIMAL:
 			if (info->flags & FLAG_SIGNED) {
-				int64_t v = noArgs ? 
-					flag_long ? (flag_long == 2 ? va_arg(va, int64_t) : va_arg(va, long int)) : va_arg(va, int) :
-					__extsystem.getIntegerArg(args);
+				int64_t v = noArgs ? flag_long ? flag_long == 2 ? va_arg(va, int64_t) : va_arg(va, long int) : va_arg(va, int) : __extsystem.getIntegerArg(args);
 				if (v < 0) { longvalue = (v == LLONG_MIN ? ((uint64_t)1)<<63 : -v); prefix = '-'; }
 				else { longvalue = v; prefix = flag_prefix; }
 			}
 			else {
-				longvalue = noArgs ? 
-					flag_long ? (flag_long == 2 ? va_arg(va, uint64_t) : va_arg(va, unsigned long int)) : va_arg(va, unsigned int) :
-					(uint64_t)__extsystem.getIntegerArg(args);
+				longvalue = noArgs ? flag_long ? flag_long == 2 ? va_arg(va, uint64_t) : va_arg(va, unsigned long int) : va_arg(va, unsigned int) : (uint64_t)__extsystem.getIntegerArg(args);
 				prefix = 0;
 			}
 			if (longvalue == 0) flag_alternateform = false;
@@ -1388,14 +1394,15 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			}
 			bufpt = &out[outLength-1];
 			if (type == TYPE_ORDINAL) {
+				static const char ord[] = "thstndrd";
 				int x = (int)(longvalue % 10);
 				if (x >= 4 || (longvalue/10)%10 == 1) x = 0;
-				*(--bufpt) = _ord[x*2+1];
-				*(--bufpt) = _ord[x*2];
+				*(--bufpt) = ord[x*2+1];
+				*(--bufpt) = ord[x*2];
 			}
 			{
 				const char *cset = &_digits[info->charset]; // Use registers for speed
-				etByte base = info->base;
+				uint8_t base = info->base;
 				do { *(--bufpt) = cset[longvalue%base]; longvalue = longvalue/base; } while (longvalue > 0); // Convert to ascii
 			}
 			length = (int)(&out[outLength-1]-bufpt);
@@ -1441,8 +1448,8 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			if (realvalue > 0.0) {
 				long_double scale = 1.0;
 				while (realvalue >= 1e100*scale && exp <= 350) { scale *= 1e100; exp += 100; }
-				while (realvalue >= 1e10*scale && exp<=350) { scale *= 1e10; exp += 10; }
-				while (realvalue >= 10.0*scale && exp<=350) { scale *= 10.0; exp++; }
+				while (realvalue >= 1e10*scale && exp <= 350) { scale *= 1e10; exp += 10; }
+				while (realvalue >= 10.0*scale && exp <= 350) { scale *= 10.0; exp++; }
 				realvalue /= scale;
 				while (realvalue < 1e-8) { realvalue *= 1e8; exp -= 8; }
 				while (realvalue < 1.0) { realvalue *= 10.0; exp--; }
@@ -1466,7 +1473,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 				else { precision = precision - exp; type = TYPE_FLOAT; }
 			}
 			else flag_rtz = flag_altform2;
-			e2 = (type == TYPE_EXP ? 0 : exp);
+			e2 = type == TYPE_EXP ? 0 : exp;
 			if (_MAX(e2,0)+(int64_t)precision+(int64_t)width > BUFSIZE - 15) {
 				bufpt = extra = (char *)malloc(_MAX(e2,0)+(int64_t)precision+(int64_t)width+15);
 				if (!bufpt) {
@@ -1476,7 +1483,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			}
 			out = bufpt;
 			nsd = 16 + flag_altform2*10;
-			flag_dp = (precision>0?1:0)|flag_alternateform|flag_altform2;
+			flag_dp = (precision>0?1:0) | flag_alternateform | flag_altform2;
 			// The sign in front of the number
 			if (prefix) *(bufpt++) = prefix;
 			// Digits prior to the decimal point
@@ -1520,11 +1527,10 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 				while (pad--) bufpt[idx++] = '0';
 				length = width;
 			}
-#endif // !defined(OMIT_FLOATING_POINT)
+#endif /* !defined(OMIT_FLOATING_POINT) */
 			break;
 		case TYPE_SIZE:
-			if (noArgs)
-				*(va_arg(va, int*)) = (int)b->size;
+			if (noArgs) *(va_arg(va, int*)) = (int)b->size;
 			length = width = 0;
 			break;
 		case TYPE_PERCENT:
@@ -1533,8 +1539,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			length = 1;
 			break;
 		case TYPE_CHARX:
-			if (noArgs) c = va_arg(va, int);
-			else { bufpt = __extsystem.getStringArg(args); c = bufpt ? bufpt[0] : 0; }
+			if (noArgs) c = va_arg(va, int); else { bufpt = __extsystem.getStringArg(args); c = bufpt ? bufpt[0] : 0; }
 			if (precision > 1) {
 				width -= precision-1;
 				if (width > 1 && !flag_leftjustify) {
@@ -1549,24 +1554,21 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 			break;
 		case TYPE_STRING:
 		case TYPE_DYNSTRING:
-			if (noArgs) bufpt = va_arg(va, char*);
-			else { bufpt = __extsystem.getStringArg(args); type = TYPE_STRING; }
+			if (noArgs) bufpt = va_arg(va, char*); else { bufpt = __extsystem.getStringArg(args); type = TYPE_STRING; }
 			if (!bufpt) bufpt = (char *)"";
 			else if (type == TYPE_DYNSTRING) extra = bufpt;
 			if (precision >= 0) for (length = 0; length < precision && bufpt[length]; length++) { }
-			else length = strlen(bufpt);
+			else length = 0x7fffffff & strlen(bufpt);
 			break;
 		case TYPE_SQLESCAPE:
 		case TYPE_SQLESCAPE2:
 		case TYPE_SQLESCAPE3: {
-			char q = (type == TYPE_SQLESCAPE3 ? '"' : '\''); // Quote character
+			char q = type == TYPE_SQLESCAPE3 ? '"' : '\''; // Quote character
 			char *escarg = noArgs ? va_arg(va, char*) : __extsystem.getStringArg(args);
 			bool isnull = !escarg;
-			if (isnull) escarg = (char *)(type == TYPE_SQLESCAPE2 ? "NULL" : "(NULL)");
+			if (isnull) escarg = type == TYPE_SQLESCAPE2 ? "NULL" : "(NULL)";
 			int k = precision;
-			int i, j, n;
-			char ch;
-			for (i = n = 0; k != 0 && (ch = escarg[i]) != 0; i++, k--)
+			int i, j, n; char ch; for (i = n = 0; k != 0 && (ch = escarg[i]) != 0; i++, k--)
 				if (ch == q) n++;
 			bool needQuote = !isnull && type == TYPE_SQLESCAPE2;
 			n += i + 3;
@@ -1623,7 +1625,7 @@ __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va) //:
 **
 ** Return the number of bytes of text that StrAccum is able to accept after the attempted enlargement.  The value returned might be zero.
 */
-static __device__ int strbldEnlarge(strbld_t *b, int n)
+static __host_device__ int strbldEnlarge(strbld_t *b, int n)
 {
 	assert(b->index+(int64_t)n >= b->size); // Only called if really needed
 	if (b->error) {
@@ -1640,8 +1642,8 @@ static __device__ int strbldEnlarge(strbld_t *b, int n)
 	int64_t sizeNew = b->index;
 	assert((!b->text || b->text == b->base) == !PRINTF_ISMALLOCED(b));
 	sizeNew += n + 1;
-	if (sizeNew+b->index <= b->maxSize) // Force exponential buffer size growth as long as it does not overflow, to avoid having to call this routine too often
-		sizeNew += b->index;
+	if (sizeNew+b->index <= b->maxSize)
+		sizeNew += b->index; // Force exponential buffer size growth as long as it does not overflow, to avoid having to call this routine too often
 	if (sizeNew > b->maxSize) {
 		strbldReset(b);
 		strbldSetError(b, STRACCUM_TOOBIG);
@@ -1650,7 +1652,7 @@ static __device__ int strbldEnlarge(strbld_t *b, int n)
 	else b->size = (int)sizeNew;
 	char *newText = (char *)(b->tag ? __extsystem.tagrealloc(b->tag, oldText, b->size) : realloc(oldText, b->size));
 	if (newText) {
-		assert( b->text || !b->index);
+		assert(b->text || !b->index);
 		if (!PRINTF_ISMALLOCED(b) && b->index > 0) memcpy(newText, b->text, b->index);
 		b->text = newText;
 		b->size = b->tag ? (size_t)__extsystem.tagallocSize(b->tag, newText) : _msize(newText);
@@ -1665,7 +1667,7 @@ static __device__ int strbldEnlarge(strbld_t *b, int n)
 }
 
 /* Append N copies of character c to the given string buffer. */
-__device__ void strbldAppendChar(strbld_t *b, int n, int c) //: sqlite3AppendChar
+__host_device__ void strbldAppendChar(strbld_t *b, int n, int c) //: sqlite3AppendChar
 {
 	ASSERTCOVERAGE(b->size+(int64_t)n > 0x7fffffff);
 	if (b->index+(int64_t)n >= b->size && (n = strbldEnlarge(b, n)) <= 0)
@@ -1680,20 +1682,19 @@ __device__ void strbldAppendChar(strbld_t *b, int n, int c) //: sqlite3AppendCha
 ** This is a helper routine to sqlite3StrAccumAppend() that does special-case work (enlarging the buffer) using tail recursion, so that the
 ** sqlite3StrAccumAppend() routine can use fast calling semantics.
 */
-static __device__ void enlargeAndAppend(strbld_t *b, const char *str, int length)
+static __host_device__ void enlargeAndAppend(strbld_t *b, const char *str, int length)
 {
 	length = strbldEnlarge(b, length);
 	if (length > 0) {
 		memcpy(&b->text[b->index], str, length);
 		b->index += length;
 	}
-	assert((!b->text || b->text == b->base) == !PRINTF_ISMALLOCED(b));
 }
 
 /* Append N bytes of text from str to the StrAccum object.  Increase the size of the memory allocation for StrAccum if necessary. */
-__device__ void strbldAppend(strbld_t *b, const char *str, int length) //: sqlite3StrAccumAppend
+__host_device__ void strbldAppend(strbld_t *b, const char *str, int length) //: sqlite3StrAccumAppend
 {
-	assert(str || length == 0);
+	assert(str || !length);
 	assert(b->text || !b->index || b->error);
 	assert(length >= 0);
 	assert(!b->error || !b->size);
@@ -1707,7 +1708,7 @@ __device__ void strbldAppend(strbld_t *b, const char *str, int length) //: sqlit
 }
 
 /* Append the complete text of zero-terminated string str[] to the b string. */
-__device__ void strbldAppendAll(strbld_t *b, const char *str) //: sqlite3StrAccumAppendAll
+__host_device__ void strbldAppendAll(strbld_t *b, const char *str) //: sqlite3StrAccumAppendAll
 {
 	strbldAppend(b, str, strlen(str));
 }
@@ -1716,7 +1717,7 @@ __device__ void strbldAppendAll(strbld_t *b, const char *str) //: sqlite3StrAccu
 ** Finish off a string by making sure it is zero-terminated. Return a pointer to the resulting string.  Return a NULL
 ** pointer if any kind of error was encountered.
 */
-static __device__ char *strbldFinishRealloc(strbld_t *b)
+static __host_device__ char *strbldFinishRealloc(strbld_t *b)
 {
 	assert(b->maxSize > 0 && !PRINTF_ISMALLOCED(b));
 	b->text = (char *)(b->tag ? __extsystem.tagallocRaw(b->tag, b->index+1) : malloc(b->index+1));
@@ -1727,7 +1728,8 @@ static __device__ char *strbldFinishRealloc(strbld_t *b)
 	else strbldSetError(b, STRACCUM_NOMEM);
 	return b->text;
 }
-__device__ char *strbldToString(strbld_t *b) //: sqlite3StrAccumFinish
+
+__host_device__ char *strbldToString(strbld_t *b) //: sqlite3StrAccumFinish
 {
 	if (b->text) {
 		assert((b->text == b->base) == !PRINTF_ISMALLOCED(b));
@@ -1738,10 +1740,8 @@ __device__ char *strbldToString(strbld_t *b) //: sqlite3StrAccumFinish
 	return b->text;
 }
 
-/*
-** Reset an StrAccum string.  Reclaim all malloced memory.
-*/
-__device__ void strbldReset(strbld_t *b) //: sqlite3StrAccumReset
+/* Reset an StrAccum string.  Reclaim all malloced memory. */
+__host_device__ void strbldReset(strbld_t *b) //: sqlite3StrAccumReset
 {
 	assert((!b->text || b->text == b->base) == !PRINTF_ISMALLOCED(b));
 	if (PRINTF_ISMALLOCED(b)) {
@@ -1761,7 +1761,7 @@ __device__ void strbldReset(strbld_t *b) //: sqlite3StrAccumReset
 ** capacity: Size of zBase in bytes.  If total space requirements never exceed n then no memory allocations ever occur.
 ** maxSize: Maximum number of bytes to accumulate.  If mx==0 then no memory allocations will ever occur.
 */
-__device__ void strbldInit(strbld_t *b, void *tag, char *base, int capacity, int maxSize) //: sqlite3StrAccumInit
+__host_device__ void strbldInit(strbld_t *b, void *tag, char *base, int capacity, int maxSize) //: sqlite3StrAccumInit
 {
 	b->text = b->base = base;
 	b->tag = tag;
@@ -1771,6 +1771,10 @@ __device__ void strbldInit(strbld_t *b, void *tag, char *base, int capacity, int
 	b->error = 0;
 	b->flags = 0;
 }
+
+///* variable-argument wrapper around sqlite3VXPrintf().  The bFlags argument can contain the bit SQLITE_PRINTF_INTERNAL enable internal formats. */
+//__device__ void strbldAppendFormat(strbld_t *b, const char *fmt, ...) //: sqlite3XPrintf
+//{ va_list va; va_start(va, fmt); strbldAppendFormatv(b, fmt, va); va_end(va); }
 
 #pragma endregion
 

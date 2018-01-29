@@ -48,7 +48,7 @@ enum {
 struct unistd_access {
 	static __forceinline__ __device__ char *Prepare(unistd_access *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int nameLength = (t->Name ? (int)strlen(t->Name) + 1 : 0);
+		int nameLength = t->Name ? (int)strlen(t->Name) + 1 : 0;
 		char *name = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += nameLength);
 		if (end > dataEnd) return nullptr;
@@ -68,7 +68,7 @@ struct unistd_lseek {
 	int Handle; long long Offset; int Whence; bool Bit64;
 	__device__ unistd_lseek(int fd, long long offset, int whence, bool bit64)
 		: Base(true, UNISTD_LSEEK), Handle(fd), Offset(offset), Whence(whence), Bit64(bit64) { sentinelDeviceSend(&Base, sizeof(unistd_lseek)); }
-	long RC;
+	long long RC;
 };
 
 struct unistd_close {
@@ -141,7 +141,7 @@ struct unistd_chown {
 struct unistd_chdir {
 	static __forceinline__ __device__ char *Prepare(unistd_chdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -200,7 +200,7 @@ struct unistd_unlink {
 struct unistd_rmdir {
 	static __forceinline__ __device__ char *Prepare(unistd_rmdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;

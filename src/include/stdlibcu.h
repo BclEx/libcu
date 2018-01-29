@@ -334,8 +334,5 @@ __forceinline__ __device__ u_quad_t strtouq_(const char *__restrict nptr, char *
 #define strtouq strtouq_
 #endif
 
-/* Allocate SIZE bytes of memory.  Then Zero memory. */ // use:calloc
-//__forceinline__ __device__ void *mallocZero(size_t size) { void *p = malloc(size); if (p) memset(p, 0, size); return p; }
-
 __END_DECLS;
 #endif  /* _STDLIBCU_H */

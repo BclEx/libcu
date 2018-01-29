@@ -186,7 +186,7 @@
 //#	define pMethods methods
 
 // CAPI3REF: OS Interface File Virtual Methods Object
-#define sqlite3_io_methods vsystemfile_methods
+#define sqlite3_io_methods vsysfile_methods
 
 // CAPI3REF: Standard File Control Opcodes
 #define SQLITE_FCNTL_LOCKSTATE VSYS_FCNTL_LOCKSTATE
@@ -507,6 +507,41 @@ RC vsystemShutdown();
 #define sqlite3_vfs_unregister(pVfs) vsystemUnregister(pVfs)
 #pragma endregion
 
+#pragma region From: pcache.c
+#define sqlite3PcachePageSanity(pPg) pcachePageSanity(pPg)
+#define sqlite3PcacheInitialize() pcacheInitialize()
+#define sqlite3PcacheShutdown() pcacheShutdown()
+#define sqlite3PcacheSize() pcacheSize()
+#define sqlite3PcacheOpen(szPage, szExtra, bPurgeable, xStress, pStress, p) PcacheOpen(szPage, szExtra, bPurgeable, xStress, pStress, p)
+#define sqlite3PcacheSetPageSize(pCache, szPage) pcacheSetPageSize(pCache, szPage)
+#define sqlite3PcacheFetch(pCache, pgno, createFlag) pcacheFetch(pCache, pgno, createFlag)
+#define sqlite3PcacheFetchStress(pCache, pgno, ppPage) pcacheFetchStress(pCache, pgno, ppPage)
+#define sqlite3PcacheFetchFinish(pCache, pgno, pPage) PcacheFetchFinish(pCache, pgno, pPage)
+#define sqlite3PcacheRelease(p) pcacheRelease(p)
+#define sqlite3PcacheRef(p) PcacheRef(p)
+#define sqlite3PcacheDrop(p) pcacheDrop(p)
+#define sqlite3PcacheMakeDirty(p) pcacheMakeDirty(p)
+#define sqlite3PcacheMakeClean(p) pcacheMakeClean(p)
+#define sqlite3PcacheCleanAll(pCache) pcacheCleanAll(pCache)
+#define sqlite3PcacheClearWritable(pCache) pcacheClearWritable(pCache)
+#define sqlite3PcacheClearSyncFlags(pCache) PcacheClearSyncFlags(pCache)
+#define sqlite3PcacheMove(p, newPgno) PcacheMove(p, newPgno)
+#define sqlite3PcacheTruncate(pCache, pgno) PcacheTruncate(pCache, pgno)
+#define sqlite3PcacheClose(pCache) PcacheClose(pCache)
+#define sqlite3PcacheClear(pCache) PcacheClear(pCache)
+#define sqlite3PcacheDirtyList(pCache) pcacheDirtyList(pCache)
+#define sqlite3PcacheRefCount(pCache) pcacheRefCount(pCache)
+#define sqlite3PcachePageRefcount(p) pcachePageRefcount(p)
+#define sqlite3PcachePagecount(pCache) pcachePagecount(pCache)
+#define sqlite3PcacheGetCachesize(pCache) PcacheGetCachesize(pCache)
+#define sqlite3PcacheSetCachesize(pCache, mxPage) pcacheSetCachesize(pCache, mxPage)
+#define sqlite3PcacheSetSpillsize(p, mxPage) pcacheSetSpillsize(p, mxPage)
+#define sqlite3PcacheShrink(pCache) pcacheShrink(pCache)
+#define sqlite3HeaderSizePcache() pcacheHeaderSize()
+#define sqlite3PCachePercentDirty(pCache) PCachePercentDirty(pCache)
+#define sqlite3PcacheIterateDirty(pCache, xIter) pcacheIterateDirty(pCache, xIter)
+#pragma endregion
+
 #pragma region From: pcache1.c
 #define sqlite3PCacheBufferSetup(pBuf, sz, n) pcacheBufferSetup(pBuf, sz, n)
 #define sqlite3PageMalloc(sz) sqlite3PageMalloc(sz)
@@ -520,22 +555,22 @@ RC vsystemShutdown();
 
 #pragma region From: printf.c
 #define StrAccum strbuf_t
-#define sqlite3VXPrintf(pAccum, fmt, ap) strbldAppendFormat(pAccum, fmt, ap)
+#define sqlite3VXPrintf(pAccum, fmt, ap) strbldAppendFormatv(pAccum, fmt, ap)
 #define sqlite3AppendChar(p, N, c) strbldAppendChar(p, N, c)
 #define sqlite3StrAccumAppend(p, z, N) strbldAppend(p, z, N)
 #define sqlite3StrAccumAppendAll(p, z) strbldAppendAll(p, z)
 #define sqlite3StrAccumFinish(p) strbldToString(p)
 #define sqlite3StrAccumReset(p) strbldReset(p)
 #define sqlite3StrAccumInit(p, db, zBase, n, mx) strbldInit(p, db, zBase, n, mx)
-#define sqlite3VMPrintf(db, zFormat, ap)
-#define sqlite3MPrintf(db, zFormat, ...)
-#define sqlite3_vmprintf(zFormat, ap)
-#define sqlite3_mprintf(zFormat, ...)
-#define sqlite3_vsnprintf(n, zBuf, zFormat, ap)
-#define sqlite3_snprintf(n, zBuf, zFormat, ...)
-#define sqlite3_log(iErrCode, zFormat, ...)
-#define sqlite3DebugPrintf(zFormat, ...)
-#define sqlite3XPrintf(p, zFormat, ...)
+#define sqlite3VMPrintf(db, zFormat, ap) vmtagprintf(db, zFormat, ap)
+#define sqlite3MPrintf(db, zFormat, ...) mtagprintf(db, zFormat, __VAR_ARGS__)
+#define sqlite3_vmprintf(zFormat, ap) vmprintf(zFormat, ap)
+#define sqlite3_mprintf(zFormat, ...) mprintf(zFormat, __VAR_ARGS__)
+#define sqlite3_vsnprintf(n, zBuf, zFormat, ap) vmsnprintf(n, zBuf, zFormat, ap)
+#define sqlite3_snprintf(n, zBuf, zFormat, ...) msnprintf(n, zBuf, zFormat, __VAR_ARGS__)
+#define sqlite3_log(iErrCode, zFormat, ...) _log(iErrCode, zFormat, __VAR_ARGS__)
+#define sqlite3DebugPrintf(zFormat, ...) _debug(zFormat, __VAR_ARGS__)
+#define sqlite3XPrintf(p, zFormat, ...) strbldAppendFormat(p, zFormat, __VAR_ARGS__)
 #pragma endregion
 
 #pragma region From: random.c
@@ -552,7 +587,7 @@ RC vsystemShutdown();
 #define sqlite3_status64(op, pCurrent, pHighwater, resetFlag) status64(op, pCurrent, pHighwater, resetFlag)
 #define sqlite3_status(op, pCurrent, pHighwater, resetFlag) status(op, pCurrent, pHighwater, resetFlag)
 #define sqlite3LookasideUsed(db, pHighwater) taglookasideUsed(db, pHighwater)
-#define sqlite3_db_status(db, op, pCurrent, pHighwater, resetFlag)
+#define sqlite3_db_status(db, op, pCurrent, pHighwater, resetFlag) tagstatus(db, op, pCurrent, pHighwater, resetFlag)
 #pragma endregion
 
 #pragma region From: threads.c
@@ -574,7 +609,7 @@ RC vsystemShutdown();
 
 #pragma region From: util.c
 #define sqlite3Coverage(x) __coverage(x)
-#define sqlite3FaultSim(iTest) sqlite3FaultSim(iTest)
+#define sqlite3FaultSim(iTest) _faultSim(iTest)
 #define sqlite3IsNaN(x) math_isNaN(x)
 #define sqlite3Strlen30(z) strlen(z)
 #define sqlite3ColumnType(pCol, zDflt) panic("NEED")

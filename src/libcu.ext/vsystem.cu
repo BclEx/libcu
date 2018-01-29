@@ -193,7 +193,7 @@ static __host_device__ void vsystemUnlink(vsystem *p)
 }
 
 /* Register a VFS with the system.  It is harmless to register the same VFS multiple times.  The new VFS becomes the default if makeDflt is true. */
-__host_device__ RC vsystemRegister(vsystem *p, int makeDefault) //: sqlite3_vfs_register
+__host_device__ RC vsystemRegister(vsystem *p, bool makeDefault) //: sqlite3_vfs_register
 {
 #ifndef OMIT_AUTOINIT
 	RC rc = runtimeInitialize();

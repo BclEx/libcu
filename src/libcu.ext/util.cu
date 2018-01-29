@@ -12,7 +12,7 @@
 ** Return whatever integer value the test callback returns, or return RC_OK if no test callback is installed.
 */
 #ifndef LIBCU_UNTESTABLE
-__host_device__ RC sqlite3FaultSim(int test) //: sqlite3FaultSim
+__host_device__ RC _faultSim(int test) //: sqlite3FaultSim
 {
 	int (*callback)(int) = _runtimeConfig.testCallback;
 	return callback ? callback(test) : RC_OK;
@@ -22,7 +22,7 @@ __host_device__ RC sqlite3FaultSim(int test) //: sqlite3FaultSim
 /* Helper function for tagError() - called rarely.  Broken out into a separate routine to avoid unnecessary register saves on entry to tagError(). */
 static __host_device__ void tagErrorFinish(tagbase_t *tag, int errCode) //: sqlite3ErrorFinish
 {
-	if (tag->err) sqlite3ValueSetNull(tag->err);
+	//if (tag->err) sqlite3ValueSetNull(tag->err);
 	tagSystemError(tag, errCode);
 }
 
@@ -67,10 +67,10 @@ __host_device__ void tagErrorWithMsgv(tagbase_t *tag, int errCode, const char *f
 	tagSystemError(tag, errCode);
 	if (!format)
 		tagError(tag, errCode);
-	else if (tag->err || (tag->err = sqlite3ValueNew(tag))) {
-		char *z = sqlite3VMPrintf(tag, format, va);
-		sqlite3ValueSetStr(tag->err, -1, z, TEXTENCODE_UTF8, SQLITE_DYNAMIC);
-	}
+	//else if (tag->err || (tag->err = sqlite3ValueNew(tag))) {
+	//	char *z = vmtagprintf(tag, format, va);
+	//	sqlite3ValueSetStr(tag->err, -1, z, TEXTENCODE_UTF8, SQLITE_DYNAMIC);
+	//}
 }
 #ifndef __CUDA_ARCH__
 __host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...) { va_list va; va_start(va, format); tagErrorWithMsgv(tag, errCode, format, va); va_end(va); }
@@ -91,10 +91,10 @@ STDARGvoid(tagErrorWithMsg, tagErrorWithMsgv(tag, errCode, format, va), tagbase_
 ** last thing the sqlite3_prepare() function does is copy the error stored by this function into the database handle using sqlite3Error().
 ** Functions sqlite3Error() or sqlite3ErrorWithMsg() should be used during statement execution (sqlite3_step() etc.).
 */
-__host_device__ void sqlite3ErrorMsgv(void *parse, const char *format, va_list va) //: sqlite3ErrorMsg
+__host_device__ void sqlite3ErrorMsgv(parsebase_t *parse, const char *format, va_list va) //: sqlite3ErrorMsg
 {
 	tagbase_t *tag = parse->tag;
-	char *msg = sqlite3VMPrintf(tag, format, va);
+	char *msg = vmtagprintf(tag, format, va);
 	if (tag->suppressErr)
 		tagfree(tag, msg);
 	else {
@@ -105,9 +105,9 @@ __host_device__ void sqlite3ErrorMsgv(void *parse, const char *format, va_list v
 	}
 }
 #ifndef __CUDA_ARCH__
-__host_device__ void sqlite3ErrorMsg(void *parse, const char *format, ...) { va_list va; va_start(va, format); sqlite3ErrorMsgv(parse, format, va); va_end(va); }
+__host_device__ void sqlite3ErrorMsg(parsebase_t *parse, const char *format, ...) { va_list va; va_start(va, format); sqlite3ErrorMsgv(parse, format, va); va_end(va); }
 #else
-STDARGvoid(sqlite3ErrorMsg, sqlite3ErrorMsgv(parse, format, va), void *parse, const char *format);
+STDARGvoid(sqlite3ErrorMsg, sqlite3ErrorMsgv(parse, format, va), parsebase_t *parse, const char *format);
 #endif
 
 /* Convert an SQL-style quoted string into a normal string by removing the quote characters.  The conversion is done in-place.  If the
@@ -133,7 +133,7 @@ __host_device__ void dequote(char *z)
 		}
 		else z[j++] = z[i];
 	}
-	z[j] = nullptr;
+	z[j] = 0;
 }
 
 /* Log an error that is an API call on a connection pointer that should not have been used.  The "type" of connection pointer is given as the
@@ -141,7 +141,7 @@ __host_device__ void dequote(char *z)
 */
 static __host_device__ void logBadConnection(const char *type)
 {
-	//sqlite3_log(RC_MISUSE, "API call with %s database connection pointer", type);
+	_log(RC_MISUSE, "API call with %s database connection pointer", type);
 }
 
 /* Check to make sure we have a valid db pointer.  This test is not foolproof but it does provide some measure of protection against
@@ -159,7 +159,7 @@ __host_device__ bool tagSafetyCheckOk(tagbase_t *tag) //: sqlite3SafetyCheckOk
 		return false;
 	}
 	uint32_t magic = tag->magic;
-	if (magic != LIBCU_MAGIC_OPEN) {
+	if (magic != TAG_MAGIC_OPEN) {
 		if (tagSafetyCheckSickOrOk(tag)) {
 			ASSERTCOVERAGE(_runtimeConfig.log);
 			logBadConnection("unopened");
@@ -171,7 +171,7 @@ __host_device__ bool tagSafetyCheckOk(tagbase_t *tag) //: sqlite3SafetyCheckOk
 __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag) //: sqlite3SafetyCheckSickOrOk
 {
 	uint32_t magic = tag->magic;
-	if (magic != LIBCU_MAGIC_SICK && magic != LIBCU_MAGIC_OPEN && magic != LIBCU_MAGIC_BUSY) {
+	if (magic != TAG_MAGIC_SICK && magic != TAG_MAGIC_OPEN && magic != TAG_MAGIC_BUSY) {
 		ASSERTCOVERAGE(_runtimeConfig.log);
 		logBadConnection("invalid");
 		return false;

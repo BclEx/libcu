@@ -508,7 +508,7 @@ __host_device__ void tagstrset(char **z, tagbase_t *tag, const char *newZ) //: s
 /* Call this routine to record the fact that an OOM (out-of-memory) error has happened.  This routine will set tag->MallocFailed, and also
 ** temporarily disable the lookaside memory allocator and interrupt any running VDBEs.
 */
-__host_device__ void tagOomFault(tagbase_t *tag)
+__host_device__ void tagOomFault(tagbase_t *tag) //: sqlite3OomFault
 {
 	if (!tag->mallocFailed && !tag->benignMalloc) {
 		tag->mallocFailed = true;

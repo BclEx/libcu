@@ -107,7 +107,7 @@ __BEGIN_DECLS;
 		RC (*initialize)();
 		RC (*shutdown)();
 		mutex *(*alloc)(MUTEX);
-		void (*free)(mutex *);
+		void (*free_)(mutex *);
 		void (*enter)(mutex *);
 		bool (*tryEnter)(mutex *);
 		void (*leave)(mutex *);

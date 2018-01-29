@@ -43,13 +43,13 @@ struct stdlib_exit {
 	bool Std;
 	int Status;
 	__device__ stdlib_exit(bool std, int status)
-		: Base(false, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(&Base, sizeof(stdlib_exit)); }
+		: Base(true, STDLIB_EXIT), Std(std), Status(status) { sentinelDeviceSend(&Base, sizeof(stdlib_exit)); }
 };
 
 struct stdlib_system {
 	static __forceinline__ __device__ char *Prepare(stdlib_system *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -60,14 +60,14 @@ struct stdlib_system {
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_system(const char *str)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_system)); }
+		: Base(true, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_system)); }
 	int RC;
 };
 
 struct stdlib_getenv {
 	static __forceinline__ __device__ char *Prepare(stdlib_getenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -78,15 +78,15 @@ struct stdlib_getenv {
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_getenv(const char *str)
-		: Base(false, STDLIB_GETENV, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_getenv)); }
+		: Base(true, STDLIB_GETENV, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_getenv)); }
 	char *RC;
 };
 
 struct stdlib_setenv {
 	static __forceinline__ __device__ char *Prepare(stdlib_setenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
+		int str2Length = t->Str2 ? (int)strlen(t->Str2) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
@@ -102,14 +102,14 @@ struct stdlib_setenv {
 	const char *Str2;
 	int Replace;
 	__device__ stdlib_setenv(const char *str, const char *str2, int replace)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str), Str2(str2), Replace(replace) { sentinelDeviceSend(&Base, sizeof(stdlib_setenv)); }
+		: Base(true, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str), Str2(str2), Replace(replace) { sentinelDeviceSend(&Base, sizeof(stdlib_setenv)); }
 	int RC;
 };
 
 struct stdlib_unsetenv {
 	static __forceinline__ __device__ char *Prepare(stdlib_unsetenv *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -120,7 +120,7 @@ struct stdlib_unsetenv {
 	sentinelMessage Base;
 	const char *Str;
 	__device__ stdlib_unsetenv(const char *str)
-		: Base(false, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_unsetenv)); }
+		: Base(true, STDLIB_SYSTEM, 1024, SENTINELPREPARE(Prepare)), Str(str) { sentinelDeviceSend(&Base, sizeof(stdlib_unsetenv)); }
 	int RC;
 };
 

@@ -72,7 +72,7 @@ struct fcntl_open {
 
 struct fcntl_stat {
 	static __forceinline__ __device__ char *Prepare(fcntl_stat *t, char *data, char *dataEnd, intptr_t offset) {
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -107,7 +107,7 @@ struct fcntl_fstat {
 
 struct fcntl_chmod {
 	static __forceinline__ __device__ char *Prepare(fcntl_chmod *t, char *data, char *dataEnd, intptr_t offset) {
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -124,7 +124,7 @@ struct fcntl_chmod {
 
 struct fcntl_mkdir {
 	static __forceinline__ __device__ char *Prepare(fcntl_mkdir *t, char *data, char *dataEnd, intptr_t offset) {
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -141,7 +141,7 @@ struct fcntl_mkdir {
 
 struct fcntl_mkfifo {
 	static __forceinline__ __device__ char *Prepare(fcntl_mkfifo *t, char *data, char *dataEnd, intptr_t offset) {
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;

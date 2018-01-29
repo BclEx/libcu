@@ -3,30 +3,31 @@
   <ItemGroup>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
-    <CudaCompile Include="convert.cu" />
-    <CudaCompile Include="alloc.cu" />
-    <CudaCompile Include="allocmem0.cu" />
-    <CudaCompile Include="allocmem1.cu" />
-    <CudaCompile Include="global.cu" />
-    <CudaCompile Include="main.cu" />
-    <CudaCompile Include="mutex.cu" />
-    <CudaCompile Include="mutex-gpu.cu" />
-    <CudaCompile Include="mutex-noop.cu" />
-    <CudaCompile Include="random.cu" />
-    <CudaCompile Include="status.cu" />
-    <CudaCompile Include="utf.cu" />
-    <CudaCompile Include="util.cu" />
-    <CudaCompile Include="vsystem.cu" />
-    <CudaCompile Include="vsystem-gpu.cu" />
-    <CudaCompile Include="vsystem-map.cu" />
-    <CudaCompile Include="math.cu" />
-    <CudaCompile Include="pcache1.cu" />
-    <CudaCompile Include="sentinel-vsystem.cpp" />
+    <CudaCompile Include="pcache.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
     <None Include="libcu.ext.native.targets" />
     <None Include="bitvec.cu" />
+    <None Include="math.cu" />
+    <None Include="pcache1.cu" />
+    <None Include="printf.cu" />
+    <None Include="random.cu" />
+    <None Include="status.cu" />
+    <None Include="utf.cu" />
+    <None Include="util.cu" />
+    <None Include="vsystem-gpu.cu" />
+    <None Include="vsystem-map.cu" />
+    <None Include="vsystem.cu" />
+    <None Include="alloc.cu" />
+    <None Include="allocmem0.cu" />
+    <None Include="allocmem1.cu" />
+    <None Include="convert.cu" />
+    <None Include="global.cu" />
+    <None Include="main.cu" />
+    <None Include="mutex-gpu.cu" />
+    <None Include="mutex-noop.cu" />
+    <None Include="mutex.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -34,9 +35,6 @@
     </Filter>
     <Filter Include="include\ext">
       <UniqueIdentifier>{5ac597d7-9332-41cd-8e31-4375a2b6550b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="sqlite">
-      <UniqueIdentifier>{d7512eec-1548-45da-bb56-15271a8e2730}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,43 +69,15 @@
     <ClInclude Include="..\include\ext\vsystem.h">
       <Filter>include\ext</Filter>
     </ClInclude>
-    <ClInclude Include="sqlite\libcu.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\os.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\os_common.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\os_setup.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\sqlite3.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\sqliteInt.h">
-      <Filter>sqlite</Filter>
-    </ClInclude>
     <ClInclude Include="libcu.sqlite.h" />
     <ClInclude Include="..\include\ext\pcache.h">
       <Filter>include\ext</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="mutex-unix.cpp" />
     <ClCompile Include="mutex-win.cpp" />
-    <ClCompile Include="sqlite\mutex_unix.c">
-      <Filter>sqlite</Filter>
-    </ClCompile>
-    <ClCompile Include="sqlite\mutex_w32.c">
-      <Filter>sqlite</Filter>
-    </ClCompile>
-    <ClCompile Include="sqlite\os_unix.c">
-      <Filter>sqlite</Filter>
-    </ClCompile>
-    <ClCompile Include="sqlite\os_win.c">
-      <Filter>sqlite</Filter>
-    </ClCompile>
+    <ClCompile Include="sentinel-vsystem.cpp" />
+    <ClCompile Include="vsystem-win.cpp" />
+    <ClCompile Include="mutex-unix.cpp" />
   </ItemGroup>
 </Project>

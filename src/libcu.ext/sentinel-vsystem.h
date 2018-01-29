@@ -1,6 +1,8 @@
 ﻿#ifndef _SENTINEL_VSYSTEM_H
 #define _SENTINEL_VSYSTEM_H
 #include <sentinel.h>
+#include <crtdefscu.h>
+#include <stringcu.h>
 #include <ext\vsystem.h>
 #undef RC
 
@@ -46,22 +48,29 @@ struct vsysfile_close {
 	vsysfile *F;
 	__device__ vsysfile_close(vsysfile *f)
 		: Base(true, VSYSFILE_CLOSE), F(f) { sentinelDeviceSend(&Base, sizeof(vsysfile_close)); }
+	int RC;
 };
 
 struct vsysfile_read {
 	static __forceinline__ __device__ char *Prepare(vsysfile_read *t, char *data, char *dataEnd, intptr_t offset) {
-		char *buf = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
-		t->Buf = buf + offset;
+		t->Ptr = ptr + offset;
 		return end;
 	}
+	static __forceinline__ __device__ bool Postfix(vsysfile_read *t, intptr_t offset)
+	{
+		char *ptr = (char *)t->Ptr - offset;
+		memcpy(t->Buf, ptr, t->Amount);
+		return true;
+	}
 	sentinelMessage Base;
-	vsysfile *F; int Amount; int64_t Offset;
-	__device__ vsysfile_read(vsysfile *f, int amount, int64_t offset)
-		: Base(true, VSYSFILE_READ, 1024, SENTINELPREPARE(Prepare)), F(f), Amount(amount), Offset(offset) { sentinelDeviceSend(&Base, sizeof(vsysfile_read)); }
+	vsysfile *F; void *Buf; int Amount; int64_t Offset;
+	__device__ vsysfile_read(vsysfile *f, void *buf, int amount, int64_t offset)
+		: Base(true, VSYSFILE_READ, 1024, SENTINELPREPARE(Prepare), SENTINELPOSTFIX(Postfix)), F(f), Buf(buf), Amount(amount), Offset(offset) { sentinelDeviceSend(&Base, sizeof(vsysfile_read)); }
 	int RC;
-	char *Buf;
+	void *Ptr;
 };
 
 struct vsysfile_write {
@@ -144,7 +153,7 @@ struct vsystem_open {
 	static __forceinline__ __device__ char *Prepare(vsystem_open *t, char *data, char *dataEnd, intptr_t offset) {
 		// filenames are double-zero terminated if they are not URIs with parameters.
 		int nameLength;
-		if (t->Name) { nameLength = strlen(t->Name) + 1; nameLength += strlen((const char *)t->Name[nameLength]) + 1; }
+		if (t->Name) { nameLength = (int)strlen(t->Name) + 1; nameLength += (int)strlen((const char *)t->Name[nameLength]) + 1; }
 		else nameLength = 0;
 		char *name = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += nameLength);
@@ -164,7 +173,7 @@ struct vsystem_open {
 
 struct vsystem_delete {
 	static __forceinline__ __device__ char *Prepare(vsystem_delete *t, char *data, char *dataEnd, intptr_t offset) {
-		int filenameLength = t->Filename ? strlen(t->Filename) + 1 : 0;
+		int filenameLength = t->Filename ? (int)strlen(t->Filename) + 1 : 0;
 		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += filenameLength);
 		if (end > dataEnd) return nullptr;
@@ -181,7 +190,7 @@ struct vsystem_delete {
 
 struct vsystem_access {
 	static __forceinline__ __device__ char *Prepare(vsystem_access *t, char *data, char *dataEnd, intptr_t offset) {
-		int filenameLength = t->Filename ? strlen(t->Filename) + 1 : 0;
+		int filenameLength = t->Filename ? (int)strlen(t->Filename) + 1 : 0;
 		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += filenameLength);
 		if (end > dataEnd) return nullptr;
@@ -199,22 +208,28 @@ struct vsystem_access {
 
 struct vsystem_fullPathname {
 	static __forceinline__ __device__ char *Prepare(vsystem_fullPathname *t, char *data, char *dataEnd, intptr_t offset) {
-		int relativeLength = t->Relative ? strlen(t->Relative) + 1 : 0;
+		int relativeLength = t->Relative ? (int)strlen(t->Relative) + 1 : 0;
 		char *relative = (char *)(data += _ROUND8(sizeof(*t)));
-		char *full = (char *)(data += relativeLength);
+		char *ptr = (char *)(data += relativeLength);
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		memcpy(relative, t->Relative, relativeLength);
 		t->Relative = relative + offset;
-		t->Full = full + offset;
+		t->Ptr = ptr + offset;
 		return end;
 	}
+	static __forceinline__ __device__ bool Postfix(vsystem_fullPathname *t, intptr_t offset)
+	{
+		char *ptr = (char *)t->Ptr - offset;
+		memcpy(t->Full, ptr, strlen(t->Full));
+		return true;
+	}
 	sentinelMessage Base;
-	const char *Relative; int FullLength;
-	__device__ vsystem_fullPathname(const char *relative, int fullLength)
-		: Base(true, VSYSTEM_FULLPATHNAME, 2024, SENTINELPREPARE(Prepare)), Relative(relative), FullLength(fullLength) { sentinelDeviceSend(&Base, sizeof(vsystem_fullPathname)); }
-	char *Full;
+	const char *Relative; int FullLength; char *Full;
+	__device__ vsystem_fullPathname(const char *relative, int fullLength, char *full)
+		: Base(true, VSYSTEM_FULLPATHNAME, 2024, SENTINELPREPARE(Prepare), SENTINELPOSTFIX(Postfix)), Relative(relative), FullLength(fullLength), Full(full) { sentinelDeviceSend(&Base, sizeof(vsystem_fullPathname)); }
 	int RC;
+	char *Ptr;
 };
 
 // dlOpen

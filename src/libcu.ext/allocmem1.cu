@@ -68,7 +68,7 @@ static __host_device__ void *memoryMalloc(int size)
 	void *p = LIBCU_MALLOC(size);
 	if (!p) {
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		runtimeLog(RC_NOMEM, "failed to allocate %u bytes of memory", size);
+		_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return p;
 #else
@@ -81,7 +81,7 @@ static __host_device__ void *memoryMalloc(int size)
 	}
 	else {
 		ASSERTCOVERAGE( _runtimeConfig.log);
-		runtimeLog(RC_NOMEM, "failed to allocate %u bytes of memory", size);
+		_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return (void *)p;
 #endif
@@ -130,7 +130,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 	void *p = LIBCU_REALLOC(prior, size);
 	if (!p){
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		runtimeLog(RC_NOMEM, "failed memory resize %u to %u bytes", LIBCU_MALLOCSIZE(prior), size);
+		_log(RC_NOMEM, "failed memory resize %u to %u bytes", LIBCU_MALLOCSIZE(prior), size);
 	}
 	return p;
 #else
@@ -145,7 +145,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 	}
 	else {
 		ASSERTCOVERAGE(_runtimeConfig.log);
-		runtimeLog(RC_NOMEM, "failed memory resize %u to %u bytes", memorySize(prior), size);
+		_log(RC_NOMEM, "failed memory resize %u to %u bytes", memorySize(prior), size);
 	}
 	return (void *)p;
 #endif

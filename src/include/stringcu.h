@@ -183,14 +183,14 @@ typedef struct strbld_t {
 #define PRINTF_MALLOCED 0x04  // True if xText is allocated space
 #define PRINTF_ISMALLOCED(X)  (((X)->flags & PRINTF_MALLOCED)!=0)
 
-extern __device__ void strbldInit(strbld_t *b, void *tag = nullptr, char *base = nullptr, int capacity = -1, int maxSize = -1);
-extern __device__ void strbldAppendFormat(strbld_t *b, const char *fmt, va_list va);
-extern __device__ void strbldAppendChar(strbld_t *b, int n, int c);
-extern __device__ void strbldAppend(strbld_t *b, const char *str, int length);
-extern __device__ void strbldAppendAll(strbld_t *b, const char *str);
-extern __forceinline__ __device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
-extern __device__ char *strbldToString(strbld_t *b);
-extern __device__ void strbldReset(strbld_t *b);
+extern __host_device__ void strbldInit(strbld_t *b, void *tag = nullptr, char *base = nullptr, int capacity = -1, int maxSize = -1);
+extern __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list va);
+extern __host_device__ void strbldAppendChar(strbld_t *b, int n, int c);
+extern __host_device__ void strbldAppend(strbld_t *b, const char *str, int length);
+extern __host_device__ void strbldAppendAll(strbld_t *b, const char *str);
+extern __forceinline__ __host_device__ void strbldAppendElement(strbld_t *b, const char *str) { strbldAppend(b, ", ", 2); strbldAppend(b, str, (int)strlen(str)); }
+extern __host_device__ char *strbldToString(strbld_t *b);
+extern __host_device__ void strbldReset(strbld_t *b);
 
 __END_DECLS;
 #endif  /* _STRINGCU_H */

@@ -105,7 +105,7 @@ bool sentinelDefaultExecutor(void *tag, sentinelMessage *data, int length, char 
 	case STDLIB_UNSETENV: { stdlib_unsetenv *msg = (stdlib_unsetenv *)data; msg->RC = unsetenv(msg->Str); return true; }
 	case UNISTD_ACCESS: { unistd_access *msg = (unistd_access *)data; msg->RC = access(msg->Name, msg->Type); return true; }
 	case UNISTD_LSEEK: { unistd_lseek *msg = (unistd_lseek *)data;
-		if (!msg->Bit64) msg->RC = lseek(msg->Handle, msg->Offset, msg->Whence);
+		if (!msg->Bit64) msg->RC = lseek(msg->Handle, (long)msg->Offset, msg->Whence);
 #ifdef __USE_LARGEFILE64
 		else msg->RC = lseek64(msg->Handle, msg->Offset, msg->Whence);
 #endif

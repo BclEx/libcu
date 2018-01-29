@@ -252,14 +252,6 @@ here:
 	/* Device Absolute */
 	FILE *B0a = fopen(DeviceDir"test.txt", "r"); int B0b = feof(B0a); fseek(B0a, 4, 0); int B0c = feof(B0a); fclose(B0a); assert(!B0b && B0c);
 	FILE *B1a = fopen(DeviceDir"test.txt", "r"); int B1b = fileno(B0a); fclose(B1a); assert(B1b);
-
-	//// EXT: MTAGPRINTF, MPRINTF, MNPRINTF ////
-	//__device__ char *vmtagprintf_(void *tag, const char *format, va_list va);
-	//__device__ char *vmprintf_(const char *format, va_list va);
-	//__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va);
-	//skipped: vmtagprintf();
-	//skipped: vmprintf();
-	//skipped: vmsnprintf();
 }
 cudaError_t stdio_test1() { g_stdio_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 

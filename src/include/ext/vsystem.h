@@ -82,12 +82,12 @@ __BEGIN_DECLS;
 // CAPI3REF: OS Interface Open File Handle
 typedef struct vsysfile vsysfile;
 struct vsysfile {
-	const struct vsystemfile_methods *methods;  // Methods for an open file
+	const struct vsysfile_methods *methods;  // Methods for an open file
 };
 
 // CAPI3REF: OS Interface File Virtual Methods Object
-typedef struct vsystemfile_methods vsystemfile_methods;
-struct vsystemfile_methods {
+typedef struct vsysfile_methods vsysfile_methods;
+struct vsysfile_methods {
 	int version;
 	int (*close)(vsysfile *);
 	int (*read)(vsysfile *, void *, int amount, int64_t offset);
@@ -101,7 +101,7 @@ struct vsystemfile_methods {
 	int (*fileControl)(vsysfile *, int op, void *args);
 	int (*sectorSize)(vsysfile *);
 	int (*deviceCharacteristics)(vsysfile *);
-	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile**);
+	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile **);
 	int (*shmLock)(vsysfile *, int offset, int n, int flags);
 	void (*shmBarrier)(vsysfile *);
 	int (*shmUnmap)(vsysfile *, int deleteFlag);
@@ -248,7 +248,7 @@ extern __host_device__ void vsys_closeAndFree(vsysfile *);
 /* Locate a VFS by name.  If no name is given, simply return the first VFS on the list. */
 extern __host_device__ vsystem *vsystemFind(const char *name);
 /* Register a VFS with the system.  It is harmless to register the same VFS multiple times.  The new VFS becomes the default if makeDflt is true. */
-extern __host_device__ RC vsystemRegister(vsystem *p, int makeDefault);
+extern __host_device__ RC vsystemRegister(vsystem *p, bool makeDefault);
 /* Unregister a VFS so that it is no longer accessible. */
 extern __host_device__ RC vsystemUnregister(vsystem *p);
 

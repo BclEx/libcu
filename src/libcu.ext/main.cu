@@ -519,51 +519,6 @@ static __host_device__ RC setupLookaside(tagbase_t *tag, void *buf, int size, in
 	return RC_OK;
 }
 
-/* This is the routine that actually formats the sqlite3_log() message. We house it in a separate routine from sqlite3_log() to avoid using
-** stack space on small-stack systems when logging is disabled.
-**
-** sqlite3_log() must render into a static buffer.  It cannot dynamically allocate memory because it might be called while the memory allocator
-** mutex is held.
-**
-** sqlite3VXPrintf() might ask for *temporary* memory allocations for certain format characters (%q) or for very large precisions or widths.
-** Care must be taken that any sqlite3_log() calls that occur while the memory mutex is held do not use these mechanisms.
-*/
-static __host_device__ void renderLogMsg(int errCode, const char *format, va_list va)
-{
-	//strbld_t b; // String accumulator
-	//char msg[SQLITE_PRINT_BUF_SIZE*3]; // Complete log message
-	//strbldInit(&b, nullptr, msg, sizeof(msg), 0);
-	//strbldAppendFormat(&b, format, va);
-	//_runtimeConfig.log(_runtimeConfig.logArg, errCode, strbldToString(&b));
-}
-
-/* Format and write a message to the log if logging is enabled. */
-__host_device__ void runtimeLogv(int errCode, const char *format, va_list va)
-{
-	if (_runtimeConfig.log)
-		renderLogMsg(errCode, format, va);
-}
-
-
-#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-/* A version of printf() that understands %lld.  Used for debugging. The printf() built into some versions of windows does not understand %lld
-** and segfaults if you give it a long long int.
-*/
-//void sqlite3DebugPrintf(const char *zFormat, ...)
-//{
-//	va_list ap;
-//	StrAccum acc;
-//	char zBuf[500];
-//	sqlite3StrAccumInit(&acc, 0, zBuf, sizeof(zBuf), 0);
-//	va_start(ap,zFormat);
-//	sqlite3VXPrintf(&acc, zFormat, ap);
-//	va_end(ap);
-//	sqlite3StrAccumFinish(&acc);
-//	fprintf(stdout,"%s", zBuf);
-//	fflush(stdout);
-//}
-#endif
-
 /* The following routines are substitutes for constants SQLITE_CORRUPT, SQLITE_MISUSE, SQLITE_CANTOPEN, SQLITE_NOMEM and possibly other error
 ** constants.  They serve two purposes:
 **
@@ -573,7 +528,7 @@ __host_device__ void runtimeLogv(int errCode, const char *format, va_list va)
 */
 static __host_device__ int reportError(int err, int lineno, const char *type)
 {
-	runtimeLog(err, "%s at line %d of [%.10s]", type, lineno, 20+libcu_sourceid());
+	_log(err, "%s at line %d of [%.10s]", type, lineno, 20+libcu_sourceid());
 	return err;
 }
 __host_device__ int runtimeCorruptError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, "database corruption"); }

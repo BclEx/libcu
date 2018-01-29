@@ -132,7 +132,7 @@ __host_device__ static uint32_t countLookasideSlots(LookasideSlot *p)
 __host_device__ int taglookasideUsed(tagbase_t *tag, int *highwater) //: sqlite3LookasideUsed
 {
 	uint32_t inits = countLookasideSlots(tag->lookaside.init);
-	uint32_t frees = countLookasideSlots(tag->lookaside.free);
+	uint32_t frees = countLookasideSlots(tag->lookaside.free_);
 	if (highwater) *highwater = tag->lookaside.slots - inits;
 	return tag->lookaside.slots - inits + frees;
 }
@@ -150,12 +150,12 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 	case TAGSTATUS_LOOKASIDE_USED: {
 		*current = taglookasideUsed(tag, highwater);
 		if (resetFlag) {
-			LookasideSlot *p = tag->lookaside.free;
+			LookasideSlot *p = tag->lookaside.free_;
 			if (p) {
 				while (p->next) p = p->next;
 				p->next = tag->lookaside.init;
-				tag->lookaside.init = tag->lookaside.free;
-				tag->lookaside.free = nullptr;
+				tag->lookaside.init = tag->lookaside.free_;
+				tag->lookaside.free_ = nullptr;
 			}
 		}
 		break; }

@@ -257,7 +257,7 @@ __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restr
 	if (maxlen <= 0) return -1;
 	strbld_t b;
 	strbldInit(&b, nullptr, (char *)s, (int)maxlen, 0);
-	strbldAppendFormat(&b, format, va);
+	strbldAppendFormatv(&b, format, va);
 	strbldToString(&b);
 	return b.index;
 }
@@ -270,7 +270,7 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 	char base[PRINT_BUF_SIZE];
 	strbld_t b;
 	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
-	strbldAppendFormat(&b, format, va);
+	strbldAppendFormatv(&b, format, va);
 	const char *v = strbldToString(&b);
 	int size = b.index + 1;
 	// chunk results
@@ -940,43 +940,6 @@ match_failure:
 }
 
 #pragma endregion
-
-#ifdef __CUDA_ARCH__
-__device__ char *vmtagprintf_(void *tag, const char *format, va_list va)
-{
-	assert(tag != nullptr);
-	char base[PRINT_BUF_SIZE];
-	strbld_t b;
-	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
-	b.tag = tag;
-	strbldAppendFormat(&b, format, va);
-	char *str = strbldToString(&b);
-	// if (b.allocFailed) tagallocfailed(tag);
-	return str;
-}
-#endif
-
-#ifdef __CUDA_ARCH__
-__device__ char *vmprintf_(const char *format, va_list va)
-{
-	char base[PRINT_BUF_SIZE];
-	strbld_t b;
-	strbldInit(&b, nullptr, base, sizeof(base), LIBCU_MAXLENGTH);
-	strbldAppendFormat(&b, format, va);
-	return strbldToString(&b);
-}
-#endif
-
-#ifdef __CUDA_ARCH__
-__device__ char *vmsnprintf_(char *__restrict s, size_t maxlen, const char *format, va_list va)
-{
-	if (maxlen <= 0) return (char *)s;
-	strbld_t b;
-	strbldInit(&b, nullptr, (char *)s, (int)maxlen, 0);
-	strbldAppendFormat(&b, format, va);
-	return strbldToString(&b);
-}
-#endif
 
 __END_DECLS;
 

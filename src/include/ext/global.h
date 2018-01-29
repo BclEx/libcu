@@ -125,7 +125,20 @@ __BEGIN_DECLS;
 #define RC_AUTH_USER               (RC_AUTH | (1<<8))
 #define RC_OK_LOAD_PERMANENTLY     (RC_OK | (1<<8))
 
-extern __host_device__ RC runtimeInitialize();
+// CAPI3REF: Run-Time Limit Categories
+#define TAG_LIMIT_LENGTH                    0
+#define TAG_LIMIT_SQL_LENGTH                1
+#define TAG_LIMIT_COLUMN                    2
+#define TAG_LIMIT_EXPR_DEPTH                3
+#define TAG_LIMIT_COMPOUND_SELECT           4
+#define TAG_LIMIT_VDBE_OP                   5
+#define TAG_LIMIT_FUNCTION_ARG              6
+#define TAG_LIMIT_ATTACHED                  7
+#define TAG_LIMIT_LIKE_PATTERN_LENGTH       8
+#define TAG_LIMIT_VARIABLE_NUMBER           9
+#define TAG_LIMIT_TRIGGER_DEPTH            10
+#define TAG_LIMIT_WORKER_THREADS           11
+#define TAG_LIMIT_MAX (TAG_LIMIT_WORKER_THREADS+1)
 
 // CAPI3REF: Initialize The SQLite Library
 extern __host_device__ RC runtimeInitialize(); //: sqlite3_initialize
@@ -198,7 +211,8 @@ struct LookasideSlot {
 };
 
 /* Each Tag object is an instance of the following structure. */
-//typedef struct tagbase_t tagbase_t;
+typedef struct vsystem vsystem;
+typedef struct tagbase_t tagbase_t;
 struct tagbase_t {
 	vsystem *vsys;          // OS Interface
 	mutex *mutex;			// Connection mutex
@@ -214,8 +228,27 @@ struct tagbase_t {
 	bool mallocFailed;      // True if we have seen a malloc failure
 	bool benignMalloc;      // Do not require OOMs if true
 	int *bytesFreed;		// If not NULL, increment this in DbFree()
+	uint8_t suppressErr;	// Do not issue error messages if true
 	uint32_t magic;         // Magic number for detect library misuse
+	int limits[TAG_LIMIT_MAX]; // Limits
 	void *err;				// Most recent error message
+};
+
+/* Possible values for the sqlite.magic field.
+** The numbers are obtained at random and have no special meaning, other than being distinct from one another.
+*/
+#define TAG_MAGIC_OPEN     0xa029a697  // Database is open
+#define TAG_MAGIC_CLOSED   0x9f3c2d33  // Database is closed
+#define TAG_MAGIC_SICK     0x4b771290  // Error and awaiting close
+#define TAG_MAGIC_BUSY     0xf03b7906  // Database currently in use
+#define TAG_MAGIC_ERROR    0xb5357930  // An SQLITE_MISUSE error occurred
+#define TAG_MAGIC_ZOMBIE   0x64cffc7f  // Close with last statement close
+
+struct parsebase_t {
+	tagbase_t *tag;			// The main database structure
+	char *errMsg;			// An error message
+	int rc;					// Return code from execution
+	int errs;				// Number of errors seen
 };
 
 #include "vsystem.h"
@@ -354,15 +387,55 @@ __host_device__ int runtimeIoerrnomemError(int line);
 
 // CAPI3REF: Error Logging Interface
 /* Format and write a message to the log if logging is enabled. */
-__host_device__ void runtimeLogv(int errCode, const char *format, va_list va);
+__host_device__ void _logv(int errCode, const char *format, va_list va);
+
+// printf.c
+__host_device__ char *vmtagprintf(void *tag, const char *format, va_list va);
+__host_device__ char *vmprintf(const char *format, va_list va);
+__host_device__ char *vmsnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
 
 __END_DECLS;
 
 #ifndef __CUDA_ARCH__
-__host_device__ __forceinline void runtimeLog(int errCode, const char *format, ...) { va_list va; va_start(va, format); runtimeLogv(errCode, format, va); va_end(va); }
+__host_device__ __forceinline void _log(int errCode, const char *format, ...) { va_list va; va_start(va, format); _logv(errCode, format, va); va_end(va); }
 #else
-STDARG1void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
-STDARG2void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
-STDARG3void(runtimeLog, runtimeLogv(errCode, format, va), int errCode, const char *format);
+STDARG1void(_log, _logv(errCode, format, va), int errCode, const char *format);
+STDARG2void(_log, _logv(errCode, format, va), int errCode, const char *format);
+STDARG3void(_log, _logv(errCode, format, va), int errCode, const char *format);
 #endif
+
+#ifndef __CUDA_ARCH__
+__host_device__ __forceinline char * mtagprintf(tagbase_t *tag, const char *format, ...) { va_list va; va_start(va, format); char *r = vmtagprintf(tag, format, va); va_end(va); return r; }
+#else
+STDARG1(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
+STDARG2(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
+STDARG3(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
+#endif
+
+#ifndef __CUDA_ARCH__
+__host_device__ __forceinline char * mprintf(const char *format, ...) { va_list va; va_start(va, format); char *r = vmprintf(format, va); va_end(va); return r; }
+#else
+STDARG1(char *, mprintf, vmprintf(format, va), const char *format);
+STDARG2(char *, mprintf, vmprintf(format, va), const char *format);
+STDARG3(char *, mprintf, vmprintf(format, va), const char *format);
+#endif
+
+#ifndef __CUDA_ARCH__
+__host_device__ __forceinline char * msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { va_list va; va_start(va, format); char *r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
+#else
+STDARG1(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+STDARG2(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+#endif
+
 #endif  /* _EXT_GLOBAL_H */
+
+
+// EXT
+//#define mtagprintf(tag, format, ...) format
+//#define vmtagprintf(tag, format, va) format
+//#define mprintf(format, ...) format
+//#define vmprintf(format, va) format
+//#define msnprintf(s, maxlen, format, ...) nullptr
+//#define vmsnprintf(s, maxlen, format, va) nullptr
+

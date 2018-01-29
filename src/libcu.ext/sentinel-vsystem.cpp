@@ -5,8 +5,8 @@ static bool Executor(void *tag, sentinelMessage *data, int length, char *(**host
 	vsystem *vfs = nullptr;
 	if (data->OP < VSYSFILE_CLOSE || data->OP > VSYSTEM_NEXTSYSTEMCALL) return false;
 	switch (data->OP) {
-	case VSYSFILE_CLOSE: { vsysfile_close *msg = (vsysfile_close *)data; vsys_close(msg->F); return true; }
-	case VSYSFILE_READ: { vsysfile_read *msg = (vsysfile_read *)data; msg->RC = vsys_read(msg->F, msg->Buf, msg->Amount, msg->Offset); return true; }
+	case VSYSFILE_CLOSE: { vsysfile_close *msg = (vsysfile_close *)data; msg->RC = RC_OK; vsys_close(msg->F); return true; }
+	case VSYSFILE_READ: { vsysfile_read *msg = (vsysfile_read *)data; msg->RC = vsys_read(msg->F, msg->Ptr, msg->Amount, msg->Offset); return true; }
 	case VSYSFILE_WRITE: { vsysfile_write *msg = (vsysfile_write *)data; msg->RC = vsys_write(msg->F, msg->Buf, msg->Amount, msg->Offset); return true; }
 	case VSYSFILE_TRUNCATE: { vsysfile_truncate *msg = (vsysfile_truncate *)data; msg->RC = vsys_truncate(msg->F, msg->Size); return true; }
 	case VSYSFILE_SYNC: { vsysfile_sync *msg = (vsysfile_sync *)data; msg->RC = vsys_sync(msg->F, msg->Flags); return true; }

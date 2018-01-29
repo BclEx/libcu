@@ -61,7 +61,7 @@ enum {
 struct stdio_remove {
 	static __forceinline__ __device__ char *Prepare(stdio_remove *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -79,8 +79,8 @@ struct stdio_remove {
 struct stdio_rename {
 	static __forceinline__ __device__ char *Prepare(stdio_rename *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
+		int str2Length = t->Str2 ? (int)strlen(t->Str2) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
@@ -117,8 +117,8 @@ struct stdio_fflush {
 struct stdio_freopen {
 	static __forceinline__ __device__ char *Prepare(stdio_freopen *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
+		int str2Length = t->Str2 ? (int)strlen(t->Str2) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
@@ -139,7 +139,7 @@ struct stdio_freopen {
 struct stdio_setvbuf {
 	static __forceinline__ __device__ char *Prepare(stdio_setvbuf *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int bufferLength = (t->Buffer ? (int)strlen(t->Buffer) + 1 : 0);
+		int bufferLength = t->Buffer ? (int)strlen(t->Buffer) + 1 : 0;
 		char *buffer = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += bufferLength);
 		if (end > dataEnd) return nullptr;
@@ -189,7 +189,7 @@ struct stdio_fgets {
 struct stdio_fputs {
 	static __forceinline__ __device__ char *Prepare(stdio_fputs *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
@@ -346,7 +346,7 @@ struct stdio_fileno {
 	sentinelMessage Base;
 	FILE *File;
 	__device__ stdio_fileno(FILE *file)
-		: Base(false, STDIO_FILENO), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_fileno)); }
+		: Base(true, STDIO_FILENO), File(file) { sentinelDeviceSend(&Base, sizeof(stdio_fileno)); }
 	int RC;
 };
 

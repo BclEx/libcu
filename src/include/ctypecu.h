@@ -88,7 +88,7 @@ extern __forceinline__ __device__ int isidchar_(int c) { return (__curtCtypeMap[
 #define isidchar isidchar_
 
 /*EXT*/
-extern __forceinline__ __device__ int isquote(int c) { return (__curtCtypeMap[(unsigned char)c]&0x80)!=0; }
+extern __forceinline__ __device__ int isquote_(int c) { return (__curtCtypeMap[(unsigned char)c]&0x80)!=0; }
 #define isquote isquote_
 
 __END_DECLS;
@@ -97,6 +97,7 @@ __END_DECLS;
 #define isctype(c, type) 0
 #define isidchar(c) 0
 #define isblank(c) ((c) == '\t' || (c) == ' ')
+#define isquote(c) ((c) == '"'|| (c) == '\'' || (c) == '[' || (c) == '`')
 
 ///* The following macros mimic the standard library functions toupper(), isspace(), isalnum(), isdigit() and isxdigit(), respectively. The
 //** libcu versions only work for ASCII characters, regardless of locale.

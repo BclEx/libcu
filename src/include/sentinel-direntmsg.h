@@ -42,7 +42,7 @@ enum {
 struct dirent_opendir {
 	static __forceinline__ __device__ char *Prepare(dirent_opendir *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
+		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
 		char *str = (char *)(data += _ROUND8(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
