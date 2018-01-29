@@ -3,8 +3,6 @@
 #include <assert.h>
 #include "sentinel-vsystem.h"
 
-#if __CUDACC__
-
 /* The mapFile structure is a subclass of sqlite3_file * specific to the map portability layer. */
 typedef struct mapsysfile mapsysfile;
 struct mapsysfile {
@@ -265,7 +263,7 @@ __device__ int mapRandomness(vsystem *t, int bufLength, char *buf)
 
 __device__ int mapSleep(vsystem *t, int milliseconds)
 {
-#if __CUDACC__
+#ifdef __CUDACC__
 	clock_t start = clock();
 	clock_t end = milliseconds * 10;
 	for (;;) {
@@ -281,7 +279,7 @@ __device__ int mapSleep(vsystem *t, int milliseconds)
 
 __device__ int mapCurrentTimeInt64(vsystem *t, int64_t *now)
 {
-#if __CUDACC__
+#ifdef __CUDACC__
 	*now = clock();
 #endif
 	return RC_OK;
@@ -289,7 +287,7 @@ __device__ int mapCurrentTimeInt64(vsystem *t, int64_t *now)
 
 __device__ int mapCurrentTime(vsystem *t, double *now)
 {
-#if __CUDACC__
+#ifdef __CUDACC__
 	int64_t i; int rc = mapCurrentTimeInt64(t, &i);
 	if (rc == RC_OK)
 		*now = i/86400000.0;
@@ -345,11 +343,9 @@ static __constant__ vsystem _mapsystem = {
 	mapNextSystemCall,		/* xNextSystemCall */
 };
 
-#endif
-
 __device__ int vsystemInitialize()
 {
-#if __CUDACC__
+#if defined(__CUDA_ARCH__)
 	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
 #else
@@ -360,7 +356,7 @@ __device__ int vsystemInitialize()
 
 __device__ int vsystemShutdown()
 {
-#if __CUDACC__
+#if defined(__CUDA_ARCH__)
 	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
 #else

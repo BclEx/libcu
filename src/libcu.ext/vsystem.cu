@@ -93,7 +93,7 @@ __host_device__ RC vsys_fileControl(vsysfile *p, int op, void *arg) //: sqlite3O
 __host_device__ void vsys_fileControlHint(vsysfile *p, int op, void *arg) { p->methods->fileControl(p, op, arg); } //: sqlite3OsFileControlHint
 __host_device__ int vsys_sectorSize(vsysfile *p) { int (*sectorSize)(vsysfile *) = p->methods->sectorSize; return sectorSize ? sectorSize(p) : LIBCU_DEFAULT_SECTOR_SIZE; } //: sqlite3OsSectorSize
 __host_device__ int vsys_deviceCharacteristics(vsysfile *p) { return p->methods->deviceCharacteristics(p); } //: sqlite3OsDeviceCharacteristics
-#ifndef NO_WAL
+#ifndef OMIT_WAL
 __host_device__ RC vsys_shmLock(vsysfile *p, int offset, int n, int flags){ return p->methods->shmLock(p, offset, n, flags); } //: sqlite3OsShmLock
 __host_device__ void vsys_shmBarrier(vsysfile *p) { p->methods->shmBarrier(p); } //: sqlite3OsShmBarrier
 __host_device__ RC vsys_shmUnmap(vsysfile *p, int deleteFlag) { return p->methods->shmUnmap(p, deleteFlag); } //: sqlite3OsShmUnmap

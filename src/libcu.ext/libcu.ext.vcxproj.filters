@@ -28,6 +28,7 @@
     <None Include="mutex-noop.cu" />
     <None Include="mutex.cu" />
     <None Include="pcache.cu" />
+    <None Include="main.more.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -79,5 +80,6 @@
     <ClCompile Include="sentinel-vsystem.cpp" />
     <ClCompile Include="mutex-unix.cpp" />
     <ClCompile Include="vsystem-win.c" />
+    <ClCompile Include="vsystem-unix.c" />
   </ItemGroup>
 </Project>

@@ -33,6 +33,12 @@ THE SOFTWARE.
 #include <stdargcu.h>
 __BEGIN_DECLS;
 
+/* Forward references to structures */
+typedef struct mutex mutex;
+typedef struct tagbase_t tagbase_t;
+typedef struct Lookaside Lookaside;
+typedef struct LookasideSlot LookasideSlot;
+
 #pragma region From: sqlite.h
 
 // CAPI3REF: Result Codes
@@ -128,6 +134,9 @@ __BEGIN_DECLS;
 #define RC_AUTH_USER               (RC_AUTH | (1<<8))
 #define RC_OK_LOAD_PERMANENTLY     (RC_OK | (1<<8))
 
+// CAPI3REF: Run-time Limits
+extern __host_device__ int taglimit(tagbase_t *, int id, int newVal);
+
 // CAPI3REF: Run-Time Limit Categories
 #define TAG_LIMIT_LENGTH                    0
 #define TAG_LIMIT_SQL_LENGTH                1
@@ -156,7 +165,7 @@ extern char *libcu_tempDirectory;
 extern char *libcu_dataDirectory;
 
 #ifndef OMIT_WSD
-extern int libcuPendingByte;
+extern __hostb_device__ int _libcuPendingByte;
 #endif
 
 #pragma endregion
@@ -191,11 +200,6 @@ extern int libcuPendingByte;
 #undef LIBCU_DEFAULTMMAPSIZE
 #define LIBCU_DEFAULTMMAPSIZE LIBCU_MAXMMAPSIZEc
 #endif
-
-/* Forward references to structures */
-typedef struct mutex mutex;
-typedef struct Lookaside Lookaside;
-typedef struct LookasideSlot LookasideSlot;
 
 /* Lookaside malloc is a set of fixed-size buffers that can be used to satisfy small transient memory allocation requests for objects
 ** associated with a particular database connection.  The use of lookaside malloc provides a significant performance enhancement
@@ -307,6 +311,64 @@ extern __device__ void randomness_(int n, void *p);
 #define CONFIG_STMTJRNL_SPILL	26  // int nByte
 #define CONFIG_SMALL_MALLOC		27  // boolean
 
+// CAPI3REF: Database Connection Configuration Options
+#define SQLITE_DBCONFIG_MAINDBNAME            1000 /* const char* */
+#define SQLITE_DBCONFIG_LOOKASIDE             1001 /* void* int int */
+#define SQLITE_DBCONFIG_ENABLE_FKEY           1002 /* int int* */
+#define SQLITE_DBCONFIG_ENABLE_TRIGGER        1003 /* int int* */
+#define SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER 1004 /* int int* */
+#define SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION 1005 /* int int* */
+#define SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE      1006 /* int int* */
+#define SQLITE_DBCONFIG_ENABLE_QPSG           1007 /* int int* */
+
+// CAPI3REF: Enable Or Disable Extended Result Codes
+extern __host_device__ int tagextendedResultcodes(tagbase_t *, int onoff); //: sqlite3_extended_result_codes
+
+// CAPI3REF: Last Insert Rowid
+extern __host_device__ int64_t taglastInsertRowid(tagbase_t *); //: sqlite3_last_insert_rowid
+
+// CAPI3REF: Set the Last Insert Rowid value.
+extern __host_device__ void tagsetLastInsertRowid(tagbase_t *, int64_t); //: sqlite3_set_last_insert_rowid
+
+// CAPI3REF: Count The Number Of Rows Modified
+extern __host_device__ int tagchanges(tagbase_t *); //: sqlite3_changes
+
+// CAPI3REF: Total Number Of Rows Modified
+extern __host_device__ int tagtotalchanges(tagbase_t *); //: sqlite3_total_changes
+
+// CAPI3REF: Interrupt A Long-Running Query
+extern __host_device__ void taginterrupt(tagbase_t *); //: sqlite3_interrupt
+
+// CAPI3REF: Register A Callback To Handle SQLITE_BUSY Errors
+extern __host_device__ int tagbusyhandler(tagbase_t *,int(*)(void*,int),void *); //: sqlite3_busy_handler
+
+// CAPI3REF: Set A Busy Timeout
+extern __host_device__ int tagbusytimeout(tagbase_t *, int ms); //: sqlite3_busy_timeout
+
+// CAPI3REF: SQL Trace Event Codes
+#define LIBCU_TRACE_STMT       0x01
+#define LIBCU_TRACE_PROFILE    0x02
+#define LIBCU_TRACE_ROW        0x04
+#define LIBCU_TRACE_CLOSE      0x08
+
+// CAPI3REF: SQL Trace Hook
+extern __host_device__ int tagtrace(tagbase_t *, unsigned mask, int (*callback)(unsigned,void*,void*,void*), void *ctx); //: sqlite3_trace_v2
+
+// CAPI3REF: Query Progress Callbacks
+extern __host_device__ void tagprogresshandler(tagbase_t *, int, int(*)(void*), void*); //: sqlite3_progress_handler
+
+// CAPI3REF: Error Codes And Messages
+extern __host_device__ int tagerrcode(tagbase_t *); //: sqlite3_errcode
+extern __host_device__ int tagextendedErrcode(tagbase_t *); //: sqlite3_extended_errcode
+extern __host_device__ const char *tagerrmsg(tagbase_t *); //: sqlite3_errmsg
+extern __host_device__ const void *tagerrmsg16(tagbase_t *); //: sqlite3_errmsg16
+extern __host_device__ const char *errstr(int); //: sqlite3_errstr
+
+
+
+
+
+
 /* Structure containing global configuration data for the Lib library.
 **
 ** This structure also contains some state information.
@@ -381,6 +443,12 @@ extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
 */
 #define CORRUPT_DB (!_runtimeConfig.neverCorrupt)
 
+
+#if defined(LIBCU_NEED_ERR_NAME)
+__host_device__ const char *libcuErrName(int);
+#endif
+__host_device__ const char *libcuErrStr(int);
+
 /* The LIBCU_*_BKPT macros are substitutes for the error codes with the same name but without the _BKPT suffix.  These macros invoke
 ** routines that report the line-number on which the error originated using sqlite3_log().  The routines also provide a convenient place
 ** to set a debugger breakpoint.
@@ -404,6 +472,33 @@ __host_device__ int libcuIoerrnomemError(int line); //: sqlite3IoerrnomemError
 #define RC_IOERR_NOMEM_BKPT RC_IOERR_NOMEM
 #endif
 
+/* All current savepoints are stored in a linked list starting at sqlite3.pSavepoint. The first element in the list is the most recently
+** opened savepoint. Savepoints are added to the list by the vdbe OP_Savepoint instruction.
+*/
+typedef struct Savepoint Savepoint;
+struct Savepoint {
+	char *name;                       // Savepoint name (nul-terminated)
+	int64_t deferredCons;				// Number of deferred fk violations
+	int64_t neferredImmCons;          // Number of deferred imm fk.
+	Savepoint *next;                  // Parent savepoint (if any)
+};
+
+/* The following are used as the second parameter to sqlite3Savepoint(), and as the P1 argument to the OP_Savepoint instruction. */
+#define SAVEPOINT_BEGIN      0
+#define SAVEPOINT_RELEASE    1
+#define SAVEPOINT_ROLLBACK   2
+
+
+
+
+
+
+
+
+
+
+
+
 __END_DECLS;
 
 #pragma region From: printf.c
@@ -422,9 +517,11 @@ __host_device__ char *vmprintf(const char *format, va_list va);
 __host_device__ char *vmsnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
 
 __END_DECLS;
-
 #ifndef __CUDA_ARCH__
 __host_device__ __forceinline void _log(int errCode, const char *format, ...) { va_list va; va_start(va, format); _logv(errCode, format, va); va_end(va); }
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+__host_device__ __forceinline void _debug(const char *format, ...) { va_list va; va_start(va, format); _debugv(format, va); va_end(va); }
+#endif
 __host_device__ __forceinline char *mtagprintf(tagbase_t *tag, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmtagprintf(tag, format, va); va_end(va); return r; }
 __host_device__ __forceinline char *mprintf(const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmprintf(format, va); va_end(va); return r; }
 __host_device__ __forceinline char *msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
@@ -432,6 +529,11 @@ __host_device__ __forceinline char *msnprintf(char *__restrict s, size_t maxlen,
 STDARG1void(_log, _logv(errCode, format, va), int errCode, const char *format);
 STDARG2void(_log, _logv(errCode, format, va), int errCode, const char *format);
 STDARG3void(_log, _logv(errCode, format, va), int errCode, const char *format);
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+STDARG1void(_debug, _debugv(format, va), const char *format);
+STDARG2void(_debug, _debugv(format, va), const char *format);
+STDARG3void(_debug, _debugv(format, va), const char *format);
+#endif
 STDARG1(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
 STDARG2(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
 STDARG3(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
@@ -442,17 +544,6 @@ STDARG1(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s
 STDARG2(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
 STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
 #endif
-
-#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-#ifndef __CUDA_ARCH__
-__host_device__ __forceinline void _debug(const char *format, ...) { va_list va; va_start(va, format); _debugv(format, va); va_end(va); }
-#else
-STDARG1void(_debug, _debugv(format, va), const char *format);
-STDARG2void(_debug, _debugv(format, va), const char *format);
-STDARG3void(_debug, _debugv(format, va), const char *format);
-#endif
-#endif
-
 #pragma endregion
 
 #endif  /* _EXT_GLOBAL_H */

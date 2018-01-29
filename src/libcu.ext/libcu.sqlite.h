@@ -23,7 +23,9 @@
 #define UNUSED_PARAMETER UNUSED_SYMBOL
 #define ArraySize _LENGTHOF
 #define MIN _MIN
-
+//
+#define SQLITE_DEBUG _DEBUG
+#define SQLITE_HAVE_OS_TRACE LIBCU_HAVE_OS_TRACE
 //
 #define SQLITE_OS_OTHER __OS_OTHER
 #define SQLITE_OS_WIN __OS_WIN
@@ -32,7 +34,6 @@
 #define SQLITE_BIGENDIAN LIBCU_BIGENDIAN 
 #define SQLITE_LITTLEENDIAN LIBCU_LITTLEENDIAN
 #define SQLITE_UTF16NATIVE LIBCU_UTF16NATIVE
-
 //
 #define sqlite3_int64 int64_t
 #define i64 int64_t
@@ -42,7 +43,7 @@
 #define i16 int16_t
 #define u8 uint8_t
 #define i8 int8_t
-
+//
 #define SQLITE_THREADSAFE LIBCU_THREADSAFE
 #define SQLITE_POWERSAFE_OVERWRITE LIBCU_POWERSAFE_OVERWRITE
 
@@ -352,8 +353,8 @@ RC vsystemShutdown();
 #define sqlite3_close_v2(db) panic("NEED")
 #define sqlite3LeaveMutexAndCloseZombie(db) panic("NEED")
 #define sqlite3RollbackAll(db, tripCode) panic("NEED")
-#define sqlite3ErrName(rc) panic("NEED")
-#define sqlite3ErrStr(rc) panic("NEED")
+#define sqlite3ErrName(rc) libcuErrName(rc)
+#define sqlite3ErrStr(rc) libcuErrStr(rc)
 #define sqlite3InvokeBusyHandler(p) panic("NEED")
 #define sqlite3_busy_handler(db, xBusy, pArg) panic("NEED")
 #define sqlite3_progress_handler(db, nOps, xProgress, pArg) panic("NEED")

@@ -228,7 +228,7 @@ struct vsystem {
 #ifdef OMIT_WSD
 #define PENDING_BYTE     (0x40000000)
 #else
-#define PENDING_BYTE      libcuPendingByte
+#define PENDING_BYTE      _libcuPendingByte
 #endif
 #define RESERVED_BYTE     (PENDING_BYTE+1)
 #define SHARED_FIRST      (PENDING_BYTE+2)
@@ -242,6 +242,15 @@ extern __hostb_device__ int _libcuOSTrace;
 #else
 #define OSTRACE(X)
 #undef LIBCU_HAVE_OS_TRACE
+#endif
+
+/* Is the sqlite3ErrName() function needed in the build?  Currently, it is needed by "mutex_w32.c" (when debugging), "os_win.c" (when
+** OSTRACE is enabled), and by several "test*.c" files (which are compiled using SQLITE_TEST).
+*/
+#if defined(LIBCU_HAVE_OS_TRACE) || defined(_TEST) || (defined(_DEBUG) && __OS_WIN)
+#define LIBCU_NEED_ERR_NAME
+#else
+#undef LIBCU_NEED_ERR_NAME
 #endif
 
 /* Wrapper around OS specific sqlite3_os_init() function. */
@@ -262,7 +271,7 @@ extern __host_device__ void vsys_fileControlHint(vsysfile *, int, void *); //: s
 #define FCNTL_DB_UNCHANGED 0xca093fa0
 extern __host_device__ int vsys_sectorSize(vsysfile *); //: sqlite3OsSectorSize
 extern __host_device__ int vsys_deviceCharacteristics(vsysfile *); //: sqlite3OsDeviceCharacteristics
-#ifndef NO_WAL
+#ifndef OMIT_WAL
 extern __host_device__ RC vsys_shmMap(vsysfile *, int, int, int, void volatile **); //: sqlite3OsShmMap
 extern __host_device__ RC vsys_shmLock(vsysfile *, int, int, int); //: sqlite3OsShmLock
 extern __host_device__ void vsys_shmBarrier(vsysfile *); //: sqlite3OsShmBarrier

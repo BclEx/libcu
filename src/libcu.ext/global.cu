@@ -115,5 +115,5 @@ _WSD struct RuntimeConfig _runtimeConfig = {
 ** Changing the pending byte during operation will result in undefined and incorrect behavior.
 */
 #ifndef OMIT_WSD
-__hostb_device__ int libcuPendingByte = 0x40000000;
+__hostb_device__ int _libcuPendingByte = 0x40000000;
 #endif
