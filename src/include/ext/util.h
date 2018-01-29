@@ -28,10 +28,12 @@ THE SOFTWARE.
 #define _EXT_UTIL_H
 __BEGIN_DECLS;
 
+typedef int vlist_t;
+
 #ifdef LIBCU_UNTESTABLE
-#define sqlite3FaultSim(X) RC_OK
+#define _faultSim(X) RC_OK
 #else
-__host_device__ RC sqlite3FaultSim(int);
+__host_device__ RC _faultSim(int);
 #endif
 
 //__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...)
@@ -40,7 +42,12 @@ __host_device__ void tagSystemError(tagbase_t *tag, RC rc);
 __host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
 __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
 
-typedef int vlist_t;
+
+#ifdef LIBCU_ENABLE_8_3_NAMES
+__host_device__ void util_fileSuffix3(const char *, char *);
+#else
+#define util_fileSuffix3(X, Y)
+#endif
 
 __END_DECLS;
 #endif	/* _EXT_UTIL_H */

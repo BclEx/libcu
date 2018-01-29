@@ -29,15 +29,16 @@ THE SOFTWARE.
 #include <crtdefscu.h>
 __BEGIN_DECLS;
 
-#pragma region X
+#pragma region From: sqlite.h
 
 // CAPI3REF: Text Encodings
-#define TEXTENCODE_UTF8           1    /* IMP: R-37514-35566 */
-#define TEXTENCODE_UTF16LE        2    /* IMP: R-03371-37637 */
-#define TEXTENCODE_UTF16BE        3    /* IMP: R-51971-34154 */
-#define TEXTENCODE_UTF16          4    /* Use native byte order */
-#define TEXTENCODE_ANY            5    /* Deprecated */
-#define TEXTENCODE_UTF16_ALIGNED  8    /* sqlite3_create_collation only */
+#define TEXTENCODE uint8_t
+#define TEXTENCODE_UTF8           1    // IMP: R-37514-35566
+#define TEXTENCODE_UTF16LE        2    // IMP: R-03371-37637
+#define TEXTENCODE_UTF16BE        3    // IMP: R-51971-34154
+#define TEXTENCODE_UTF16          4    // Use native byte order
+#define TEXTENCODE_ANY            5    // Deprecated
+#define TEXTENCODE_UTF16_ALIGNED  8    // sqlite3_create_collation only
 
 #pragma endregion
 

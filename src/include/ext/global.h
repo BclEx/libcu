@@ -25,12 +25,15 @@ THE SOFTWARE.
 
 #define ENABLE_API_ARMOR 1
 #define LIBCU_ENABLE_SQLLOG
+#define OMIT_COMPILEOPTION_DIAGS
 
 #ifndef _EXT_GLOBAL_H
 #define _EXT_GLOBAL_H
 #include <crtdefscu.h>
 #include <stdargcu.h>
 __BEGIN_DECLS;
+
+#pragma region From: sqlite.h
 
 // CAPI3REF: Result Codes
 #define RC int
@@ -146,10 +149,17 @@ extern __host_device__ RC runtimeShutdown(); //: sqlite3_shutdown
 extern __host_device__ int vsystemInitialize(); //: sqlite3_os_init
 extern __host_device__ int vsystemShutdown(); //: sqlite3_os_end
 
-/* Forward references to structures */
-typedef struct mutex mutex;
-typedef struct Lookaside Lookaside;
-typedef struct LookasideSlot LookasideSlot;
+// CAPI3REF: Name Of The Folder Holding Temporary Files
+extern char *libcu_tempDirectory;
+
+// CAPI3REF: Name Of The Folder Holding Database Files
+extern char *libcu_dataDirectory;
+
+#ifndef OMIT_WSD
+extern int libcuPendingByte;
+#endif
+
+#pragma endregion
 
 /* Disable MMAP on platforms where it is known to not work */
 #if defined(__OpenBSD__) || defined(__QNXNTO__)
@@ -170,8 +180,7 @@ typedef struct LookasideSlot LookasideSlot;
 #define LIBCU_MAXMMAPSIZE_xc 1 // exclude from ctime.c
 #endif
 
-/*
-** The default MMAP_SIZE is zero on all platforms.  Or, even if a larger default MMAP_SIZE is specified at compile-time, make sure that it does
+/* The default MMAP_SIZE is zero on all platforms.  Or, even if a larger default MMAP_SIZE is specified at compile-time, make sure that it does
 ** not exceed the maximum mmap size.
 */
 #ifndef LIBCU_DEFAULTMMAPSIZE
@@ -183,8 +192,12 @@ typedef struct LookasideSlot LookasideSlot;
 #define LIBCU_DEFAULTMMAPSIZE LIBCU_MAXMMAPSIZEc
 #endif
 
-/*
-** Lookaside malloc is a set of fixed-size buffers that can be used to satisfy small transient memory allocation requests for objects
+/* Forward references to structures */
+typedef struct mutex mutex;
+typedef struct Lookaside Lookaside;
+typedef struct LookasideSlot LookasideSlot;
+
+/* Lookaside malloc is a set of fixed-size buffers that can be used to satisfy small transient memory allocation requests for objects
 ** associated with a particular database connection.  The use of lookaside malloc provides a significant performance enhancement
 ** (approx 10%) by avoiding numerous malloc/free requests while parsing SQL statements.
 **
@@ -196,8 +209,8 @@ typedef struct LookasideSlot LookasideSlot;
 ** schema information, the Lookaside.bEnabled flag is cleared so that lookaside allocations are not used to construct the schema objects.
 */
 struct Lookaside {
-	uint32_t disable;       // Only operate the lookaside when zero */
-	uint16_t size;          // Size of each buffer in bytes */
+	uint32_t disable;       // Only operate the lookaside when zero
+	uint16_t size;          // Size of each buffer in bytes
 	bool malloced;			// True if Start obtained from alloc32()
 	int slots;				// Number of lookaside slots allocated
 	int stats[3];			// 0: hits.  1: size misses.  2: full misses
@@ -244,6 +257,8 @@ struct tagbase_t {
 #define TAG_MAGIC_ERROR    0xb5357930  // An SQLITE_MISUSE error occurred
 #define TAG_MAGIC_ZOMBIE   0x64cffc7f  // Close with last statement close
 
+/* Pasebase structure */
+typedef struct parsebase_t parsebase_t;
 struct parsebase_t {
 	tagbase_t *tag;			// The main database structure
 	char *errMsg;			// An error message
@@ -296,6 +311,7 @@ extern __device__ void randomness_(int n, void *p);
 **
 ** This structure also contains some state information.
 */
+typedef struct RuntimeConfig RuntimeConfig;
 struct RuntimeConfig {
 	void (*appendFormat[2])(void *b, va_list va); // Formatter
 	bool memstat;                   // True to enable memory status
@@ -334,7 +350,7 @@ struct RuntimeConfig {
 	void (*log)(void*,int,const char*); // Function for logging
 	void *logArg;					// First argument to xLog()
 #ifdef LIBCU_ENABLE_SQLLOG
-	void(*sqllog)(void*,tagbase_t*,const char*,int);
+	void (*sqllog)(void*,tagbase_t*,const char*,int);
 	void *sqllogArg;
 #endif
 #ifdef LIBCU_VDBE_COVERAGE
@@ -369,27 +385,38 @@ extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
 ** routines that report the line-number on which the error originated using sqlite3_log().  The routines also provide a convenient place
 ** to set a debugger breakpoint.
 */
-__host_device__ int runtimeCorruptError(int line);
-__host_device__ int runtimeMisuseError(int line);
-__host_device__ int runtimeCantopenError(int line);
-#define RC_CORRUPT_BKPT runtimeCorruptError(__LINE__)
-#define RC_MISUSE_BKPT runtimeMisuseError(__LINE__)
-#define RC_CANTOPEN_BKPT runtimeCantopenError(__LINE__)
+__host_device__ int libcuCorruptError(int line); //: sqlite3CorruptError
+__host_device__ int libcuMisuseError(int line); //: sqlite3MisuseError
+__host_device__ int libcuCantopenError(int line); //: sqlite3CantopenError
+#define RC_CORRUPT_BKPT libcuCorruptError(__LINE__)
+#define RC_MISUSE_BKPT libcuMisuseError(__LINE__)
+#define RC_CANTOPEN_BKPT libcuCantopenError(__LINE__)
 #ifdef _DEBUG
-__host_device__ int runtimeNomemError(int line);
-__host_device__ int runtimeIoerrnomemError(int line);
-#define RC_NOMEM_BKPT runtimeNomemError(__LINE__)
-#define RC_IOERR_NOMEM_BKPT runtimeIoerrnomemError(__LINE__)
+__host_device__ int libcuCorruptPgnoError(int line, Pgno pgno); //: sqlite3CorruptPgnoError
+__host_device__ int libcuNomemError(int line); //: sqlite3NomemError
+__host_device__ int libcuIoerrnomemError(int line); //: sqlite3IoerrnomemError
+#define RC_CORRUPT_PGNO(P) libCorruptPgnoError(__LINE__, (P))
+#define RC_NOMEM_BKPT libcuNomemError(__LINE__)
+#define RC_IOERR_NOMEM_BKPT libcuIoerrnomemError(__LINE__)
 #else
+#define RC_CORRUPT_PGNO(P) libcuCorruptPgnoError(__LINE__)
 #define RC_NOMEM_BKPT RC_NOMEM
 #define RC_IOERR_NOMEM_BKPT RC_IOERR_NOMEM
 #endif
 
+__END_DECLS;
+
+#pragma region From: printf.c
+__BEGIN_DECLS;
+
 // CAPI3REF: Error Logging Interface
 /* Format and write a message to the log if logging is enabled. */
-__host_device__ void _logv(int errCode, const char *format, va_list va);
+__host_device__ void _logv(int errCode, const char *format, va_list va); //: sqlite3_log
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+__host_device__ void _debugv(const char *format, va_list va); //: sqlite3DebugPrintf
+#endif
 
-// printf.c
+//
 __host_device__ char *vmtagprintf(void *tag, const char *format, va_list va);
 __host_device__ char *vmprintf(const char *format, va_list va);
 __host_device__ char *vmsnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
@@ -398,44 +425,35 @@ __END_DECLS;
 
 #ifndef __CUDA_ARCH__
 __host_device__ __forceinline void _log(int errCode, const char *format, ...) { va_list va; va_start(va, format); _logv(errCode, format, va); va_end(va); }
+__host_device__ __forceinline char *mtagprintf(tagbase_t *tag, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmtagprintf(tag, format, va); va_end(va); return r; }
+__host_device__ __forceinline char *mprintf(const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmprintf(format, va); va_end(va); return r; }
+__host_device__ __forceinline char *msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
 #else
 STDARG1void(_log, _logv(errCode, format, va), int errCode, const char *format);
 STDARG2void(_log, _logv(errCode, format, va), int errCode, const char *format);
 STDARG3void(_log, _logv(errCode, format, va), int errCode, const char *format);
-#endif
-
-#ifndef __CUDA_ARCH__
-__host_device__ __forceinline char * mtagprintf(tagbase_t *tag, const char *format, ...) { va_list va; va_start(va, format); char *r = vmtagprintf(tag, format, va); va_end(va); return r; }
-#else
 STDARG1(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
 STDARG2(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
 STDARG3(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
-#endif
-
-#ifndef __CUDA_ARCH__
-__host_device__ __forceinline char * mprintf(const char *format, ...) { va_list va; va_start(va, format); char *r = vmprintf(format, va); va_end(va); return r; }
-#else
 STDARG1(char *, mprintf, vmprintf(format, va), const char *format);
 STDARG2(char *, mprintf, vmprintf(format, va), const char *format);
 STDARG3(char *, mprintf, vmprintf(format, va), const char *format);
-#endif
-
-#ifndef __CUDA_ARCH__
-__host_device__ __forceinline char * msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { va_list va; va_start(va, format); char *r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
-#else
 STDARG1(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
 STDARG2(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
 STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
 #endif
 
+#if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
+#ifndef __CUDA_ARCH__
+__host_device__ __forceinline void _debug(const char *format, ...) { va_list va; va_start(va, format); _debugv(format, va); va_end(va); }
+#else
+STDARG1void(_debug, _debugv(format, va), const char *format);
+STDARG2void(_debug, _debugv(format, va), const char *format);
+STDARG3void(_debug, _debugv(format, va), const char *format);
+#endif
+#endif
+
+#pragma endregion
+
 #endif  /* _EXT_GLOBAL_H */
-
-
-// EXT
-//#define mtagprintf(tag, format, ...) format
-//#define vmtagprintf(tag, format, va) format
-//#define mprintf(format, ...) format
-//#define vmprintf(format, va) format
-//#define msnprintf(s, maxlen, format, ...) nullptr
-//#define vmsnprintf(s, maxlen, format, va) nullptr
 

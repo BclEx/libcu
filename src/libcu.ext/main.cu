@@ -1,4 +1,5 @@
 #include <ext/global.h> //: main.c
+#include <stdiocu.h>
 #include <stringcu.h>
 #include <stdargcu.h>
 #include <assert.h>
@@ -33,9 +34,9 @@ __host_device__ int libcu_threadsafe() { return LIBCU_THREADSAFE; }
 */
 #ifdef LIBCU_HAVE_OSTRACE
 #ifndef LIBCU_DEBUG_OSTRACE
-#define LIBCU_DEBUG_OSTRACE false
+#define LIBCU_DEBUG_OSTRACE 0
 #endif
-bool _runtimeOSTrace = LIBCU_DEBUG_OSTRACE;
+int _libcuOSTrace = LIBCU_DEBUG_OSTRACE;
 #endif
 
 #if !defined(LIBCU_OMIT_TRACE) && defined(LIBCU_ENABLE_IOTRACE)
@@ -528,13 +529,41 @@ static __host_device__ RC setupLookaside(tagbase_t *tag, void *buf, int size, in
 */
 static __host_device__ int reportError(int err, int lineno, const char *type)
 {
-	_log(err, "%s at line %d of [%.10s]", type, lineno, 20+libcu_sourceid());
+	_log(err, "%s at line %d of [%.10s]", type, lineno, 20 + libcu_sourceid());
 	return err;
 }
-__host_device__ int runtimeCorruptError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, "database corruption"); }
-__host_device__ int runtimeMisuseError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_MISUSE, lineno, "misuse"); }
-__host_device__ int runtimeCantopenError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CANTOPEN, lineno, "cannot open file"); }
+__host_device__ int libcuCorruptError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, "database corruption"); } //: sqlite3CorruptError
+__host_device__ int libcuMisuseError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_MISUSE, lineno, "misuse"); } //: sqlite3MisuseError
+__host_device__ int libcuCantopenError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CANTOPEN, lineno, "cannot open file"); } //: sqlite3CantopenError
 #ifdef _DEBUG
-__host_device__ int runtimeNomemError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_NOMEM, lineno, "OOM"); }
-__host_device__ int runtimeIoerrnomemError(int lineno){ ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_IOERR_NOMEM, lineno, "I/O OOM error"); }
+__host_device__ int libcuCorruptPgnoError(int lineno, Pgno pgno) { char msg[100]; snprintf(msg, sizeof(msg), "database corruption page %d", pgno); ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, msg); } //: sqlite3CorruptPgnoError
+__host_device__ int libcuNomemError(int lineno) { ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_NOMEM, lineno, "OOM"); } //: sqlite3NomemError
+__host_device__ int libcuIoerrnomemError(int lineno){ ASSERTCOVERAGE(_runtimeConfig.log); return reportError(RC_IOERR_NOMEM, lineno, "I/O OOM error"); } //: sqlite3IoerrnomemError
 #endif
+
+#ifndef OMIT_COMPILEOPTION_DIAGS
+/* Given the name of a compile-time option, return true if that option was used and false if not.
+**
+** The name can optionally begin with "SQLITE_" but the "SQLITE_" prefix is not required for a match.
+*/
+__host_device__ int sqlite3_compileoption_used(const char *optName) //: sqlite3_compileoption_used
+{
+#if ENABLE_API_ARMOR
+	if (!optName) { (void)RC_MISUSE_BKPT; return 0; }
+#endif
+	int opts; const char **compileOpts = sqlite3CompileOptions(&opts);
+	if (!strnicmp(optName, "SQLITE_", 7)) optName += 7;
+	int n = strlen(optName);
+	// Since nOpt is normally in single digits, a linear search is adequate. No need for a binary search.
+	for (int i = 0; i < opts; i++)
+		if (!strnicmp(optName, compileOpts[i], n) && !isidchar((unsigned char)compileOpt[i][n])) return 1;
+	return 0;
+}
+
+/* Return the N-th compile-time option string.  If N is out of range, return a NULL pointer. */
+__host_device__ const char *sqlite3_compileoption_get(int n) //: sqlite3_compileoption_get
+{
+	int opts; const char **compileOpts = sqlite3CompileOptions(&opts);
+	return n >= 0 && n < opts ? compileOpts[n] : nullptr;
+}
+#endif /* OMIT_COMPILEOPTION_DIAGS */

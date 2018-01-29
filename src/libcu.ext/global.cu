@@ -102,3 +102,18 @@ _WSD struct RuntimeConfig _runtimeConfig = {
 	0,							// localtimeFault
 	0x7ffffffe					// onceResetThreshold
 };
+
+/* The value of the "pending" byte must be 0x40000000 (1 byte past the 1-gibabyte boundary) in a compatible database.  SQLite never uses
+** the database page that contains the pending byte.  It never attempts to read or write that page.  The pending byte page is set aside
+** for use by the VFS layers as space for managing file locks.
+**
+** During testing, it is often desirable to move the pending byte to a different position in the file.  This allows code that has to
+** deal with the pending byte to run on files that are much smaller than 1 GiB.  The sqlite3_test_control() interface can be used to
+** move the pending byte.
+**
+** IMPORTANT:  Changing the pending byte to any value other than 0x40000000 results in an incompatible database file format!
+** Changing the pending byte during operation will result in undefined and incorrect behavior.
+*/
+#ifndef OMIT_WSD
+__hostb_device__ int libcuPendingByte = 0x40000000;
+#endif

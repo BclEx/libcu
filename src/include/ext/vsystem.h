@@ -28,6 +28,8 @@ THE SOFTWARE.
 #define _EXT_VSYSTEM_H
 __BEGIN_DECLS;
 
+#pragma region From: sqlite.h
+
 // CAPI3REF: Flags For File Open Operations
 #define VSYS_OPEN_READONLY         0x00000001  // Ok for sqlite3_open_v2()
 #define VSYS_OPEN_READWRITE        0x00000002  // Ok for sqlite3_open_v2()
@@ -188,6 +190,8 @@ struct vsystem {
 // CAPI3REF: Maximum xShmLock index
 #define VSYS_SHM_NLOCK        8
 
+#pragma endregion
+
 /* If the SET_FULLSYNC macro is not defined above, then make it a no-op */
 #ifndef SET_FULLSYNC
 #define SET_FULLSYNC(x, y)
@@ -196,6 +200,48 @@ struct vsystem {
 /* The default size of a disk sector */
 #ifndef LIBCU_DEFAULT_SECTOR_SIZE
 #define LIBCU_DEFAULT_SECTOR_SIZE 4096
+#endif
+
+/* Temporary files are named starting with this prefix followed by 16 random alphanumeric characters, and no file extension. */
+#ifndef LIBCU_TEMP_FILE_PREFIX
+#define LIBCU_TEMP_FILE_PREFIX "etilqs_"
+#endif
+
+/* The following values may be passed as the second argument to sqlite3OsLock(). The various locks exhibit the following semantics:
+**
+** SHARED:    Any number of processes may hold a SHARED lock simultaneously.
+** RESERVED:  A single process may hold a RESERVED lock on a file at any time. Other processes may hold and obtain new SHARED locks.
+** PENDING:   A single process may hold a PENDING lock on a file at any one time. Existing SHARED locks may persist, but no new
+**            SHARED locks may be obtained by other processes.
+** EXCLUSIVE: An EXCLUSIVE lock precludes all other locks.
+**
+** PENDING_LOCK may not be passed directly to sqlite3OsLock(). Instead, a process that requests an EXCLUSIVE lock may actually obtain a PENDING
+** lock. This can be upgraded to an EXCLUSIVE lock by a subsequent call to sqlite3OsLock().
+*/
+#define NO_LOCK         0
+#define SHARED_LOCK     1
+#define RESERVED_LOCK   2
+#define PENDING_LOCK    3
+#define EXCLUSIVE_LOCK  4
+
+/* File Locking Notes:  (Mostly about windows but also some info for Unix) */
+#ifdef OMIT_WSD
+#define PENDING_BYTE     (0x40000000)
+#else
+#define PENDING_BYTE      libcuPendingByte
+#endif
+#define RESERVED_BYTE     (PENDING_BYTE+1)
+#define SHARED_FIRST      (PENDING_BYTE+2)
+#define SHARED_SIZE       510
+
+/* Declarations used for tracing the operating system interfaces. */
+#if defined(LIBCU_FORCE_OS_TRACE) || defined(_TEST) || (defined(_DEBUG) && __OS_WIN)
+extern __hostb_device__ int _libcuOSTrace;
+#define OSTRACE(X) if (_libcuOSTrace) _debug X
+#define LIBCU_HAVE_OS_TRACE
+#else
+#define OSTRACE(X)
+#undef LIBCU_HAVE_OS_TRACE
 #endif
 
 /* Wrapper around OS specific sqlite3_os_init() function. */

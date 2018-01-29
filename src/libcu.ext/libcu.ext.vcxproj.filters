@@ -3,7 +3,6 @@
   <ItemGroup>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
-    <CudaCompile Include="pcache.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -28,6 +27,7 @@
     <None Include="mutex-gpu.cu" />
     <None Include="mutex-noop.cu" />
     <None Include="mutex.cu" />
+    <None Include="pcache.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -77,7 +77,7 @@
   <ItemGroup>
     <ClCompile Include="mutex-win.cpp" />
     <ClCompile Include="sentinel-vsystem.cpp" />
-    <ClCompile Include="vsystem-win.cpp" />
     <ClCompile Include="mutex-unix.cpp" />
+    <ClCompile Include="vsystem-win.c" />
   </ItemGroup>
 </Project>

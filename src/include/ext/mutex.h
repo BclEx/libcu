@@ -28,8 +28,7 @@ THE SOFTWARE.
 #define _EXT_MUTEX_H
 __BEGIN_DECLS;
 
-	/*
-	** The LIBCU_THREADSAFE macro must be defined as 0, 1, or 2. 0 means mutexes are permanently disable and the library is never
+	/* The LIBCU_THREADSAFE macro must be defined as 0, 1, or 2. 0 means mutexes are permanently disable and the library is never
 	** threadsafe.  1 means the library is serialized which is the highest level of threadsafety.  2 means the library is multithreaded - multiple
 	** threads can use SQLite as long as no two threads try to use the same database connection at the same time.
 	**
@@ -41,6 +40,11 @@ __BEGIN_DECLS;
 #else
 #define LIBCU_THREADSAFE 1 // IMP: R-07272-22309
 #endif
+#endif
+
+/* Powersafe overwrite is on by default.  But can be turned off using the -DSQLITE_POWERSAFE_OVERWRITE=0 command-line option. */
+#ifndef LIBCU_POWERSAFE_OVERWRITE
+#define LIBCU_POWERSAFE_OVERWRITE 1
 #endif
 
 	/*
@@ -90,7 +94,6 @@ __BEGIN_DECLS;
 #define MUTEX_STATIC_VFS2     12  // For use by extension VFS
 #define MUTEX_STATIC_VFS3     13  // For use by application VFS
 
-	//?__device__ void __mutexsystem_setdefault(); // Default mutex interface
 	// CAPI3REF: Mutex Handle
 	typedef struct mutex mutex;
 

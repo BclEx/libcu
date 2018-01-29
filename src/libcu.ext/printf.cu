@@ -3,6 +3,8 @@
 #include <ext/global.h> //: printf.c
 #include <assert.h>
 
+#pragma region From: printf.c
+
 #define LIBCU_MAXLENGTH 1000000000
 
 __host_device__ char *vmtagprintf(tagbase_t *tag, const char *format, va_list va) //: sqlite3VMPrintf, sqlite3MPrintf
@@ -88,3 +90,4 @@ __host_device__ void _debugv(const char *format, va_list va) //: sqlite3DebugPri
 }
 #endif
 
+#pragma endregion

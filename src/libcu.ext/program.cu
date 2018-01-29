@@ -7,9 +7,12 @@
 static __global__ void g_test1()
 {
 	printf("test1\n");
+	runtimeInitialize();
 
 	void *a = alloc32(10);
 	mfree(a);
+
+	runtimeShutdown();
 }
 cudaError_t test1() { g_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
 
@@ -31,6 +34,7 @@ int main(int argc, char ** argv)
 	}
 	cudaErrorCheck(cudaDeviceSetLimit(cudaLimitStackSize, 1024*5));
 	sentinelServerInitialize();
+	runtimeInitialize();
 
 	// Launch test
 	switch (testId)
@@ -55,6 +59,7 @@ int main(int argc, char ** argv)
 	mainPause("SUCCESS");
 
 Error:
+	runtimeShutdown();
 	sentinelServerShutdown();
 
 	// close

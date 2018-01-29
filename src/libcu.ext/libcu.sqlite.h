@@ -16,15 +16,47 @@
 #define SQLITE_LIBCU_H
 #include <ext/global.h>
 
-#pragma region from x
+#pragma region Basetypes
 
 #define SQLITE_PTRSIZE _PTRSIZE
 #define SQLITE_WITHIN _WITHIN
+#define UNUSED_PARAMETER UNUSED_SYMBOL
+#define ArraySize _LENGTHOF
+#define MIN _MIN
 
+//
+#define SQLITE_OS_OTHER __OS_OTHER
+#define SQLITE_OS_WIN __OS_WIN
+#define SQLITE_OS_UNIX __OS_UNIX
 #define SQLITE_BYTEORDER LIBCU_BYTEORDER
 #define SQLITE_BIGENDIAN LIBCU_BIGENDIAN 
 #define SQLITE_LITTLEENDIAN LIBCU_LITTLEENDIAN
 #define SQLITE_UTF16NATIVE LIBCU_UTF16NATIVE
+
+//
+#define sqlite3_int64 int64_t
+#define i64 int64_t
+#define u64 uint64_t
+#define u32 uint32_t
+#define u16 uint16_t
+#define i16 int16_t
+#define u8 uint8_t
+#define i8 int8_t
+
+#define SQLITE_THREADSAFE LIBCU_THREADSAFE
+#define SQLITE_POWERSAFE_OVERWRITE LIBCU_POWERSAFE_OVERWRITE
+
+#pragma endregion
+
+#pragma region From: sqlite.h
+
+// The SQLITE_*_BKPT macros are substitutes for the error codes with
+#define SQLITE_CORRUPT_BKPT RC_CORRUPT_BKPT
+#define SQLITE_MISUSE_BKPT RC_MISUSE_BKPT
+#define SQLITE_CANTOPEN_BKPT RC_CANTOPEN_BKPT
+#define SQLITE_NOMEM_BKPT RC_NOMEM_BKPT
+#define SQLITE_IOERR_NOMEM_BKPT RC_IOERR_NOMEM_BKPT
+#define SQLITE_CORRUPT_PGNO RC_CORRUPT_PGNO
 
 // CAPI3REF: Result Codes
 #define SQLITE_OK RC_OK	// Successful result
@@ -128,7 +160,7 @@
 
 #pragma endregion
 
-#pragma region vsystem
+#pragma region From: sqlite.h - vsystem
 
 // CAPI3REF: Flags For File Open Operations
 #define SQLITE_OPEN_READONLY VSYS_OPEN_READONLY
@@ -226,7 +258,7 @@
 //typedef struct sqlite3_api_routines sqlite3_api_routines;
 
 // CAPI3REF: OS Interface Object
-#define sqlite3_syscall_ptr sqlite3_syscall_ptr
+#define sqlite3_syscall_ptr vsystemcall_ptr
 #define sqlite3_vfs vsystem 
 #	define iVersion version
 #	define szOsFile sizeOsFile
@@ -293,6 +325,9 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: main.c
+#define sqlite3GlobalConfig _runtimeConfig
+#	define bCoreMutex coreMutex
+//
 #define sqlite3_version libcu_version
 #define sqlite3_libversion() libcu_libversion()
 #define sqlite3_sourceid() libcu_sourceid()
@@ -304,87 +339,91 @@ RC vsystemShutdown();
 #define sqlite3_initialize() runtimeInitialize()
 #define sqlite3_shutdown() runtimeShutdown()
 #define sqlite3_config(op, ...) runtimeConfig(op, __VA_ARGS__)
-#define sqlite3_db_mutex(db)
-#define sqlite3_db_release_memory(db)
-#define sqlite3_db_cacheflush(db)
-#define sqlite3_db_config(db, op, ...)
-#define sqlite3_last_insert_rowid(db)
-#define sqlite3_set_last_insert_rowid(db, iRowid)
-#define sqlite3_changes(db)
-#define sqlite3_total_changes(db)
-#define sqlite3CloseSavepoints(db)
-#define sqlite3_close(db)
-#define sqlite3_close_v2(db)
-#define sqlite3LeaveMutexAndCloseZombie(db)
-#define sqlite3RollbackAll(db, tripCode)
-#define sqlite3ErrName(rc)
-#define sqlite3ErrStr(rc)
-#define sqlite3InvokeBusyHandler(p)
-#define sqlite3_busy_handler(db, xBusy, pArg)
-#define sqlite3_progress_handler(db, nOps, xProgress, pArg)
-#define sqlite3_busy_timeout(db, ms)
-#define sqlite3_interrupt(db){
-#define sqlite3CreateFunc(db, zFunctionName, nArg, enc, pUserData, xSFunc, xStep, xFinal, pDestructor)
-#define sqlite3_create_function(db, zFunc, nArg, enc, p, xSFunc, xStep, xFinal)
-#define sqlite3_create_function_v2(db, zFunc, nArg, enc, p, xSFunc, xStep, xFinal, xDestroy)
-#define sqlite3_overload_function(db, zName, nArg)
-#define sqlite3_trace(db, xTrace, pArg)
-#define sqlite3_profile(db, xProfile, pArg)
-#define sqlite3_commit_hook(db, xCallback, pArg)
-#define sqlite3_update_hook(db, xCallback, pArg)
-#define sqlite3_rollback_hook(db, xCallback, pArg)
-#define sqlite3_preupdate_hook(db,xCallback, pArg )
-#define sqlite3WalDefaultHook(pClientData, db, zDb, nFrame)
-#define sqlite3_wal_autocheckpoint(db, nFrame)
-#define sqlite3_wal_hook(db, xCallback, pArg)
-#define sqlite3_wal_checkpoint_v2(db, zDb, eMode, pnLog, pnCkpt)
-#define sqlite3_wal_checkpoint(db, zDb)
-#define sqlite3Checkpoint(db, iDb, eMode, pnLog, pnCkpt)
-#define sqlite3TempInMemory(db)
-#define sqlite3_errmsg(db)
-#define sqlite3_errmsg16(db)
-#define sqlite3_errcode(db)
-#define sqlite3_extended_errcode(db)
-#define sqlite3_system_errno(db)
-#define sqlite3_errstr(rc)
-#define sqlite3_limit(db, limitId, newLimit)
-#define sqlite3ParseUri(zDefaultVfs, zUri, pFlags, ppVfs, pzFile, pzErrMsg)
-#define sqlite3_open(zFilename, ppDb)
-#define sqlite3_open16(zFilename, ppDb)
-#define sqlite3_create_collation(db, zName, enc, pCtx, xCompare)
-#define sqlite3_create_collation_v2(db, zName, enc, pCtx, xCompare, xDel)
-#define sqlite3_create_collation16(db, zName, enc, pCtx, xCompare)
-#define sqlite3_collation_needed(db, pCollNeededArg, xCollNeeded)
-#define sqlite3_collation_needed16(db, pCollNeededArg, xCollNeeded16)
-#define sqlite3_global_recover()
-#define sqlite3_get_autocommit(db)
-#define sqlite3CorruptError(lineno)
-#define sqlite3MisuseError(lineno)
-#define sqlite3CantopenError(lineno)
-#define sqlite3CorruptPgnoError(lineno, pgno)
-#define sqlite3NomemError(lineno)
-#define sqlite3IoerrnomemError(lineno)
-#define sqlite3_thread_cleanup()
-#define sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc)
-#define sqlite3_sleep(ms)
-#define sqlite3_extended_result_codes(db, onoff)
-#define sqlite3_file_control(db, zDbName, op, pArg)
-#define sqlite3_test_control(op, ...)
-#define sqlite3_uri_parameter(zFilename, zParam)
-#define sqlite3_uri_boolean(zFilename, zParam, bDflt)
-#define sqlite3_uri_int64(zFilename, zParam, bDflt)
-#define sqlite3DbNameToBtree(db, zDbName)
-#define sqlite3_db_filename(db, zDbName)
-#define sqlite3_db_readonly(db, zDbName)
-#define sqlite3_snapshot_get(db, zDb, ppSnapshot)
-#define sqlite3_snapshot_open(db, zDb, pSnapshot)
-#define sqlite3_snapshot_recover(db, zDb)
-#define sqlite3_snapshot_free(pSnapshot)
-#define sqlite3_compileoption_used(zOptName)
-#define sqlite3_compileoption_get(N)
+#define sqlite3_db_mutex(db) panic("NEED")
+#define sqlite3_db_release_memory(db) panic("NEED")
+#define sqlite3_db_cacheflush(db) panic("NEED")
+#define sqlite3_db_config(db, op, ...) panic("NEED")
+#define sqlite3_last_insert_rowid(db) panic("NEED")
+#define sqlite3_set_last_insert_rowid(db, iRowid) panic("NEED")
+#define sqlite3_changes(db) panic("NEED")
+#define sqlite3_total_changes(db) panic("NEED")
+#define sqlite3CloseSavepoints(db) panic("NEED")
+#define sqlite3_close(db) panic("NEED")
+#define sqlite3_close_v2(db) panic("NEED")
+#define sqlite3LeaveMutexAndCloseZombie(db) panic("NEED")
+#define sqlite3RollbackAll(db, tripCode) panic("NEED")
+#define sqlite3ErrName(rc) panic("NEED")
+#define sqlite3ErrStr(rc) panic("NEED")
+#define sqlite3InvokeBusyHandler(p) panic("NEED")
+#define sqlite3_busy_handler(db, xBusy, pArg) panic("NEED")
+#define sqlite3_progress_handler(db, nOps, xProgress, pArg) panic("NEED")
+#define sqlite3_busy_timeout(db, ms) panic("NEED")
+#define sqlite3_interrupt(db) panic("NEED")
+#define sqlite3CreateFunc(db, zFunctionName, nArg, enc, pUserData, xSFunc, xStep, xFinal, pDestructor) panic("NEED")
+#define sqlite3_create_function(db, zFunc, nArg, enc, p, xSFunc, xStep, xFinal) panic("NEED")
+#define sqlite3_create_function_v2(db, zFunc, nArg, enc, p, xSFunc, xStep, xFinal, xDestroy) panic("NEED")
+#define sqlite3_overload_function(db, zName, nArg) panic("NEED")
+#define sqlite3_trace(db, xTrace, pArg) panic("NEED")
+#define sqlite3_profile(db, xProfile, pArg) panic("NEED")
+#define sqlite3_commit_hook(db, xCallback, pArg) panic("NEED")
+#define sqlite3_update_hook(db, xCallback, pArg) panic("NEED")
+#define sqlite3_rollback_hook(db, xCallback, pArg) panic("NEED")
+#define sqlite3_preupdate_hook(db,xCallback, pArg) panic("NEED")
+#define sqlite3WalDefaultHook(pClientData, db, zDb, nFrame) panic("NEED")
+#define sqlite3_wal_autocheckpoint(db, nFrame) panic("NEED")
+#define sqlite3_wal_hook(db, xCallback, pArg) panic("NEED")
+#define sqlite3_wal_checkpoint_v2(db, zDb, eMode, pnLog, pnCkpt) panic("NEED")
+#define sqlite3_wal_checkpoint(db, zDb) panic("NEED")
+#define sqlite3Checkpoint(db, iDb, eMode, pnLog, pnCkpt) panic("NEED")
+#define sqlite3TempInMemory(db) panic("NEED")
+#define sqlite3_errmsg(db) panic("NEED")
+#define sqlite3_errmsg16(db) panic("NEED")
+#define sqlite3_errcode(db) panic("NEED")
+#define sqlite3_extended_errcode(db) panic("NEED")
+#define sqlite3_system_errno(db) panic("NEED")
+#define sqlite3_errstr(rc) panic("NEED")
+#define sqlite3_limit(db, limitId, newLimit) panic("NEED")
+#define sqlite3ParseUri(zDefaultVfs, zUri, pFlags, ppVfs, pzFile, pzErrMsg) panic("NEED")
+#define sqlite3_open(zFilename, ppDb) panic("NEED")
+#define sqlite3_open16(zFilename, ppDb) panic("NEED")
+#define sqlite3_create_collation(db, zName, enc, pCtx, xCompare) panic("NEED")
+#define sqlite3_create_collation_v2(db, zName, enc, pCtx, xCompare, xDel) panic("NEED")
+#define sqlite3_create_collation16(db, zName, enc, pCtx, xCompare) panic("NEED")
+#define sqlite3_collation_needed(db, pCollNeededArg, xCollNeeded) panic("NEED")
+#define sqlite3_collation_needed16(db, pCollNeededArg, xCollNeeded16) panic("NEED")
+#define sqlite3_global_recover() panic("NEED")
+#define sqlite3_get_autocommit(db) panic("NEED")
+#define sqlite3CorruptError(lineno) libcuCorruptError(lineno)
+#define sqlite3MisuseError(lineno) libcuMisuseError(lineno)
+#define sqlite3CantopenError(lineno) libcuCantopenError(lineno)
+#define sqlite3CorruptPgnoError(lineno, pgno) libcuCorruptError(lineno, pgno)
+#define sqlite3NomemError(lineno) libcuNomemError(lineno)
+#define sqlite3IoerrnomemError(lineno) libcuIoerrnomemError(lineno)
+#define sqlite3_thread_cleanup() panic("NEED")
+#define sqlite3_table_column_metadata(db, zDbName, zTableName, zColumnName, pzDataType, pzCollSeq, pNotNull, pPrimaryKey, pAutoinc) panic("NEED")
+#define sqlite3_sleep(ms) panic("NEED")
+#define sqlite3_extended_result_codes(db, onoff) panic("NEED")
+#define sqlite3_file_control(db, zDbName, op, pArg) panic("NEED")
+#define sqlite3_test_control(op, ...) panic("NEED")
+#define sqlite3_uri_parameter(zFilename, zParam) convert_uriparam(zFilename, zParam)
+#define sqlite3_uri_boolean(zFilename, zParam, bDflt) convert_uritob(zFilename, zParam, bDflt)
+#define sqlite3_uri_int64(zFilename, zParam, bDflt) convert_uritoi64(zFilename, zParam, bDflt)
+#define sqlite3DbNameToBtree(db, zDbName) panic("NEED")
+#define sqlite3_db_filename(db, zDbName) panic("NEED")
+#define sqlite3_db_readonly(db, zDbName) panic("NEED")
+#define sqlite3_snapshot_get(db, zDb, ppSnapshot) panic("NEED")
+#define sqlite3_snapshot_open(db, zDb, pSnapshot) panic("NEED")
+#define sqlite3_snapshot_recover(db, zDb) panic("NEED")
+#define sqlite3_snapshot_free(pSnapshot) panic("NEED")
+#define sqlite3_compileoption_used(zOptName) sqlite3_compileoption_used(zOptName)
+#define sqlite3_compileoption_get(N) sqlite3_compileoption_get(N)
 #pragma endregion
 
 #pragma region From: malloc.c
+#define sqlite3MemdebugSetType(X, Y) memdbg_settype(X, Y)
+#define sqlite3MemdebugHasType(X, Y) memdbg_hastype(X, Y)
+#define sqlite3MemdebugNotType(X, Y) memdbg_nottype(X, Y)
+//
 #define sqlite3_release_memory(n) alloc_releasememory(n)
 #define sqlite3MallocMutex() allocMutex()
 #define sqlite3_memory_alarm(xCallback, pArg, iThreshold) panic("DEPRECATED")
@@ -426,7 +465,7 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: memjournal.c
-#define sqlite3_file memfile_t
+//#define sqlite3_file memfile_t
 #define sqlite3JournalOpen(pVfs, zName, pJfd, flags, nSpill)
 #define sqlite3MemJournalOpen(pJfd) memfileOpen
 #define sqlite3JournalCreate(pJfd)
@@ -439,6 +478,25 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: mutex.c
+#define sqlite3MemoryBarrier systemMemoryBarrier
+// CAPI3REF: Mutex Types
+#define SQLITE_MUTEX_FAST MUTEX_FAST
+#define SQLITE_MUTEX_RECURSIVE MUTEX_RECURSIVE
+#define SQLITE_MUTEX_STATIC_MASTER MUTEX_STATIC_MASTER
+#define SQLITE_MUTEX_STATIC_MEM MUTEX_STATIC_MEM
+#define SQLITE_MUTEX_STATIC_MEM2 MUTEX_STATIC_MEM2
+#define SQLITE_MUTEX_STATIC_OPEN MUTEX_STATIC_OPEN
+#define SQLITE_MUTEX_STATIC_PRNG MUTEX_STATIC_PRNG
+#define SQLITE_MUTEX_STATIC_LRU MUTEX_STATIC_LRU
+#define SQLITE_MUTEX_STATIC_LRU2 MUTEX_STATIC_LRU2
+#define SQLITE_MUTEX_STATIC_PMEM MUTEX_STATIC_PMEM
+#define SQLITE_MUTEX_STATIC_APP1 MUTEX_STATIC_APP1
+#define SQLITE_MUTEX_STATIC_APP2 MUTEX_STATIC_APP2
+#define SQLITE_MUTEX_STATIC_APP3 MUTEX_STATIC_APP3
+#define SQLITE_MUTEX_STATIC_VFS1 MUTEX_STATIC_VFS1
+#define SQLITE_MUTEX_STATIC_VFS2 MUTEX_STATIC_VFS2
+#define SQLITE_MUTEX_STATIC_VFS3 MUTEX_STATIC_VFS3
+//
 #define sqlite3_mutex mutex
 #define sqlite3MutexInit() mutexInitialize()
 #define sqlite3MutexEnd() mutexShutdown()
@@ -459,6 +517,9 @@ RC vsystemShutdown();
 #pragma endregion
 
 #pragma region From: os.c
+#define SQLITE_DEFAULT_SECTOR_SIZE LIBCU_DEFAULT_SECTOR_SIZE
+#define SQLITE_TEMP_FILE_PREFIX LIBCU_TEMP_FILE_PREFIX
+//
 #define sqlite3_io_error_hit libcu_io_error_hit
 #define sqlite3_io_error_hardhit libcu_io_error_hardhit
 #define sqlite3_io_error_pending libcu_io_error_pending
@@ -553,6 +614,10 @@ RC vsystemShutdown();
 #define sqlite3PcacheStats(pnCurrent, pnMax, pnMin, pnRecyclable) pcacheStats(pnCurrent, pnMax, pnMin, pnRecyclable)
 #pragma endregion
 
+#pragma region From: pragma.c
+#define sqlite3GetBoolean(z, dflt) convert_atob(z, dflt)
+#pragma endregion
+
 #pragma region From: printf.c
 #define StrAccum strbuf_t
 #define sqlite3VXPrintf(pAccum, fmt, ap) strbldAppendFormatv(pAccum, fmt, ap)
@@ -563,14 +628,14 @@ RC vsystemShutdown();
 #define sqlite3StrAccumReset(p) strbldReset(p)
 #define sqlite3StrAccumInit(p, db, zBase, n, mx) strbldInit(p, db, zBase, n, mx)
 #define sqlite3VMPrintf(db, zFormat, ap) vmtagprintf(db, zFormat, ap)
-#define sqlite3MPrintf(db, zFormat, ...) mtagprintf(db, zFormat, __VAR_ARGS__)
+#define sqlite3MPrintf(db, zFormat, ...) mtagprintf(db, zFormat, __VA_ARGS__)
 #define sqlite3_vmprintf(zFormat, ap) vmprintf(zFormat, ap)
-#define sqlite3_mprintf(zFormat, ...) mprintf(zFormat, __VAR_ARGS__)
-#define sqlite3_vsnprintf(n, zBuf, zFormat, ap) vmsnprintf(n, zBuf, zFormat, ap)
-#define sqlite3_snprintf(n, zBuf, zFormat, ...) msnprintf(n, zBuf, zFormat, __VAR_ARGS__)
-#define sqlite3_log(iErrCode, zFormat, ...) _log(iErrCode, zFormat, __VAR_ARGS__)
-#define sqlite3DebugPrintf(zFormat, ...) _debug(zFormat, __VAR_ARGS__)
-#define sqlite3XPrintf(p, zFormat, ...) strbldAppendFormat(p, zFormat, __VAR_ARGS__)
+#define sqlite3_mprintf(zFormat, ...) mprintf(zFormat, __VA_ARGS__)
+#define sqlite3_vsnprintf(n, zBuf, zFormat, ap) vmsnprintf(zBuf, n, zFormat, ap)
+#define sqlite3_snprintf(n, zBuf, zFormat, ...) msnprintf(zBuf, n, zFormat, __VA_ARGS__)
+#define sqlite3_log(iErrCode, zFormat, ...) _log(iErrCode, zFormat, __VA_ARGS__)
+#define sqlite3DebugPrintf(zFormat, ...) _debug(zFormat, __VA_ARGS__)
+#define sqlite3XPrintf(p, zFormat, ...) strbldAppendFormat(p, zFormat, __VA_ARGS__)
 #pragma endregion
 
 #pragma region From: random.c
@@ -611,16 +676,16 @@ RC vsystemShutdown();
 #define sqlite3Coverage(x) __coverage(x)
 #define sqlite3FaultSim(iTest) _faultSim(iTest)
 #define sqlite3IsNaN(x) math_isNaN(x)
-#define sqlite3Strlen30(z) strlen(z)
+#define sqlite3Strlen30(z) ((int)strlen(z))
 #define sqlite3ColumnType(pCol, zDflt) panic("NEED")
 #define sqlite3Error(db, err_code) tagError(db, err_code)
 #define sqlite3SystemError(db, rc) tagSystemError(db, rc)
-#define sqlite3ErrorWithMsg(db, err_code, zFormat, ...) tagErrorWithMsg(db, err_code, zFormat, __VAR_ARGS__)
+#define sqlite3ErrorWithMsg(db, err_code, zFormat, ...) tagErrorWithMsg(db, err_code, zFormat, __VA_ARGS__)
 #define sqlite3ErrorMsg(pParse, zFormat, ...)
 #define sqlite3Dequote(z) dequote(z)
 #define sqlite3TokenInit(p, z) panic("NEED")
-#define sqlite3_stricmp(zLeft, zRight) stricmp(zLeft, zRight)
-#define sqlite3StrICmp(zLeft, zRight) stricmp(zLeft, zRight)
+#define sqlite3_stricmp(zLeft, zRight) _stricmp(zLeft, zRight)
+#define sqlite3StrICmp(zLeft, zRight) _stricmp(zLeft, zRight)
 #define sqlite3_strnicmp(zLeft, zRight, N) strnicmp(zLeft, zRight, N)
 #define sqlite3AtoF(z, pResult, length, enc) convert_atofe(z, pResult, length, enc)
 #define sqlite3Atoi64(zNum, pNum, length, enc) convert_atoi64e(zNum, pNum, length, enc)

@@ -21,7 +21,7 @@
 **
 ** If some prefix of the input string is a valid number, this routine returns FALSE but it still converts the prefix and writes the result into *r.
 */
-__device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE encode) //: sqlite3AtoF
+__host_device__ bool convert_atofe(const char *z, double *r, int length, TEXTENCODE encode) //: sqlite3AtoF
 {
 #ifndef OMIT_FLOATING_POINT
 	assert(encode == TEXTENCODE_UTF8 || encode == TEXTENCODE_UTF16LE || encode == TEXTENCODE_UTF16BE);
@@ -161,7 +161,7 @@ do_atof_calc:
 **
 ** will return -8.
 */
-static __device__ int compare2pow63(const char *z, int incr)
+static __host_device__ int compare2pow63(const char *z, int incr)
 {
 	const char *pow63 = "922337203685477580"; // 012345678901234567
 	int c = 0;
@@ -187,7 +187,7 @@ static __device__ int compare2pow63(const char *z, int incr)
 **
 ** length is the number of bytes in the string (bytes, not characters). The string is not necessarily zero-terminated.  The encoding is given by enc.
 */
-__device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE encode) //: sqlite3Atoi64
+__host_device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE encode) //: sqlite3Atoi64
 {
 	const char *start;
 	const char *end = z + length;
@@ -252,7 +252,7 @@ __device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTENCODE
 **     1    Integer too large for a 64-bit signed integer or is malformed
 **     2    Special case of 9223372036854775808
 */
-__device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHexToI64
+__host_device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHexToI64
 #ifndef LIBCU_OMIT_HEX_INTEGER
 	if (z[0] == '0' && (z[1] == 'x' || z[1] == 'X')) {
 		int i; for (i = 2; z[i] == '0'; i++) { }
@@ -261,7 +261,7 @@ __device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHex
 		return !z[k] && k - i <= 16 ? 0 : 2;
 	} else
 #endif /* LIBCU_OMIT_HEX_INTEGER */
-	{ return convert_atoi64e(z, r, strlen(z), TEXTENCODE_UTF8); }
+	{ return convert_atoi64e(z, r, (int)strlen(z), TEXTENCODE_UTF8); }
 }
 
 /* If z represents an integer that will fit in 32-bits, then set *r to that integer and return true.  Otherwise return false.
@@ -271,7 +271,7 @@ __device__ int convert_axtoi64e(const char *z, int64_t *r) { //: sqlite3DecOrHex
 ** Any non-numeric characters that following z are ignored. This is different from convert_atoi64e() which requires the
 ** input number to be zero-terminated.
 */
-__device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
+__host_device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
 {
 	int i, c;
 	// get sign of significand
@@ -303,10 +303,10 @@ __device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
 
 /* Return a 32-bit integer value extracted from a string.  If the string is not an integer, just return 0. */
 // inline: convert_atoi(z)
-__device__ int convert_atoi(const char *z) { int r = 0; if (z) convert_atoie(z, &r); return r; } //: sqlite3Atoi
+__host_device__ int convert_atoi(const char *z) { int r = 0; if (z) convert_atoie(z, &r); return r; } //: sqlite3Atoi
 
 /* Translate a single byte of Hex into an integer. This routine only works if h really is a valid hexadecimal character:  0..9a..fA..F */
-__device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
+__host_device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
 	assert((h >= '0' && h <= '9') || (h >= 'a' && h <= 'f') || (h >= 'A' && h <= 'F'));
 #ifdef LIBCU_ASCII
 	h += 9 * (1 & (h >> 6));
@@ -321,7 +321,7 @@ __device__ uint8_t convert_xtoi(int h) { //: sqlite3HexToInt
 /* Convert a BLOB literal of the form "x'hhhhhh'" into its binary value.  Return a pointer to its binary value.  Space to hold the
 ** binary value has been obtained from malloc and must be freed by the calling routine.
 */
-__device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) // (size_t size) //: sqlite3HexToBlob
+__host_device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) // (size_t size) //: sqlite3HexToBlob
 {
 	char *b = (char *)tagallocRawNN(tag, size / 2 + 1);
 	size--;
@@ -335,7 +335,7 @@ __device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) /
 #endif /* !OMIT_BLOB_LITERAL || LIBCU_HAS_CODEC */
 
 //static __constant__ char const __convert_digits[] = "0123456789";
-//__device__ char *convert_itoa64(int64_t i, char *b) //: sky
+//__host_device__ char *convert_itoa64(int64_t i, char *b) //: sky
 //{
 //	char *p = b;
 //	if (i < 0) { *p++ = '-'; i *= -1; }
@@ -374,7 +374,7 @@ __device__ void *convert_taghextoblob(tagbase_t *tag, const char *z, int size) /
 ** A variable-length integer consists of the lower 7 bits of each byte for all bytes that have the 8th bit set and one byte with the 8th
 ** bit clear.  Except, if we get to the 9th byte, it stores the full 8 bits and is the last byte.
 */
-__device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVarint
+__host_device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVarint
 {
 	if (v <= 0x7f) {
 		p[0] = v & 0x7f;
@@ -420,7 +420,7 @@ __device__ int convert_putvarint(unsigned char *p, uint64_t v) //: sqlite3PutVar
 #define SLOT_4_2_0   0xf01fc07f
 
 /* Read a 64-bit variable-length integer from memory starting at p[0]. Return the number of bytes read.  The value is stored in *v. */
-__device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sqlite3GetVarint
+__host_device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sqlite3GetVarint
 {
 	uint32_t a, b, s;
 	a = *p;
@@ -577,7 +577,7 @@ __device__ uint8_t convert_getvarint(const unsigned char *p, uint64_t *v) //: sq
 ** A MACRO version, getVarint32, is provided which inlines the single-byte case.  All code should use the MACRO version as 
 ** this function assumes the single-byte case has already been handled.
 */
-__device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: sqlite3GetVarint32
+__host_device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: sqlite3GetVarint32
 {
 	uint32_t a, b;
 	// The 1-byte case.  Overwhelmingly the most common.  Handled inline by the getVarin32() macro
@@ -670,7 +670,7 @@ __device__ uint8_t convert_getvarint32(const unsigned char *p, uint32_t *v) //: 
 #endif
 }
 
-__device__ int convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
+__host_device__ int convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 {
 	int i; for (i = 1; v >>= 7; i++) { assert(i < 10); }
 	return i;
@@ -679,12 +679,12 @@ __device__ int convert_getvarintLength(uint64_t v) //: sqlite3VarintLen
 #pragma endregion
 
 /* not sure where these are */ //: Sky
-__device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
-__device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
-__device__ void convert_put2(unsigned char *p, uint32_t v) { p[0] = (uint8_t)(v>>8); p[1] = (uint8_t)v; }
+__host_device__ uint16_t convert_get2nz(const uint8_t *p) { return ((((int)((p[0]<<8) | p[1]) -1)&0xffff)+1); }
+__host_device__ uint16_t convert_get2(const uint8_t *p) { return (p[0]<<8) | p[1]; }
+__host_device__ void convert_put2(unsigned char *p, uint32_t v) { p[0] = (uint8_t)(v>>8); p[1] = (uint8_t)v; }
 
 /* Read or write a four-byte big-endian integer value. */
-__device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
+__host_device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
 {
 #if LIBCU_BYTEORDER==4321
   uint32_t x; memcpy(&x, p, 4); return x;
@@ -696,8 +696,8 @@ __device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
   ASSERTCOVERAGE(p[0] & 0x80); return ((unsigned)p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3];
 #endif
 }
-//__device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
-__device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
+//__host_device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }
+__host_device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
 {
 #if LIBCU_BYTEORDER==4321
   memcpy(p, &v, 4);
@@ -712,27 +712,80 @@ __device__ void convert_put4(unsigned char *p, uint32_t v) //: sqlite3Put4byte
   p[3] = (uint8_t)v;
 #endif
 }
-//__device__ void convert_put4(unsigned char *p, uint32 v) { p[0] = (uint8_t)(v>>24); p[1] = (uint8_t)(v>>16); p[2] = (uint8_t)(v>>8); p[3] = (uint8_t)v; }
+//__host_device__ void convert_put4(unsigned char *p, uint32 v) { p[0] = (uint8_t)(v>>24); p[1] = (uint8_t)(v>>16); p[2] = (uint8_t)(v>>8); p[3] = (uint8_t)v; }
 
-#pragma region From: pragma.c
+#pragma region From: main.c
 
-static __constant__ const char __safetyLevelText[] = "onoffalseyestruefull";
-static __constant__ const uint8_t __safetyLevelOffset[] = {0, 1, 2, 4, 9, 12, 16};
-static __constant__ const uint8_t __safetyLevelLength[] = {2, 2, 3, 5, 3, 4, 4};
-static __constant__ const uint8_t __safetyLevelValue[] =  {1, 0, 0, 0, 1, 1, 2};
-
-__device__ uint8_t convert_atolevel(const char *z, int omitFull, uint8_t dflt)
+/* This is a utility routine, useful to VFS implementations, that checks to see if a database file was a URI that contained a specific query 
+** parameter, and if so obtains the value of the query parameter.
+**
+** The zFilename argument is the filename pointer passed into the xOpen() method of a VFS implementation.  The zParam argument is the name of the
+** query parameter we seek.  This routine returns the value of the zParam parameter if it exists.  If the parameter does not exist, this routine
+** returns a NULL pointer.
+*/
+__host_device__ const char *convert_uriparam(const char *filename, const char *param) //: sqlite3_uri_parameter
 {
-	if (isdigit(*z))
-		return (uint8_t)convert_atoi(z);
-	int n = strlen(z);
-	for (int i = 0; i < _LENGTHOF(__safetyLevelLength) - omitFull; i++)
-		if (__safetyLevelLength[i] == n && !strncmp(&__safetyLevelText[__safetyLevelOffset[i]], z, n))
-			return __safetyLevelValue[i];
+	if (!filename || !param) return nullptr;
+	filename += strlen(filename) + 1;
+	while (filename[0]) {
+		int x = strcmp(filename, param);
+		filename += strlen(filename) + 1;
+		if (!x) return filename;
+		filename += strlen(filename) + 1;
+	}
+	return nullptr;
+}
+
+/* Return a boolean value for a query parameter. */
+__host_device__ int convert_uritob(const char *filename, const char *param, int dflt) //: sqlite3_uri_boolean
+{
+	const char *z = convert_uriparam(filename, param);
+	dflt = dflt != 0;
+	return z ? convert_atob(z, dflt) : dflt;
+}
+
+/* Return a 64-bit integer value for a query parameter. */
+__host_device__ int64_t convert_uritoi64(const char *filename, const char *param, int64_t dflt) //: sqlite3_uri_int64
+{
+	const char *z = convert_uriparam(filename, param);
+	int64_t v; if (z && !convert_axtoi64e(z, &v)) dflt = v;
 	return dflt;
 }
 
-__device__ bool convert_atob(const char *z, uint8_t dflt)
+#pragma endregion
+
+#pragma region From: pragma.c
+
+//static __constant__ const char __safetyLevelText[] = "onoffalseyestruefull";
+//static __constant__ const uint8_t __safetyLevelOffset[] = {0, 1, 2, 4, 9, 12, 16};
+//static __constant__ const uint8_t __safetyLevelLength[] = {2, 2, 3, 5, 3, 4, 4};
+//static __constant__ const uint8_t __safetyLevelValue[] =  {1, 0, 0, 0, 1, 1, 2};
+
+/* Interpret the given string as a safety level.  Return 0 for OFF, 1 for ON or NORMAL, 2 for FULL, and 3 for EXTRA.  Return 1 for an empty or 
+** unrecognized string argument.  The FULL and EXTRA option is disallowed if the omitFull parameter it 1.
+**
+** Note that the values returned are one less that the values that should be passed into sqlite3BtreeSetSafetyLevel().  The is done
+** to support legacy SQL code.  The safety level used to be boolean and older scripts may have used numbers 0 for OFF and 1 for ON.
+*/
+static __host_device__ uint8_t convert_atolevel(const char *z, int omitFull, uint8_t dflt)
+{
+	// 123456789 123456789 123
+	static const char texts[] = "onoffalseyestruextrafull";
+	static const uint8_t offsets[] = {0, 1, 2,  4,    9,  12,  15,   20};
+	static const uint8_t lengths[] = {2, 2, 3,  5,    3,   4,   5,    4};
+	static const uint8_t values[] =  {1, 0, 0,  0,    1,   1,   3,    2};
+	// on no off false yes true extra full
+	if (isdigit(*z))
+		return (uint8_t)convert_atoi(z);
+	int n = (int)strlen(z);
+	for (int i = 0; i < _LENGTHOF(lengths); i++)
+		if (lengths[i] == n && !strnicmp(&texts[offsets[i]], z , n) && (!omitFull || values[i] <= 1))
+			return values[i];
+	return dflt;
+}
+
+/* Interpret the given string as a boolean value. */
+__host_device__ bool convert_atob(const char *z, uint8_t dflt) //: sqlite3GetBoolean
 {
 	return convert_atolevel(z, 1, dflt) != 0;
 }

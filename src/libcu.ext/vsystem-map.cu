@@ -3,13 +3,7 @@
 #include <assert.h>
 #include "sentinel-vsystem.h"
 
-#if defined(_TEST) || defined(_DEBUG)
-__device__ bool _ostrace = false;
-#define OSTRACE(X, ...) if (_ostrace) { printf("MAP: "X, __VA_ARGS__); }
-#else
-#define OSTRACE(X, ...)
-#endif
-#pragma endregion
+#if __CUDACC__
 
 /* The mapFile structure is a subclass of sqlite3_file * specific to the map portability layer. */
 typedef struct mapsysfile mapsysfile;
@@ -24,37 +18,37 @@ __device__ int mapClose(vsysfile *f)
 	mapsysfile *file = (mapsysfile *)f;
 	vsysfile_close msg(f);
 	file->methods = nullptr;
-	OSTRACE("CLOSE %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("CLOSE %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapRead(vsysfile *f, void *buf, int amount, int64_t offset)
 {
-	OSTRACE("READ %d - ", f);
+	OSTRACE(("READ %d - ", f));
 	vsysfile_read msg(f, buf, amount, offset);
-	OSTRACE("%s\n", !msg.RC ? "ok" : "failed");
+	OSTRACE(("%s\n", !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapWrite(vsysfile *f, const void *buf, int amount, int64_t offset)
 {
-	OSTRACE("WRITE %d - ", f);
+	OSTRACE(("WRITE %d - ", f));
 	vsysfile_write msg(f, buf, amount, offset);
-	OSTRACE("%s\n", !msg.RC ? "ok" : "failed");
+	OSTRACE(("%s\n", !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapTruncate(vsysfile *f, int64_t size)
 {
 	vsysfile_truncate msg(f, size);
-	OSTRACE("TRUC %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("TRUC %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapSync(vsysfile *f, int flags)
 {
 	vsysfile_sync msg(f, flags);
-	OSTRACE("SYNC %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("SYNC %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -62,21 +56,21 @@ __device__ int mapFileSize(vsysfile *f, int64_t *size)
 {
 	vsysfile_fileSize msg(f);
 	*size = msg.Size;
-	OSTRACE("FILESIZE %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("FILESIZE %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapLock(vsysfile *f, int lock)
 {
 	vsysfile_lock msg(f, lock);
-	OSTRACE("LOCK %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("LOCK %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapUnlock(vsysfile *f, int lock)
 {
 	vsysfile_unlock msg(f, lock);
-	OSTRACE("UNLOCK %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("UNLOCK %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -84,7 +78,7 @@ __device__ int mapCheckReservedLock(vsysfile *f, int *lock)
 {
 	vsysfile_checkReservedLock msg(f);
 	*lock = msg.Lock;
-	OSTRACE("CHECKRESLK %d %s\n", f, !msg.RC ? "ok" : "failed");
+	OSTRACE(("CHECKRESLK %d %s\n", f, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -162,8 +156,8 @@ static __constant__ const vsysfile_methods _mapFileMethods = {
 #define MAP_TEMP_DIRECTORY_TYPE (2) 
 #endif
 
-__device__ char *g_data_directory;
-__device__ char *g_temp_directory;
+__device__ char *g_libcu_dataDirectory;
+__device__ char *g_libcu_tempDirectory;
 
 __device__ int mapSetDirectory(int type, void *value)
 {
@@ -172,8 +166,8 @@ __device__ int mapSetDirectory(int type, void *value)
 	if (rc) return rc;
 #endif
 	char **directory = nullptr;
-	if (type == MAP_DATA_DIRECTORY_TYPE) directory = &g_data_directory;
-	else if (type == MAP_TEMP_DIRECTORY_TYPE) directory = &g_temp_directory;
+	if (type == MAP_DATA_DIRECTORY_TYPE) directory = &g_libcu_dataDirectory;
+	else if (type == MAP_TEMP_DIRECTORY_TYPE) directory = &g_libcu_tempDirectory;
 	assert(!directory || type == MAP_DATA_DIRECTORY_TYPE || type == MAP_TEMP_DIRECTORY_TYPE);
 	assert(!directory || memdbg_hastype(*directory, MEMTYPE_HEAP));
 	if (directory) {
@@ -195,14 +189,14 @@ __device__ int mapOpen(vsystem *t, const char *name, vsysfile *f, int flags, int
 	file->methods = &_mapFileMethods;
 	file->vsys = t;
 	file->f = msg.F;
-	OSTRACE("OPEN %s %s\n", name, !msg.RC ? "ok" : "failed");
+	OSTRACE(("OPEN %s %s\n", name, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapDelete(vsystem *t, const char *filename, int syncDir)
 {
 	vsystem_delete msg(filename, syncDir);
-	OSTRACE("DELETE %s %s\n", filename, !msg.RC ? "ok" : "failed");
+	OSTRACE(("DELETE %s %s\n", filename, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -210,14 +204,14 @@ __device__ int mapAccess(vsystem *t, const char *filename, int flags, int *resOu
 {
 	vsystem_access msg(filename, flags);
 	*resOut = msg.ResOut;
-	OSTRACE("ACCESS %s %s\n", filename, !msg.RC ? "ok" : "failed");
+	OSTRACE(("ACCESS %s %s\n", filename, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
 __device__ int mapFullPathname(vsystem *t, const char *relative, int fullLength, char *full)
 {
 	vsystem_fullPathname msg(relative, fullLength, full);
-	OSTRACE("FULLPATHNAME %s %s\n", msg.Full, !msg.RC ? "ok" : "failed");
+	OSTRACE(("FULLPATHNAME %s %s\n", msg.Full, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -309,7 +303,7 @@ __device__ int mapGetLastError(vsystem *t, int bufLength, char *buf)
 {
 	vsystem_getLastError msg(bufLength);
 	buf = mprintf("%", msg.Buf);
-	OSTRACE("GETLASTERROR %s %s\n", buf, !msg.RC ? "ok" : "failed");
+	OSTRACE(("GETLASTERROR %s %s\n", buf, !msg.RC ? "ok" : "failed"));
 	return msg.RC;
 }
 
@@ -351,13 +345,26 @@ static __constant__ vsystem _mapsystem = {
 	mapNextSystemCall,		/* xNextSystemCall */
 };
 
+#endif
+
 __device__ int vsystemInitialize()
 {
+#if __CUDACC__
 	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
+#else
+	extern int sqlite3_os_init();
+	return sqlite3_os_init();
+#endif
 }
 
 __device__ int vsystemShutdown()
 {
+#if __CUDACC__
+	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
+#else
+	extern int sqlite3_os_end();
+	return sqlite3_os_end();
+#endif
 }

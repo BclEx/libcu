@@ -305,6 +305,7 @@ old code expects.  */
 //////////////////////
 // DEVICE/HOST
 #pragma region DEVICE/HOST
+__BEGIN_DECLS;
 
 #ifndef __CUDA_ARCH__
 #define __host_device__ __host__
@@ -316,33 +317,43 @@ old code expects.  */
 #define __host_constant__ __constant__
 #endif
 
+#ifndef	__cplusplus
+#define bool int
+#define false 0
+#define true 1
+#endif
+
 typedef struct hostptr_t {
 	void *host;
 } hostptr_t;
 
 /* IsHost support  */
-extern "C" __device__ char __cwd[];
+extern __device__ char __cwd[];
 #define ISHOSTENV(name) (name[0] != ':')
 #define ISHOSTPATH(path) ((path)[1] == ':' || ((path)[0] != ':' && __cwd[0] == 0))
 #define ISHOSTHANDLE(handle) (handle < INT_MAX-LIBCU_MAXFILESTREAM)
 #define ISHOSTPTR(ptr) ((hostptr_t *)(ptr) >= __iob_hostptrs && (hostptr_t *)(ptr) <= __iob_hostptrs+LIBCU_MAXHOSTPTR)
 
 /* Host pointer support  */
-extern "C" __constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
-extern "C" __device__ hostptr_t *__hostptrGet(void *host);
-extern "C" __device__ void __hostptrFree(hostptr_t *p);
+extern __constant__ hostptr_t __iob_hostptrs[LIBCU_MAXHOSTPTR];
+extern __device__ hostptr_t *__hostptrGet(void *host);
+extern __device__ void __hostptrFree(hostptr_t *p);
+
+/* Reset library */
+extern __device__ void libcuReset();
+
+__END_DECLS;
+#ifdef	__cplusplus
 template <typename T> __forceinline__ __device__ T *newhostptr(T *p) { return (T *)(p ? __hostptrGet(p) : nullptr); }
 template <typename T> __forceinline__ __device__ void freehostptr(T *p) { if (p) __hostptrFree((hostptr_t *)p); }
 template <typename T> __forceinline__ __device__ T *hostptr(T *p) { return (T *)(p ? ((hostptr_t *)p)->host : nullptr); }
-
-/* Reset library */
-extern "C" __device__ void libcuReset();
-
+#endif
 #pragma endregion
 
 //////////////////////
 // ASSERT
 #pragma region ASSERT
+__BEGIN_DECLS;
 
 /*
 ** NDEBUG and _DEBUG are opposites.  It should always be true that defined(NDEBUG) == !defined(_DEBUG).  If this is not currently true,
@@ -407,11 +418,13 @@ void __coverage(int line);
 # define _NEVER(X)       (X)
 #endif
 
+__END_DECLS;
 #pragma endregion
 
 //////////////////////
 // WSD
 #pragma region WSD
+__BEGIN_DECLS;
 
 // When NO_WSD is defined, it means that the target platform does not support Writable Static Data (WSD) such as global and static variables.
 // All variables must either be on the stack or dynamically allocated from the heap.  When WSD is unsupported, the variable declarations scattered
@@ -430,13 +443,15 @@ void *__wsdfind(void *k, int l);
 #define _GLOBAL(t, v) v
 #endif
 
+__END_DECLS;
 #pragma endregion
 
 //////////////////////
 // EXT METHODS
 #pragma region EXT-METHODS
+__BEGIN_DECLS;
 
-struct strbld_t;
+typedef struct strbld_t strbld_t;
 typedef struct ext_methods ext_methods;
 struct ext_methods {
 	void *(*tagallocRaw)(void *tag, uint64_t size);
@@ -448,8 +463,9 @@ struct ext_methods {
 	double (*getDoubleArg)(void *args);
 	char *(*getStringArg)(void *args);
 };
-extern "C" __device__ ext_methods __extsystem;
+extern __device__ ext_methods __extsystem;
 
+__END_DECLS;
 #pragma endregion	
 
 #endif  /* _CRTDEFSCU_H */

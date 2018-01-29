@@ -1,1 +1,0 @@
-﻿#include <ext/global.h>

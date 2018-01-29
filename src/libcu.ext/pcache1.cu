@@ -242,7 +242,7 @@ static __host_device__ int pcache1MemSize(void *p)
 }
 #endif
 
-static __host_device__ PgHdr1 *pcache1AllocPage(PCache1 *cache, bool benignMalloc)
+static __host_device__ PgHdr1 *pcache1AllocPage(PCache1 *cache, int benignMalloc)
 {
 	// The group mutex must be released before pcache1Alloc() is called. This is because it may call sqlite3_release_memory(), which assumes that this mutex is not held.
 	assert(mutex_held(cache->group->mutex));
