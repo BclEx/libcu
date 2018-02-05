@@ -3,9 +3,9 @@
 #include <ext\bitvec.h>
 #include <assert.h>
 
-static __global__ void g_ext_bitvec_test1()
+static __global__ void g_bitvec_test1()
 {
-	printf("ext_bitvec_test1\n");
+	printf("bitvec_test1\n");
 	/* Create a new bitmap object able to handle bits between 0 and iSize, inclusive.  Return a pointer to the new object.  Return NULL if malloc fails. */
 	//__device__ bitvec_t *bitvecNew(uint32_t size);
 	/* Check to see if the i-th bit is set.  Return true or false. If p is NULL (if the bitmap has not been created) or if i is out of range, then return false. */
@@ -20,4 +20,4 @@ static __global__ void g_ext_bitvec_test1()
 	//__device__ uint32_t bitvecSize(bitvec_t *b);
 
 }
-cudaError_t ext_bitvec_test1() { g_ext_bitvec_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
+cudaError_t bitvec_test1() { g_bitvec_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

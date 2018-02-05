@@ -72,11 +72,6 @@ __host_device__ void tagErrorWithMsgv(tagbase_t *tag, int errCode, const char *f
 	//	sqlite3ValueSetStr(tag->err, -1, z, TEXTENCODE_UTF8, SQLITE_DYNAMIC);
 	//}
 }
-#ifndef __CUDA_ARCH__
-__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...) { va_list va; va_start(va, format); tagErrorWithMsgv(tag, errCode, format, va); va_end(va); }
-#else
-STDARGvoid(tagErrorWithMsg, tagErrorWithMsgv(tag, errCode, format, va), tagbase_t *tag, int errCode, const char *format);
-#endif
 
 /* Add an error message to pParse->zErrMsg and increment pParse->nErr.
 ** The following formatting characters are allowed:
@@ -161,7 +156,7 @@ __host_device__ bool tagSafetyCheckOk(tagbase_t *tag) //: sqlite3SafetyCheckOk
 	uint32_t magic = tag->magic;
 	if (magic != TAG_MAGIC_OPEN) {
 		if (tagSafetyCheckSickOrOk(tag)) {
-			ASSERTCOVERAGE(_runtimeConfig.log);
+			TESTCASE(_runtimeConfig.log);
 			logBadConnection("unopened");
 		}
 		return false;
@@ -172,7 +167,7 @@ __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag) //: sqlite3SafetyChe
 {
 	uint32_t magic = tag->magic;
 	if (magic != TAG_MAGIC_SICK && magic != TAG_MAGIC_OPEN && magic != TAG_MAGIC_BUSY) {
-		ASSERTCOVERAGE(_runtimeConfig.log);
+		TESTCASE(_runtimeConfig.log);
 		logBadConnection("invalid");
 		return false;
 	}

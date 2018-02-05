@@ -205,8 +205,7 @@ All macros listed above as possibly being defined by this file are explicitly un
 #define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 /* Returns the length of an array at compile time (via math) */
-// _ARRAYSIZE
-#define _LENGTHOF(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+#define _ARRAYSIZE(symbol) (sizeof(symbol) / sizeof(symbol[0]))
 /* Removes compiler warning for unused parameter(s) */
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
@@ -375,7 +374,6 @@ __BEGIN_DECLS;
 ** can be used to make sure boundary values are tested.  For bitmask tests, testcase() can be used to make sure each bit
 ** is significant and used at least once.  On switch statements where multiple cases go to the same block of code, testcase()
 ** can insure that all cases are evaluated.
-**
 */
 #ifdef _COVERAGE_TEST
 #if defined(__CUDA_ARCH__)
@@ -383,18 +381,29 @@ __device__ void __coverage(int line);
 #else
 void __coverage(int line);
 #endif
-# define ASSERTCOVERAGE(X)  if (X) { __coverage(__LINE__); }
+#define TESTCASE(X)  if (X) { __coverage(__LINE__); }
 #else
-# define ASSERTCOVERAGE(X)
+#define TESTCASE(X)
 #endif
 
 /* The TESTONLY macro is used to enclose variable declarations or other bits of code that are needed to support the arguments
 ** within testcase() and assert() macros.
 */
 #if !defined(NDEBUG) || defined(_COVERAGE_TEST)
-# define ASSERTONLY(X)  X
+#define TESTONLY(X)  X
 #else
-# define ASSERTONLY(X)
+#define TESTONLY(X)
+#endif
+
+/*
+** Sometimes we need a small amount of code such as a variable initialization to setup for a later assert() statement.  We do not want this code to
+** appear when assert() is disabled.  The following macro is therefore used to contain that setup code.  The "VVA" acronym stands for
+** "Verification, Validation, and Accreditation".  In other words, the code within VVA_ONLY() will only run during verification processes.
+*/
+#ifndef NDEBUG
+#define DEBUGONLY(X)  X
+#else
+#define DEBUGONLY(X)
 #endif
 
 /* The ALWAYS and NEVER macros surround boolean expressions which are intended to always be true or false, respectively.  Such

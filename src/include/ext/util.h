@@ -36,12 +36,11 @@ typedef int vlist_t;
 __host_device__ RC _faultSim(int);
 #endif
 
-//__host_device__ void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...)
+__host_device__ void tagErrorWithMsgv(tagbase_t *tag, int errCode, const char *format, va_list va);
 __host_device__ void tagError(tagbase_t *tag, int errCode);
 __host_device__ void tagSystemError(tagbase_t *tag, RC rc);
 __host_device__ bool tagSafetyCheckOk(tagbase_t *tag);
 __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag);
-
 
 #ifdef LIBCU_ENABLE_8_3_NAMES
 __host_device__ void util_fileSuffix3(const char *, char *);
@@ -50,4 +49,10 @@ __host_device__ void util_fileSuffix3(const char *, char *);
 #endif
 
 __END_DECLS;
+// STDARG
+#ifndef __CUDA_ARCH__
+__forceinline void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...) { va_list va; va_start(va, format); tagErrorWithMsgv(tag, errCode, format, va); va_end(va); }
+#else
+STDARGvoid(tagErrorWithMsg, tagErrorWithMsgv(tag, errCode, format, va), tagbase_t *tag, int errCode, const char *format);
+#endif
 #endif	/* _EXT_UTIL_H */

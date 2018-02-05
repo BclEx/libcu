@@ -465,9 +465,9 @@ static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va)
 {
 	if (!condition)
 		return;
-	printf("\nJIM INTERPRETER PANIC: ");
-	printf(vmprintf(fmt, va));
-	printf("\n\n");
+	fprintf_(stderr, "\nJIM INTERPRETER PANIC: ");
+	vfprintf(stderr, fmt, va);
+	fprintf_(stderr, "\n\n");
 #ifdef HAVE_BACKTRACE
 	{
 		void *array[40];

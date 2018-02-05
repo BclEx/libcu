@@ -26,6 +26,8 @@
   <ItemGroup>
     <ClCompile Include="vsystem-unix.c" />
     <ClCompile Include="vsystem-win.c" />
+    <CudaCompile Include="pager.cu" />
+    <CudaCompile Include="wal.cu" />
     <None Include="math.cu" />
     <None Include="pcache1.cu" />
     <None Include="printf.cu" />
@@ -48,9 +50,8 @@
     <None Include="mutex-noop.cu" />
     <None Include="mutex.cu" />
     <None Include="pcache.cu" />
-    <None Include="main.more.cu">
-      <FileType>Document</FileType>
-    </None>
+    <None Include="main.more.cu" />
+    <None Include="notify.cu" />
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
     <ClCompile Include="mutex-unix.cpp" />

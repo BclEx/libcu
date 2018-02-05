@@ -108,8 +108,8 @@ __device__ int dup2_(int fd, int fd2)
 }
 
 /* NULL-terminated array of "NAME=VALUE" environment variables.  */
-//__device__ const char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
-extern __device__ char **__environ_ = nullptr; //(char **)__environ_device;
+__device__ const char *__environ_device[3] = { "HOME=", "PATH=", nullptr }; // pointer to environment table
+extern __device__ char **__environ_ = (char **)__environ_device;
 
 /* Remove the link NAME.  */
 __device__ int unlink_(const char *filename)

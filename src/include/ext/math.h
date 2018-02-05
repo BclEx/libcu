@@ -30,8 +30,7 @@ THE SOFTWARE.
 #include <stdint.h>
 __BEGIN_DECLS;
 
-/*
-** Estimated quantities used for query planning are stored as 16-bit logarithms.  For quantity X, the value stored is 10*log2(X).  This
+/* Estimated quantities used for query planning are stored as 16-bit logarithms.  For quantity X, the value stored is 10*log2(X).  This
 ** gives a possible range of values of approximately 1.0e986 to 1e-986. But the allowed values are "grainy".  Not every value is representable.
 ** For example, quantities 16 and 17 are both represented by a logest_t of 40.  However, since logest_t quantities are suppose to be estimates,
 ** not exact values, this imprecision is not a problem.

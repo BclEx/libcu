@@ -23,7 +23,7 @@ static __global__ void g_crtdefs_test1()
 	/* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
 	int c0a = _HASALIGNMENT8(3); int c0b = _HASALIGNMENT8(8); int c0c = _HASALIGNMENT8(9); int c0d = _HASALIGNMENT8(-3); assert(!c0a && c0b && !c0c && !c0d);
 	/* Returns the length of an array at compile time (via math) */
-	int integerArrayOfSixElements[6]; int d0a = _LENGTHOF(integerArrayOfSixElements); assert(d0a == 6);
+	int integerArrayOfSixElements[6]; int d0a = _ARRAYSIZE(integerArrayOfSixElements); assert(d0a == 6);
 
 	/* Determines where you are based on path */
 	bool e0a = ISHOSTPATH("C:\\test"); bool e0b = ISHOSTPATH("C:/test"); bool e0c = ISHOSTPATH(":\\test"); bool e0d = ISHOSTPATH(":/test"); assert(e0a && e0b && !e0c && !e0d);

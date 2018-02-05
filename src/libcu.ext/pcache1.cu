@@ -427,13 +427,13 @@ static __host_device__ void pcache1TruncateUnsafe(PCache1 *cache, uint limit)
 	assert(cache->maxKey >= limit);
 	assert(cache->hashs > 0);
 	uint h, stop;
-	ASSERTONLY(uint pages = 0);
+	TESTONLY(uint pages = 0);
 	if (cache->maxKey - limit < cache->hashs) {
 		// If we are just shaving the last few pages off the end of the cache, then there is no point in scanning the entire hash table.
 		// Only scan those hash slots that might contain pages that need to be removed.
 		h = limit % cache->hashs;
 		stop = cache->maxKey % cache->hashs;
-		ASSERTONLY(pages = -10); // Disable the pCache->nPage validity check
+		TESTONLY(pages = -10); // Disable the pCache->nPage validity check
 	}
 	else {
 		// This is the general case where many pages are being removed. It is necessary to scan the entire hash table */
@@ -452,7 +452,7 @@ static __host_device__ void pcache1TruncateUnsafe(PCache1 *cache, uint limit)
 			}
 			else {
 				pp = &page->next;
-				ASSERTONLY(if (pages >= 0) pages++);
+				TESTONLY(if (pages >= 0) pages++);
 			}
 		}
 		if (h == stop) break;

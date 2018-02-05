@@ -1277,7 +1277,7 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 				wx = wx*10 + c - '0';
 				c = *++fmt;
 			}
-			ASSERTCOVERAGE(wx > 0x7fffffff);
+			TESTCASE(wx > 0x7fffffff);
 			width = wx & 0x7fffffff;
 		}
 		assert(width >= 0);
@@ -1302,7 +1302,7 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 					px = px*10 + c - '0';
 					c = *++fmt;
 				}
-				ASSERTCOVERAGE(px > 0x7fffffff);
+				TESTCASE(px > 0x7fffffff);
 				precision = px & 0x7fffffff;
 			}
 		}
@@ -1326,7 +1326,7 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 		// Fetch the info entry for the field
 		const info_t *info = &_info[0]; // Pointer to the appropriate info structure
 		type = TYPE_INVALID; // Conversion paradigm
-		int idx; for (idx = 0; idx < _LENGTHOF(_info); idx++) {
+		int idx; for (idx = 0; idx < _ARRAYSIZE(_info); idx++) {
 			if (c == _info[idx].fmtType) {
 				info = &_info[idx];
 				type = info->type;
@@ -1435,7 +1435,7 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 			if (realvalue < 0.0) { realvalue = -realvalue; prefix = '-'; }
 			else prefix = flag_prefix;
 			if (type == TYPE_GENERIC && precision > 0) precision--;
-			ASSERTCOVERAGE(precision > 0xfff);
+			TESTCASE(precision > 0xfff);
 			for (idx = precision&0xfff, rounder = 0.5; idx > 0; idx--, rounder *= 0.1) { }
 			if (type == TYPE_FLOAT) realvalue += rounder;
 			// Normalize realvalue to within 10.0 > realvalue >= 1.0
@@ -1629,8 +1629,8 @@ static __host_device__ int strbldEnlarge(strbld_t *b, int n)
 {
 	assert(b->index+(int64_t)n >= b->size); // Only called if really needed
 	if (b->error) {
-		ASSERTCOVERAGE(b->error == STRACCUM_TOOBIG);
-		ASSERTCOVERAGE(b->error == STRACCUM_NOMEM);
+		TESTCASE(b->error == STRACCUM_TOOBIG);
+		TESTCASE(b->error == STRACCUM_NOMEM);
 		return 0;
 	}
 	if (!b->maxSize) {
@@ -1669,7 +1669,7 @@ static __host_device__ int strbldEnlarge(strbld_t *b, int n)
 /* Append N copies of character c to the given string buffer. */
 __host_device__ void strbldAppendChar(strbld_t *b, int n, int c) //: sqlite3AppendChar
 {
-	ASSERTCOVERAGE(b->size+(int64_t)n > 0x7fffffff);
+	TESTCASE(b->size+(int64_t)n > 0x7fffffff);
 	if (b->index+(int64_t)n >= b->size && (n = strbldEnlarge(b, n)) <= 0)
 		return;
 	assert((b->text == b->base) == !PRINTF_ISMALLOCED(b));

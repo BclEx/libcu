@@ -246,7 +246,7 @@ __constant__ const char *_strtol_strings[] = {
 	" -",
 	" - 0",
 };
-__device__ int _strtol_ntests = _LENGTHOF(_strtol_strings);
+__device__ int _strtol_ntests = _ARRAYSIZE(_strtol_strings);
 
 static __device__ void strtol_test(int base)
 {
@@ -340,7 +340,7 @@ __constant__ const char *_strtoq_strings[] = {
 	" -",
 	" - 0",
 };
-__device__ int _strtoq_ntests = _LENGTHOF(_strtoq_strings);
+__device__ int _strtoq_ntests = _ARRAYSIZE(_strtoq_strings);
 
 static __device__ void strtoq_test(int base)
 {

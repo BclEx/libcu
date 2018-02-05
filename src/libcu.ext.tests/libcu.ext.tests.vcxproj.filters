@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="libcu.ext.tests.cu" />
+    <CudaCompile Include="program.cu" />
+    <CudaCompile Include="allocTest.cu" />
+    <CudaCompile Include="mainTest.cu" />
+    <CudaCompile Include="mathTest.cu" />
+    <CudaCompile Include="mutexTest.cu" />
+    <CudaCompile Include="pcache1Test.cu" />
+    <CudaCompile Include="pcacheTest.cu" />
+    <CudaCompile Include="printfTest.cu" />
+    <CudaCompile Include="randomTest.cu" />
+    <CudaCompile Include="statusTest.cu" />
+    <CudaCompile Include="utfTest.cu" />
+    <CudaCompile Include="utilTest.cu" />
+    <CudaCompile Include="vsystemTest.cu" />
+    <CudaCompile Include="globalTest.cu" />
+    <CudaCompile Include="notifyTest.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="allTests.cpp" />
+    <ClCompile Include="AssemblyInfo.cpp">
+      <Filter>Properties</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Properties</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h">
+      <Filter>Properties</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Properties</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bitvecTest.cu" />
+    <None Include="convertTest.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Properties">
+      <UniqueIdentifier>{32ca3c2e-430f-42e8-87e1-4a61ed4bc479}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico">
+      <Filter>Properties</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.rc">
+      <Filter>Properties</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

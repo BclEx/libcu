@@ -47,11 +47,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tcl", "Tcl", "{270E7DA7-571
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.sqlite", "libcu.sqlite\libcu.sqlite.vcxproj", "{F9A9EA50-AB8D-4BE3-BA66-43743EA9CF91}"
 	ProjectSection(ProjectDependencies) = postProject
-		{ABDDD338-DC1C-475E-9903-0FC99E18726E} = {ABDDD338-DC1C-475E-9903-0FC99E18726E}
 		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91} = {F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.ext.tests", "libcu.ext.tests\libcu.ext.tests.vcxproj", "{DA288617-FD66-42D5-B27E-9190E9F3DF93}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91} = {F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

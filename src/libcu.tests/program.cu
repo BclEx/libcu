@@ -38,7 +38,7 @@ cudaError_t unistd_test1();
 #define mainPause(fmt) { printf(fmt"\n"); }
 #endif
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
 	int testId = argv[1] ? atoi(argv[1]) : 25; //0; //18; //25;
 

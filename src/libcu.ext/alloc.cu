@@ -354,7 +354,7 @@ __host_device__ void *allocZero(uint64_t size) //: sqlite3MallocZero
 /* Allocate and zero memory.  If the allocation fails, make the mallocFailed flag in the connection pointer. */
 __host_device__ void *tagallocZero(tagbase_t *tag, uint64_t size) //: sqlite3DbMallocZero
 {
-	ASSERTCOVERAGE(tag);
+	TESTCASE(tag);
 	void *p = tagallocRaw(tag, size);
 	if (p) memset(p, 0, (size_t)size);
 	return p;

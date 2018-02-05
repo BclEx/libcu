@@ -3,8 +3,8 @@
 #include <ext\convert.h>
 #include <assert.h>
 
-static __global__ void g_ext_convert_test1()
+static __global__ void g_convert_test1()
 {
-	printf("ext_convert_test1\n");
+	printf("convert_test1\n");
 }
-cudaError_t ext_convert_test1() { g_ext_convert_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }
+cudaError_t convert_test1() { g_convert_test1<<<1, 1>>>(); return cudaDeviceSynchronize(); }

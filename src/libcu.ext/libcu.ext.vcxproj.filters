@@ -3,6 +3,8 @@
   <ItemGroup>
     <CudaCompile Include="program.cu" />
     <CudaCompile Include="libcu.ext.cu" />
+    <CudaCompile Include="wal.cu" />
+    <CudaCompile Include="pager.cu" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libcu.ext.native.nuspec" />
@@ -29,6 +31,7 @@
     <None Include="mutex.cu" />
     <None Include="pcache.cu" />
     <None Include="main.more.cu" />
+    <None Include="notify.cu" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

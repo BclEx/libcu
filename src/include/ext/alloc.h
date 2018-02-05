@@ -28,16 +28,14 @@ THE SOFTWARE.
 #define _EXT_ALLOC_H
 __BEGIN_DECLS;
 
-/*
-** EVIDENCE-OF: R-25715-37072 Memory allocation statistics are enabled by default unless SQLite is compiled with SQLITE_DEFAULT_MEMSTATUS=0 in
+/* EVIDENCE-OF: R-25715-37072 Memory allocation statistics are enabled by default unless SQLite is compiled with SQLITE_DEFAULT_MEMSTATUS=0 in
 ** which case memory allocation statistics are disabled by default.
 */
 #if !defined(LIBCU_DEFAULTMEMSTATUS)
 #define LIBCU_DEFAULTMEMSTATUS true
 #endif
 
-/*
-** Exactly one of the following macros must be defined in order to specify which memory allocation subsystem to use.
+/* Exactly one of the following macros must be defined in order to specify which memory allocation subsystem to use.
 **
 **     LIBCU_SYSTEM_MALLOC          // Use normal system malloc()
 **     LIBCU_WIN32_MALLOC           // Use Win32 native heap API
@@ -142,8 +140,7 @@ __host_device__ void allocBenignEnd();
 #define allocBenignEnd()
 #endif
 
-/*
-** On systems with ample stack space and that support alloca(), make use of alloca() to obtain space for large automatic objects.  By default,
+/* On systems with ample stack space and that support alloca(), make use of alloca() to obtain space for large automatic objects.  By default,
 ** obtain space from malloc().
 **
 ** The alloca() routine never returns NULL.  This will cause code paths that deal with sqlite3StackAlloc() failures to be unreachable.
@@ -167,8 +164,7 @@ const alloc_methods *sqlite3MemGetMemsys5();
 const alloc_methods *sqlite3MemGetMemsys3();
 #endif
 
-/*
-** These routines are available for the mem2.c debugging memory allocator only.  They are used to verify that different "types" of memory
+/* These routines are available for the mem2.c debugging memory allocator only.  They are used to verify that different "types" of memory
 ** allocations are properly tracked by the system.
 **
 ** memdbg_settype() sets the "type" of an allocation to one of the MEMTYPE_* macros defined below.  The type must be a bitmask with

@@ -26,6 +26,7 @@ THE SOFTWARE.
 #define ENABLE_API_ARMOR 1
 #define LIBCU_ENABLE_SQLLOG
 #define OMIT_COMPILEOPTION_DIAGS
+#define LIBCU_ENABLE_UNLOCK_NOTIFY
 
 #ifndef _EXT_GLOBAL_H
 #define _EXT_GLOBAL_H
@@ -168,7 +169,28 @@ extern char *libcu_dataDirectory;
 extern __hostb_device__ int _libcuPendingByte;
 #endif
 
+// CAPI3REF: Checkpoint a database
+//extern __hostb_device__ int sqlite3_wal_checkpoint_v2(sqlite3 *db, const char *zDb, int eMode, int *pnLog, int *pnCkpt); //: sqlite3_wal_checkpoint_v2
+
+// CAPI3REF: Checkpoint Mode Values
+#define PCACHE_CHECKPOINT_PASSIVE  0  // Do as much as possible w/o blocking
+#define PCACHE_CHECKPOINT_FULL     1  // Wait for writers, then checkpoint
+#define PCACHE_CHECKPOINT_RESTART  2  // Like FULL but wait for for readers
+#define PCACHE_CHECKPOINT_TRUNCATE 3  // Like RESTART but also truncate WAL
+
 #pragma endregion
+
+/* If the SQLITE_ENABLE IOTRACE exists then the global variable sqlite3IoTrace is a pointer to a printf-like routine used to
+** print I/O tracing messages.
+*/
+#ifdef LIBCU_ENABLE_IOTRACE
+#define IOTRACE(A)  if (_libcuIoTracev) { _libcuIoTrace A; }
+  //__host_device__ void libcuVdbeIOTraceSql(Vdbe *);
+__host_device__ void (*_libcuIoTracev)(const char*,va_list);
+#else
+#define IOTRACE(A)
+#define libcuVdbeIOTraceSql(X)
+#endif
 
 /* Disable MMAP on platforms where it is known to not work */
 #if defined(__OpenBSD__) || defined(__QNXNTO__)
@@ -249,6 +271,17 @@ struct tagbase_t {
 	uint32_t magic;         // Magic number for detect library misuse
 	int limits[TAG_LIMIT_MAX]; // Limits
 	void *err;				// Most recent error message
+#ifdef LIBCU_ENABLE_UNLOCK_NOTIFY
+	/* The following variables are all protected by the STATIC_MASTER mutex, not by sqlite3.mutex. They are used by code in notify.c.
+	** When X.pUnlockConnection==Y, that means that X is waiting for Y to unlock so that it can proceed.
+	** When X.pBlockingConnection==Y, that means that something that X tried tried to do recently failed with an SQLITE_LOCKED error due to locks held by Y.
+	*/
+	tagbase_t *blockingConnection; // Connection that caused SQLITE_LOCKED
+	tagbase_t *unlockConnection;           // Connection to watch for unlock
+	void *unlockArg;                     // Argument to xUnlockNotify
+	void (*unlockNotify)(void **, int);  // Unlock notify callback
+	tagbase_t *nextBlocked;        // Next in list of all blocked connections
+#endif
 };
 
 /* Possible values for the sqlite.magic field.
@@ -270,16 +303,19 @@ struct parsebase_t {
 	int errs;				// Number of errors seen
 };
 
+__END_DECLS;
 #include "vsystem.h"
+#include "convert.h"
 #include "util.h"
 #include "math.h"
 #include "mutex.h"
 #include "alloc.h"
 #include "status.h"
 #include "pcache.h"
+__BEGIN_DECLS;
 
 // CAPI3REF: Pseudo-Random Number Generator
-extern __device__ void randomness_(int n, void *p);
+extern __host_device__ void randomness_(int n, void *p);
 
 // CAPI3REF: Configuration Options
 #define CONFIG int
@@ -363,10 +399,6 @@ extern __host_device__ int tagextendedErrcode(tagbase_t *); //: sqlite3_extended
 extern __host_device__ const char *tagerrmsg(tagbase_t *); //: sqlite3_errmsg
 extern __host_device__ const void *tagerrmsg16(tagbase_t *); //: sqlite3_errmsg16
 extern __host_device__ const char *errstr(int); //: sqlite3_errstr
-
-
-
-
 
 
 /* Structure containing global configuration data for the Lib library.
@@ -489,17 +521,38 @@ struct Savepoint {
 #define SAVEPOINT_ROLLBACK   2
 
 
+__END_DECLS;
 
 
+// CAPI3REF: Online Backup Object
+typedef struct backupbase_t backupbase_t;
+
+// CAPI3REF: Online Backup API.
+__host_device__ backupbase_t *backup_init(tagbase_t *dest, const char *destName, tagbase_t *source, const char *sourceName); //: sqlite3_backup_init
+__host_device__ int backup_step(backupbase_t *p, int pages); //: sqlite3_backup_step
+__host_device__ int backup_finish(backupbase_t *p); //: sqlite3_backup_finish
+__host_device__ int backup_remaining(backupbase_t *p); //: sqlite3_backup_remaining
+__host_device__ int backup_pagecount(backupbase_t *p); //: sqlite3_backup_pagecount
 
 
+#pragma region From: notify.c
+__BEGIN_DECLS;
 
+// CAPI3REF: Unlock Notification
+__host_device__ RC notify_unlock(tagbase_t *tag, void (*notify)(void**,int), void *arg);
 
-
-
-
+#ifdef LIBCU_ENABLE_UNLOCK_NOTIFY
+__host_device__ void notifyConnectionBlocked(tagbase_t *tag, tagbase_t *);
+__host_device__ void notifyConnectionUnlocked(tagbase_t *tag);
+__host_device__ void notifyConnectionClosed(tagbase_t *tag);
+#else
+#define notifyConnectionBlocked(x,y)
+#define notifyConnectionUnlocked(x)
+#define notifyConnectionClosed(x)
+#endif
 
 __END_DECLS;
+#pragma endregion
 
 #pragma region From: printf.c
 __BEGIN_DECLS;
@@ -517,14 +570,15 @@ __host_device__ char *vmprintf(const char *format, va_list va);
 __host_device__ char *vmsnprintf(char *__restrict s, size_t maxlen, const char *format, va_list va);
 
 __END_DECLS;
+// // STDARG
 #ifndef __CUDA_ARCH__
-__host_device__ __forceinline void _log(int errCode, const char *format, ...) { va_list va; va_start(va, format); _logv(errCode, format, va); va_end(va); }
+__forceinline void _log(int errCode, const char *format, ...) { va_list va; va_start(va, format); _logv(errCode, format, va); va_end(va); }
 #if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-__host_device__ __forceinline void _debug(const char *format, ...) { va_list va; va_start(va, format); _debugv(format, va); va_end(va); }
+__forceinline void _debug(const char *format, ...) { va_list va; va_start(va, format); _debugv(format, va); va_end(va); }
 #endif
-__host_device__ __forceinline char *mtagprintf(tagbase_t *tag, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmtagprintf(tag, format, va); va_end(va); return r; }
-__host_device__ __forceinline char *mprintf(const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmprintf(format, va); va_end(va); return r; }
-__host_device__ __forceinline char *msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
+__forceinline char *mtagprintf(tagbase_t *tag, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmtagprintf(tag, format, va); va_end(va); return r; }
+__forceinline char *mprintf(const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmprintf(format, va); va_end(va); return r; }
+__forceinline char *msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
 #else
 STDARG1void(_log, _logv(errCode, format, va), int errCode, const char *format);
 STDARG2void(_log, _logv(errCode, format, va), int errCode, const char *format);

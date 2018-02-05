@@ -68,6 +68,7 @@ __BEGIN_DECLS;
 #define VSYS_IOCAP_UNDELETABLE_WHEN_OPEN  0x00000800
 #define VSYS_IOCAP_POWERSAFE_OVERWRITE    0x00001000
 #define VSYS_IOCAP_IMMUTABLE              0x00002000
+#define VSYS_IOCAP_BATCH_ATOMIC           0x00004000
 
 // CAPI3REF: File Locking Levels
 #define VSYS_LOCK_NONE          0
@@ -255,6 +256,8 @@ extern __hostb_device__ int _libcuOSTrace;
 
 /* Wrapper around OS specific sqlite3_os_init() function. */
 //int vsystemFakeInit(); //: sqlite3OsInit
+
+#define LIBCU_FCNTL_DB_UNCHANGED 0xca093fa0
 
 /* Functions for accessing vsysfile methods */
 extern __host_device__ void vsys_close(vsysfile *); //: sqlite3OsClose 

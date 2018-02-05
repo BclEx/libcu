@@ -9,6 +9,7 @@
 #include "mutex-gpu.cu"
 #include "mutex-noop.cu"
 #include "mutex.cu"
+#include "notify.cu"
 #include "pcache.cu"
 #include "pcache1.cu"
 #include "printf.cu"

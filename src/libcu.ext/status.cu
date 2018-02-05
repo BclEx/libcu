@@ -42,8 +42,8 @@ static __host_constant__ const char statusMutexStatics[] = {
 __host_device__ int64_t status_now(STATUS op) //: sqlite3StatusValue
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(op >= 0 && op < _ARRAYSIZE(_status.nowValue));
+	assert(op >= 0 && op < _ARRAYSIZE(statusMutexStatics));
 	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	return _status.nowValue[op];
 }
@@ -58,8 +58,8 @@ __host_device__ int64_t status_now(STATUS op) //: sqlite3StatusValue
 __host_device__ void status_inc(STATUS op, int n) //: sqlite3StatusUp
 {
 	_statusInit;
-	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(op >= 0 && op < _ARRAYSIZE(_status.nowValue));
+	assert(op >= 0 && op < _ARRAYSIZE(statusMutexStatics));
 	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	_status.nowValue[op] += n;
 	if (_status.nowValue[op] > _status.maxValue[op])
@@ -70,9 +70,9 @@ __host_device__ void status_dec(STATUS op, int n) //: sqlite3StatusDown
 {
 	_statusInit;
 	assert(n >= 0);
-	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(op >= 0 && op < _ARRAYSIZE(statusMutexStatics));
 	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
-	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
+	assert(op >= 0 && op < _ARRAYSIZE(_status.nowValue));
 	_status.nowValue[op] -= n;
 }
 
@@ -82,8 +82,8 @@ __host_device__ void status_max(STATUS op, int x) //: sqlite3StatusHighwater
 	_statusInit;
 	assert(x >= 0);
 	statusValue_t newValue = (statusValue_t)x;
-	assert(op >= 0 && op < _LENGTHOF(_status.nowValue));
-	assert(op >= 0 && op < _LENGTHOF(statusMutexStatics));
+	assert(op >= 0 && op < _ARRAYSIZE(_status.nowValue));
+	assert(op >= 0 && op < _ARRAYSIZE(statusMutexStatics));
 	assert(mutex_held(statusMutexStatics[op] ? pcacheMutex() : allocMutex()));
 	assert(op == STATUS_MALLOC_SIZE || op == STATUS_PAGECACHE_SIZE || op == STATUS_PARSER_STACK);
 	if (newValue > _status.maxValue[op])
@@ -94,7 +94,7 @@ __host_device__ void status_max(STATUS op, int x) //: sqlite3StatusHighwater
 __host_device__ RC status64(STATUS op, int64_t *current, int64_t *highwater, bool resetFlag) //: sqlite3_status64
 {
 	_statusInit;
-	if (op < 0 || op >= _LENGTHOF(_status.nowValue))
+	if (op < 0 || op >= _ARRAYSIZE(_status.nowValue))
 		return RC_MISUSE_BKPT;
 #ifdef ENABLE_API_ARMOR
 	if (!current || !highwater) return RC_MISUSE_BKPT;
@@ -162,9 +162,9 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 	case TAGSTATUS_LOOKASIDE_HIT:
 	case TAGSTATUS_LOOKASIDE_MISS_SIZE:
 	case TAGSTATUS_LOOKASIDE_MISS_FULL: {
-		ASSERTCOVERAGE(op == TAGSTATUS_LOOKASIDE_HIT);
-		ASSERTCOVERAGE(op == TAGSTATUS_LOOKASIDE_MISS_SIZE);
-		ASSERTCOVERAGE(op == TAGSTATUS_LOOKASIDE_MISS_FULL);
+		TESTCASE(op == TAGSTATUS_LOOKASIDE_HIT);
+		TESTCASE(op == TAGSTATUS_LOOKASIDE_MISS_SIZE);
+		TESTCASE(op == TAGSTATUS_LOOKASIDE_MISS_FULL);
 		assert((op - TAGSTATUS_LOOKASIDE_HIT) >= 0);
 		assert((op - TAGSTATUS_LOOKASIDE_HIT) < 3);
 		*current = 0;

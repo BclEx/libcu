@@ -65,7 +65,7 @@ typedef struct PgHdr PgHdr;
 typedef struct PCache PCache;
 
 typedef struct Pager Pager; //: Sky
-typedef int Pgno; //: Sky
+typedef uint Pgno; //: Sky
 
 /* Every page in the cache is controlled by an instance of the following structure. */
 struct PgHdr {
