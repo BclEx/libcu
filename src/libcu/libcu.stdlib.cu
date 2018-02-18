@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define _ROUND8(x) (((x)+7)&~7)
+#define ROUND8_(x) (((x)+7)&~7)
 #define panic(fmt, ...) { printf(fmt, __VA_ARGS__); asm("trap;"); }
 
 #ifdef	__cplusplus
@@ -23,7 +23,7 @@ __BEGIN_DECLS;
 __device__ void *malloc_(size_t size)
 {
 	assert(size > 0);
-	size = _ROUND8(size);
+	size = ROUND8_(size);
 	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
 	if (p)
 		p[0] = size;
@@ -41,7 +41,7 @@ __device__ void free_(void *ptr)
 __device__ void *realloc_(void *ptr, size_t size)
 {
 	assert(size > 0);
-	size = _ROUND8(size);
+	size = ROUND8_(size);
 	MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
 	if (p)
 		p[0] = size;

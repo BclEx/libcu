@@ -67,7 +67,7 @@ static __host_device__ mutex *noopMutexAlloc(MUTEX id)
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= _ARRAYSIZE(noopMutexStatics)) {
+		if (id-2 < 0 || id-2 >= ARRAYSIZE_(noopMutexStatics)) {
 			(void)RC_MISUSE_BKPT;
 			return 0;
 		}

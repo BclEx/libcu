@@ -135,7 +135,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			CloseHandle(_hostMapHandle);
 			exit(1);
 		}
-		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN_(_hostMap, MEMORY_ALIGNMENT);
 		_ctx.HostMap->Offset = (intptr_t)_sentinelHostMap;
 #elif __OS_UNIX
 		_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -143,7 +143,7 @@ void sentinelServerInitialize(sentinelExecutor *executor, char *mapHostName, boo
 			printf("Could not map view of file.\n");
 			exit(1);
 		}
-		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+		_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN_(_hostMap, MEMORY_ALIGNMENT);
 		_ctx.HostMap->Offset = 0;
 #endif
 	}
@@ -256,7 +256,7 @@ void sentinelClientInitialize(char *mapHostName)
 		CloseHandle(_hostMapHandle);
 		exit(1);
 	}
-	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN_(_hostMap, MEMORY_ALIGNMENT);
 	_sentinelHostMapOffset = (intptr_t)((char *)_ctx.HostMap->Offset - (char *)_sentinelHostMap);
 #elif __OS_UNIX
 	_hostMap = mmap(NULL, sizeof(sentinelMap) + MEMORY_ALIGNMENT, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -264,7 +264,7 @@ void sentinelClientInitialize(char *mapHostName)
 		printf("Could not map view of file.\n");
 		exit(1);
 	}
-	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)_ROUNDN(_hostMap, MEMORY_ALIGNMENT);
+	_sentinelHostMap = _ctx.HostMap = (sentinelMap *)ROUNDN_(_hostMap, MEMORY_ALIGNMENT);
 	_sentinelHostMapOffset = 0;
 #endif
 }

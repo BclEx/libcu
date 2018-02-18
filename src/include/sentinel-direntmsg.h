@@ -43,7 +43,7 @@ struct dirent_opendir {
 	static __forceinline__ __device__ char *Prepare(dirent_opendir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = t->Str ? (int)strlen(t->Str) + 1 : 0;
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -70,7 +70,7 @@ struct dirent_readdir {
 	{
 		if (!t->RC) return data;
 		int ptrLength = sizeof(struct dirent);
-		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += ptrLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->RC, ptrLength);
@@ -82,7 +82,7 @@ struct dirent_readdir {
 	{
 		if (!t->RC64) return data;
 		int ptrLength = sizeof(struct dirent64);
-		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += ptrLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(ptr, t->RC64, ptrLength);

@@ -84,7 +84,7 @@ static RC winMutexInitialize()
 { 
 	// The first to increment to 1 does actual initialization
 	if (!InterlockedCompareExchange(&_winMutexLock, 1, 0)) {
-		for (int i = 0; i < _ARRAYSIZE(winMutexStatics); i++) {
+		for (int i = 0; i < ARRAYSIZE_(winMutexStatics); i++) {
 #if __OS_WINRT
 			InitializeCriticalSectionEx(&winMutexStatics[i].Mutex, 0, 0);
 #else
@@ -103,7 +103,7 @@ static RC winMutexShutdown()
 	// The first to decrement to 0 does actual shutdown (which should be the last to shutdown.)
 	if (InterlockedCompareExchange(&_winMutexLock, 0, 1) == 1) {
 		if (_winMutexIsInit) {
-			for (int i =0 ; i < _ARRAYSIZE(winMutexStatics); i++)
+			for (int i =0 ; i < ARRAYSIZE_(winMutexStatics); i++)
 				DeleteCriticalSection(&winMutexStatics[i].Mutex);
 			_winMutexIsInit = false;
 		}
@@ -168,7 +168,7 @@ static mutex *winMutexAlloc(MUTEX id)
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= _ARRAYSIZE(winMutexStatics)) {
+		if (id-2 < 0 || id-2 >= ARRAYSIZE_(winMutexStatics)) {
 			(void)RC_MISUSE_BKPT;
 			return 0;
 		}

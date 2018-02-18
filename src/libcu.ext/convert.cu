@@ -778,7 +778,7 @@ static __host_device__ uint8_t convert_atolevel(const char *z, int omitFull, uin
 	if (isdigit(*z))
 		return (uint8_t)convert_atoi(z);
 	int n = (int)strlen(z);
-	for (int i = 0; i < _ARRAYSIZE(lengths); i++)
+	for (int i = 0; i < ARRAYSIZE_(lengths); i++)
 		if (lengths[i] == n && !strnicmp(&texts[offsets[i]], z , n) && (!omitFull || values[i] <= 1))
 			return values[i];
 	return dflt;

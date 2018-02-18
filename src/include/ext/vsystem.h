@@ -82,35 +82,35 @@ __BEGIN_DECLS;
 #define VSYS_SYNC_FULL          0x00003
 #define VSYS_SYNC_DATAONLY      0x00010
 
-// CAPI3REF: OS Interface Open File Handle
-typedef struct vsysfile vsysfile;
-struct vsysfile {
-	const struct vsysfile_methods *methods;  // Methods for an open file
-};
-
-// CAPI3REF: OS Interface File Virtual Methods Object
-typedef struct vsysfile_methods vsysfile_methods;
-struct vsysfile_methods {
-	int version;
-	int (*close)(vsysfile *);
-	int (*read)(vsysfile *, void *, int amount, int64_t offset);
-	int (*write)(vsysfile *, const void *, int amount, int64_t offset);
-	int (*truncate)(vsysfile *, int64_t size);
-	int (*sync)(vsysfile *, int flags);
-	int (*fileSize)(vsysfile *, int64_t *size);
-	int (*lock)(vsysfile *, int);
-	int (*unlock)(vsysfile *, int);
-	int (*checkReservedLock)(vsysfile *, int *resOut);
-	int (*fileControl)(vsysfile *, int op, void *args);
-	int (*sectorSize)(vsysfile *);
-	int (*deviceCharacteristics)(vsysfile *);
-	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile **);
-	int (*shmLock)(vsysfile *, int offset, int n, int flags);
-	void (*shmBarrier)(vsysfile *);
-	int (*shmUnmap)(vsysfile *, int deleteFlag);
-	int (*fetch)(vsysfile *, int64_t offset, int amount, void **p);
-	int (*unfetch)(vsysfile *, int64_t offset, void *p);
-};
+//// CAPI3REF: OS Interface Open File Handle
+//typedef struct vsysfile vsysfile;
+//struct vsysfile {
+//	const struct vsysfile_methods *methods;  // Methods for an open file
+//};
+//
+//// CAPI3REF: OS Interface File Virtual Methods Object
+//typedef struct vsysfile_methods vsysfile_methods;
+//struct vsysfile_methods {
+//	int version;
+//	int (*close)(vsysfile *);
+//	int (*read)(vsysfile *, void *, int amount, int64_t offset);
+//	int (*write)(vsysfile *, const void *, int amount, int64_t offset);
+//	int (*truncate)(vsysfile *, int64_t size);
+//	int (*sync)(vsysfile *, int flags);
+//	int (*fileSize)(vsysfile *, int64_t *size);
+//	int (*lock)(vsysfile *, int);
+//	int (*unlock)(vsysfile *, int);
+//	int (*checkReservedLock)(vsysfile *, int *resOut);
+//	int (*fileControl)(vsysfile *, int op, void *args);
+//	int (*sectorSize)(vsysfile *);
+//	int (*deviceCharacteristics)(vsysfile *);
+//	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile **);
+//	int (*shmLock)(vsysfile *, int offset, int n, int flags);
+//	void (*shmBarrier)(vsysfile *);
+//	int (*shmUnmap)(vsysfile *, int deleteFlag);
+//	int (*fetch)(vsysfile *, int64_t offset, int amount, void **p);
+//	int (*unfetch)(vsysfile *, int64_t offset, void *p);
+//};
 
 // CAPI3REF: Standard File Control Opcodes
 #define VSYS_FCNTL_LOCKSTATE               1
@@ -284,7 +284,7 @@ extern __host_device__ RC vsys_fetch(vsysfile *, int64_t, int, void **); //: sql
 extern __host_device__ RC vsys_unfetch(vsysfile *, int64_t, void *); //: sqlite3OsUnfetch
 
 /* Functions for accessing vsystem methods */
-extern __host_device__ RC vsys_open(vsystem *, const char *, vsysfile*, int, int *); //: sqlite3OsOpen
+extern __host_device__ RC vsys_open(vsystem *, const char *, vsysfile *, int, int *); //: sqlite3OsOpen
 extern __host_device__ RC vsys_delete(vsystem *, const char *, int); //: sqlite3OsDelete
 extern __host_device__ RC vsys_access(vsystem *, const char *, int, int *pResOut); //: sqlite3OsAccess
 extern __host_device__ RC vsys_fullPathname(vsystem *, const char *, int, char *); //: sqlite3OsFullPathname

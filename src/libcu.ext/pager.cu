@@ -13,5 +13,6 @@
 
 #define SQLITEINT_H
 //#include "sqlite3\sqliteLimit.h"
-#include "sqlite3\pager.h"
-#include "sqlite3\pager.c"
+
+//#include "sqlite3\pager.h"
+//#include "sqlite3\pager.c"

@@ -64,7 +64,7 @@ static malloc_zone_t *_sqliteZone_;
 static __host_device__ void *memoryMalloc(int size)
 {
 #ifdef LIBCU_MALLOCSIZE
-	TESTCASE(_ROUND8(size) == size);
+	TESTCASE(ROUND8_(size) == size);
 	void *p = LIBCU_MALLOC(size);
 	if (!p) {
 		TESTCASE(_runtimeConfig.log);
@@ -73,7 +73,7 @@ static __host_device__ void *memoryMalloc(int size)
 	return p;
 #else
 	assert(size > 0);
-	TESTCASE(_ROUND8(size) != size);
+	TESTCASE(ROUND8_(size) != size);
 	int64_t *p = LIBCU_MALLOC(size+8);
 	if (p) {
 		p[0] = size;
@@ -154,7 +154,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 /* Round up a request size to the next valid allocation size. */
 static __host_device__ int memoryRoundup(int size)
 {
-	return _ROUND8(size);
+	return ROUND8_(size);
 }
 
 /* Initialize this module. */

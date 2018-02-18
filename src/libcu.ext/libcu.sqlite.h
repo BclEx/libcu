@@ -25,11 +25,11 @@
 
 #pragma region Basetypes
 
-#define SQLITE_PTRSIZE _PTRSIZE
-#define SQLITE_WITHIN _WITHIN
+#define SQLITE_PTRSIZE PTRSIZE_
+#define SQLITE_WITHIN WITHIN_
 #define UNUSED_PARAMETER UNUSED_SYMBOL
-#define ArraySize _ARRAYSIZE
-#define MIN _MIN
+#define ArraySize ARRAYSIZE_
+#define MIN MIN_
 #define testcase TESTCASE
 #define VVA_ONLY DEBUGONLY
 #define ALWAYS _ALWAYS

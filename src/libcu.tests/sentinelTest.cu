@@ -20,7 +20,7 @@ struct module_string {
 	static __forceinline__ __device__ char *Prepare(module_string *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);

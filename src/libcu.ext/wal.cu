@@ -9,4 +9,4 @@
 
 #define SQLITEINT_H
 #include "sqlite3\sqliteLimit.h"
-#include "sqlite3\wal.c"
+//#include "sqlite3\wal.c"

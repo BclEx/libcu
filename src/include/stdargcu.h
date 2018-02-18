@@ -129,9 +129,9 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define _crt_va_list _crt_va_list0 
 #define _crt_va_restart(ap, ...) (ap.i = ap.b);
 #ifndef _WIN64
-#define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)_ROUNDT((unsigned long)(ap.i + _INTSIZEOF(t)), t)) - _INTSIZEOF(t)))
+#define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)ROUNDT_((unsigned long)(ap.i + _INTSIZEOF(t)), t)) - _INTSIZEOF(t)))
 #else
-#define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)_ROUNDT((unsigned long long)(ap.i + _INTSIZEOF(t)), t)) - _INTSIZEOF(t)))
+#define _crt_va_arg(ap, t) (*(t *)((ap.i = (char *)ROUNDT_((unsigned long long)(ap.i + _INTSIZEOF(t)), t)) - _INTSIZEOF(t)))
 #endif
 #define _crt_va_end(ap) (ap.i = nullptr);
 

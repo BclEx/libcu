@@ -53,7 +53,7 @@ struct vsysfile_close {
 
 struct vsysfile_read {
 	static __forceinline__ __device__ char *Prepare(vsysfile_read *t, char *data, char *dataEnd, intptr_t offset) {
-		char *ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		char *ptr = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		t->Ptr = ptr + offset;
@@ -75,7 +75,7 @@ struct vsysfile_read {
 
 struct vsysfile_write {
 	static __forceinline__ __device__ char *Prepare(vsysfile_write *t, char *data, char *dataEnd, intptr_t offset) {
-		char *buf = (char *)(data += _ROUND8(sizeof(*t)));
+		char *buf = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		memcpy(buf, t->Buf, t->Amount);
@@ -155,7 +155,7 @@ struct vsystem_open {
 		int nameLength;
 		if (t->Name) { nameLength = (int)strlen(t->Name) + 1; nameLength += (int)strlen((const char *)t->Name[nameLength]) + 1; }
 		else nameLength = 0;
-		char *name = (char *)(data += _ROUND8(sizeof(*t)));
+		char *name = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += nameLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(name, t->Name, nameLength);
@@ -174,7 +174,7 @@ struct vsystem_open {
 struct vsystem_delete {
 	static __forceinline__ __device__ char *Prepare(vsystem_delete *t, char *data, char *dataEnd, intptr_t offset) {
 		int filenameLength = t->Filename ? (int)strlen(t->Filename) + 1 : 0;
-		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
+		char *filename = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += filenameLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(filename, t->Filename, filenameLength);
@@ -191,7 +191,7 @@ struct vsystem_delete {
 struct vsystem_access {
 	static __forceinline__ __device__ char *Prepare(vsystem_access *t, char *data, char *dataEnd, intptr_t offset) {
 		int filenameLength = t->Filename ? (int)strlen(t->Filename) + 1 : 0;
-		char *filename = (char *)(data += _ROUND8(sizeof(*t)));
+		char *filename = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += filenameLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(filename, t->Filename, filenameLength);
@@ -209,7 +209,7 @@ struct vsystem_access {
 struct vsystem_fullPathname {
 	static __forceinline__ __device__ char *Prepare(vsystem_fullPathname *t, char *data, char *dataEnd, intptr_t offset) {
 		int relativeLength = t->Relative ? (int)strlen(t->Relative) + 1 : 0;
-		char *relative = (char *)(data += _ROUND8(sizeof(*t)));
+		char *relative = (char *)(data += ROUND8_(sizeof(*t)));
 		char *ptr = (char *)(data += relativeLength);
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
@@ -242,7 +242,7 @@ struct vsystem_fullPathname {
 
 struct vsystem_getLastError {
 	static __forceinline__ __device__ char *Prepare(vsystem_getLastError *t, char *data, char *dataEnd, intptr_t offset) {
-		t->Buf = (char *)(data += _ROUND8(sizeof(*t)));
+		t->Buf = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;

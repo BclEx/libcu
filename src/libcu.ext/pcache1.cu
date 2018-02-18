@@ -115,7 +115,7 @@ __host_device__ void pcacheBufferSetup(void *buf, int size, int n) // sqlite3PCa
 	if (_pcache1.isInit) {
 		if (!buf) size = n = 0;
 		if (!n) size = 0;
-		size = _ROUNDDOWN8(size);
+		size = ROUNDDOWN8_(size);
 		_pcache1.sizeSlot = size;
 		_pcache1.slots = _pcache1.freeSlots = n;
 		_pcache1.reserves = n > 90 ? 10 : (n / 10 + 1);
@@ -203,7 +203,7 @@ static __host_device__ void *pcache1Alloc(int bytes)
 static __host_device__ void pcache1Free(void *p)
 {
 	if (!p) return;
-	if (_WITHIN(p, _pcache1.start, _pcache1.end)) {
+	if (WITHIN_(p, _pcache1.start, _pcache1.end)) {
 		mutex_enter(_pcache1.mutex);
 		status_dec(STATUS_PAGECACHE_USED, 1);
 		PgFreeslot *slot = (PgFreeslot *)p;
@@ -528,7 +528,7 @@ static __host_device__ pcache_t *pcache1Create(int sizePage, int sizeExtra, int 
 		cache->group = group;
 		cache->sizePage = sizePage;
 		cache->sizeExtra = sizeExtra;
-		cache->sizeAlloc = sizePage + sizeExtra + _ROUND8(sizeof(PgHdr1));
+		cache->sizeAlloc = sizePage + sizeExtra + ROUND8_(sizeof(PgHdr1));
 		cache->purgeable = purgeable;
 		pcache1EnterMutex(group);
 		pcache1ResizeHash(cache);
@@ -829,7 +829,7 @@ __host_device__ void __pcachesystemSetDefault() //: sqlite3PCacheSetDefault
 }
 
 /* Return the size of the header on each page of this PCACHE implementation. */
-__host_device__ int pcache1HeaderSize() { return _ROUND8(sizeof(PgHdr1)); } //: sqlite3HeaderSizePcache1
+__host_device__ int pcache1HeaderSize() { return ROUND8_(sizeof(PgHdr1)); } //: sqlite3HeaderSizePcache1
 
 /* Return the global mutex used by this PCACHE implementation.  The sqlite3_status() routine needs access to this mutex. */
 __host_device__ mutex *pcacheMutex() { return _pcache1.mutex; } //: sqlite3Pcache1Mutex

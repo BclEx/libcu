@@ -94,7 +94,7 @@ __device__ int expandPath(const char *path, char *newPath)
 
 static __device__ dirEnt_t *createEnt(dirEnt_t *parentEnt, const char *path, const char *name, int type, int extraSize)
 {
-	dirEnt_t *ent = (dirEnt_t *)malloc(_ROUND64(sizeof(dirEnt_t)) + extraSize);
+	dirEnt_t *ent = (dirEnt_t *)malloc(ROUND64_(sizeof(dirEnt_t)) + extraSize);
 	char *newPath = (char *)malloc(strlen(path));
 	strcpy(newPath, path);
 	if (hashInsert(&__iob_dir, newPath, ent))
@@ -310,9 +310,9 @@ __device__ dirEnt_t *fsystemOpen(const char *__restrict path, int mode, int *fd)
 		return nullptr;
 	}
 	// create file
-	fileEnt = createEnt(parentEnt, newPath, name, 2, __sizeofMemfile_t);
-	fileEnt->u.file = (memfile_t *)((char *)fileEnt + _ROUND64(sizeof(dirEnt_t)));
-	memfileOpen(fileEnt->u.file);
+	fileEnt = createEnt(parentEnt, newPath, name, 2, memfileSize(nullptr));
+	fileEnt->u.file = (vsysfile *)((char *)fileEnt + ROUND64_(sizeof(dirEnt_t)));
+	memfileMemOpen(fileEnt->u.file);
 	// set to file
 	file_t *f; *fd = fileGet(&f);
 	f->base = (char *)fileEnt;

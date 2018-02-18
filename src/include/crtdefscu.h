@@ -187,38 +187,38 @@ All macros listed above as possibly being defined by this file are explicitly un
 
 #define MEMORY_ALIGNMENT 4096
 /* Memory allocation - rounds to the type in T */
-#define _ROUNDT(x, T)		(((x)+sizeof(T)-1)&~(sizeof(T)-1))
+#define ROUNDT_(x, T)		(((x)+sizeof(T)-1)&~(sizeof(T)-1))
 /* Memory allocation - rounds up to 8 */
-#define _ROUND8(x)			(((x)+7)&~7)
+#define ROUND8_(x)			(((x)+7)&~7)
 /* Memory allocation - rounds up to 64 */
-#define _ROUND64(x)			(((x)+63)&~63)
+#define ROUND64_(x)			(((x)+63)&~63)
 /* Memory allocation - rounds up to "size" */
-#define _ROUNDN(x, size)	(((size_t)(x)+(size-1))&~(size-1))
+#define ROUNDN_(x, size)	(((size_t)(x)+(size-1))&~(size-1))
 /* Memory allocation - rounds down to 8 */
-#define _ROUNDDOWN8(x)		((x)&~7)
+#define ROUNDDOWN8_(x)		((x)&~7)
 /* Memory allocation - rounds down to "size" */
-#define _ROUNDDOWNN(x, size) (((size_t)(x))&~(size-1))
+#define ROUNDDOWNN_(x, size) (((size_t)(x))&~(size-1))
 /* Test to see if you are on aligned boundary, affected by BYTEALIGNED4 */
 #ifdef BYTEALIGNED4
-#define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&3) == 0)
+#define HASALIGNMENT8_(x) ((((char *)(x) - (char *)0)&3) == 0)
 #else
-#define _HASALIGNMENT8(x) ((((char *)(x) - (char *)0)&7) == 0)
+#define HASALIGNMENT8_(x) ((((char *)(x) - (char *)0)&7) == 0)
 #endif
 /* Returns the length of an array at compile time (via math) */
-#define _ARRAYSIZE(symbol) (sizeof(symbol) / sizeof(symbol[0]))
+#define ARRAYSIZE_(symbol) (sizeof(symbol) / sizeof(symbol[0]))
 /* Removes compiler warning for unused parameter(s) */
 #define UNUSED_SYMBOL(x) (void)(x)
 #define UNUSED_SYMBOL2(x,y) (void)(x),(void)(y)
 
 /* Macros to compute minimum and maximum of two numbers. */
-#ifndef _MIN
-#define _MIN(A,B) ((A)<(B)?(A):(B))
+#ifndef MIN_
+#define MIN_(A,B) ((A)<(B)?(A):(B))
 #endif
-#ifndef _MAX
-#define _MAX(A,B) ((A)>(B)?(A):(B))
+#ifndef MAX_
+#define MAX_(A,B) ((A)>(B)?(A):(B))
 #endif
 /* Swap two objects of type TYPE. */
-#define _SWAP(TYPE,A,B) { TYPE t=A; A=B; B=t; }
+#define SWAP_(TYPE,A,B) { TYPE t=A; A=B; B=t; }
 
 #pragma endregion
 
@@ -227,32 +227,32 @@ All macros listed above as possibly being defined by this file are explicitly un
 #pragma region PTRSIZE
 
 /* Set the SQLITE_PTRSIZE macro to the number of bytes in a pointer */
-#ifndef _PTRSIZE
+#ifndef PTRSIZE_
 #if defined(__SIZEOF_POINTER__)
-#define _PTRSIZE __SIZEOF_POINTER__
+#define PTRSIZE_ __SIZEOF_POINTER__
 #elif defined(i386) || defined(__i386__) || defined(_M_IX86) || defined(_M_ARM) || defined(__arm__) || defined(__x86)
-#define _PTRSIZE 4
+#define PTRSIZE_ 4
 #else
-#define _PTRSIZE 8
+#define PTRSIZE_ 8
 #endif
 #endif
 
 /* The uptr type is an unsigned integer large enough to hold a pointer */
 #if defined(HAVE_STDINT_H)
 //typedef uintptr_t uintptr_t;
-#elif _PTRSIZE == 4
+#elif PTRSIZE_ == 4
 typedef uint32_t uintptr_t;
 #else
 typedef uint64_t uintptr_t;
 #endif
 
 /*
-** The _WITHIN(P,S,E) macro checks to see if pointer P points to something between S (inclusive) and E (exclusive).
+** The WITHIN_(P,S,E) macro checks to see if pointer P points to something between S (inclusive) and E (exclusive).
 **
 ** In other words, S is a buffer and E is a pointer to the first byte after the end of buffer S.  This macro returns true if P points to something
 ** contained within the buffer S.
 */
-#define _WITHIN(P,S,E) (((uintptr_t)(P)>=(uintptr_t)(S))&&((uintptr_t)(P)<(uintptr_t)(E)))
+#define WITHIN_(P,S,E) (((uintptr_t)(P)>=(uintptr_t)(S))&&((uintptr_t)(P)<(uintptr_t)(E)))
 
 #pragma endregion	
 
@@ -460,6 +460,39 @@ __END_DECLS;
 #pragma region EXT-METHODS
 __BEGIN_DECLS;
 
+// CAPI3REF: OS Interface Open File Handle
+typedef struct vsysfile vsysfile;
+struct vsysfile {
+	const struct vsysfile_methods *methods;  // Methods for an open file
+};
+
+// CAPI3REF: OS Interface File Virtual Methods Object
+typedef struct vsysfile_methods vsysfile_methods;
+struct vsysfile_methods {
+	int version;
+	int (*close)(vsysfile *);
+	int (*read)(vsysfile *, void *, int amount, int64_t offset);
+	int (*write)(vsysfile *, const void *, int amount, int64_t offset);
+	int (*truncate)(vsysfile *, int64_t size);
+	int (*sync)(vsysfile *, int flags);
+	int (*fileSize)(vsysfile *, int64_t *size);
+	int (*lock)(vsysfile *, int);
+	int (*unlock)(vsysfile *, int);
+	int (*checkReservedLock)(vsysfile *, int *resOut);
+	int (*fileControl)(vsysfile *, int op, void *args);
+	int (*sectorSize)(vsysfile *);
+	int (*deviceCharacteristics)(vsysfile *);
+	int (*shmMap)(vsysfile *, int page, int pageSize, int, void volatile **);
+	int (*shmLock)(vsysfile *, int offset, int n, int flags);
+	void (*shmBarrier)(vsysfile *);
+	int (*shmUnmap)(vsysfile *, int deleteFlag);
+	int (*fetch)(vsysfile *, int64_t offset, int amount, void **p);
+	int (*unfetch)(vsysfile *, int64_t offset, void *p);
+};
+
+// CAPI3REF: OS Interface Object
+typedef struct vsystem vsystem;
+
 typedef struct strbld_t strbld_t;
 typedef struct ext_methods ext_methods;
 struct ext_methods {
@@ -471,8 +504,12 @@ struct ext_methods {
 	int64_t (*getIntegerArg)(void *args);
 	double (*getDoubleArg)(void *args);
 	char *(*getStringArg)(void *args);
+	//
+	void (*vsys_close)(vsysfile *); //: sqlite3OsClose 
+	int (*vsys_write)(vsysfile *, const void *, int amount, int64_t offset); //: sqlite3OsWrite
+	int (*vsys_open)(vsystem *, const char *, vsysfile *, int, int *); //: sqlite3OsOpen
 };
-extern __device__ ext_methods __extsystem;
+extern __hostb_device__ ext_methods __extsystem;
 
 __END_DECLS;
 #pragma endregion	

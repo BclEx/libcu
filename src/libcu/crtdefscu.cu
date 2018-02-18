@@ -68,7 +68,7 @@ __device__ void libcuReset()
 // EXT-METHODS
 #pragma region EXT-METHODS
 
-__device__ ext_methods __extsystem = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+__hostb_device__ ext_methods __extsystem = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 #pragma endregion
 

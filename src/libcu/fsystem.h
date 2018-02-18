@@ -17,7 +17,7 @@ struct dirEnt_t {
 	char *path;		// Path/Key
 	union {
 		dirEnt_t *list;	// List of entities in the directory
-		memfile_t *file; // Memory file associated with this element
+		vsysfile *file; // Memory file associated with this element
 	} u;
 };
 

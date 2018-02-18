@@ -1326,7 +1326,7 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 		// Fetch the info entry for the field
 		const info_t *info = &_info[0]; // Pointer to the appropriate info structure
 		type = TYPE_INVALID; // Conversion paradigm
-		int idx; for (idx = 0; idx < _ARRAYSIZE(_info); idx++) {
+		int idx; for (idx = 0; idx < ARRAYSIZE_(_info); idx++) {
 			if (c == _info[idx].fmtType) {
 				info = &_info[idx];
 				type = info->type;
@@ -1474,8 +1474,8 @@ __host_device__ void strbldAppendFormatv(strbld_t *b, const char *fmt, va_list v
 			}
 			else flag_rtz = flag_altform2;
 			e2 = type == TYPE_EXP ? 0 : exp;
-			if (_MAX(e2,0)+(int64_t)precision+(int64_t)width > BUFSIZE - 15) {
-				bufpt = extra = (char *)malloc(_MAX(e2,0)+(int64_t)precision+(int64_t)width+15);
+			if (MAX_(e2,0)+(int64_t)precision+(int64_t)width > BUFSIZE - 15) {
+				bufpt = extra = (char *)malloc(MAX_(e2,0)+(int64_t)precision+(int64_t)width+15);
 				if (!bufpt) {
 					strbldSetError(b, STRACCUM_NOMEM);
 					return;

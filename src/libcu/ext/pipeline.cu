@@ -66,7 +66,7 @@ error:
 
 static int WinFindExecutable(const char *originalName, char fullPath[MAX_PATH]) {
 	static char extensions[][5] = {".exe", "", ".bat"};
-	for (int i = 0; i < _ARRAYSIZE(extensions); i++) {
+	for (int i = 0; i < ARRAYSIZE_(extensions); i++) {
 		lstrcpyn(fullPath, originalName, MAX_PATH - 5);
 		lstrcat(fullPath, extensions[i]);
 		if (!SearchPath(NULL, fullPath, NULL, MAX_PATH, fullPath, NULL) || (GetFileAttributes(fullPath) & FILE_ATTRIBUTE_DIRECTORY))

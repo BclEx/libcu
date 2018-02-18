@@ -223,7 +223,7 @@ __device__ RC pcacheSetPageSize(PCache *cache, int sizePage) //: sqlite3PcacheSe
 	assert(!cache->refSum && !cache->dirty);
 	if (cache->sizePage) {
 		pcache_t *newCache;
-		newCache = __pcachesystem.create(sizePage, cache->sizeExtra + _ROUND8(sizeof(PgHdr)), cache->purgeable);
+		newCache = __pcachesystem.create(sizePage, cache->sizeExtra + ROUND8_(sizeof(PgHdr)), cache->purgeable);
 		if (!newCache) return RC_NOMEM_BKPT;
 		__pcachesystem.cachesize(newCache, numberOfCachePages(cache));
 		if (cache->cache)
@@ -581,7 +581,7 @@ __device__ int sqlite3PcacheSetSpillsize(PCache *p, int maxPage) //: sqlite3Pcac
 __device__ void pcacheShrink(PCache *cache) { assert(cache->cache); __pcachesystem.shrink(cache->cache); } //: sqlite3PcacheShrink
 
 /* Return the size of the header added by this middleware layer in the page-cache hierarchy. */
-__device__ int pcacheHeaderSize() { return _ROUND8(sizeof(PgHdr)); } //: sqlite3HeaderSizePcache
+__device__ int pcacheHeaderSize() { return ROUND8_(sizeof(PgHdr)); } //: sqlite3HeaderSizePcache
 
 /* Return the number of dirty pages currently in the cache, as a percentage of the configured cache size. */
 __device__ int pcachePercentDirty(PCache *cache) //: sqlite3PCachePercentDirty

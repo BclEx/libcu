@@ -30,10 +30,10 @@ void sentinelClientSend(sentinelMessage *msg, int msgLength)
 	sentinelCommand *cmd = (sentinelCommand *)&map->Data[id%sizeof(map->Data)];
 	volatile long *control = (volatile long *)&cmd->Control;
 	//while (InterlockedCompareExchange((long *)control, 1, 0) != 0) { }
-	//cmd->Data = (char *)cmd + _ROUND8(sizeof(sentinelCommand));
+	//cmd->Data = (char *)cmd + ROUND8_(sizeof(sentinelCommand));
 	cmd->Magic = SENTINEL_MAGIC;
 	cmd->Length = msgLength;
-	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + _ROUND8(msgLength) + msg->Size, _sentinelHostMapOffset)) {
+	if (msg->Prepare && !msg->Prepare(msg, cmd->Data, cmd->Data + ROUND8_(msgLength) + msg->Size, _sentinelHostMapOffset)) {
 		printf("msg too long");
 		exit(0);
 	}

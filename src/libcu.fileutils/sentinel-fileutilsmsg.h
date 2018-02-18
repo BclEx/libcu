@@ -55,7 +55,7 @@ struct fileutils_dcat
 	static __forceinline__ char *Prepare(fileutils_dcat *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -74,7 +74,7 @@ struct fileutils_dchgrp
 	static __forceinline__ char *Prepare(fileutils_dchgrp *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -93,7 +93,7 @@ struct fileutils_dchmod
 	static __forceinline__ char *Prepare(fileutils_dchmod *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -112,7 +112,7 @@ struct fileutils_dchown
 	static __forceinline__ char *Prepare(fileutils_dchown *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -132,7 +132,7 @@ struct fileutils_dcmp
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
@@ -155,7 +155,7 @@ struct fileutils_dcp
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
@@ -178,7 +178,7 @@ struct fileutils_dgrep
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
@@ -200,7 +200,7 @@ struct fileutils_dls
 	static __forceinline__ char *Prepare(fileutils_dls *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -219,7 +219,7 @@ struct fileutils_dmkdir
 	static __forceinline__ char *Prepare(fileutils_dmkdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -238,7 +238,7 @@ struct fileutils_dmore
 	static __forceinline__ char *Prepare(fileutils_dmore *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -258,7 +258,7 @@ struct fileutils_dmv
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
 		int str2Length = (t->Str2 ? (int)strlen(t->Str2) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *str2 = (char *)(data += strLength);
 		char *end = (char *)(data += str2Length);
 		if (end > dataEnd) return nullptr;
@@ -280,7 +280,7 @@ struct fileutils_drm
 	static __forceinline__ char *Prepare(fileutils_drm *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -299,7 +299,7 @@ struct fileutils_drmdir
 	static __forceinline__ char *Prepare(fileutils_drmdir *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);
@@ -317,7 +317,7 @@ struct fileutils_dpwd
 {
 	static __forceinline__ __device__ char *Prepare(fileutils_dpwd *t, char *data, char *dataEnd, intptr_t offset)
 	{
-		t->Ptr = (char *)(data += _ROUND8(sizeof(*t)));
+		t->Ptr = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += 1024);
 		if (end > dataEnd) return nullptr;
 		return end;
@@ -334,7 +334,7 @@ struct fileutils_dcd
 	static __forceinline__ char *Prepare(fileutils_dcd *t, char *data, char *dataEnd, intptr_t offset)
 	{
 		int strLength = (t->Str ? (int)strlen(t->Str) + 1 : 0);
-		char *str = (char *)(data += _ROUND8(sizeof(*t)));
+		char *str = (char *)(data += ROUND8_(sizeof(*t)));
 		char *end = (char *)(data += strLength);
 		if (end > dataEnd) return nullptr;
 		memcpy(str, t->Str, strLength);

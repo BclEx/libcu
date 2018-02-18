@@ -170,8 +170,8 @@ __host_device__ void notifyConnectionUnlocked(tagbase_t *tag) //: sqlite3Connect
 
 			allocBenignBegin();
 			assert(args == dyns || (!dyns && args == statics));
-			assert(argCount <= (int)_ARRAYSIZE(statics) || args == dyns);
-			if ((!dyns && argCount == (int)_ARRAYSIZE(statics)) || (dyns && argCount == (int)(allocSize(dyns)/sizeof(void *)))) {
+			assert(argCount <= (int)ARRAYSIZE_(statics) || args == dyns);
+			if ((!dyns && argCount == (int)ARRAYSIZE_(statics)) || (dyns && argCount == (int)(allocSize(dyns)/sizeof(void *)))) {
 				// The aArg[] array needs to grow.
 				void **newArgs = (void **)alloc(argCount * sizeof(void *) * 2);
 				if (newArgs) {

@@ -171,7 +171,7 @@ __host_device__ void *alloc(uint64_t size) //: sqlite3Malloc
 		mutex_leave(mem0.mutex);
 	}
 	else p = __allocsystem.alloc((int)size);
-	assert(_HASALIGNMENT8(p)); // IMP: R-04675-44850
+	assert(HASALIGNMENT8_(p)); // IMP: R-04675-44850
 	return p;
 }
 
@@ -193,7 +193,7 @@ __host_device__ void *alloc64(uint64_t n) //: sqlite3_malloc64
 
 /* TRUE if p is a lookaside memory allocation from tag */
 #ifndef LIBCU_OMITLOOKASIDE
-static __host_device__ bool isLookaside(tagbase_t *tag, void *p) { return _WITHIN(p, tag->lookaside.start, tag->lookaside.end); }
+static __host_device__ bool isLookaside(tagbase_t *tag, void *p) { return WITHIN_(p, tag->lookaside.start, tag->lookaside.end); }
 #else
 #define isLookaside(tag, p) false
 #endif
@@ -321,7 +321,7 @@ __host_device__ void *allocRealloc(void *prior, uint64_t newSize) //: sqlite3Rea
 		mutex_leave(mem0.mutex);
 	}
 	else p = __allocsystem.realloc(prior, newSize2);
-	assert(_HASALIGNMENT8(p)); // IMP: R-11148-40995
+	assert(HASALIGNMENT8_(p)); // IMP: R-11148-40995
 	return p;
 }
 

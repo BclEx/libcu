@@ -642,7 +642,7 @@ __device__ void srand_(unsigned int seed)
 __device__ void *malloc_(size_t size)
 {
 assert(size > 0);
-size = _ROUND8(size);
+size = ROUND8_(size);
 MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
 if (p)
 p[0] = size;
@@ -665,7 +665,7 @@ free(p-1);
 __device__ void *realloc_(void *ptr, size_t size)
 {
 assert(size > 0);
-size = _ROUND8(size);
+size = ROUND8_(size);
 MALLOCSIZETYPE *p = (MALLOCSIZETYPE *)malloc(sizeof(MALLOCSIZETYPE) + size);
 if (p)
 p[0] = size;

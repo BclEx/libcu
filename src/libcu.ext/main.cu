@@ -94,7 +94,7 @@ __host_device__ RC runtimeInitialize()
 
 	/* If the following assert() fails on some obscure processor/compiler combination, the work-around is to set the correct pointer
 	** size at compile-time using -DSQLITE_PTRSIZE=n compile-time option */
-	assert(_PTRSIZE == sizeof(char *));
+	assert(PTRSIZE_ == sizeof(char *));
 
 	/* If Libcu is already completely initialized, then this call to sqlite3_initialize() should be a no-op.  But the initialization
 	** must be complete.  So isInit must not be set until the very end of this routine.
@@ -480,7 +480,7 @@ static __host_device__ RC setupLookaside(tagbase_t *tag, void *buf, int size, in
 	if (tag->lookaside.malloced)
 		mfree(tag->lookaside.start);
 	// The size of a lookaside slot after ROUNDDOWN8 needs to be larger than a pointer to be useful.
-	size = _ROUNDDOWN8(size); // IMP: R-33038-09382
+	size = ROUNDDOWN8_(size); // IMP: R-33038-09382
 	if (size <= (int)sizeof(LookasideSlot *)) size = 0;
 	if (count < 0) count = 0;
 	void *start;
@@ -835,7 +835,7 @@ __host_device__ const char *errStr(int rc) //: sqlite3ErrStr
 	case LIBCU_ABORT_ROLLBACK: err = "abort due to ROLLBACK"; break;
 	default:
 		rc &= 0xff;
-		if (_ALWAYS(rc >= 0) && rc < _ARRAYSIZE(msgs) && msgs[rc] != 0) err = msgs[rc];
+		if (_ALWAYS(rc >= 0) && rc < ARRAYSIZE_(msgs) && msgs[rc] != 0) err = msgs[rc];
 		break;
 	}
 	return err;
@@ -851,7 +851,7 @@ static __host_device__ int libcuDefaultBusyCallback(void *p, int count)
 #if __OS_WIN || HAVE_USLEEP
 	static const uint8_t delays[] = { 1, 2, 5, 10, 15, 20, 25, 25,  25,  50,  50, 100 };
 	static const uint8_t totals[] = { 0, 1, 3,  8, 18, 33, 53, 78, 103, 128, 178, 228 };
-#define NDELAY _ARRAYSIZE(delays)
+#define NDELAY ARRAYSIZE_(delays)
 	int delay, prior;
 	assert(count >= 0);
 	if (count < NDELAY) {

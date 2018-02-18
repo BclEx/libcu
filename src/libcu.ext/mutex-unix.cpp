@@ -144,7 +144,7 @@ static mutex *unixMutexAlloc(MUTEX id)
 		break; }
 	default: {
 #ifdef ENABLE_API_ARMOR
-		if (id-2 < 0 || id-2 >= _ARRAYSIZE(unixMutexStatics)) {
+		if (id-2 < 0 || id-2 >= ARRAYSIZE_(unixMutexStatics)) {
 			(void)RC_MISUSE_BKPT;
 			return 0;
 		}

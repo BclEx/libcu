@@ -30,32 +30,38 @@ struct filePoint_t {
 
 /* This structure is a subclass of sqlite3_file. Each open memory-journal is an instance of this class. */
 typedef struct memfile_t {
-	//bool opened;
-	const void *method;			// Parent class. MUST BE FIRST
+	const vsysfile_methods *method;			// Parent class. MUST BE FIRST
 	int chunkSize;              // In-memory chunk-size
 	int spill;                  // Bytes of data before flushing
 	int size;                   // Bytes of data currently in memory
 	fileChunk_t *first;			// Head of in-memory chunk-list
 	filePoint_t endpoint;		// Pointer to the end of the file
 	filePoint_t readpoint;		// Pointer to the end of the last xRead()
+	//
+	int flags;					// xOpen flags
+	vsystem *vsys;				// The "real" underlying VFS
+	const char *name;			// Name of the journal file
 } memfile_t;
 
-__constant__ const int __sizeofMemfile_t = sizeof(memfile_t);
+//__constant__ const int __sizeofMemfile_t = sizeof(memfile_t);
 
-__host_device__ void memfileOpen(memfile_t *f)
-{
-	memset(f, 0, sizeof(memfile_t));
-	f->opened = true;
-}
+//__host_device__ void memfileOpen(memfile_t *f)
+//{
+//	memset(f, 0, sizeof(memfile_t));
+//	f->opened = true;
+//}
 
+#define RC_OK 0 
 #define RC_IOERR 10 
 #define RC_IOERR_SHORT_READ (RC_IOERR | (2<<8))
 #define RC_IOERR_NOMEM_BKPT 10
-#define MIN(a, b) ((a) < (b) ? a : b)
+#define MIN(a, b) ((a)<(b)?(a):(b))
+#define MAX(a, b) ((a)>(b)?(a):(b))
 
 /* Read data from the in-memory journal file.  This is the implementation of the sqlite3_vfs.xRead method. */
-__host_device__ int memfileRead(memfile_t *f, void *buf, int amount, int64_t offset)
+__host_device__ int memfileRead(vsysfile *p, void *buf, int amount, int64_t offset)
 {
+	memfile_t *f = (memfile_t *)p;
 #if defined(ENABLE_ATOMIC_WRITE) || defined(ENABLE_BATCH_ATOMIC_WRITE)
 	if (amount + offset > p->endpoint.offset)
 		return RC_IOERR_SHORT_READ;
@@ -63,7 +69,7 @@ __host_device__ int memfileRead(memfile_t *f, void *buf, int amount, int64_t off
 
 	// never try to read past the end of an in-memory file
 	fileChunk_t *chunk;
-	assert(offset + amount <= f->endpoint.offset);
+	assert(amount + offset <= f->endpoint.offset);
 	assert(!f->readpoint.offset || f->readpoint.chunk);
 	if (f->readpoint.offset != offset || !offset) { int64_t off = 0; for (chunk = f->first; _ALWAYS(chunk) && (off + f->chunkSize) <= offset; chunk = chunk->next) off += f->chunkSize; }
 	else { chunk = f->readpoint.chunk; assert(chunk); }
@@ -74,14 +80,14 @@ __host_device__ int memfileRead(memfile_t *f, void *buf, int amount, int64_t off
 	do {
 		int space = f->chunkSize - chunkOffset;
 		int copy = MIN(read, (f->chunkSize - chunkOffset));
-		memcpy(out, &chunk->chunk[chunkOffset], copy);
+		memcpy(out, chunk->chunk + chunkOffset, copy);
 		out += copy;
 		read -= space;
 		chunkOffset = 0;
 	} while (read >= 0 && (chunk = chunk->next) && read > 0);
 	f->readpoint.offset = chunk ? offset + amount : 0;
 	f->readpoint.chunk = chunk;
-	return 0;
+	return RC_OK;
 }
 
 /* Free the list of FileChunk structures headed at MemJournal.pFirst. */
@@ -95,41 +101,41 @@ static __host_device__ void memfileFreeChunks(memfile_t *f)
 }
 
 /* Flush the contents of memory to a real file on disk. */
-__host_device__ int memfileCreateFile(memfile_t *f)
+static __host_device__ int memfileCreateFile(memfile_t *f)
 {
-	//memfile_t copy = *p;
-	//memset(p, 0, sizeof(memfile_t));
-	//int rc = sqlite3OsOpen(copy.vfs, copy.journal, f, copy.flags, 0);
-	//if (!rc) {
-	//	int chunkSize = copy.chunkSize;
-	//	int64_t off = 0;
-	//	for (fileChunk_t *p = copy.first; p; p = p->next) {
-	//		if (off + chunkSize > copy.endpoint.offset)
-	//			chunkSize = copy.endpoint.offset - off;
-	//		rc = sqlite3OsWrite(pReal, (uint8_t *)p->chunk, chunkSize, off);
-	//		if (rc) break;
-	//		off += chunkSize;
-	//	}
-	//	// No error has occurred. Free the in-memory buffers.
-	//	if (!rc) memfileFreeChunks(&copy);
-	//}
-	//if (rc) {
-	//	// If an error occurred while creating or writing to the file, restore the original before returning. This way, SQLite uses the in-memory
-	//	// journal data to roll back changes made to the internal page-cache before this function was called.
-	//	sqlite3OsClose(pReal);
-	//	*p = copy;
-	//}
-	//return rc;
-	return 0;
+	memfile_t copy = *f;
+	memset(f, 0, sizeof(memfile_t));
+	int rc = __extsystem.vsys_open(copy.vsys, copy.name, (vsysfile *)f, copy.flags, 0);
+	if (!rc) {
+		int chunkSize = copy.chunkSize;
+		int64_t off = 0;
+		for (fileChunk_t *p = copy.first; p; p = p->next) {
+			if (off + chunkSize > copy.endpoint.offset)
+				chunkSize = copy.endpoint.offset - off;
+			rc = __extsystem.vsys_write((vsysfile *)f, (uint8_t *)p->chunk, chunkSize, off);
+			if (rc) break;
+			off += chunkSize;
+		}
+		// No error has occurred. Free the in-memory buffers.
+		if (!rc) memfileFreeChunks(&copy);
+	}
+	if (rc) {
+		// If an error occurred while creating or writing to the file, restore the original before returning. This way, SQLite uses the in-memory
+		// journal data to roll back changes made to the internal page-cache before this function was called.
+		__extsystem.vsys_close((vsysfile *)f);
+		*f = copy;
+	}
+	return rc;
 }
 
 /* Write data to the file. */
-__host_device__ int memfileWrite(memfile_t *f, const void *buf, int amount, int64_t offset)
+__host_device__ int memfileWrite(vsysfile *p, const void *buf, int amount, int64_t offset)
 {
+	memfile_t *f = (memfile_t *)p;
 	// If the file should be created now, create it and write the new data into the file on disk.
 	if (f->spill > 0 && amount + offset > f->spill) {
 		int rc = memfileCreateFile(f);
-		if (!rc) rc = sqlite3OsWrite(f, buf, amount, offset);
+		if (!rc) rc = __extsystem.vsys_write(p, buf, amount, offset);
 		return rc;
 	}
 	// If the contents of this write should be stored in memory
@@ -173,15 +179,16 @@ __host_device__ int memfileWrite(memfile_t *f, const void *buf, int amount, int6
 			f->size = amount + offset;
 		}
 	}
-	return 0;
+	return RC_OK;
 }
 
 /* Truncate the file.
 **
 ** If the journal file is already on disk, truncate it there. Or, if it is still in main memory but is being truncated to zero bytes in size, ignore 
 */
-__host_device__ int memfileTruncate(memfile_t *f, int64_t size)
+__host_device__ int memfileTruncate(vsysfile *p, int64_t size)
 {
+	memfile_t *f = (memfile_t *)p;
 	if (_ALWAYS(!size)) {
 		memfileFreeChunks(f);
 		f->size = 0;
@@ -190,34 +197,64 @@ __host_device__ int memfileTruncate(memfile_t *f, int64_t size)
 		f->readpoint.chunk = nullptr;
 		f->readpoint.offset = 0;
 	}
-	return 0;
+	return RC_OK;
 }
 
 /* Close the file. */
-__host_device__ int memfileClose(memfile_t *f)
+__host_device__ int memfileClose(vsysfile *p)
 {
+	memfile_t *f = (memfile_t *)p;
 	memfileFreeChunks(f);
-	return 0;
+	return RC_OK;
 }
 
 /* Sync the file.
 **
 ** If the real file has been created, call its xSync method. Otherwise,  syncing an in-memory journal is a no-op. 
 */
-__host_device__ int memfileSync(memfile_t *f, int flags)
+static __host_device__ int memfileSync(vsysfile *p, int flags)
 {
-	UNUSED_SYMBOL2(f, flags);
-	return 0;
+	UNUSED_SYMBOL2(p, flags);
+	return RC_OK;
 }
 
 /* Query the size of the file in bytes. */
-__device__ int64_t memfileFileSize(memfile_t *f, int64_t *size)
+__host_device__ int memfileFileSize(vsysfile *p, int64_t *size)
 {
+	memfile_t *f = (memfile_t *)p;
 	*size = (int64_t)f->endpoint.offset;
-	return 0;
+	return RC_OK;
 }
 
+/* Table of methods for MemJournal sqlite3_file object. */
+static __hostb_device__ const struct vsysfile_methods _memFileMethods = {
+	1,					// iVersion
+	memfileClose,		// xClose
+	memfileRead,		// xRead
+	memfileWrite,		// xWrite
+	memfileTruncate,	// xTruncate
+	memfileSync,		// xSync
+	memfileFileSize,	// xFileSize
+	nullptr,			// xLock
+	nullptr,			// xUnlock
+	nullptr,			// xCheckReservedLock
+	nullptr,			// xFileControl
+	nullptr,			// xSectorSize
+	nullptr,			// xDeviceCharacteristics
+	nullptr,			// xShmMap
+	nullptr,			// xShmLock
+	nullptr,			// xShmBarrier
+	nullptr,			// xShmUnmap
+	nullptr,			// xFetch
+	nullptr				// xUnfetch
+};
 
+//(int (*)(vsysfile*))memfileClose,							// xClose
+//(int (*)(vsysfile*,void*,int,int64_t))memfileRead,			// xRead
+//(int (*)(vsysfile*,const void*,int,int64_t))memfileWrite,	// xWrite
+//(int (*)(vsysfile*,int64_t))memfileTruncate,				// xTruncate
+//(int (*)(vsysfile*,int))memfileSync,						// xSync
+//(int (*)(vsysfile*,int64_t*))memfileFileSize,				// xFileSize
 
 
 /* Open a journal file.
@@ -227,67 +264,66 @@ __device__ int64_t memfileFileSize(memfile_t *f, int64_t *size)
 ** positive value, then the journal file is initially created in-memory but may be flushed to disk later on. In this case the journal file is
 ** flushed to disk either when it grows larger than nSpill bytes in size, or when sqlite3JournalCreate() is called.
 */
-__host_device__ int sqlite3JournalOpen(vsystem *vsys, const char *name, vsys_file *f, int flags, int spill) //: sqlite3JournalOpen
+__host_device__ int memfileOpen(vsystem *vsys, const char *name, vsysfile *p, int flags, int spill) //: sqlite3JournalOpen
 {
+	memfile_t *f = (memfile_t *)p;
 	// Zero the file-handle object. If nSpill was passed zero, initialize it using the sqlite3OsOpen() function of the underlying VFS. In this
 	// case none of the code in this module is executed as a result of calls made on the journal file-handle.
 	memset(f, 0, sizeof(memfile_t));
 	if (!spill)
-		return sqlite3OsOpen(vsys, name, f, flags, 0);
+		return __extsystem.vsys_open(vsys, name, p, flags, 0);
 
-	if (spill > 0) p->chunkSize = spill;
-	else { p->chunkSize = 8 + MEMJOURNAL_DFLT_FILECHUNKSIZE - sizeof(fileChunk_t); assert(MEMJOURNAL_DFLT_FILECHUNKSIZE == fileChunkSize(f->chunkSize)); }
+	if (spill > 0) f->chunkSize = spill;
+	else { f->chunkSize = 8 + MEMFILE_DFLT_FILECHUNKSIZE - sizeof(fileChunk_t); assert(MEMFILE_DFLT_FILECHUNKSIZE == fileChunkSize(f->chunkSize)); }
 
-	p->method = (const sqlite3_io_methods*)&MemJournalMethods;
-	p->spill = nSpill;
-	p->flags = flags;
-	p->name = name;
-	p->vsys = vsys;
+	f->method = (const vsysfile_methods *)&_memFileMethods;
+	f->spill = spill;
+	f->flags = flags;
+	f->name = name;
+	f->vsys = vsys;
 	return RC_OK;
 }
 
 /* Open an in-memory journal file. */
-void sqlite3MemJournalOpen(sqlite3_file *pJfd){
-	sqlite3JournalOpen(0, 0, pJfd, 0, -1);
+__host_device__ void memfileMemOpen(vsysfile *p) //: sqlite3MemJournalOpen
+{
+	memfileOpen(nullptr, nullptr, p, 0, -1);
 }
 
-#if defined(SQLITE_ENABLE_ATOMIC_WRITE) || defined(SQLITE_ENABLE_BATCH_ATOMIC_WRITE)
-/*
-** If the argument p points to a MemJournal structure that is not an 
-** in-memory-only journal file (i.e. is one that was opened with a +ve
-** nSpill parameter or as SQLITE_OPEN_MAIN_JOURNAL), and the underlying 
-** file has not yet been created, create it now.
+#if 1 || defined(ENABLE_ATOMIC_WRITE) || defined(ENABLE_BATCH_ATOMIC_WRITE)
+/* If the argument p points to a MemJournal structure that is not an in-memory-only journal file (i.e. is one that was opened with a +ve
+** nSpill parameter or as SQLITE_OPEN_MAIN_JOURNAL), and the underlying  file has not yet been created, create it now.
 */
-int sqlite3JournalCreate(sqlite3_file *pJfd){
-	int rc = SQLITE_OK;
-	MemJournal *p = (MemJournal*)pJfd;
-	if( p->pMethod==&MemJournalMethods && (
-#ifdef SQLITE_ENABLE_ATOMIC_WRITE
-		p->nSpill>0
+__host_device__ int memfileCreate(vsysfile *p) //: sqlite3JournalCreate
+{
+	memfile_t *f = (memfile_t *)p;
+	int rc = RC_OK;
+	if (f->method == &_memFileMethods && (
+#ifdef ENABLE_ATOMIC_WRITE
+		f->spill > 0
 #else
-		/* While this appears to not be possible without ATOMIC_WRITE, the
-		** paths are complex, so it seems prudent to leave the test in as
-		** a NEVER(), in case our analysis is subtly flawed. */
-		NEVER(p->nSpill>0)
+		_NEVER(f->spill > 0) // While this appears to not be possible without ATOMIC_WRITE, the paths are complex, so it seems prudent to leave the test in as a NEVER(), in case our analysis is subtly flawed.
 #endif
-#ifdef SQLITE_ENABLE_BATCH_ATOMIC_WRITE
-		|| (p->flags & SQLITE_OPEN_MAIN_JOURNAL)
+#ifdef ENABLE_BATCH_ATOMIC_WRITE
+		|| (f->flags & SQLITE_OPEN_MAIN_JOURNAL)
 #endif
-		)){
-			rc = memjrnlCreateFile(p);
-	}
+		)) rc = memfileCreateFile(f);
 	return rc;
 }
 #endif
 
 /* The file-handle passed as the only argument is open on a journal file. Return true if this "journal file" is currently stored in heap memory, or false otherwise. */
-__host_device__ int sqlite3JournalIsInMemory(sqlite3_file *p)
+__host_device__ int memfileIsInMemory(vsysfile *p) //: sqlite3JournalIsInMemory
 {
-	return p->pMethods == &MemJournalMethods;
+	return p->methods == &_memFileMethods;
 }
 
 /* Return the number of bytes required to store a JournalFile that uses vfs pVfs to create the underlying on-disk files. */
-__host_device__ int sqlite3JournalSize(sqlite3_vfs *pVfs) //: sqlite3JournalSize
+struct vsystem_partial {
+	int version;			// Structure version number (currently 3)
+	int sizeOsFile;			// Size of subclassed vsysfile
+};
+__host_device__ int memfileSize(vsystem *p) //: sqlite3JournalSize
 {
-	return MAX(pVfs->szOsFile, (int)sizeof(MemJournal));
+	return MAX(((struct vsystem_partial *)p)->sizeOsFile, (int)sizeof(memfile_t));
 }
