@@ -34,7 +34,7 @@
 ** sqlite_rename_table('CREATE INDEX i ON abc(a)', 'def')
 **     -> 'CREATE INDEX i ON def(a, b, c)'
 */
-static void renameTableFunc(
+static SQLITE_METHOD void renameTableFunc(
   sqlite3_context *context,
   int NotUsed,
   sqlite3_value **argv
@@ -99,7 +99,7 @@ static void renameTableFunc(
 **       -> 'CREATE TABLE t1(a REFERENCES t3)'
 */
 #ifndef SQLITE_OMIT_FOREIGN_KEY
-static void renameParentFunc(
+static SQLITE_METHOD void renameParentFunc(
   sqlite3_context *context,
   int NotUsed,
   sqlite3_value **argv
@@ -156,7 +156,7 @@ static void renameParentFunc(
 ** returned. This is analagous to renameTableFunc() above, except for CREATE
 ** TRIGGER, not CREATE INDEX and CREATE TABLE.
 */
-static void renameTriggerFunc(
+static SQLITE_METHOD void renameTriggerFunc(
   sqlite3_context *context,
   int NotUsed,
   sqlite3_value **argv
@@ -228,7 +228,7 @@ static void renameTriggerFunc(
 /*
 ** Register built-in functions used to help implement ALTER TABLE
 */
-void sqlite3AlterFunctions(void){
+SQLITE_METHOD void sqlite3AlterFunctions(void){
   static FuncDef aAlterTableFuncs[] = {
     FUNCTION(sqlite_rename_table,   2, 0, 0, renameTableFunc),
 #ifndef SQLITE_OMIT_TRIGGER
@@ -257,7 +257,7 @@ void sqlite3AlterFunctions(void){
 ** In this case zWhere is passed to sqlite3DbFree() before returning.
 ** 
 */
-static char *whereOrName(sqlite3 *db, char *zWhere, char *zConstant){
+static SQLITE_METHOD char *whereOrName(sqlite3 *db, char *zWhere, char *zConstant){
   char *zNew;
   if( !zWhere ){
     zNew = sqlite3MPrintf(db, "name=%Q", zConstant);
@@ -275,7 +275,7 @@ static char *whereOrName(sqlite3 *db, char *zWhere, char *zConstant){
 ** constraints for which pTab is the parent table) from the sqlite_master
 ** table.
 */
-static char *whereForeignKeys(Parse *pParse, Table *pTab){
+static SQLITE_METHOD char *whereForeignKeys(Parse *pParse, Table *pTab){
   FKey *p;
   char *zWhere = 0;
   for(p=sqlite3FkReferences(pTab); p; p=p->pNextTo){
@@ -291,7 +291,7 @@ static char *whereForeignKeys(Parse *pParse, Table *pTab){
 ** table pTab has no temporary triggers, or is itself stored in the 
 ** temporary database, NULL is returned.
 */
-static char *whereTempTriggers(Parse *pParse, Table *pTab){
+static SQLITE_METHOD char *whereTempTriggers(Parse *pParse, Table *pTab){
   Trigger *pTrig;
   char *zWhere = 0;
   const Schema *pTempSchema = pParse->db->aDb[1].pSchema; /* Temp db schema */
@@ -325,7 +325,7 @@ static char *whereTempTriggers(Parse *pParse, Table *pTab){
 ** pTab->zName if this function is being called to code part of an 
 ** "ALTER TABLE RENAME TO" statement.
 */
-static void reloadTableSchema(Parse *pParse, Table *pTab, const char *zName){
+static SQLITE_METHOD void reloadTableSchema(Parse *pParse, Table *pTab, const char *zName){
   Vdbe *v;
   char *zWhere;
   int iDb;                   /* Index of database containing pTab */
@@ -374,7 +374,7 @@ static void reloadTableSchema(Parse *pParse, Table *pTab, const char *zName){
 **
 ** Or, if zName is not a system table, zero is returned.
 */
-static int isSystemTable(Parse *pParse, const char *zName){
+static SQLITE_METHOD int isSystemTable(Parse *pParse, const char *zName){
   if( sqlite3Strlen30(zName)>6 && 0==sqlite3StrNICmp(zName, "sqlite_", 7) ){
     sqlite3ErrorMsg(pParse, "table %s may not be altered", zName);
     return 1;
@@ -386,7 +386,7 @@ static int isSystemTable(Parse *pParse, const char *zName){
 ** Generate code to implement the "ALTER TABLE xxx RENAME TO yyy" 
 ** command. 
 */
-void sqlite3AlterRenameTable(
+SQLITE_METHOD void sqlite3AlterRenameTable(
   Parse *pParse,            /* Parser context. */
   SrcList *pSrc,            /* The table to rename. */
   Token *pName              /* The new table name. */
@@ -590,7 +590,7 @@ exit_rename_table:
 ** The Table structure pParse->pNewTable was extended to include
 ** the new column during parsing.
 */
-void sqlite3AlterFinishAddColumn(Parse *pParse, Token *pColDef){
+SQLITE_METHOD void sqlite3AlterFinishAddColumn(Parse *pParse, Token *pColDef){
   Table *pNew;              /* Copy of pParse->pNewTable */
   Table *pTab;              /* Table being altered */
   int iDb;                  /* Database number */
@@ -728,7 +728,7 @@ void sqlite3AlterFinishAddColumn(Parse *pParse, Token *pColDef){
 ** Routine sqlite3AlterFinishAddColumn() will be called to complete
 ** coding the "ALTER TABLE ... ADD" statement.
 */
-void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
+SQLITE_METHOD void sqlite3AlterBeginAddColumn(Parse *pParse, SrcList *pSrc){
   Table *pNew;
   Table *pTab;
   Vdbe *v;

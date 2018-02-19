@@ -71,10 +71,10 @@ struct HashElem {
 /*
 ** Access routines.  To delete, insert a NULL pointer.
 */
-void sqlite3HashInit(Hash*);
-void *sqlite3HashInsert(Hash*, const char *pKey, void *pData);
-void *sqlite3HashFind(const Hash*, const char *pKey);
-void sqlite3HashClear(Hash*);
+SQLITE_METHOD void sqlite3HashInit(Hash*);
+SQLITE_METHOD void *sqlite3HashInsert(Hash*, const char *pKey, void *pData);
+SQLITE_METHOD void *sqlite3HashFind(const Hash*, const char *pKey);
+SQLITE_METHOD void sqlite3HashClear(Hash*);
 
 /*
 ** Macros for looping over all elements of a hash table.  The idiom is

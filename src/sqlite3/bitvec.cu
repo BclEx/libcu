@@ -112,7 +112,7 @@ struct Bitvec {
 ** inclusive.  Return a pointer to the new object.  Return NULL if 
 ** malloc fails.
 */
-Bitvec *sqlite3BitvecCreate(u32 iSize){
+SQLITE_METHOD Bitvec *sqlite3BitvecCreate(u32 iSize){
   Bitvec *p;
   assert( sizeof(*p)==BITVEC_SZ );
   p = (Bitvec *)sqlite3MallocZero( sizeof(*p) );
@@ -127,7 +127,7 @@ Bitvec *sqlite3BitvecCreate(u32 iSize){
 ** If p is NULL (if the bitmap has not been created) or if
 ** i is out of range, then return false.
 */
-int sqlite3BitvecTestNotNull(Bitvec *p, u32 i){
+SQLITE_METHOD int sqlite3BitvecTestNotNull(Bitvec *p, u32 i){
   assert( p!=0 );
   i--;
   if( i>=p->iSize ) return 0;
@@ -150,7 +150,7 @@ int sqlite3BitvecTestNotNull(Bitvec *p, u32 i){
     return 0;
   }
 }
-int sqlite3BitvecTest(Bitvec *p, u32 i){
+SQLITE_METHOD int sqlite3BitvecTest(Bitvec *p, u32 i){
   return p!=0 && sqlite3BitvecTestNotNull(p,i);
 }
 
@@ -166,7 +166,7 @@ int sqlite3BitvecTest(Bitvec *p, u32 i){
 ** and that the value for "i" is within range of the Bitvec object.
 ** Otherwise the behavior is undefined.
 */
-int sqlite3BitvecSet(Bitvec *p, u32 i){
+SQLITE_METHOD int sqlite3BitvecSet(Bitvec *p, u32 i){
   u32 h;
   if( p==0 ) return SQLITE_OK;
   assert( i>0 );
@@ -237,7 +237,7 @@ bitvec_set_end:
 ** pBuf must be a pointer to at least BITVEC_SZ bytes of temporary storage
 ** that BitvecClear can use to rebuilt its hash table.
 */
-void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
+SQLITE_METHOD void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
   if( p==0 ) return;
   assert( i>0 );
   i--;
@@ -274,7 +274,7 @@ void sqlite3BitvecClear(Bitvec *p, u32 i, void *pBuf){
 /*
 ** Destroy a bitmap object.  Reclaim all memory used.
 */
-void sqlite3BitvecDestroy(Bitvec *p){
+SQLITE_METHOD void sqlite3BitvecDestroy(Bitvec *p){
   if( p==0 ) return;
   if( p->iDivisor ){
     unsigned int i;
@@ -289,7 +289,7 @@ void sqlite3BitvecDestroy(Bitvec *p){
 ** Return the value of the iSize parameter specified when Bitvec *p
 ** was created.
 */
-u32 sqlite3BitvecSize(Bitvec *p){
+SQLITE_METHOD u32 sqlite3BitvecSize(Bitvec *p){
   return p->iSize;
 }
 
@@ -334,7 +334,7 @@ u32 sqlite3BitvecSize(Bitvec *p){
 **
 ** If a memory allocation error occurs, return -1.
 */
-int sqlite3BitvecBuiltinTest(int sz, int *aOp){
+SQLITE_METHOD int sqlite3BitvecBuiltinTest(int sz, int *aOp){
   Bitvec *pBitvec = 0;
   unsigned char *pV = 0;
   int rc = -1;

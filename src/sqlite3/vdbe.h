@@ -169,79 +169,79 @@ typedef struct VdbeOpList VdbeOpList;
 ** Prototypes for the VDBE interface.  See comments on the implementation
 ** for a description of what each of these routines does.
 */
-Vdbe *sqlite3VdbeCreate(Parse*);
-int sqlite3VdbeAddOp0(Vdbe*,int);
-int sqlite3VdbeAddOp1(Vdbe*,int,int);
-int sqlite3VdbeAddOp2(Vdbe*,int,int,int);
-int sqlite3VdbeGoto(Vdbe*,int);
-int sqlite3VdbeLoadString(Vdbe*,int,const char*);
-void sqlite3VdbeMultiLoad(Vdbe*,int,const char*,...);
-int sqlite3VdbeAddOp3(Vdbe*,int,int,int,int);
-int sqlite3VdbeAddOp4(Vdbe*,int,int,int,int,const char *zP4,int);
-int sqlite3VdbeAddOp4Dup8(Vdbe*,int,int,int,int,const u8*,int);
-int sqlite3VdbeAddOp4Int(Vdbe*,int,int,int,int,int);
-void sqlite3VdbeEndCoroutine(Vdbe*,int);
+SQLITE_METHOD Vdbe *sqlite3VdbeCreate(Parse*);
+SQLITE_METHOD int sqlite3VdbeAddOp0(Vdbe*,int);
+SQLITE_METHOD int sqlite3VdbeAddOp1(Vdbe*,int,int);
+SQLITE_METHOD int sqlite3VdbeAddOp2(Vdbe*,int,int,int);
+SQLITE_METHOD int sqlite3VdbeGoto(Vdbe*,int);
+SQLITE_METHOD int sqlite3VdbeLoadString(Vdbe*,int,const char*);
+SQLITE_METHOD void sqlite3VdbeMultiLoad(Vdbe*,int,const char*,...);
+SQLITE_METHOD int sqlite3VdbeAddOp3(Vdbe*,int,int,int,int);
+SQLITE_METHOD int sqlite3VdbeAddOp4(Vdbe*,int,int,int,int,const char *zP4,int);
+SQLITE_METHOD int sqlite3VdbeAddOp4Dup8(Vdbe*,int,int,int,int,const u8*,int);
+SQLITE_METHOD int sqlite3VdbeAddOp4Int(Vdbe*,int,int,int,int,int);
+SQLITE_METHOD void sqlite3VdbeEndCoroutine(Vdbe*,int);
 #if defined(SQLITE_DEBUG) && !defined(SQLITE_TEST_REALLOC_STRESS)
-  void sqlite3VdbeVerifyNoMallocRequired(Vdbe *p, int N);
-  void sqlite3VdbeVerifyNoResultRow(Vdbe *p);
+  SQLITE_METHOD void sqlite3VdbeVerifyNoMallocRequired(Vdbe *p, int N);
+  SQLITE_METHOD void sqlite3VdbeVerifyNoResultRow(Vdbe *p);
 #else
 # define sqlite3VdbeVerifyNoMallocRequired(A,B)
 # define sqlite3VdbeVerifyNoResultRow(A)
 #endif
-VdbeOp *sqlite3VdbeAddOpList(Vdbe*, int nOp, VdbeOpList const *aOp, int iLineno);
-void sqlite3VdbeAddParseSchemaOp(Vdbe*,int,char*);
-void sqlite3VdbeChangeOpcode(Vdbe*, u32 addr, u8);
-void sqlite3VdbeChangeP1(Vdbe*, u32 addr, int P1);
-void sqlite3VdbeChangeP2(Vdbe*, u32 addr, int P2);
-void sqlite3VdbeChangeP3(Vdbe*, u32 addr, int P3);
-void sqlite3VdbeChangeP5(Vdbe*, u16 P5);
-void sqlite3VdbeJumpHere(Vdbe*, int addr);
-int sqlite3VdbeChangeToNoop(Vdbe*, int addr);
-int sqlite3VdbeDeletePriorOpcode(Vdbe*, u8 op);
-void sqlite3VdbeChangeP4(Vdbe*, int addr, const char *zP4, int N);
-void sqlite3VdbeAppendP4(Vdbe*, void *pP4, int p4type);
-void sqlite3VdbeSetP4KeyInfo(Parse*, Index*);
-void sqlite3VdbeUsesBtree(Vdbe*, int);
-VdbeOp *sqlite3VdbeGetOp(Vdbe*, int);
-int sqlite3VdbeMakeLabel(Vdbe*);
-void sqlite3VdbeRunOnlyOnce(Vdbe*);
-void sqlite3VdbeReusable(Vdbe*);
-void sqlite3VdbeDelete(Vdbe*);
-void sqlite3VdbeClearObject(sqlite3*,Vdbe*);
-void sqlite3VdbeMakeReady(Vdbe*,Parse*);
-int sqlite3VdbeFinalize(Vdbe*);
-void sqlite3VdbeResolveLabel(Vdbe*, int);
-int sqlite3VdbeCurrentAddr(Vdbe*);
+SQLITE_METHOD VdbeOp *sqlite3VdbeAddOpList(Vdbe*, int nOp, VdbeOpList const *aOp, int iLineno);
+SQLITE_METHOD void sqlite3VdbeAddParseSchemaOp(Vdbe*,int,char*);
+SQLITE_METHOD void sqlite3VdbeChangeOpcode(Vdbe*, u32 addr, u8);
+SQLITE_METHOD void sqlite3VdbeChangeP1(Vdbe*, u32 addr, int P1);
+SQLITE_METHOD void sqlite3VdbeChangeP2(Vdbe*, u32 addr, int P2);
+SQLITE_METHOD void sqlite3VdbeChangeP3(Vdbe*, u32 addr, int P3);
+SQLITE_METHOD void sqlite3VdbeChangeP5(Vdbe*, u16 P5);
+SQLITE_METHOD void sqlite3VdbeJumpHere(Vdbe*, int addr);
+SQLITE_METHOD int sqlite3VdbeChangeToNoop(Vdbe*, int addr);
+SQLITE_METHOD int sqlite3VdbeDeletePriorOpcode(Vdbe*, u8 op);
+SQLITE_METHOD void sqlite3VdbeChangeP4(Vdbe*, int addr, const char *zP4, int N);
+SQLITE_METHOD void sqlite3VdbeAppendP4(Vdbe*, void *pP4, int p4type);
+SQLITE_METHOD void sqlite3VdbeSetP4KeyInfo(Parse*, Index*);
+SQLITE_METHOD void sqlite3VdbeUsesBtree(Vdbe*, int);
+SQLITE_METHOD VdbeOp *sqlite3VdbeGetOp(Vdbe*, int);
+SQLITE_METHOD int sqlite3VdbeMakeLabel(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeRunOnlyOnce(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeReusable(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeDelete(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeClearObject(sqlite3*,Vdbe*);
+SQLITE_METHOD void sqlite3VdbeMakeReady(Vdbe*,Parse*);
+SQLITE_METHOD int sqlite3VdbeFinalize(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeResolveLabel(Vdbe*, int);
+SQLITE_METHOD int sqlite3VdbeCurrentAddr(Vdbe*);
 #ifdef SQLITE_DEBUG
-  int sqlite3VdbeAssertMayAbort(Vdbe *, int);
+  SQLITE_METHOD int sqlite3VdbeAssertMayAbort(Vdbe *, int);
 #endif
-void sqlite3VdbeResetStepResult(Vdbe*);
-void sqlite3VdbeRewind(Vdbe*);
-int sqlite3VdbeReset(Vdbe*);
-void sqlite3VdbeSetNumCols(Vdbe*,int);
-int sqlite3VdbeSetColName(Vdbe*, int, int, const char *, void(*)(void*));
-void sqlite3VdbeCountChanges(Vdbe*);
-sqlite3 *sqlite3VdbeDb(Vdbe*);
-void sqlite3VdbeSetSql(Vdbe*, const char *z, int n, int);
-void sqlite3VdbeSwap(Vdbe*,Vdbe*);
-VdbeOp *sqlite3VdbeTakeOpArray(Vdbe*, int*, int*);
-sqlite3_value *sqlite3VdbeGetBoundValue(Vdbe*, int, u8);
-void sqlite3VdbeSetVarmask(Vdbe*, int);
+SQLITE_METHOD void sqlite3VdbeResetStepResult(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeRewind(Vdbe*);
+SQLITE_METHOD int sqlite3VdbeReset(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeSetNumCols(Vdbe*,int);
+SQLITE_METHOD int sqlite3VdbeSetColName(Vdbe*, int, int, const char *, void(*)(void*));
+SQLITE_METHOD void sqlite3VdbeCountChanges(Vdbe*);
+SQLITE_METHOD sqlite3 *sqlite3VdbeDb(Vdbe*);
+SQLITE_METHOD void sqlite3VdbeSetSql(Vdbe*, const char *z, int n, int);
+SQLITE_METHOD void sqlite3VdbeSwap(Vdbe*,Vdbe*);
+SQLITE_METHOD VdbeOp *sqlite3VdbeTakeOpArray(Vdbe*, int*, int*);
+SQLITE_METHOD sqlite3_value *sqlite3VdbeGetBoundValue(Vdbe*, int, u8);
+SQLITE_METHOD void sqlite3VdbeSetVarmask(Vdbe*, int);
 #ifndef SQLITE_OMIT_TRACE
-  char *sqlite3VdbeExpandSql(Vdbe*, const char*);
+  SQLITE_METHOD char *sqlite3VdbeExpandSql(Vdbe*, const char*);
 #endif
-int sqlite3MemCompare(const Mem*, const Mem*, const CollSeq*);
+SQLITE_METHOD int sqlite3MemCompare(const Mem*, const Mem*, const CollSeq*);
 
-void sqlite3VdbeRecordUnpack(KeyInfo*,int,const void*,UnpackedRecord*);
-int sqlite3VdbeRecordCompare(int,const void*,UnpackedRecord*);
-int sqlite3VdbeRecordCompareWithSkip(int, const void *, UnpackedRecord *, int);
-UnpackedRecord *sqlite3VdbeAllocUnpackedRecord(KeyInfo*);
+SQLITE_METHOD void sqlite3VdbeRecordUnpack(KeyInfo*,int,const void*,UnpackedRecord*);
+SQLITE_METHOD int sqlite3VdbeRecordCompare(int,const void*,UnpackedRecord*);
+SQLITE_METHOD int sqlite3VdbeRecordCompareWithSkip(int, const void *, UnpackedRecord *, int);
+SQLITE_METHOD UnpackedRecord *sqlite3VdbeAllocUnpackedRecord(KeyInfo*);
 
 typedef int (*RecordCompare)(int,const void*,UnpackedRecord*);
-RecordCompare sqlite3VdbeFindCompare(UnpackedRecord*);
+SQLITE_METHOD RecordCompare sqlite3VdbeFindCompare(UnpackedRecord*);
 
 #ifndef SQLITE_OMIT_TRIGGER
-void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
+SQLITE_METHOD void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
 #endif
 
 /* Use SQLITE_ENABLE_COMMENTS to enable generation of extra comments on
@@ -252,9 +252,9 @@ void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
 ** generator.
 */
 #ifdef SQLITE_ENABLE_EXPLAIN_COMMENTS
-  void sqlite3VdbeComment(Vdbe*, const char*, ...);
+  SQLITE_METHOD void sqlite3VdbeComment(Vdbe*, const char*, ...);
 # define VdbeComment(X)  sqlite3VdbeComment X
-  void sqlite3VdbeNoopComment(Vdbe*, const char*, ...);
+  SQLITE_METHOD void sqlite3VdbeNoopComment(Vdbe*, const char*, ...);
 # define VdbeNoopComment(X)  sqlite3VdbeNoopComment X
 # ifdef SQLITE_ENABLE_MODULE_COMMENTS
 #   define VdbeModuleComment(X)  sqlite3VdbeNoopComment X
@@ -290,7 +290,7 @@ void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
 ** routine in vdbe.c, alerting the developer to the missed tag.
 */
 #ifdef SQLITE_VDBE_COVERAGE
-  void sqlite3VdbeSetLineNumber(Vdbe*,int);
+  SQLITE_METHOD void sqlite3VdbeSetLineNumber(Vdbe*,int);
 # define VdbeCoverage(v) sqlite3VdbeSetLineNumber(v,__LINE__)
 # define VdbeCoverageIf(v,x) if(x)sqlite3VdbeSetLineNumber(v,__LINE__)
 # define VdbeCoverageAlwaysTaken(v) sqlite3VdbeSetLineNumber(v,2);
@@ -305,7 +305,7 @@ void sqlite3VdbeLinkSubProgram(Vdbe *, SubProgram *);
 #endif
 
 #ifdef SQLITE_ENABLE_STMT_SCANSTATUS
-void sqlite3VdbeScanStatus(Vdbe*, int, int, int, LogEst, const char*);
+SQLITE_METHOD void sqlite3VdbeScanStatus(Vdbe*, int, int, int, LogEst, const char*);
 #else
 # define sqlite3VdbeScanStatus(a,b,c,d,e)
 #endif

@@ -24,7 +24,7 @@
 ** set BtShared.db to the database handle associated with p and the
 ** p->locked boolean to true.
 */
-static void lockBtreeMutex(Btree *p){
+static SQLITE_METHOD void lockBtreeMutex(Btree *p){
   assert( p->locked==0 );
   assert( sqlite3_mutex_notheld(p->pBt->mutex) );
   assert( sqlite3_mutex_held(p->db->mutex) );
@@ -38,7 +38,7 @@ static void lockBtreeMutex(Btree *p){
 ** Release the BtShared mutex associated with B-Tree handle p and
 ** clear the p->locked boolean.
 */
-static void SQLITE_NOINLINE unlockBtreeMutex(Btree *p){
+static SQLITE_METHOD void SQLITE_NOINLINE unlockBtreeMutex(Btree *p){
   BtShared *pBt = p->pBt;
   assert( p->locked==1 );
   assert( sqlite3_mutex_held(pBt->mutex) );
@@ -50,7 +50,7 @@ static void SQLITE_NOINLINE unlockBtreeMutex(Btree *p){
 }
 
 /* Forward reference */
-static void SQLITE_NOINLINE btreeLockCarefully(Btree *p);
+static SQLITE_METHOD void SQLITE_NOINLINE btreeLockCarefully(Btree *p);
 
 /*
 ** Enter a mutex on the given BTree object.
@@ -68,7 +68,7 @@ static void SQLITE_NOINLINE btreeLockCarefully(Btree *p);
 ** for the lock to become available on p, then relock all of the
 ** subsequent Btrees that desire a lock.
 */
-void sqlite3BtreeEnter(Btree *p){
+SQLITE_METHOD void sqlite3BtreeEnter(Btree *p){
   /* Some basic sanity checking on the Btree.  The list of Btrees
   ** connected by pNext and pPrev should be in sorted order by
   ** Btree.pBt value. All elements of the list should belong to
@@ -102,7 +102,7 @@ void sqlite3BtreeEnter(Btree *p){
 ** and thus help the sqlite3BtreeLock() routine to run much faster
 ** in the common case.
 */
-static void SQLITE_NOINLINE btreeLockCarefully(Btree *p){
+static SQLITE_METHOD void SQLITE_NOINLINE btreeLockCarefully(Btree *p){
   Btree *pLater;
 
   /* In most cases, we should be able to acquire the lock we
@@ -140,7 +140,7 @@ static void SQLITE_NOINLINE btreeLockCarefully(Btree *p){
 /*
 ** Exit the recursive mutex on a Btree.
 */
-void sqlite3BtreeLeave(Btree *p){
+SQLITE_METHOD void sqlite3BtreeLeave(Btree *p){
   assert( sqlite3_mutex_held(p->db->mutex) );
   if( p->sharable ){
     assert( p->wantToLock>0 );
@@ -158,7 +158,7 @@ void sqlite3BtreeLeave(Btree *p){
 **
 ** This routine is used only from within assert() statements.
 */
-int sqlite3BtreeHoldsMutex(Btree *p){
+SQLITE_METHOD int sqlite3BtreeHoldsMutex(Btree *p){
   assert( p->sharable==0 || p->locked==0 || p->wantToLock>0 );
   assert( p->sharable==0 || p->locked==0 || p->db==p->pBt->db );
   assert( p->sharable==0 || p->locked==0 || sqlite3_mutex_held(p->pBt->mutex) );
@@ -183,7 +183,7 @@ int sqlite3BtreeHoldsMutex(Btree *p){
 ** two or more btrees in common both try to lock all their btrees
 ** at the same instant.
 */
-static void SQLITE_NOINLINE btreeEnterAll(sqlite3 *db){
+static SQLITE_METHOD void SQLITE_NOINLINE btreeEnterAll(sqlite3 *db){
   int i;
   int skipOk = 1;
   Btree *p;
@@ -197,10 +197,10 @@ static void SQLITE_NOINLINE btreeEnterAll(sqlite3 *db){
   }
   db->skipBtreeMutex = skipOk;
 }
-void sqlite3BtreeEnterAll(sqlite3 *db){
+SQLITE_METHOD void sqlite3BtreeEnterAll(sqlite3 *db){
   if( db->skipBtreeMutex==0 ) btreeEnterAll(db);
 }
-static void SQLITE_NOINLINE btreeLeaveAll(sqlite3 *db){
+static SQLITE_METHOD void SQLITE_NOINLINE btreeLeaveAll(sqlite3 *db){
   int i;
   Btree *p;
   assert( sqlite3_mutex_held(db->mutex) );
@@ -209,7 +209,7 @@ static void SQLITE_NOINLINE btreeLeaveAll(sqlite3 *db){
     if( p ) sqlite3BtreeLeave(p);
   }
 }
-void sqlite3BtreeLeaveAll(sqlite3 *db){
+SQLITE_METHOD void sqlite3BtreeLeaveAll(sqlite3 *db){
   if( db->skipBtreeMutex==0 ) btreeLeaveAll(db);
 }
 
@@ -220,7 +220,7 @@ void sqlite3BtreeLeaveAll(sqlite3 *db){
 **
 ** This routine is used inside assert() statements only.
 */
-int sqlite3BtreeHoldsAllMutexes(sqlite3 *db){
+SQLITE_METHOD int sqlite3BtreeHoldsAllMutexes(sqlite3 *db){
   int i;
   if( !sqlite3_mutex_held(db->mutex) ){
     return 0;
@@ -249,7 +249,7 @@ int sqlite3BtreeHoldsAllMutexes(sqlite3 *db){
 ** If pSchema is not NULL, then iDb is computed from pSchema and
 ** db using sqlite3SchemaToIndex().
 */
-int sqlite3SchemaMutexHeld(sqlite3 *db, int iDb, Schema *pSchema){
+SQLITE_METHOD int sqlite3SchemaMutexHeld(sqlite3 *db, int iDb, Schema *pSchema){
   Btree *p;
   assert( db!=0 );
   if( pSchema ) iDb = sqlite3SchemaToIndex(db, pSchema);
@@ -273,10 +273,10 @@ int sqlite3SchemaMutexHeld(sqlite3 *db, int iDb, Schema *pSchema){
 ** the ones below, are no-ops and are null #defines in btree.h.
 */
 
-void sqlite3BtreeEnter(Btree *p){
+SQLITE_METHOD void sqlite3BtreeEnter(Btree *p){
   p->pBt->db = p->db;
 }
-void sqlite3BtreeEnterAll(sqlite3 *db){
+SQLITE_METHOD void sqlite3BtreeEnterAll(sqlite3 *db){
   int i;
   for(i=0; i<db->nDb; i++){
     Btree *p = db->aDb[i].pBt;
@@ -295,11 +295,11 @@ void sqlite3BtreeEnterAll(sqlite3 *db){
 ** any time OMIT_SHARED_CACHE is not defined, regardless of whether or not 
 ** the build is threadsafe. Leave() is only required by threadsafe builds.
 */
-void sqlite3BtreeEnterCursor(BtCursor *pCur){
+SQLITE_METHOD void sqlite3BtreeEnterCursor(BtCursor *pCur){
   sqlite3BtreeEnter(pCur->pBtree);
 }
 # if SQLITE_THREADSAFE
-void sqlite3BtreeLeaveCursor(BtCursor *pCur){
+SQLITE_METHOD void sqlite3BtreeLeaveCursor(BtCursor *pCur){
   sqlite3BtreeLeave(pCur->pBtree);
 }
 # endif

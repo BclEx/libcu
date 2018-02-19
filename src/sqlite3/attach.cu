@@ -32,7 +32,7 @@
 **
 ** will fail because neither abc or def can be resolved.
 */
-static int resolveAttachExpr(NameContext *pName, Expr *pExpr)
+static SQLITE_METHOD int resolveAttachExpr(NameContext *pName, Expr *pExpr)
 {
   int rc = SQLITE_OK;
   if( pExpr ){
@@ -56,7 +56,7 @@ static int resolveAttachExpr(NameContext *pName, Expr *pExpr)
 ** If the optional "KEY z" syntax is omitted, an SQL NULL is passed as the
 ** third argument.
 */
-static void attachFunc(
+static SQLITE_METHOD void attachFunc(
   sqlite3_context *context,
   int NotUsed,
   sqlite3_value **argv
@@ -259,7 +259,7 @@ attach_error:
 **
 **     SELECT sqlite_detach(x)
 */
-static void detachFunc(
+static SQLITE_METHOD void detachFunc(
   sqlite3_context *context,
   int NotUsed,
   sqlite3_value **argv
@@ -311,7 +311,7 @@ detach_error:
 ** This procedure generates VDBE code for a single invocation of either the
 ** sqlite_detach() or sqlite_attach() SQL user functions.
 */
-static void codeAttach(
+static SQLITE_METHOD void codeAttach(
   Parse *pParse,       /* The parser context */
   int type,            /* Either SQLITE_ATTACH or SQLITE_DETACH */
   FuncDef const *pFunc,/* FuncDef wrapper for detachFunc() or attachFunc() */
@@ -385,7 +385,7 @@ attach_end:
 **
 **     DETACH pDbname
 */
-void sqlite3Detach(Parse *pParse, Expr *pDbname){
+void SQLITE_METHOD sqlite3Detach(Parse *pParse, Expr *pDbname){
   static const FuncDef detach_func = {
     1,                /* nArg */
     SQLITE_UTF8,      /* funcFlags */
@@ -404,7 +404,7 @@ void sqlite3Detach(Parse *pParse, Expr *pDbname){
 **
 **     ATTACH p AS pDbname KEY pKey
 */
-void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
+void SQLITE_METHOD sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
   static const FuncDef attach_func = {
     3,                /* nArg */
     SQLITE_UTF8,      /* funcFlags */
@@ -423,7 +423,7 @@ void sqlite3Attach(Parse *pParse, Expr *p, Expr *pDbname, Expr *pKey){
 ** Initialize a DbFixer structure.  This routine must be called prior
 ** to passing the structure to one of the sqliteFixAAAA() routines below.
 */
-void sqlite3FixInit(
+SQLITE_METHOD void sqlite3FixInit(
   DbFixer *pFix,      /* The fixer to be initialized */
   Parse *pParse,      /* Error messages will be written here */
   int iDb,            /* This is the database that must be used */
@@ -456,7 +456,7 @@ void sqlite3FixInit(
 ** pParse->zErrMsg and these routines return non-zero.  If everything
 ** checks out, these routines return 0.
 */
-int sqlite3FixSrcList(
+SQLITE_METHOD int sqlite3FixSrcList(
   DbFixer *pFix,       /* Context of the fixation */
   SrcList *pList       /* The Source list to check and modify */
 ){
@@ -486,7 +486,7 @@ int sqlite3FixSrcList(
   return 0;
 }
 #if !defined(SQLITE_OMIT_VIEW) || !defined(SQLITE_OMIT_TRIGGER)
-int sqlite3FixSelect(
+SQLITE_METHOD int sqlite3FixSelect(
   DbFixer *pFix,       /* Context of the fixation */
   Select *pSelect      /* The SELECT statement to be fixed to one database */
 ){
@@ -519,7 +519,7 @@ int sqlite3FixSelect(
   }
   return 0;
 }
-int sqlite3FixExpr(
+SQLITE_METHOD int sqlite3FixExpr(
   DbFixer *pFix,     /* Context of the fixation */
   Expr *pExpr        /* The expression to be fixed to one database */
 ){
@@ -545,7 +545,7 @@ int sqlite3FixExpr(
   }
   return 0;
 }
-int sqlite3FixExprList(
+SQLITE_METHOD int sqlite3FixExprList(
   DbFixer *pFix,     /* Context of the fixation */
   ExprList *pList    /* The expression to be fixed to one database */
 ){
@@ -562,7 +562,7 @@ int sqlite3FixExprList(
 #endif
 
 #ifndef SQLITE_OMIT_TRIGGER
-int sqlite3FixTriggerStep(
+SQLITE_METHOD int sqlite3FixTriggerStep(
   DbFixer *pFix,     /* Context of the fixation */
   TriggerStep *pStep /* The trigger step be fixed to one database */
 ){
