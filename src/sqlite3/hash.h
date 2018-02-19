@@ -14,6 +14,9 @@
 */
 #ifndef SQLITE_HASH_H
 #define SQLITE_HASH_H
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /* Forward declarations of structures. */
 typedef struct Hash Hash;
@@ -96,4 +99,7 @@ void sqlite3HashClear(Hash*);
 */
 /* #define sqliteHashCount(H)  ((H)->count) // NOT USED */
 
+#ifdef	__cplusplus
+}
+#endif
 #endif /* SQLITE_HASH_H */

@@ -140,10 +140,10 @@
 #include <windows.h>
 
 /* string conversion routines only needed on Win32 */
-extern char *sqlite3_win32_unicode_to_utf8(LPCWSTR);
-extern char *sqlite3_win32_mbcs_to_utf8_v2(const char *, int);
-extern char *sqlite3_win32_utf8_to_mbcs_v2(const char *, int);
-extern LPWSTR sqlite3_win32_utf8_to_unicode(const char *zText);
+extern "C" char *sqlite3_win32_unicode_to_utf8(LPCWSTR);
+extern "C" char *sqlite3_win32_mbcs_to_utf8_v2(const char *, int);
+extern "C" char *sqlite3_win32_utf8_to_mbcs_v2(const char *, int);
+extern "C" LPWSTR sqlite3_win32_utf8_to_unicode(const char *zText);
 #endif
 
 /* On Windows, we normally run with output mode of TEXT so that \n characters

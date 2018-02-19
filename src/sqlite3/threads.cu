@@ -178,7 +178,7 @@ int sqlite3ThreadCreate(
   return SQLITE_OK;
 }
 
-DWORD sqlite3Win32Wait(HANDLE hObject); /* os_win.c */
+extern "C" DWORD sqlite3Win32Wait(HANDLE hObject); /* os_win.c */
 
 /* Get the results of the thread */
 int sqlite3ThreadJoin(SQLiteThread *p, void **ppOut){

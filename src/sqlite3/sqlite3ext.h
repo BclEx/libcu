@@ -18,6 +18,9 @@
 #ifndef SQLITE3EXT_H
 #define SQLITE3EXT_H
 #include "sqlite3.h"
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /*
 ** The following structure holds pointers to all of the SQLite API
@@ -561,4 +564,7 @@ typedef int (*sqlite3_loadext_entry)(
 # define SQLITE_EXTENSION_INIT3     /*no-op*/
 #endif
 
+#ifdef	__cplusplus
+}
+#endif
 #endif /* SQLITE3EXT_H */

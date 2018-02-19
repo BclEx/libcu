@@ -29,93 +29,254 @@
       </AdditionalCompilerOptions>
       <FileType>Document</FileType>
     </ClCompile>
-    <ClCompile Include="attach.cpp" />
-    <ClCompile Include="auth.cpp" />
-    <ClCompile Include="backup.cpp" />
-    <ClCompile Include="bitvec.cpp" />
-    <ClCompile Include="btmutex.cpp" />
-    <ClCompile Include="btree.cpp" />
-    <ClCompile Include="build.cpp" />
-    <ClCompile Include="callback.cpp" />
-    <ClCompile Include="complete.cpp" />
-    <ClCompile Include="ctime.cpp" />
-    <ClCompile Include="date.cpp" />
-    <ClCompile Include="dbstat.cpp" />
-    <ClCompile Include="delete.cpp" />
-    <ClCompile Include="expr.cpp" />
-    <ClCompile Include="fault.cpp" />
-    <ClCompile Include="fkey.cpp" />
-    <ClCompile Include="func.cpp" />
-    <ClCompile Include="global.cpp" />
-    <ClCompile Include="hash.cpp" />
-    <ClCompile Include="insert.cpp" />
-    <ClCompile Include="json1.cpp" />
-    <ClCompile Include="legacy.cpp" />
-    <ClCompile Include="loadext.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="malloc.cpp" />
-    <ClCompile Include="mem0.cpp" />
-    <ClCompile Include="mem1.cpp" />
-    <ClCompile Include="mem2.cpp" />
-    <ClCompile Include="mem3.cpp" />
-    <ClCompile Include="mem5.cpp" />
-    <ClCompile Include="memjournal.cpp" />
-    <ClCompile Include="mutex.cpp" />
-    <ClCompile Include="mutex_noop.cpp" />
-    <ClCompile Include="mutex_unix.cpp" />
-    <ClCompile Include="mutex_w32.cpp" />
-    <ClCompile Include="notify.cpp" />
-    <ClCompile Include="opcodes.cpp" />
-    <ClCompile Include="os.cpp" />
-    <ClCompile Include="os_unix.cpp" />
-    <ClCompile Include="os_win.cpp" />
-    <ClCompile Include="pager.cpp" />
+    <CudaCompile Include="attach.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="auth.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="backup.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="bitvec.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="btmutex.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="btree.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="build.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="callback.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="complete.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="ctime.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="date.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="dbstat.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="delete.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="expr.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="fault.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="fkey.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="func.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="global.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="hash.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="insert.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="json1.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="legacy.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="loadext.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="main.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="malloc.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mem0.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mem1.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mem2.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mem3.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mem5.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="memjournal.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mutex.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="mutex_noop.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <ClCompile Include="mutex_unix.c" />
+    <ClCompile Include="mutex_w32.c" />
+    <CudaCompile Include="notify.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="opcodes.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="os.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <ClCompile Include="os_unix.c" />
+    <ClCompile Include="os_win.c" />
+    <CudaCompile Include="pager.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
     <ClCompile Include="parse.c" />
-    <ClCompile Include="pcache.cpp" />
-    <ClCompile Include="pcache1.cpp" />
-    <ClCompile Include="pragma.cpp" />
-    <ClCompile Include="prepare.cpp" />
-    <ClCompile Include="printf.cpp" />
-    <ClCompile Include="random.cpp" />
-    <ClCompile Include="resolve.cpp" />
-    <ClCompile Include="rowset.cpp" />
-    <ClCompile Include="select.cpp" />
-    <ClCompile Include="shell.cpp" />
-    <ClCompile Include="status.cpp" />
-    <ClCompile Include="table.cpp" />
-    <ClCompile Include="threads.cpp" />
-    <ClCompile Include="tokenize.cpp" />
-    <ClCompile Include="treeview.cpp" />
-    <ClCompile Include="trigger.cpp" />
-    <ClCompile Include="update.cpp" />
-    <ClCompile Include="utf.cpp" />
-    <ClCompile Include="util.cpp" />
-    <ClCompile Include="vacuum.cpp" />
-    <ClCompile Include="vdbe.cpp" />
-    <ClCompile Include="vdbeapi.cpp" />
-    <ClCompile Include="vdbeaux.cpp" />
-    <ClCompile Include="vdbeblob.cpp" />
-    <ClCompile Include="vdbemem.cpp" />
-    <ClCompile Include="vdbesort.cpp" />
-    <ClCompile Include="vdbetrace.cpp" />
-    <ClCompile Include="vtab.cpp" />
-    <ClCompile Include="wal.cpp" />
-    <ClCompile Include="walker.cpp" />
-    <ClCompile Include="where.cpp" />
-    <ClCompile Include="wherecode.cpp" />
-    <ClCompile Include="whereexpr.cpp" />
+    <CudaCompile Include="pcache.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="pcache1.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="pragma.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="prepare.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="printf.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="random.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="resolve.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="rowset.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="select.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="shell.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="status.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="table.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="threads.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="tokenize.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="treeview.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="trigger.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="update.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="utf.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="util.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vacuum.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbe.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbeapi.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbeaux.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbeblob.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbemem.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbesort.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vdbetrace.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="vtab.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="wal.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="walker.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="where.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="wherecode.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
+    <CudaCompile Include="whereexpr.cu">
+      <FileType>CppCode</FileType>
+    </CudaCompile>
     <CudaCompile Include="program.cu" />
-    <ClCompile Include="alter.cpp">
+    <CudaCompile Include="alter.cu">
       <AdditionalCompilerOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalCompilerOptions>
-      <FileType>Document</FileType>
-    </ClCompile>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="btree.h" />
+    <ClInclude Include="btreeInt.h" />
+    <ClInclude Include="hash.h" />
+    <ClInclude Include="keywordhash.h" />
     <ClInclude Include="libcu.h" />
+    <ClInclude Include="msvc.h" />
+    <ClInclude Include="mutex.h" />
+    <ClInclude Include="opcodes.h" />
+    <ClInclude Include="os.h" />
+    <ClInclude Include="os_common.h" />
+    <ClInclude Include="os_setup.h" />
+    <ClInclude Include="os_win.h" />
+    <ClInclude Include="pager.h" />
+    <ClInclude Include="parse.h" />
+    <ClInclude Include="pcache.h" />
+    <ClInclude Include="pragma.h" />
+    <ClInclude Include="rtree.h" />
     <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="sqlite3ext.h" />
     <ClInclude Include="sqliteInt.h" />
+    <ClInclude Include="sqliteLimit.h" />
+    <ClInclude Include="vdbe.h" />
     <ClInclude Include="vdbeInt.h" />
+    <ClInclude Include="vxworks.h" />
+    <ClInclude Include="wal.h" />
+    <ClInclude Include="whereInt.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}</ProjectGuid>

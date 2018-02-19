@@ -19,6 +19,9 @@
 */
 #ifndef _SQLITE_OS_H_
 #define _SQLITE_OS_H_
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /*
 ** Attempt to automatically detect the operating system and setup the
@@ -207,4 +210,7 @@ int sqlite3OsCurrentTimeInt64(sqlite3_vfs *, sqlite3_int64*);
 int sqlite3OsOpenMalloc(sqlite3_vfs *, const char *, sqlite3_file **, int,int*);
 void sqlite3OsCloseFree(sqlite3_file *);
 
+#ifdef	__cplusplus
+}
+#endif
 #endif /* _SQLITE_OS_H_ */
