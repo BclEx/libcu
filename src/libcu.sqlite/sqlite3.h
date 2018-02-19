@@ -4588,7 +4588,7 @@ SQLITE_API int sqlite3_create_function_v2(
 SQLITE_API SQLITE_DEPRECATED int sqlite3_aggregate_count(sqlite3_context*);
 SQLITE_API SQLITE_DEPRECATED int sqlite3_expired(sqlite3_stmt*);
 SQLITE_API SQLITE_DEPRECATED int sqlite3_transfer_bindings(sqlite3_stmt*, sqlite3_stmt*);
-SQLITE_API SQLITE_DEPRECATED int sqlite3_global_recover(void);
+SQLITE_API SQLITE_DEPRECATED int sqlite3GLOBAL__recover(void);
 SQLITE_API SQLITE_DEPRECATED void sqlite3_thread_cleanup(void);
 SQLITE_API SQLITE_DEPRECATED int sqlite3_memory_alarm(void(*)(void*,sqlite3_int64,int),
                       void*,sqlite3_int64);

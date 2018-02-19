@@ -11,7 +11,7 @@
 /* Head of a linked list of all sqlite3 objects created by this process for which either sqlite3.pBlockingConnection or sqlite3.pUnlockConnection
 ** is not NULL. This variable may only accessed while the STATIC_MASTER mutex is held.
 */
-static __hostb_device__ tagbase_t *_WSD _blockedList = 0;
+static __hostb_device__ tagbase_t *WSD_ _blockedList = 0;
 
 #ifndef NDEBUG
 /* This function is a complex assert() that verifies the following properties of the blocked connections list:

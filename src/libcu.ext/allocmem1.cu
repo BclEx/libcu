@@ -64,23 +64,23 @@ static malloc_zone_t *_sqliteZone_;
 static __host_device__ void *memoryMalloc(int size)
 {
 #ifdef LIBCU_MALLOCSIZE
-	TESTCASE(ROUND8_(size) == size);
+	TESTCASE_(ROUND8_(size) == size);
 	void *p = LIBCU_MALLOC(size);
 	if (!p) {
-		TESTCASE(_runtimeConfig.log);
+		TESTCASE_(_runtimeConfig.log);
 		_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return p;
 #else
 	assert(size > 0);
-	TESTCASE(ROUND8_(size) != size);
+	TESTCASE_(ROUND8_(size) != size);
 	int64_t *p = LIBCU_MALLOC(size+8);
 	if (p) {
 		p[0] = size;
 		p++;
 	}
 	else {
-		TESTCASE( _runtimeConfig.log);
+		TESTCASE_( _runtimeConfig.log);
 		_log(RC_NOMEM, "failed to allocate %u bytes of memory", size);
 	}
 	return (void *)p;
@@ -129,7 +129,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 #ifdef LIBCU_MALLOCSIZE
 	void *p = LIBCU_REALLOC(prior, size);
 	if (!p){
-		TESTCASE(_runtimeConfig.log);
+		TESTCASE_(_runtimeConfig.log);
 		_log(RC_NOMEM, "failed memory resize %u to %u bytes", LIBCU_MALLOCSIZE(prior), size);
 	}
 	return p;
@@ -144,7 +144,7 @@ static __host_device__ void *memoryRealloc(void *prior, int size)
 		p++;
 	}
 	else {
-		TESTCASE(_runtimeConfig.log);
+		TESTCASE_(_runtimeConfig.log);
 		_log(RC_NOMEM, "failed memory resize %u to %u bytes", memorySize(prior), size);
 	}
 	return (void *)p;

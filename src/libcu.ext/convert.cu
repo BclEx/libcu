@@ -168,9 +168,9 @@ static __host_device__ int compare2pow63(const char *z, int incr)
 	for (int i = 0; !c && i < 18; i++) c = (z[i * incr] - pow63[i])*10;
 	if (!c) {
 		c = z[18 * incr] - '8';
-		TESTCASE(c == -1);
-		TESTCASE(c == 0);
-		TESTCASE(c == +1);
+		TESTCASE_(c == -1);
+		TESTCASE_(c == 0);
+		TESTCASE_(c == +1);
 	}
 	return c;
 }
@@ -223,9 +223,9 @@ __host_device__ int convert_atoi64e(const char *z, int64_t *r, int length, TEXTE
 	uint64_t u = 0; int c = 0; int i; for (i = 0; &z[i] < end && (c = z[i]) >= '0' && c <= '9'; i += incr) { u = u*10 + c - '0'; }
 	if (u > INT64_MAX) *r = neg ? INT64_MIN : INT64_MAX;
 	else *r = neg ? -(int64_t)u : (int64_t)u;
-	TESTCASE(i == 18);
-	TESTCASE(i == 19);
-	TESTCASE(i == 20);
+	TESTCASE_(i == 18);
+	TESTCASE_(i == 19);
+	TESTCASE_(i == 20);
 
 	int rc = &z[i] < end || (!i && start == z) || nonNum ? 1 : 0;
 	// z is empty or contains non-numeric text or is longer than 19 digits (thus guaranteeing that it is too large)
@@ -293,9 +293,9 @@ __host_device__ bool convert_atoie(const char *z, int *r) //: sqlite3GetInt32
 	// The longest decimal representation of a 32 bit integer is 10 digits:
 	//             1234567890
 	//     2^31 -> 2147483648
-	TESTCASE(i == 10);
+	TESTCASE_(i == 10);
 	if (i > 10) return false;
-	TESTCASE(v - neg == 2147483647);
+	TESTCASE_(v - neg == 2147483647);
 	if (v - neg > 2147483647) return false;
 	*r = (int)(neg ? -v : v);
 	return true;
@@ -693,7 +693,7 @@ __host_device__ uint32_t convert_get4(const uint8_t *p) //: sqlite3Get4byte
 #elif LIBCU_BYTEORDER==1234 && MSVC_VERSION>=1300
   uint32_t x; memcpy(&x, p, 4); return _byteswap_ulong(x);
 #else
-  TESTCASE(p[0] & 0x80); return ((unsigned)p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3];
+  TESTCASE_(p[0] & 0x80); return ((unsigned)p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3];
 #endif
 }
 //__host_device__ uint32_t convert_get4(const uint8_t *p) { return (p[0]<<24) | (p[1]<<16) | (p[2]<<8) | p[3]; }

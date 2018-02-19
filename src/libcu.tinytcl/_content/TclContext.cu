@@ -385,9 +385,9 @@ static __device__ void SetTestUnlockNotifyVars(Tcl_Interp *interp, int argId, in
 {
 	char b[64];
 	__snprintf(b, sizeof(b), "%d", argId);
-	Tcl_SetVar(interp, "sqlite_unlock_notify_arg", b, TCL_GLOBAL_ONLY);
+	Tcl_SetVar(interp, "sqlite_unlock_notify_arg", b, TCLGLOBAL__ONLY);
 	__snprintf(b, sizeof(b), "%d", argsLength);
-	Tcl_SetVar(interp, "sqlite_unlock_notify_argcount", b, TCL_GLOBAL_ONLY);
+	Tcl_SetVar(interp, "sqlite_unlock_notify_argcount", b, TCLGLOBAL__ONLY);
 }
 #else
 #define SetTestUnlockNotifyVars(x,y,z)
@@ -398,7 +398,7 @@ static __device__ void DbUnlockNotify(void **args, int argsLength)
 {
 	for (int i = 0; i < argsLength; i++)
 	{
-		const int flags = (TCL_EVAL_GLOBAL | TCL_EVAL_DIRECT);
+		const int flags = (TCL_EVALGLOBAL_ | TCL_EVAL_DIRECT);
 		TclContext *tctx = (TclContext *)args[i];
 		Tcl_Interp *interp = tctx->Interp;
 		SetTestUnlockNotifyVars(interp, i, argsLength);
@@ -609,7 +609,7 @@ static __device__ ARC AuthCallback(void *arg, int code, const char *arg1, const 
 	default                     : codeName="????"; break;
 	}
 	char *str = _mprintf("%s%s%s%s%s", tctx->Auth, codeName, (arg1?arg1:""), (arg2?arg2:""), (arg3?arg3:""), (arg4?arg4:""));
-	int rc2 = Tcl_GlobalEval(interp, str);
+	int rc2 = TclGLOBAL_Eval(interp, str);
 	free(str);
 	ARC rc = ARC_OK;
 	const char *reply = (rc == RC_OK ? interp->result : "ARC_DENY");

@@ -33,7 +33,7 @@ static __constant__ CmdInfo _builtInCmds[] = {
 	{"for",			Tcl_ForCmd},
 	{"foreach",		Tcl_ForeachCmd},
 	{"format",		Tcl_FormatCmd},
-	{"global",		Tcl_GlobalCmd},
+	{"global",		TclGLOBAL_Cmd},
 	{"glob",		Tcl_GlobCmd},
 #ifndef TCL_NO_HISTORY
 	{"h",			Tcl_HistoryCmd},
@@ -689,15 +689,15 @@ __device__ void Tcl_AddErrorInfo(Tcl_Interp *interp, char *message)
 	// If an error is already being logged, then the new errorInfo is the concatenation of the old info and the new message.
 	// If this is the first piece of info for the error, then the new errorInfo is the concatenation of the message in interp->result and the new message.
 	if (!(iPtr->flags & ERR_IN_PROGRESS)) {
-		Tcl_SetVar2(interp, "errorInfo", (char *)NULL, interp->result, TCL_GLOBAL_ONLY);
+		Tcl_SetVar2(interp, "errorInfo", (char *)NULL, interp->result, TCLGLOBAL__ONLY);
 		iPtr->flags |= ERR_IN_PROGRESS;
 
 		// If the errorCode variable wasn't set by the code that generated the error, set it to "NONE".
 		if (!(iPtr->flags & ERROR_CODE_SET)) {
-			Tcl_SetVar2(interp, "errorCode", (char *)NULL, "NONE", TCL_GLOBAL_ONLY);
+			Tcl_SetVar2(interp, "errorCode", (char *)NULL, "NONE", TCLGLOBAL__ONLY);
 		}
 	}
-	Tcl_SetVar2(interp, "errorInfo", (char *)NULL, message, TCL_GLOBAL_ONLY|TCL_APPEND_VALUE);
+	Tcl_SetVar2(interp, "errorInfo", (char *)NULL, message, TCLGLOBAL__ONLY|TCL_APPEND_VALUE);
 }
 
 /*
@@ -754,7 +754,7 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, va_list va)
 /*
 *----------------------------------------------------------------------
 *
-* Tcl_GlobalEval --
+* TclGLOBAL_Eval --
 *	Evaluate a command at global level in an interpreter.
 *
 * Results:
@@ -766,7 +766,7 @@ __device__ int _Tcl_VarEval(Tcl_Interp *interp, va_list va)
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_GlobalEval(Tcl_Interp *interp, char *command)
+__device__ int TclGLOBAL_Eval(Tcl_Interp *interp, char *command)
 {
 	register Interp *iPtr = (Interp *)interp;
 	CallFrame *savedVarFramePtr = iPtr->varFramePtr;

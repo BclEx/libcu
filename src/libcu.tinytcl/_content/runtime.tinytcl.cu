@@ -70,7 +70,7 @@ int main(int argc, const char *args[])
 
 		// Before we eval the file, create an args global containing the remaining arguments
 		char *args2 = Tcl_Merge(argc - 2, args + 2);
-		Tcl_SetVar(_interp, "argv", args2, TCL_GLOBAL_ONLY);
+		Tcl_SetVar(_interp, "argv", args2, TCLGLOBAL__ONLY);
 		_freeFast(args2);
 
 		result = Tcl_EvalFile(_interp, filename);

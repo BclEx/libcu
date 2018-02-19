@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="UserMacros">
+    <CUARCH Condition="'$(CUARCH)'==''">35</CUARCH>
+    <ShortPlatform Condition="'$(Platform)'=='Win32'">x86</ShortPlatform>
+    <ShortPlatform Condition="'$(Platform)'=='x64'">x64</ShortPlatform>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="analyze.cpp">
+      <AdditionalCompilerOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalCompilerOptions>
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="attach.cpp" />
+    <ClCompile Include="auth.cpp" />
+    <ClCompile Include="backup.cpp" />
+    <ClCompile Include="bitvec.cpp" />
+    <ClCompile Include="btmutex.cpp" />
+    <ClCompile Include="btree.cpp" />
+    <ClCompile Include="build.cpp" />
+    <ClCompile Include="callback.cpp" />
+    <ClCompile Include="complete.cpp" />
+    <ClCompile Include="ctime.cpp" />
+    <ClCompile Include="date.cpp" />
+    <ClCompile Include="dbstat.cpp" />
+    <ClCompile Include="delete.cpp" />
+    <ClCompile Include="expr.cpp" />
+    <ClCompile Include="fkey.cpp" />
+    <ClCompile Include="func.cpp" />
+    <ClCompile Include="global.cpp" />
+    <ClCompile Include="hash.cpp" />
+    <ClCompile Include="insert.cpp" />
+    <ClCompile Include="json1.cpp" />
+    <ClCompile Include="loadext.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="malloc.cpp" />
+    <ClCompile Include="mem0.cpp" />
+    <ClCompile Include="mem1.cpp" />
+    <ClCompile Include="mem2.cpp" />
+    <ClCompile Include="mem3.cpp" />
+    <ClCompile Include="mem5.cpp" />
+    <ClCompile Include="memjournal.cpp" />
+    <ClCompile Include="mutex.cpp" />
+    <ClCompile Include="mutex_noop.cpp" />
+    <ClCompile Include="mutex_unix.cpp" />
+    <ClCompile Include="mutex_w32.cpp" />
+    <ClCompile Include="notify.cpp" />
+    <ClCompile Include="opcodes.cpp" />
+    <ClCompile Include="os.cpp" />
+    <ClCompile Include="os_unix.cpp" />
+    <ClCompile Include="os_win.cpp" />
+    <ClCompile Include="pager.cpp" />
+    <ClCompile Include="parse.c" />
+    <ClCompile Include="pcache.cpp" />
+    <ClCompile Include="pcache1.cpp" />
+    <ClCompile Include="pragma.cpp" />
+    <ClCompile Include="prepare.cpp" />
+    <ClCompile Include="printf.cpp" />
+    <ClCompile Include="random.cpp" />
+    <ClCompile Include="resolve.cpp" />
+    <ClCompile Include="rowset.cpp" />
+    <ClCompile Include="select.cpp" />
+    <ClCompile Include="shell.cpp" />
+    <ClCompile Include="status.cpp" />
+    <ClCompile Include="table.cpp" />
+    <ClCompile Include="threads.cpp" />
+    <ClCompile Include="tokenize.cpp" />
+    <ClCompile Include="treeview.cpp" />
+    <ClCompile Include="trigger.cpp" />
+    <ClCompile Include="update.cpp" />
+    <ClCompile Include="utf.cpp" />
+    <ClCompile Include="util.cpp" />
+    <ClCompile Include="vacuum.cpp" />
+    <ClCompile Include="vtab.cpp" />
+    <ClCompile Include="wal.cpp" />
+    <ClCompile Include="walker.cpp" />
+    <ClCompile Include="where.cpp" />
+    <ClCompile Include="wherecode.cpp" />
+    <ClCompile Include="whereexpr.cpp" />
+    <CudaCompile Include="program.cu" />
+    <ClCompile Include="alter.cpp">
+      <AdditionalCompilerOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </AdditionalCompilerOptions>
+      <FileType>Document</FileType>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libcu.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="sqliteInt.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}</ProjectGuid>
+    <RootNamespace>libcu</RootNamespace>
+    <ProjectName>sqlite3</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName).$(CUARCH)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName).$(CUARCH)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>$(ProjectName).$(CUARCH)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName).$(CUARCH)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;SQLITE_MEMDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=32 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>libcu.$(CUARCH).lib;libcu.ext.$(CUARCH).lib;cudart.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <Include>$(SolutionDir)include;%(Include)</Include>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_$(CUARCH),sm_$(CUARCH)</CodeGeneration>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.targets" />
+  </ImportGroup>
+</Project>

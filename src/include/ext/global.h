@@ -28,8 +28,8 @@ THE SOFTWARE.
 #define OMIT_COMPILEOPTION_DIAGS
 #define LIBCU_ENABLE_UNLOCK_NOTIFY
 
-#ifndef _EXT_GLOBAL_H
-#define _EXT_GLOBAL_H
+#ifndef _EXTGLOBAL__H
+#define _EXTGLOBAL__H
 #include <crtdefscu.h>
 #include <stdargcu.h>
 __BEGIN_DECLS;
@@ -458,8 +458,8 @@ struct RuntimeConfig {
 	int localtimeFault;				// True to fail localtime() calls
 	int onceResetThreshold;			// When to reset OP_Once counters
 };
-extern __hostb_device__ _WSD RuntimeConfig _runtimeConfig;
-#define _runtimeConfig _GLOBAL(RuntimeConfig, _runtimeConfig)
+extern __hostb_device__ WSD_ RuntimeConfig _runtimeConfig;
+#define _runtimeConfig GLOBAL_(RuntimeConfig, _runtimeConfig)
 
 /* This macro is used inside of assert() statements to indicate that the assert is only valid on a well-formed database.  Instead of:
 **
@@ -600,5 +600,5 @@ STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s
 #endif
 #pragma endregion
 
-#endif  /* _EXT_GLOBAL_H */
+#endif  /* _EXTGLOBAL__H */
 

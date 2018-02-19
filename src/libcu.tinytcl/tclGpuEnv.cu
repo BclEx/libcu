@@ -39,7 +39,7 @@ __device__ void TclSetupEnv(Tcl_Interp *interp)
 	_firstInterpPtr = eiPtr;
 
 	// Store the environment variable values into the interpreter's "env" array, and arrange for us to be notified on future writes and unsets to that array.
-	Tcl_UnsetVar2(interp, "env", (char *)NULL, TCL_GLOBAL_ONLY);
+	Tcl_UnsetVar2(interp, "env", (char *)NULL, TCLGLOBAL__ONLY);
 	for (int i = 0; ; i++) {
 		char *p = __environ[i];
 		if (!p || !*p ) {
@@ -48,10 +48,10 @@ __device__ void TclSetupEnv(Tcl_Interp *interp)
 		char *p2;
 		for (p2 = p; *p2 != '='; p2++) { }
 		*p2 = 0;
-		Tcl_SetVar2(interp, "env", p, p2+1, TCL_GLOBAL_ONLY);
+		Tcl_SetVar2(interp, "env", p, p2+1, TCLGLOBAL__ONLY);
 		*p2 = '=';
 	}
-	Tcl_TraceVar2(interp, "env", (char *)NULL, TCL_GLOBAL_ONLY | TCL_TRACE_WRITES | TCL_TRACE_UNSETS, EnvTraceProc, (ClientData)NULL);
+	Tcl_TraceVar2(interp, "env", (char *)NULL, TCLGLOBAL__ONLY | TCL_TRACE_WRITES | TCL_TRACE_UNSETS, EnvTraceProc, (ClientData)NULL);
 }
 
 /*
@@ -97,7 +97,7 @@ static __device__ char *EnvTraceProc(ClientData clientData, Tcl_Interp *interp, 
 	}
 	// If a value is being set, call setenv to do all of the work.
 	if (flags & TCL_TRACE_WRITES) {
-		setenv(name2, Tcl_GetVar2(interp, "env", name2, TCL_GLOBAL_ONLY), true);
+		setenv(name2, Tcl_GetVar2(interp, "env", name2, TCLGLOBAL__ONLY), true);
 	}
 	if (flags & TCL_TRACE_UNSETS) {
 		unsetenv(name2);

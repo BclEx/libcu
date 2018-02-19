@@ -19,7 +19,7 @@ __host_device__ int math_isnan(double x) //: sqlite3IsNaN
 #else  /* if HAVE_ISNAN */
 	rc = isnan(x);
 #endif /* HAVE_ISNAN */
-	TESTCASE(rc);
+	TESTCASE_(rc);
 	return rc;
 }
 #endif /* SQLITE_OMIT_FLOATING_POINT */
@@ -34,16 +34,16 @@ __host_device__ bool math_add64(int64_t *ao, int64_t b) //: sqlite3AddInt64
 	return __builtin_add_overflow(*a, b, a);
 #else
 	int64_t a = *ao;
-	TESTCASE(a == 0); TESTCASE(a == 1);
-	TESTCASE(b == -1); TESTCASE(b == 0);
+	TESTCASE_(a == 0); TESTCASE_(a == 1);
+	TESTCASE_(b == -1); TESTCASE_(b == 0);
 	if (b >= 0) {
-		TESTCASE(a > 0 && INT64_MAX - a == b);
-		TESTCASE(a > 0 && INT64_MAX - a == b - 1);
+		TESTCASE_(a > 0 && INT64_MAX - a == b);
+		TESTCASE_(a > 0 && INT64_MAX - a == b - 1);
 		if (a > 0 && INT64_MAX - a < b) return true;
 	}
 	else {
-		TESTCASE(a < 0 && -(a + INT64_MAX) == b + 1);
-		TESTCASE(a < 0 && -(a + INT64_MAX) == b + 2);
+		TESTCASE_(a < 0 && -(a + INT64_MAX) == b + 1);
+		TESTCASE_(a < 0 && -(a + INT64_MAX) == b + 2);
 		if (a < 0 && -(a + INT64_MAX) > b + 1) return true;
 	}
 	*ao += b;
@@ -56,9 +56,9 @@ __host_device__ bool math_sub64(int64_t *ao, int64_t b) //: sqlite3SubInt64
 #if GCC_VERSION>=5004000 && !defined(__INTEL_COMPILER)
 	return __builtin_sub_overflow(*ao, b, ao);
 #else
-	TESTCASE(b == INT64_MIN + 1);
+	TESTCASE_(b == INT64_MIN + 1);
 	if (b == INT64_MIN) {
-		TESTCASE(*ao == -1); TESTCASE(*ao == 0);
+		TESTCASE_(*ao == -1); TESTCASE_(*ao == 0);
 		if (*ao >= 0) return true;
 		*ao -= b;
 		return false;

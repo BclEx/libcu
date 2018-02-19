@@ -875,7 +875,7 @@ __device__ void Tcl_SetErrorCode_(Tcl_Interp *interp, va_list va)
 {
 	register Interp *iPtr = (Interp *)interp;
 	// Scan through the arguments one at a time, appending them to $errorCode as list elements.
-	int flags = TCL_GLOBAL_ONLY | TCL_LIST_ELEMENT;
+	int flags = TCLGLOBAL__ONLY | TCL_LIST_ELEMENT;
 	while (true) {
 		char *string = va_arg(va, char *);
 		if (string == NULL) {

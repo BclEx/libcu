@@ -17,13 +17,13 @@ __host_device__ int alloc_releasememory(int n) //: sqlite3_release_memory
 }
 
 /* State information local to the memory allocation subsystem. */
-static __hostb_device__ _WSD struct Mem0Global {
+static __hostb_device__ WSD_ struct Mem0Global {
 	mutex *mutex;				// Mutex to serialize access
 	int64_t alarmThreshold;		// The soft heap limit
 	// True if heap is nearly "full" where "full" is defined by the soft_heap_limit() setting.
 	bool nearlyFull;
 } _mem0 = { nullptr, 0, false };
-#define mem0 _GLOBAL(struct Mem0Global, _mem0)
+#define mem0 GLOBAL_(struct Mem0Global, _mem0)
 
 /* Return the memory allocator mutex. sqlite3_status() needs it. */
 __host_device__ mutex *allocMutex() //: sqlite3MallocMutex
@@ -354,7 +354,7 @@ __host_device__ void *allocZero(uint64_t size) //: sqlite3MallocZero
 /* Allocate and zero memory.  If the allocation fails, make the mallocFailed flag in the connection pointer. */
 __host_device__ void *tagallocZero(tagbase_t *tag, uint64_t size) //: sqlite3DbMallocZero
 {
-	TESTCASE(tag);
+	TESTCASE_(tag);
 	void *p = tagallocRaw(tag, size);
 	if (p) memset(p, 0, (size_t)size);
 	return p;
@@ -562,7 +562,7 @@ __host_device__ RC tagApiExit(tagbase_t *tag, RC rc) //: sqlite3ApiExit
 #ifndef LIBCU_UNTESTABLE
 
 typedef struct BenignMallocHooks BenignMallocHooks;
-static __hostb_device__ _WSD struct BenignMallocHooks {
+static __hostb_device__ WSD_ struct BenignMallocHooks {
 	void (*benignBegin)();
 	void (*benignEnd)();
 } _benignMallocHooks = { nullptr, nullptr };

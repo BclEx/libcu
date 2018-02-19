@@ -71,7 +71,7 @@ __host_device__ int memfileRead(vsysfile *p, void *buf, int amount, int64_t offs
 	fileChunk_t *chunk;
 	assert(amount + offset <= f->endpoint.offset);
 	assert(!f->readpoint.offset || f->readpoint.chunk);
-	if (f->readpoint.offset != offset || !offset) { int64_t off = 0; for (chunk = f->first; _ALWAYS(chunk) && (off + f->chunkSize) <= offset; chunk = chunk->next) off += f->chunkSize; }
+	if (f->readpoint.offset != offset || !offset) { int64_t off = 0; for (chunk = f->first; ALWAYS_(chunk) && (off + f->chunkSize) <= offset; chunk = chunk->next) off += f->chunkSize; }
 	else { chunk = f->readpoint.chunk; assert(chunk); }
 
 	int chunkOffset = (int)(offset % f->chunkSize);
@@ -189,7 +189,7 @@ __host_device__ int memfileWrite(vsysfile *p, const void *buf, int amount, int64
 __host_device__ int memfileTruncate(vsysfile *p, int64_t size)
 {
 	memfile_t *f = (memfile_t *)p;
-	if (_ALWAYS(!size)) {
+	if (ALWAYS_(!size)) {
 		memfileFreeChunks(f);
 		f->size = 0;
 		f->endpoint.chunk = nullptr;
@@ -302,7 +302,7 @@ __host_device__ int memfileCreate(vsysfile *p) //: sqlite3JournalCreate
 #ifdef ENABLE_ATOMIC_WRITE
 		f->spill > 0
 #else
-		_NEVER(f->spill > 0) // While this appears to not be possible without ATOMIC_WRITE, the paths are complex, so it seems prudent to leave the test in as a NEVER(), in case our analysis is subtly flawed.
+		NEVER_(f->spill > 0) // While this appears to not be possible without ATOMIC_WRITE, the paths are complex, so it seems prudent to leave the test in as a NEVER(), in case our analysis is subtly flawed.
 #endif
 #ifdef ENABLE_BATCH_ATOMIC_WRITE
 		|| (f->flags & SQLITE_OPEN_MAIN_JOURNAL)

@@ -7,7 +7,7 @@ typedef uint64_t statusValue_t;
 #else
 typedef uint32_t statusValue_t;
 #endif
-static __hostb_device__ _WSD struct Status {
+static __hostb_device__ WSD_ struct Status {
 	statusValue_t nowValue[10]; // Current value
 	statusValue_t maxValue[10]; // Maximum value
 } _status = { {0,}, {0,} };
@@ -31,7 +31,7 @@ static __host_constant__ const char statusMutexStatics[] = {
 ** to the "_status" state vector declared above.
 */
 #ifdef OMIT_WSD
-#define _statusInit statusValue_t *x = &_GLOBAL(statusValue_t, _status)
+#define _statusInit statusValue_t *x = &GLOBAL_(statusValue_t, _status)
 #define _status x[0]
 #else
 #define _statusInit
@@ -162,9 +162,9 @@ __host_device__ RC tagstatus(tagbase_t *tag, STATUS op, int *current, int *highw
 	case TAGSTATUS_LOOKASIDE_HIT:
 	case TAGSTATUS_LOOKASIDE_MISS_SIZE:
 	case TAGSTATUS_LOOKASIDE_MISS_FULL: {
-		TESTCASE(op == TAGSTATUS_LOOKASIDE_HIT);
-		TESTCASE(op == TAGSTATUS_LOOKASIDE_MISS_SIZE);
-		TESTCASE(op == TAGSTATUS_LOOKASIDE_MISS_FULL);
+		TESTCASE_(op == TAGSTATUS_LOOKASIDE_HIT);
+		TESTCASE_(op == TAGSTATUS_LOOKASIDE_MISS_SIZE);
+		TESTCASE_(op == TAGSTATUS_LOOKASIDE_MISS_FULL);
 		assert((op - TAGSTATUS_LOOKASIDE_HIT) >= 0);
 		assert((op - TAGSTATUS_LOOKASIDE_HIT) < 3);
 		*current = 0;

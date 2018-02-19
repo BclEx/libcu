@@ -435,7 +435,7 @@ static __device__ int JimELVwaitCommand(ClientData dummy, Jim_Interp *interp, in
 		return JIM_ERROR;
 	}
 	Jim_EventLoop *eventLoop = (Jim_EventLoop *)Jim_CmdPrivData(interp);
-	Jim_Obj *oldValue = Jim_GetVariable(interp, argv[1], JIM_GLOBAL);
+	Jim_Obj *oldValue = Jim_GetVariable(interp, argv[1], JIMGLOBAL_);
 	if (oldValue)
 		Jim_IncrRefCount(oldValue);
 	// If a result was left, it is an error
@@ -445,7 +445,7 @@ static __device__ int JimELVwaitCommand(ClientData dummy, Jim_Interp *interp, in
 	int rc;
 	while ((rc = Jim_ProcessEvents(interp, JIM_ALL_EVENTS)) >= 0) {
 		Jim_Obj *currValue;
-		currValue = Jim_GetVariable(interp, argv[1], JIM_GLOBAL);
+		currValue = Jim_GetVariable(interp, argv[1], JIMGLOBAL_);
 		// Stop the loop if the vwait-ed variable changed value, or if was unset and now is set (or the contrary) or if a signal was caught
 		if ((oldValue && !currValue) || (!oldValue && currValue) || (oldValue && currValue && !Jim_StringEqObj(oldValue, currValue)) || Jim_CheckSignal(interp))
 			break;

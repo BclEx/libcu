@@ -835,7 +835,7 @@ __host_device__ const char *errStr(int rc) //: sqlite3ErrStr
 	case LIBCU_ABORT_ROLLBACK: err = "abort due to ROLLBACK"; break;
 	default:
 		rc &= 0xff;
-		if (_ALWAYS(rc >= 0) && rc < ARRAYSIZE_(msgs) && msgs[rc] != 0) err = msgs[rc];
+		if (ALWAYS_(rc >= 0) && rc < ARRAYSIZE_(msgs) && msgs[rc] != 0) err = msgs[rc];
 		break;
 	}
 	return err;
@@ -883,7 +883,7 @@ static __host_device__ int libcuDefaultBusyCallback(void *p, int count)
 */
 __host_device__ int sqlite3InvokeBusyHandler(BusyHandler *p) //: sqlite3InvokeBusyHandler
 {
-	if (_NEVER(!p) || !p->func || p->busys < 0) return 0;
+	if (NEVER_(!p) || !p->func || p->busys < 0) return 0;
 	int rc = p->func(p->arg, p->busys);
 	if (rc == 0) p->busys = -1;
 	else p->busys++;
@@ -1159,7 +1159,7 @@ __host_device__ const char *tagerrmsg(tagbase_t *tag) //: sqlite3_errmsg
 	const char *z;
 	if (tag->mallocFailed) z = sqlite3ErrStr(SQLITE_NOMEM_BKPT);
 	else {
-		TESTCASE(!tag->err);
+		TESTCASE_(!tag->err);
 		z = (char *)sqlite3_value_text(tag->err);
 		assert(!tag->mallocFailed);
 		if (!z) z = tagErrStr(tag->errCode);
@@ -1231,13 +1231,13 @@ static __host_device__ int reportError(int err, int lineno, const char *type)
 	_log(err, "%s at line %d of [%.10s]", type, lineno, 20 + libcu_sourceid());
 	return err;
 }
-__host_device__ int libcuCorruptError(int lineno) { TESTCASE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, "database corruption"); } //: sqlite3CorruptError
-__host_device__ int libcuMisuseError(int lineno) { TESTCASE(_runtimeConfig.log); return reportError(RC_MISUSE, lineno, "misuse"); } //: sqlite3MisuseError
-__host_device__ int libcuCantopenError(int lineno) { TESTCASE(_runtimeConfig.log); return reportError(RC_CANTOPEN, lineno, "cannot open file"); } //: sqlite3CantopenError
+__host_device__ int libcuCorruptError(int lineno) { TESTCASE_(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, "database corruption"); } //: sqlite3CorruptError
+__host_device__ int libcuMisuseError(int lineno) { TESTCASE_(_runtimeConfig.log); return reportError(RC_MISUSE, lineno, "misuse"); } //: sqlite3MisuseError
+__host_device__ int libcuCantopenError(int lineno) { TESTCASE_(_runtimeConfig.log); return reportError(RC_CANTOPEN, lineno, "cannot open file"); } //: sqlite3CantopenError
 #ifdef _DEBUG
-__host_device__ int libcuCorruptPgnoError(int lineno, Pgno pgno) { char msg[100]; snprintf(msg, sizeof(msg), "database corruption page %d", pgno); TESTCASE(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, msg); } //: sqlite3CorruptPgnoError
-__host_device__ int libcuNomemError(int lineno) { TESTCASE(_runtimeConfig.log); return reportError(RC_NOMEM, lineno, "OOM"); } //: sqlite3NomemError
-__host_device__ int libcuIoerrnomemError(int lineno){ TESTCASE(_runtimeConfig.log); return reportError(RC_IOERR_NOMEM, lineno, "I/O OOM error"); } //: sqlite3IoerrnomemError
+__host_device__ int libcuCorruptPgnoError(int lineno, Pgno pgno) { char msg[100]; snprintf(msg, sizeof(msg), "database corruption page %d", pgno); TESTCASE_(_runtimeConfig.log); return reportError(RC_CORRUPT, lineno, msg); } //: sqlite3CorruptPgnoError
+__host_device__ int libcuNomemError(int lineno) { TESTCASE_(_runtimeConfig.log); return reportError(RC_NOMEM, lineno, "OOM"); } //: sqlite3NomemError
+__host_device__ int libcuIoerrnomemError(int lineno){ TESTCASE_(_runtimeConfig.log); return reportError(RC_IOERR_NOMEM, lineno, "I/O OOM error"); } //: sqlite3IoerrnomemError
 #endif
 
 #ifndef OMIT_COMPILEOPTION_DIAGS

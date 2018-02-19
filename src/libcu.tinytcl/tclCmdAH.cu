@@ -248,7 +248,7 @@ __device__ int Tcl_ErrorCmd(ClientData dummy, Tcl_Interp *interp, int argc, cons
 		iPtr->flags |= ERR_ALREADY_LOGGED;
 	}
 	if (argc == 4) {
-		Tcl_SetVar2(interp, "errorCode", (char *)NULL, (char *)args[3], TCL_GLOBAL_ONLY);
+		Tcl_SetVar2(interp, "errorCode", (char *)NULL, (char *)args[3], TCLGLOBAL__ONLY);
 		iPtr->flags |= ERROR_CODE_SET;
 	}
 	Tcl_SetResult(interp, (char *)args[1], TCL_VOLATILE);

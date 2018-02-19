@@ -3684,9 +3684,9 @@ static __device__ Jim_Var *JimCreateVariable(Jim_Interp *interp, Jim_Obj *nameOb
 __device__ int Jim_SetVariable(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_Obj *valObjPtr, int flags)
 {
 	Jim_CallFrame *savedFramePtr;
-	int global = (flags & JIM_GLOBAL);
+	int global = (flags & JIMGLOBAL_);
 	if (global) { savedFramePtr = interp->framePtr; interp->framePtr = interp->topFramePtr; }
-	flags &= ~JIM_GLOBAL;
+	flags &= ~JIMGLOBAL_;
 
 	switch (SetVariableFromAny(interp, nameObjPtr)) {
 	case JIM_DICT_SUGAR:
@@ -3824,9 +3824,9 @@ __device__ int Jim_SetVariableLink(Jim_Interp *interp, Jim_Obj *nameObjPtr, Jim_
 __device__ Jim_Obj *Jim_GetVariable(Jim_Interp *interp, Jim_Obj *nameObjPtr, int flags)
 {
 	Jim_CallFrame *savedFramePtr;
-	int global = (flags & JIM_GLOBAL);
+	int global = (flags & JIMGLOBAL_);
 	if (global) { savedFramePtr = interp->framePtr; interp->framePtr = interp->topFramePtr; }
-	flags &= ~JIM_GLOBAL;
+	flags &= ~JIMGLOBAL_;
 
 	switch (SetVariableFromAny(interp, nameObjPtr)) {
 	case JIM_OK: {
@@ -3873,9 +3873,9 @@ __device__ Jim_Obj *Jim_GetVariableStr(Jim_Interp *interp, const char *name, int
 __device__ int Jim_UnsetVariable(Jim_Interp *interp, Jim_Obj *nameObjPtr, int flags)
 {
 	Jim_CallFrame *savedFramePtr;
-	int global = (flags & JIM_GLOBAL);
+	int global = (flags & JIMGLOBAL_);
 	if (global) { savedFramePtr = interp->framePtr; interp->framePtr = interp->topFramePtr; }
-	flags &= ~JIM_GLOBAL;
+	flags &= ~JIMGLOBAL_;
 
 	int retval = SetVariableFromAny(interp, nameObjPtr);
 	if (retval == JIM_DICT_SUGAR) { // [dict] syntax sugar.
@@ -9043,7 +9043,7 @@ static __device__ Jim_Obj *JimCommandsList(Jim_Interp *interp, Jim_Obj *patternO
 }
 
 // Keep these in order
-#define JIM_VARLIST_GLOBALS 0
+#define JIM_VARLISTGLOBAL_S 0
 #define JIM_VARLIST_LOCALS 1
 #define JIM_VARLIST_VARS 2
 #define JIM_VARLIST_VALUES 0x1000
@@ -9066,7 +9066,7 @@ static __device__ Jim_Obj *JimVariablesList(Jim_Interp *interp, Jim_Obj *pattern
 	if (mode == JIM_VARLIST_LOCALS && interp->framePtr == interp->topFramePtr)
 		return interp->emptyObj;
 	else {
-		Jim_CallFrame *framePtr = (mode == JIM_VARLIST_GLOBALS ? interp->topFramePtr : interp->framePtr);
+		Jim_CallFrame *framePtr = (mode == JIM_VARLISTGLOBAL_S ? interp->topFramePtr : interp->framePtr);
 		return JimHashtablePatternMatch(interp, &framePtr->vars, patternObjPtr, JimVariablesMatch, mode);
 	}
 }
@@ -10467,7 +10467,7 @@ static __device__ int Jim_ReturnCoreCommand(ClientData dummy, Jim_Interp *interp
 		JimSetStackTrace(interp, stackTraceObj);
 	// If an error code list is supplied, set the global $errorCode
 	if (errorCodeObj && returnCode == JIM_ERROR)
-		Jim_SetVariableStr(interp, "errorCode", errorCodeObj, JIM_GLOBAL);
+		Jim_SetVariableStr(interp, "errorCode", errorCodeObj, JIMGLOBAL_);
 	interp->returnCode = returnCode;
 	interp->returnLevel = level;
 	if (i == argc - 1)
@@ -10684,7 +10684,7 @@ static __device__ int Jim_UpvarCoreCommand(ClientData dummy, Jim_Interp *interp,
 }
 
 // [global]
-static __device__ int Jim_GlobalCoreCommand(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
+static __device__ int JimGLOBAL_CoreCommand(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	if (argc < 2) {
 		Jim_WrongNumArgs(interp, 1, argv, "varName ?varName ...?");
@@ -11045,7 +11045,7 @@ static __device__ int Jim_CatchCoreCommand(ClientData dummy, Jim_Interp *interp,
 	jim_wide ignore_mask = (1 << JIM_EXIT) | (1 << JIM_EVAL) | (1 << JIM_SIGNAL);
 	const int max_ignore_code = sizeof(ignore_mask) * 8;
 	// Reset the error code before catch. Note that this is not strictly correct.
-	Jim_SetVariableStr(interp, "errorCode", Jim_NewStringObj(interp, "NONE", -1), JIM_GLOBAL);
+	Jim_SetVariableStr(interp, "errorCode", Jim_NewStringObj(interp, "NONE", -1), JIMGLOBAL_);
 	int i;
 	for (i = 1; i < argc - 1; i++) {
 		const char *arg = Jim_String(argv[i]);
@@ -11116,7 +11116,7 @@ wrongargs:
 			if (exitCode == JIM_ERROR) {
 				Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-errorinfo", -1));
 				Jim_ListAppendElement(interp, optListObj, interp->stackTrace);
-				Jim_Obj *errorCode = Jim_GetVariableStr(interp, "errorCode", JIM_GLOBAL);
+				Jim_Obj *errorCode = Jim_GetVariableStr(interp, "errorCode", JIMGLOBAL_);
 				if (errorCode) {
 					Jim_ListAppendElement(interp, optListObj, Jim_NewStringObj(interp, "-errorcode", -1));
 					Jim_ListAppendElement(interp, optListObj, errorCode);
@@ -11469,7 +11469,7 @@ __constant__ static const char *const _info_commands[] = {
 static __device__ int Jim_InfoCoreCommand(ClientData dummy, Jim_Interp *interp, int argc, Jim_Obj *const *argv)
 {
 	enum
-	{ INFO_BODY, INFO_STATICS, INFO_COMMANDS, INFO_PROCS, INFO_CHANNELS, INFO_EXISTS, INFO_GLOBALS, INFO_LEVEL,
+	{ INFO_BODY, INFO_STATICS, INFO_COMMANDS, INFO_PROCS, INFO_CHANNELS, INFO_EXISTS, INFOGLOBAL_S, INFO_LEVEL,
 	INFO_FRAME, INFO_LOCALS, INFO_VARS, INFO_VERSION, INFO_PATCHLEVEL, INFO_COMPLETE, INFO_ARGS,
 	INFO_HOSTNAME, INFO_SCRIPT, INFO_SOURCE, INFO_STACKTRACE, INFO_NAMEOFEXECUTABLE,
 	INFO_RETURNCODES, INFO_REFERENCES, INFO_ALIAS,
@@ -11540,8 +11540,8 @@ static __device__ int Jim_InfoCoreCommand(ClientData dummy, Jim_Interp *interp, 
 		mode++; // JIM_VARLIST_VARS
 	case INFO_LOCALS:
 		mode++; // JIM_VARLIST_LOCALS
-	case INFO_GLOBALS:
-		// mode 0 => JIM_VARLIST_GLOBALS
+	case INFOGLOBAL_S:
+		// mode 0 => JIM_VARLISTGLOBAL_S
 		if (argc != 2 && argc != 3) {
 			Jim_WrongNumArgs(interp, 2, argv, "?pattern?");
 			return JIM_ERROR;
@@ -12286,7 +12286,7 @@ __constant__ static const struct {
 	{"concat", Jim_ConcatCoreCommand},
 	{"return", Jim_ReturnCoreCommand},
 	{"upvar", Jim_UpvarCoreCommand},
-	{"global", Jim_GlobalCoreCommand},
+	{"global", JimGLOBAL_CoreCommand},
 	{"string", Jim_StringCoreCommand},
 	{"time", Jim_TimeCoreCommand},
 	{"exit", Jim_ExitCoreCommand},
@@ -12569,7 +12569,7 @@ __device__ int Jim_SetCommandInfo(Jim_Interp *interp, Jim_Obj *objPtr, Jim_CmdIn
 __device__ Jim_Obj *Jim_GetVar2(Jim_Interp *interp, const char *name, const char *key, int flags)
 {
 	Jim_CallFrame *savedFramePtr;
-	int global = (flags & JIM_GLOBAL);
+	int global = (flags & JIMGLOBAL_);
 	if (global) { savedFramePtr = interp->framePtr; interp->framePtr = interp->topFramePtr; }
 
 	Jim_Obj *nameObjPtr = Jim_NewStringObj(interp, key, -1);
@@ -12588,7 +12588,7 @@ __device__ Jim_Obj *Jim_GetVar2(Jim_Interp *interp, const char *name, const char
 __device__ int Jim_SetVar2(Jim_Interp *interp, const char *name, const char *key, const char *val, int flags)
 {
 	Jim_CallFrame *savedFramePtr;
-	int global = (flags & JIM_GLOBAL);
+	int global = (flags & JIMGLOBAL_);
 	if (global) { savedFramePtr = interp->framePtr; interp->framePtr = interp->topFramePtr; }
 
 	Jim_Obj *nameObjPtr = Jim_NewStringObj(interp, name, -1);

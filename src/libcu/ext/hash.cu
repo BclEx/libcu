@@ -8,7 +8,7 @@
 **
 ** "h" is a pointer to the hash table that is to be initialized.
 */
-__device__ void hashInit(hash_t *h) //: sqlite3HashInit
+__host_device__ void hashInit(hash_t *h) //: sqlite3HashInit
 {
 	assert(h);
 	h->first = nullptr;
@@ -20,7 +20,7 @@ __device__ void hashInit(hash_t *h) //: sqlite3HashInit
 /* Remove all entries from a hash table.  Reclaim all memory. Call this routine to delete a hash table or to reset a hash table
 ** to the empty state.
 */
-__device__ void hashClear(hash_t *h) //: sqlite3HashClear
+__host_device__ void hashClear(hash_t *h) //: sqlite3HashClear
 {
 	hashElem_t *elem = h->first; // For looping over all elements of the table
 	h->first = nullptr;
@@ -35,7 +35,7 @@ __device__ void hashClear(hash_t *h) //: sqlite3HashClear
 }
 
 /* The hashing function.  */
-__device__ static unsigned int getHashCode(const char *key)
+__host_device__ static unsigned int getHashCode(const char *key)
 {
 	/* Knuth multiplicative hashing.  (Sorting & Searching, p. 510). 0x9e3779b1 is 2654435761 which is the closest prime number to (2**32)*golden_ratio, where golden_ratio = (sqrt(5) - 1)/2. */
 	unsigned int h = 0;
@@ -45,7 +45,7 @@ __device__ static unsigned int getHashCode(const char *key)
 }
 
 /* Link "newElem" element into the hash table "h".  If "entry!=0" then also insert "newElem" into the "entry" hash bucket. */
-static __device__ void insertElement(hash_t *h, hash_t::htable_t *entry, hashElem_t *newElem)
+static __host_device__ void insertElement(hash_t *h, hash_t::htable_t *entry, hashElem_t *newElem)
 {
 	hashElem_t *headElem; // First element already in entry
 	if (entry) {
@@ -75,7 +75,7 @@ static __device__ void insertElement(hash_t *h, hash_t::htable_t *entry, hashEle
 ** The hash table might fail to resize if malloc() fails or if the new size is the same as the prior size.
 ** Return true if the resize occurs and false if not.
 */
-static __device__ bool rehash(hash_t *h, unsigned int newSize)
+static __host_device__ bool rehash(hash_t *h, unsigned int newSize)
 {
 #if MALLOC_SOFT_LIMIT > 0
 	if (newSize * sizeof(htable_t) > MALLOC_SOFT_LIMIT)
@@ -101,7 +101,7 @@ static __device__ bool rehash(hash_t *h, unsigned int newSize)
 /* This function (for internal use only) locates an element in an hash table that matches the given key.  The hash for this key is
 ** also computed and returned in the "h" parameter.
 */
-static __device__ hashElem_t *findElementWithHash(const hash_t *h, const char *key, unsigned int *hash)
+static __host_device__ hashElem_t *findElementWithHash(const hash_t *h, const char *key, unsigned int *hash)
 {
 	hashElem_t *elem;
 	unsigned int hash2; // The computed hash
@@ -128,7 +128,7 @@ static __device__ hashElem_t *findElementWithHash(const hash_t *h, const char *k
 }
 
 /* Remove a single entry from the hash table given a pointer to that element and a hash on the element's key. */
-static __device__ void removeElementGivenHash(hash_t *h, hashElem_t *elem, unsigned int hash)
+static __host_device__ void removeElementGivenHash(hash_t *h, hashElem_t *elem, unsigned int hash)
 {
 	if (elem->prev)
 		elem->prev->next = elem->next; 
@@ -156,7 +156,7 @@ static __device__ void removeElementGivenHash(hash_t *h, hashElem_t *elem, unsig
 /* Attempt to locate an element of the hash table "h" with a key that matches pKey.  Return the data for this element if it is
 ** found, or nullptr if there is no match.
 */
-__device__ void *hashFind(hash_t *h, const char *key) //: sqlite3HashFind
+__host_device__ void *hashFind(hash_t *h, const char *key) //: sqlite3HashFind
 {
 	assert(h);
 	assert(key);
@@ -174,7 +174,7 @@ __device__ void *hashFind(hash_t *h, const char *key) //: sqlite3HashFind
 **
 ** If the "data" parameter to this function is NULL, then the element corresponding to "key" is removed from the hash table.
 */
-__device__ void *hashInsert(hash_t *h, const char *key, void *data) //: sqlite3HashInsert
+__host_device__ void *hashInsert(hash_t *h, const char *key, void *data) //: sqlite3HashInsert
 {
 	assert(h);
 	assert(key);

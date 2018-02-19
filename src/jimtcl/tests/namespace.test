@@ -214,8 +214,8 @@ test namespace-3.4 {querying:  namespace tail} {
 # TEST: namespace hierarchy
 # -----------------------------------------------------------------------
 test namespace-5.1 {define nested namespaces} {
-    set test_ns_var_global "var in ::"
-    proc test_ns_cmd_global {} {return "cmd in ::"}
+    set test_ns_varGLOBAL_ "var in ::"
+    proc test_ns_cmdGLOBAL_ {} {return "cmd in ::"}
     namespace eval nsh1 {
         set test_ns_var_hier1 "particular to hier1"
         proc test_ns_cmd_hier1 {} {return "particular to hier1"}
@@ -246,10 +246,10 @@ test namespace-5.3 {namespace qualifiers work in namespace command} {
 } {::nsh1 ::nsh1::nsh2 ::nsh1::nsh2}
 
 test namespace-5.4 {nested namespaces can access global namespace} {
-    list [namespace eval nsh1 {set ::test_ns_var_global}] \
-         [namespace eval nsh1 {test_ns_cmd_global}] \
-         [namespace eval nsh1::nsh2 {set ::test_ns_var_global}] \
-         [namespace eval nsh1::nsh2 {test_ns_cmd_global}]
+    list [namespace eval nsh1 {set ::test_ns_varGLOBAL_}] \
+         [namespace eval nsh1 {test_ns_cmdGLOBAL_}] \
+         [namespace eval nsh1::nsh2 {set ::test_ns_varGLOBAL_}] \
+         [namespace eval nsh1::nsh2 {test_ns_cmdGLOBAL_}]
 } {{var in ::} {cmd in ::} {var in ::} {cmd in ::}}
 
 test namespace-5.6 {commands in different namespaces don't conflict} {
@@ -522,7 +522,7 @@ catch {unset trigger2}
 catch {unset sval}
 catch {unset msg}
 catch {unset x}
-catch {unset test_ns_var_global}
+catch {unset test_ns_varGLOBAL_}
 catch {unset cmd}
 catch {eval namespace delete [namespace children :: test_ns_*]}
 

@@ -6,7 +6,7 @@
 /* For debugging purposes, record when the mutex subsystem is initialized and uninitialized so that we can assert() if there is an attempt to
 ** allocate a mutex while the system is uninitialized.
 */
-static __hostb_device__ _WSD bool _mutexIsInit = false;
+static __hostb_device__ WSD_ bool _mutexIsInit = false;
 #endif
 
 /* Initialize the mutex system. */
@@ -31,7 +31,7 @@ __host_device__ RC mutexInitialize() //: sqlite3MutexInit
 	assert(__mutexsystem.initialize);
 	RC rc = __mutexsystem.initialize();
 #ifdef _DEBUG
-	_GLOBAL(bool, _mutexIsInit) = true;
+	GLOBAL_(bool, _mutexIsInit) = true;
 #endif
 	return rc;
 }
@@ -43,7 +43,7 @@ __host_device__ RC mutexShutdown() //: sqlite3MutexEnd
 	if (__mutexsystem.shutdown)
 		rc = __mutexsystem.shutdown();
 #ifdef _DEBUG
-	_GLOBAL(bool, _mutexIsInit) = false;
+	GLOBAL_(bool, _mutexIsInit) = false;
 #endif
 	return rc;
 }
@@ -62,7 +62,7 @@ __host_device__ mutex *mutexAlloc(MUTEX id) //: sqlite3MutexAlloc
 {
 	if (!_runtimeConfig.coreMutex)
 		return nullptr;
-	assert(_GLOBAL(bool, _mutexIsInit));
+	assert(GLOBAL_(bool, _mutexIsInit));
 	return __mutexsystem.alloc(id);
 }
 

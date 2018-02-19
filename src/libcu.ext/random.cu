@@ -2,12 +2,12 @@
 #include <assert.h>
 
 /* All threads share a single random number generator. This structure is the current state of the generator. */
-static __hostb_device__ _WSD struct PrngGlobal {
+static __hostb_device__ WSD_ struct PrngGlobal {
 	bool isInit;  // True if initialized
 	unsigned char i, j;         // State variables
 	unsigned char s[256];       // State variables
 } _prng;
-#define prng _GLOBAL(struct PrngGlobal, _prng)
+#define prng GLOBAL_(struct PrngGlobal, _prng)
 
 /* Return N random bytes. */
 __host_device__ void randomness_(int n, void *p) //: sqlite3_randomness
@@ -67,14 +67,14 @@ __host_device__ void randomness_(int n, void *p) //: sqlite3_randomness
 **
 ** The sqlite3_test_control() interface calls these routines to control the PRNG.
 */
-static __hostb_device__ _WSD struct PrngGlobal _prngSaved;
+static __hostb_device__ WSD_ struct PrngGlobal _prngSaved;
 __host_device__ void randomness_save() //: sqlite3PrngSaveState
 {
-	memcpy(&_GLOBAL(struct PrngGlobal, _prngSaved), &_GLOBAL(struct PrngGlobal, _prng), sizeof(_prng));
+	memcpy(&GLOBAL_(struct PrngGlobal, _prngSaved), &GLOBAL_(struct PrngGlobal, _prng), sizeof(_prng));
 }
 
 __host_device__ void randomness_restore() //: sqlite3PrngRestoreState
 {
-	memcpy(&_GLOBAL(struct PrngGlobal, _prng), &_GLOBAL(struct PrngGlobal, _prngSaved), sizeof(_prng));
+	memcpy(&GLOBAL_(struct PrngGlobal, _prng), &GLOBAL_(struct PrngGlobal, _prngSaved), sizeof(_prng));
 }
 #endif /* LIBCU_UNTESTABLE */

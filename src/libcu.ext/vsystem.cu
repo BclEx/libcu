@@ -156,8 +156,8 @@ __host_device__ RC vsystemFakeInit() //: sqlite3OsInit
 }
 
 /* The list of all registered VFS implementations. */
-static __hostb_device__ vsystem * _WSD _vfsGlobal = nullptr;
-#define vfs _GLOBAL(vsystem *, _vfsGlobal)
+static __hostb_device__ vsystem * WSD_ _vfsGlobal = nullptr;
+#define vfs GLOBAL_(vsystem *, _vfsGlobal)
 
 /* Locate a VFS by name.  If no name is given, simply return the first VFS on the list. */
 __host_device__ vsystem *vsystemFind(const char *name) //: sqlite3_vfs_find
@@ -240,7 +240,7 @@ __host_device__ RC vsystemUnregister(vsystem *p) //: sqlite3_vfs_unregister
 //	int size = _strlen(z);
 //	int i;
 //	for (i = size-1; i > 0 && z[i] != '/' && z[i] !='.'; i--) { }
-//	if (z[i] == '.' && _ALWAYS(size > i+4)) _memmove(&z[i+1], &z[size-3], 4);
+//	if (z[i] == '.' && ALWAYS_(size > i+4)) _memmove(&z[i+1], &z[size-3], 4);
 //}
 //#endif
 //
@@ -276,7 +276,7 @@ __host_device__ RC vsystemUnregister(vsystem *p) //: sqlite3_vfs_unregister
 //
 //	RC rc = RC_OK;
 //	char *fileName;
-//	if (((flags & VSystem::OPEN_URI) || SysEx_GlobalStatics.OpenUri) && uriLength >= 5 && !_memcmp(uri, "file:", 5))
+//	if (((flags & VSystem::OPEN_URI) || SysExGLOBAL_Statics.OpenUri) && uriLength >= 5 && !_memcmp(uri, "file:", 5))
 //	{
 //		// Make sure the SQLITE_OPEN_URI flag is set to indicate to the VFS xOpen method that there may be extra parameters following the file-name.
 //		flags |= VSystem::OPEN_URI;

@@ -52,7 +52,7 @@
 #endif
 
 /* The following singleton contains the global configuration for the Libcu library. */
-_WSD struct RuntimeConfig _runtimeConfig = {
+WSD_ struct RuntimeConfig _runtimeConfig = {
 	{0,0},						// appendFormat
 	LIBCU_DEFAULTMEMSTATUS,		// memstat
 	true,						// coreMutex

@@ -394,7 +394,7 @@ __device__ void sqlite3PcacheMakeDirty(PgHdr *p){
 __device__ void pcacheMakeClean(PgHdr *p) //: sqlite3PcacheMakeClean
 {
 	assert(pcachePageSanity(p) );
-	if (_ALWAYS(p->flags & PGHDR_DIRTY)) {
+	if (ALWAYS_(p->flags & PGHDR_DIRTY)) {
 		assert(!(p->flags & PGHDR_CLEAN));
 		pcacheManageDirtyList(p, PCACHE_DIRTYLIST_REMOVE);
 		p->flags &= ~(PGHDR_DIRTY|PGHDR_NEED_SYNC|PGHDR_WRITEABLE);
@@ -463,7 +463,7 @@ __device__ void pcacheTruncate(PCache *cache, Pgno pgno) //: sqlite3PcacheTrunca
 		}
 		if (pgno == 0 && cache->refSum) {
 			pcache_page_t *page1 = __pcachesystem.fetch(cache->cache, 1, 0);
-			if (_ALWAYS(page1)) { memset(page1->buf, 0, cache->sizePage); pgno = 1; } // Page 1 is always available in cache, because pCache->nRefSum>0
+			if (ALWAYS_(page1)) { memset(page1->buf, 0, cache->sizePage); pgno = 1; } // Page 1 is always available in cache, because pCache->nRefSum>0
 		}
 		__pcachesystem.truncate(cache->cache, pgno + 1);
 	}
@@ -514,12 +514,12 @@ static __device__ PgHdr *pcacheSortDirtyList(PgHdr *in)
 	memset(a, 0, sizeof(a));
 	int i; while (in) {
 		p = in; in = p->dirty; p->dirty = 0;
-		for (i = 0; _ALWAYS(i < N_SORT_BUCKET - 1); i++) {
+		for (i = 0; ALWAYS_(i < N_SORT_BUCKET - 1); i++) {
 			if (!a[i]) { a[i] = p; break; }
 			else { p = pcacheMergeDirtyList(a[i], p); a[i] = 0; }
 		}
 		// To get here, there need to be 2^(N_SORT_BUCKET) elements in the input list.  But that is impossible.
-		if (_NEVER(i == N_SORT_BUCKET - 1))
+		if (NEVER_(i == N_SORT_BUCKET - 1))
 			a[i] = pcacheMergeDirtyList(a[i], p);
 	}
 	p = a[0];

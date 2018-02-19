@@ -105,7 +105,7 @@ extern __device__ int Tcl_SetCommandInfo(Tcl_Interp *interp, const char *cmdName
 #define TCL_DYNAMIC	((Tcl_FreeProc *)free)
 
 // Flag values passed to variable-related procedures.
-#define TCL_GLOBAL_ONLY		1
+#define TCLGLOBAL__ONLY		1
 #define TCL_APPEND_VALUE	2
 #define TCL_LIST_ELEMENT	4
 #define TCL_NO_SPACE		8
@@ -185,7 +185,7 @@ extern __device__ int Tcl_GetWideInt(Tcl_Interp *interp, const char *string, int
 extern __device__ char *Tcl_GetByteArray(Tcl_Interp *interp, const char *string, int *arrayLength);
 extern __device__ char *Tcl_GetVar(Tcl_Interp *interp, char *varName, int flags);
 extern __device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int flags);
-extern __device__ int Tcl_GlobalEval(Tcl_Interp *interp, char *command);
+extern __device__ int TclGLOBAL_Eval(Tcl_Interp *interp, char *command);
 extern __device__ void Tcl_InitHistory(Tcl_Interp *interp);
 extern __device__ void Tcl_InitMemory(Tcl_Interp *interp);
 extern __device__ void Tcl_InitUnix(Tcl_Interp *interp);

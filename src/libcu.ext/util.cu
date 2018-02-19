@@ -156,7 +156,7 @@ __host_device__ bool tagSafetyCheckOk(tagbase_t *tag) //: sqlite3SafetyCheckOk
 	uint32_t magic = tag->magic;
 	if (magic != TAG_MAGIC_OPEN) {
 		if (tagSafetyCheckSickOrOk(tag)) {
-			TESTCASE(_runtimeConfig.log);
+			TESTCASE_(_runtimeConfig.log);
 			logBadConnection("unopened");
 		}
 		return false;
@@ -167,7 +167,7 @@ __host_device__ bool tagSafetyCheckSickOrOk(tagbase_t *tag) //: sqlite3SafetyChe
 {
 	uint32_t magic = tag->magic;
 	if (magic != TAG_MAGIC_SICK && magic != TAG_MAGIC_OPEN && magic != TAG_MAGIC_BUSY) {
-		TESTCASE(_runtimeConfig.log);
+		TESTCASE_(_runtimeConfig.log);
 		logBadConnection("invalid");
 		return false;
 	}
@@ -197,7 +197,7 @@ __host_device__ void util_fileSuffix3(const char *baseFilename, char *z) //: sql
 		int i, sz;
 		int size = strlen(z);
 		for (i = size - 1; i > 0 && z[i] != '/' && z[i] != '.'; i--) { }
-		if (z[i] == '.' && _ALWAYS(size > i + 4)) memmove(&z[i+1], &z[size-3], 4);
+		if (z[i] == '.' && ALWAYS_(size > i + 4)) memmove(&z[i+1], &z[size-3], 4);
 	}
 }
 #endif

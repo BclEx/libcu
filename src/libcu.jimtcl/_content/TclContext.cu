@@ -383,9 +383,9 @@ static __device__ void SetTestUnlockNotifyVars(Jim_Interp *interp, int argId, in
 {
 	char b[64];
 	snprintf(b, sizeof(b), "%d", argId);
-	Jim_SetVar(interp, "sqlite_unlock_notify_arg", b, JIM_GLOBAL_ONLY);
+	Jim_SetVar(interp, "sqlite_unlock_notify_arg", b, JIMGLOBAL__ONLY);
 	snprintf(b, sizeof(b), "%d", argsLength);
-	Jim_SetVar(interp, "sqlite_unlock_notify_argcount", b, JIM_GLOBAL_ONLY);
+	Jim_SetVar(interp, "sqlite_unlock_notify_argcount", b, JIMGLOBAL__ONLY);
 }
 #else
 #define SetTestUnlockNotifyVars(x,y,z)
@@ -396,7 +396,7 @@ static __device__ void DbUnlockNotify(void **args, int argsLength)
 {
 	for (int i = 0; i < argsLength; i++)
 	{
-		const int flags = (JIM_EVAL_GLOBAL | JIM_EVAL_DIRECT);
+		const int flags = (JIM_EVALGLOBAL_ | JIM_EVAL_DIRECT);
 		TclContext *tctx = (TclContext *)args[i];
 		Jim_Interp *interp = tctx->Interp;
 		SetTestUnlockNotifyVars(interp, i, argsLength);

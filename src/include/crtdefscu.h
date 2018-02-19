@@ -381,18 +381,18 @@ __device__ void __coverage(int line);
 #else
 void __coverage(int line);
 #endif
-#define TESTCASE(X)  if (X) { __coverage(__LINE__); }
+#define TESTCASE_(X)  if (X) { __coverage(__LINE__); }
 #else
-#define TESTCASE(X)
+#define TESTCASE_(X)
 #endif
 
-/* The TESTONLY macro is used to enclose variable declarations or other bits of code that are needed to support the arguments
+/* The TESTONLY_ macro is used to enclose variable declarations or other bits of code that are needed to support the arguments
 ** within testcase() and assert() macros.
 */
 #if !defined(NDEBUG) || defined(_COVERAGE_TEST)
-#define TESTONLY(X)  X
+#define TESTONLY_(X)  X
 #else
-#define TESTONLY(X)
+#define TESTONLY_(X)
 #endif
 
 /*
@@ -401,9 +401,9 @@ void __coverage(int line);
 ** "Verification, Validation, and Accreditation".  In other words, the code within VVA_ONLY() will only run during verification processes.
 */
 #ifndef NDEBUG
-#define DEBUGONLY(X)  X
+#define DEBUGONLY_(X)  X
 #else
-#define DEBUGONLY(X)
+#define DEBUGONLY_(X)
 #endif
 
 /* The ALWAYS and NEVER macros surround boolean expressions which are intended to always be true or false, respectively.  Such
@@ -417,14 +417,14 @@ void __coverage(int line);
 ** not be counted as untested code.
 */
 #if defined(_COVERAGE_TEST) || defined(_MUTATION_TEST)
-# define _ALWAYS(X)      (1)
-# define _NEVER(X)       (0)
+# define ALWAYS_(X)      (1)
+# define NEVER_(X)       (0)
 #elif !defined(NDEBUG)
-# define _ALWAYS(X)      ((X)?1:(assert(0),0))
-# define _NEVER(X)       ((X)?(assert(0),1):0)
+# define ALWAYS_(X)      ((X)?1:(assert(0),0))
+# define NEVER_(X)       ((X)?(assert(0),1):0)
 #else
-# define _ALWAYS(X)      (X)
-# define _NEVER(X)       (X)
+# define ALWAYS_(X)      (X)
+# define NEVER_(X)       (X)
 #endif
 
 __END_DECLS;
@@ -437,19 +437,19 @@ __BEGIN_DECLS;
 
 // When NO_WSD is defined, it means that the target platform does not support Writable Static Data (WSD) such as global and static variables.
 // All variables must either be on the stack or dynamically allocated from the heap.  When WSD is unsupported, the variable declarations scattered
-// throughout the code must become constants instead.  The _WSD macro is used for this purpose.  And instead of referencing the variable
+// throughout the code must become constants instead.  The WSD_ macro is used for this purpose.  And instead of referencing the variable
 // directly, we use its constant as a key to lookup the run-time allocated buffer that holds real variable.  The constant is also the initializer
 // for the run-time allocated buffer.
 //
-// In the usual case where WSD is supported, the _WSD and _GLOBAL macros become no-ops and have zero performance impact.
+// In the usual case where WSD is supported, the WSD_ and GLOBAL_ macros become no-ops and have zero performance impact.
 #ifdef NO_WSD
 int __wsdinit(int n, int j);
 void *__wsdfind(void *k, int l);
-#define _WSD const
-#define _GLOBAL(t, v) (*(t*)__wsdfind((void *)&(v), sizeof(v)))
+#define WSD_ const
+#define GLOBAL_(t, v) (*(t*)__wsdfind((void *)&(v), sizeof(v)))
 #else
-#define _WSD
-#define _GLOBAL(t, v) v
+#define WSD_
+#define GLOBAL_(t, v) v
 #endif
 
 __END_DECLS;

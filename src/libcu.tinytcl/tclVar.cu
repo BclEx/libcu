@@ -91,10 +91,10 @@ __device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 	// If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
-	if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	if ((flags & TCLGLOBAL__ONLY) || (iPtr->varFramePtr == NULL)) {
 		hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
 	} else {
 		hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
@@ -138,7 +138,7 @@ __device__ char *Tcl_GetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 
 	// Invoke any traces that have been set for the variable.
 	if (varPtr->tracePtr != NULL || (arrayPtr != NULL && arrayPtr->tracePtr != NULL)) {
-		char *msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2, (flags & TCL_GLOBAL_ONLY) | TCL_TRACE_READS);
+		char *msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2, (flags & TCLGLOBAL__ONLY) | TCL_TRACE_READS);
 		if (msg != NULL) {
 			VarErrMsg(interp, part1, part2, "read", msg);
 			return NULL;
@@ -222,11 +222,11 @@ __device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char 
 	// If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
 	int new_;
-	if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	if ((flags & TCLGLOBAL__ONLY) || (iPtr->varFramePtr == NULL)) {
 		hPtr = Tcl_CreateHashEntry(&iPtr->globalTable, part1, &new_);
 	} else {
 		hPtr = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable, part1, &new_);
@@ -327,7 +327,7 @@ __device__ char *Tcl_SetVar2(Tcl_Interp *interp, char *part1, char *part2, char 
 
 	// Invoke any write traces for the variable.
 	if (varPtr->tracePtr != NULL || (arrayPtr != NULL && arrayPtr->tracePtr != NULL)) {
-		char *msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2, (flags & TCL_GLOBAL_ONLY) | TCL_TRACE_WRITES);
+		char *msg = CallTraces(iPtr, arrayPtr, hPtr, part1, part2, (flags & TCLGLOBAL__ONLY) | TCL_TRACE_WRITES);
 		if (msg != NULL) {
 			VarErrMsg(interp, part1, part2, "set", msg);
 			return NULL;
@@ -400,10 +400,10 @@ __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 	// If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
-	if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	if ((flags & TCLGLOBAL__ONLY) || (iPtr->varFramePtr == NULL)) {
 		hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
 	} else {
 		hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
@@ -471,7 +471,7 @@ __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 
 	// Call trace procedures for the variable being deleted and delete its traces.
 	if (dummyVar.tracePtr != NULL || (arrayPtr != NULL && arrayPtr->tracePtr != NULL)) {
-		CallTraces(iPtr, arrayPtr, &dummyEntry, part1, part2, (flags & TCL_GLOBAL_ONLY) | TCL_TRACE_UNSETS);
+		CallTraces(iPtr, arrayPtr, &dummyEntry, part1, part2, (flags & TCLGLOBAL__ONLY) | TCL_TRACE_UNSETS);
 		while (dummyVar.tracePtr != NULL) {
 			VarTrace *tracePtr = dummyVar.tracePtr;
 			dummyVar.tracePtr = tracePtr->nextPtr;
@@ -481,7 +481,7 @@ __device__ int Tcl_UnsetVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 
 	// If the variable is an array, delete all of its elements.  This must be done after calling the traces on the array, above (that's the way traces are defined).
 	if (dummyVar.flags & VAR_ARRAY) {
-		DeleteArray(iPtr, part1, &dummyVar, (flags & TCL_GLOBAL_ONLY) | TCL_TRACE_UNSETS);
+		DeleteArray(iPtr, part1, &dummyVar, (flags & TCLGLOBAL__ONLY) | TCL_TRACE_UNSETS);
 	}
 	if (dummyVar.flags & VAR_UNDEFINED) {
 		if (flags & TCL_LEAVE_ERR_MSG) {
@@ -555,11 +555,11 @@ __device__ int Tcl_TraceVar2(Tcl_Interp *interp, char *part1, char *part2, int f
 	// Locate the variable, making a new (undefined) one if necessary. If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
 	int new_;
-	if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	if ((flags & TCLGLOBAL__ONLY) || (iPtr->varFramePtr == NULL)) {
 		hPtr = Tcl_CreateHashEntry(&iPtr->globalTable, part1, &new_);
 	} else {
 		hPtr = Tcl_CreateHashEntry(&iPtr->varFramePtr->varTable, part1, &new_);
@@ -675,10 +675,10 @@ __device__ void Tcl_UntraceVar2(Tcl_Interp *interp, char *part1, char *part2, in
 	// First, lookup the variable. If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
-	if ((flags & TCL_GLOBAL_ONLY) || (iPtr->varFramePtr == NULL)) {
+	if ((flags & TCLGLOBAL__ONLY) || (iPtr->varFramePtr == NULL)) {
 		hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
 	} else {
 		hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
@@ -791,10 +791,10 @@ __device__ ClientData Tcl_VarTraceInfo2(Tcl_Interp *interp, char *part1, char *p
 	// First, lookup the variable. If the name starts with ::, we lookup in the global scope
 	if (part1[0] == ':' && part1[1] == ':') {
 		part1 += 2;
-		flags |= TCL_GLOBAL_ONLY;
+		flags |= TCLGLOBAL__ONLY;
 	}
 	Tcl_HashEntry *hPtr;
-	if ((flags & TCL_GLOBAL_ONLY) || iPtr->varFramePtr == NULL) {
+	if ((flags & TCLGLOBAL__ONLY) || iPtr->varFramePtr == NULL) {
 		hPtr = Tcl_FindHashEntry(&iPtr->globalTable, part1);
 	} else {
 		hPtr = Tcl_FindHashEntry(&iPtr->varFramePtr->varTable, part1);
@@ -1237,7 +1237,7 @@ error:
 /*
 *----------------------------------------------------------------------
 *
-* Tcl_GlobalCmd --
+* TclGLOBAL_Cmd --
 *	This procedure is invoked to process the "global" Tcl command. See the user documentation for details on what it does.
 *
 * Results:
@@ -1248,7 +1248,7 @@ error:
 *
 *----------------------------------------------------------------------
 */
-__device__ int Tcl_GlobalCmd(ClientData dummy, Tcl_Interp *interp, int argc, const char *args[])
+__device__ int TclGLOBAL_Cmd(ClientData dummy, Tcl_Interp *interp, int argc, const char *args[])
 {
 	register Interp *iPtr = (Interp *)interp;
 	if (argc < 2) {
@@ -1384,7 +1384,7 @@ __device__ void TclDeleteVars(Interp *iPtr, Tcl_HashTable *tablePtr)
 {
 	int flags = TCL_TRACE_UNSETS;
 	if (tablePtr == &iPtr->globalTable) {
-		flags |= TCL_INTERP_DESTROYED | TCL_GLOBAL_ONLY;
+		flags |= TCL_INTERP_DESTROYED | TCLGLOBAL__ONLY;
 	}
 	Tcl_HashSearch search;
 	for (Tcl_HashEntry *hPtr = Tcl_FirstHashEntry(tablePtr, &search); hPtr != NULL; hPtr = Tcl_NextHashEntry(&search)) {
@@ -1402,7 +1402,7 @@ __device__ void TclDeleteVars(Interp *iPtr, Tcl_HashTable *tablePtr)
 			if (varPtr->upvarUses != 0 || !(varPtr->flags & VAR_UNDEFINED) || varPtr->tracePtr != NULL) {
 				continue;
 			}
-			globalFlag = TCL_GLOBAL_ONLY;
+			globalFlag = TCLGLOBAL__ONLY;
 		}
 
 		// Invoke traces on the variable that is being deleted, then free up the variable's space (no need to free the hash entry

@@ -30,10 +30,10 @@
 #define UNUSED_PARAMETER UNUSED_SYMBOL
 #define ArraySize ARRAYSIZE_
 #define MIN MIN_
-#define testcase TESTCASE
-#define VVA_ONLY DEBUGONLY
-#define ALWAYS _ALWAYS
-#define NEVER _NEVER
+#define testcase TESTCASE_
+#define VVA_ONLY DEBUGONLY_
+#define ALWAYS ALWAYS_
+#define NEVER NEVER_
 //
 #define SQLITE_DEBUG _DEBUG
 #define SQLITE_HAVE_OS_TRACE LIBCU_HAVE_OS_TRACE
@@ -407,7 +407,7 @@
 #define sqlite3_create_collation16(db, zName, enc, pCtx, xCompare) panic("NEED")
 #define sqlite3_collation_needed(db, pCollNeededArg, xCollNeeded) panic("NEED")
 #define sqlite3_collation_needed16(db, pCollNeededArg, xCollNeeded16) panic("NEED")
-#define sqlite3_global_recover() panic("NEED")
+#define sqlite3GLOBAL__recover() panic("NEED")
 #define sqlite3_get_autocommit(db) panic("NEED")
 #define sqlite3CorruptError(lineno) libcuCorruptError(lineno)
 #define sqlite3MisuseError(lineno) libcuMisuseError(lineno)

@@ -54,6 +54,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.ext.tests", "libcu.ex
 		{F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91} = {F9A9EA50-AB8D-4BE3-BA66-33743EA9CF91}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcu.sqlite3", "sqlite3\sqlite3.vcxproj", "{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -149,6 +151,14 @@ Global
 		{DA288617-FD66-42D5-B27E-9190E9F3DF93}.Release|Win32.Build.0 = Release|Win32
 		{DA288617-FD66-42D5-B27E-9190E9F3DF93}.Release|x64.ActiveCfg = Release|x64
 		{DA288617-FD66-42D5-B27E-9190E9F3DF93}.Release|x64.Build.0 = Release|x64
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Debug|Win32.Build.0 = Debug|Win32
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Debug|x64.ActiveCfg = Debug|x64
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Debug|x64.Build.0 = Debug|x64
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Release|Win32.ActiveCfg = Release|Win32
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Release|Win32.Build.0 = Release|Win32
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Release|x64.ActiveCfg = Release|x64
+		{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

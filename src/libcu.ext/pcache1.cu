@@ -92,8 +92,8 @@ struct PCacheGlobal {
 	// (2) even if an incorrect value is read, no great harm is done since this is really just an optimization. */
 	bool underPressure;            // True if low on PAGECACHE memory
 };
-static __hostb_device__ _WSD PCacheGlobal g_pcache1;
-#define _pcache1 _GLOBAL(PCacheGlobal, g_pcache1)
+static __hostb_device__ WSD_ PCacheGlobal g_pcache1;
+#define _pcache1 GLOBAL_(PCacheGlobal, g_pcache1)
 
 /* Macros to enter and leave the PCache LRU mutex. */
 #if !defined(ENABLE_MEMORY_MANAGEMENT) || LIBCU_THREADSAFE == 0
@@ -427,13 +427,13 @@ static __host_device__ void pcache1TruncateUnsafe(PCache1 *cache, uint limit)
 	assert(cache->maxKey >= limit);
 	assert(cache->hashs > 0);
 	uint h, stop;
-	TESTONLY(uint pages = 0);
+	TESTONLY_(uint pages = 0);
 	if (cache->maxKey - limit < cache->hashs) {
 		// If we are just shaving the last few pages off the end of the cache, then there is no point in scanning the entire hash table.
 		// Only scan those hash slots that might contain pages that need to be removed.
 		h = limit % cache->hashs;
 		stop = cache->maxKey % cache->hashs;
-		TESTONLY(pages = -10); // Disable the pCache->nPage validity check
+		TESTONLY_(pages = -10); // Disable the pCache->nPage validity check
 	}
 	else {
 		// This is the general case where many pages are being removed. It is necessary to scan the entire hash table */
@@ -452,7 +452,7 @@ static __host_device__ void pcache1TruncateUnsafe(PCache1 *cache, uint limit)
 			}
 			else {
 				pp = &page->next;
-				TESTONLY(if (pages >= 0) pages++);
+				TESTONLY_(if (pages >= 0) pages++);
 			}
 		}
 		if (h == stop) break;
