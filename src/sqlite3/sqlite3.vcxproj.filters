@@ -7,6 +7,7 @@
     <ClInclude Include="libcu.h" />
     <ClInclude Include="sqliteInt.h" />
     <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="vdbeInt.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="alter.cpp" />
@@ -77,5 +78,14 @@
     <ClCompile Include="where.cpp" />
     <ClCompile Include="wherecode.cpp" />
     <ClCompile Include="whereexpr.cpp" />
+    <ClCompile Include="fault.cpp" />
+    <ClCompile Include="vdbe.cpp" />
+    <ClCompile Include="vdbeapi.cpp" />
+    <ClCompile Include="vdbeaux.cpp" />
+    <ClCompile Include="vdbeblob.cpp" />
+    <ClCompile Include="vdbemem.cpp" />
+    <ClCompile Include="vdbesort.cpp" />
+    <ClCompile Include="vdbetrace.cpp" />
+    <ClCompile Include="legacy.cpp" />
   </ItemGroup>
 </Project>

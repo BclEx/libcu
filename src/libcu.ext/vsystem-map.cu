@@ -349,8 +349,8 @@ __device__ int vsystemInitialize()
 	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
 #else
-	extern int sqlite3_os_init();
-	return sqlite3_os_init();
+	extern int runtime_os_init();
+	return runtime_os_init();
 #endif
 }
 
@@ -360,7 +360,7 @@ __device__ int vsystemShutdown()
 	vsystemRegister(&_mapsystem, true);
 	return RC_OK;
 #else
-	extern int sqlite3_os_end();
-	return sqlite3_os_end();
+	extern int runtime_os_end();
+	return runtime_os_end();
 #endif
 }

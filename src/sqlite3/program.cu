@@ -16,7 +16,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 	//free(s);
 }
 
-int main()
+int main_()
 {
 	sentinelServerInitialize();
 

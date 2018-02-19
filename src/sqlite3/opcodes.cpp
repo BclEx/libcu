@@ -8,7 +8,7 @@
 #else
 # define OpHelp(X)
 #endif
-const char *sqlite3OpcodeName(int i){
+extern "C" const char *sqlite3OpcodeName(int i){
  static const char *const azName[] = {
     /*   0 */ "Savepoint"        OpHelp(""),
     /*   1 */ "AutoCommit"       OpHelp(""),

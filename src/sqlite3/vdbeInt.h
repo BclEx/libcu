@@ -17,6 +17,9 @@
 */
 #ifndef SQLITE_VDBEINT_H
 #define SQLITE_VDBEINT_H
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 /*
 ** The maximum number of times that a statement will try to reparse
@@ -549,4 +552,7 @@ int sqlite3VdbeMemHandleBom(Mem *pMem);
   #define ExpandBlob(P) SQLITE_OK
 #endif
 
+#ifdef	__cplusplus
+}
+#endif
 #endif /* !defined(SQLITE_VDBEINT_H) */

@@ -43,12 +43,14 @@
     <ClCompile Include="dbstat.cpp" />
     <ClCompile Include="delete.cpp" />
     <ClCompile Include="expr.cpp" />
+    <ClCompile Include="fault.cpp" />
     <ClCompile Include="fkey.cpp" />
     <ClCompile Include="func.cpp" />
     <ClCompile Include="global.cpp" />
     <ClCompile Include="hash.cpp" />
     <ClCompile Include="insert.cpp" />
     <ClCompile Include="json1.cpp" />
+    <ClCompile Include="legacy.cpp" />
     <ClCompile Include="loadext.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="malloc.cpp" />
@@ -89,6 +91,13 @@
     <ClCompile Include="utf.cpp" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="vacuum.cpp" />
+    <ClCompile Include="vdbe.cpp" />
+    <ClCompile Include="vdbeapi.cpp" />
+    <ClCompile Include="vdbeaux.cpp" />
+    <ClCompile Include="vdbeblob.cpp" />
+    <ClCompile Include="vdbemem.cpp" />
+    <ClCompile Include="vdbesort.cpp" />
+    <ClCompile Include="vdbetrace.cpp" />
     <ClCompile Include="vtab.cpp" />
     <ClCompile Include="wal.cpp" />
     <ClCompile Include="walker.cpp" />
@@ -106,6 +115,7 @@
     <ClInclude Include="libcu.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="sqliteInt.h" />
+    <ClInclude Include="vdbeInt.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B6007607-7FD6-4CC4-90D7-411E6C3ED4E6}</ProjectGuid>
@@ -174,7 +184,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;SQLITE_MEMDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -206,7 +216,7 @@
       <AdditionalLibraryDirectories>$(OutDir);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>
+      <!--<Command>"$(CudaToolkitBinDir)\nvcc.exe" -m=64 -arch=sm_$(CUARCH) -lib "$(IntDir)libcu.sqlite.cu.obj" -o "$(OutDir)libcu.sqlite.$(CUARCH).lib"</Command>-->
     </PostBuildEvent>
     <CudaCompile>
       <Include>$(SolutionDir)include;%(Include)</Include>
@@ -221,7 +231,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;SQLITE_MEMDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -247,7 +257,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;SQLITE_MEMDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(CudaToolkitIncludeDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
