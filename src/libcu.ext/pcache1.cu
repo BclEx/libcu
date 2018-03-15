@@ -807,7 +807,7 @@ static __host_device__ void pcache1Destroy(pcache_t *p)
 /* This function is called during initialization (sqlite3_initialize()) to install the default pluggable cache module, assuming the user has not
 ** already provided an alternative.
 */
-static __constant__ const pcache_methods _pcache1DefaultMethods = {
+static __host_constant__ const pcache_methods _pcache1DefaultMethods = {
 	1,
 	0,
 	pcache1Init,

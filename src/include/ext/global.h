@@ -580,23 +580,23 @@ __forceinline char *mtagprintf(tagbase_t *tag, const char *format, ...) { char *
 __forceinline char *mprintf(const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmprintf(format, va); va_end(va); return r; }
 __forceinline char *msnprintf(char *__restrict s, size_t maxlen, const char *format, ...) { char *r; va_list va; va_start(va, format); r = vmsnprintf(s, maxlen, format, va); va_end(va); return r; }
 #else
-STDARG1void(_log, _logv(errCode, format, va), int errCode, const char *format);
-STDARG2void(_log, _logv(errCode, format, va), int errCode, const char *format);
-STDARG3void(_log, _logv(errCode, format, va), int errCode, const char *format);
+STDARG1void(_log, _logv(errCode, format, va), format, int errCode, const char *format);
+STDARG2void(_log, _logv(errCode, format, va), format, int errCode, const char *format);
+STDARG3void(_log, _logv(errCode, format, va), format, int errCode, const char *format);
 #if defined(_DEBUG) || defined(LIBCU_HAVE_OS_TRACE)
-STDARG1void(_debug, _debugv(format, va), const char *format);
-STDARG2void(_debug, _debugv(format, va), const char *format);
-STDARG3void(_debug, _debugv(format, va), const char *format);
+STDARG1void(_debug, _debugv(format, va), format, const char *format);
+STDARG2void(_debug, _debugv(format, va), format, const char *format);
+STDARG3void(_debug, _debugv(format, va), format, const char *format);
 #endif
-STDARG1(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
-STDARG2(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
-STDARG3(char *, mtagprintf, vmtagprintf(tag, format, va), tagbase_t *tag, const char *format);
-STDARG1(char *, mprintf, vmprintf(format, va), const char *format);
-STDARG2(char *, mprintf, vmprintf(format, va), const char *format);
-STDARG3(char *, mprintf, vmprintf(format, va), const char *format);
-STDARG1(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
-STDARG2(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
-STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), char *__restrict s, size_t maxlen, const char *format);
+STDARG1(char *, mtagprintf, vmtagprintf(tag, format, va), format, tagbase_t *tag, const char *format);
+STDARG2(char *, mtagprintf, vmtagprintf(tag, format, va), format, tagbase_t *tag, const char *format);
+STDARG3(char *, mtagprintf, vmtagprintf(tag, format, va), format, tagbase_t *tag, const char *format);
+STDARG1(char *, mprintf, vmprintf(format, va), format, const char *format);
+STDARG2(char *, mprintf, vmprintf(format, va), format, const char *format);
+STDARG3(char *, mprintf, vmprintf(format, va), format, const char *format);
+STDARG1(char *, msnprintf, vmsnprintf(s, maxlen, format, va), format, char *__restrict s, size_t maxlen, const char *format);
+STDARG2(char *, msnprintf, vmsnprintf(s, maxlen, format, va), format, char *__restrict s, size_t maxlen, const char *format);
+STDARG3(char *, msnprintf, vmsnprintf(s, maxlen, format, va), format, char *__restrict s, size_t maxlen, const char *format);
 #endif
 #pragma endregion
 

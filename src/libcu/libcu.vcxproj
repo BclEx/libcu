@@ -51,7 +51,7 @@
     <ClInclude Include="..\include\sentinel-stdiomsg.h" />
     <ClInclude Include="..\include\sentinel-stdlibmsg.h" />
     <ClInclude Include="..\include\sentinel.h" />
-    <ClInclude Include="..\include\stdargcu.h" />
+    <ClInclude Include="..\include\stdargcu_.h" />
     <ClInclude Include="..\include\stddefcu.h" />
     <ClInclude Include="..\include\stdiocu.h" />
     <ClInclude Include="..\include\stdlibcu.h" />

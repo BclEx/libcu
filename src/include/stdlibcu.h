@@ -302,6 +302,24 @@ extern __device__ size_t wcstombs_(char *__restrict s, const wchar_t *__restrict
 #define wcstombs wcstombs_
 __END_NAMESPACE_STD;
 
+__END_NAMESPACE_EXT;
+#if defined(__GNUC__)
+extern __device__ uint16_t __builtin_bswap16_(uint16_t x);
+#define __builtin_bswap16 __builtin_bswap16_
+extern __device__ uint32_t __builtin_bswap32_(uint32_t x);
+#define __builtin_bswap32 __builtin_bswap32_
+extern __device__ uint64_t __builtin_bswap64_(uint64_t x);
+#define __builtin_bswap64 __builtin_bswap64_
+#elif defined(_MSC_VER)
+extern __device__ unsigned short _byteswap_ushort_(unsigned short x);
+#define _byteswap_ushort _byteswap_ushort_
+extern __device__ unsigned long _byteswap_ulong_(unsigned long x);
+#define _byteswap_ulong _byteswap_ulong_
+extern __device__ unsigned __int64 _byteswap_uint64_(unsigned __int64 x);
+#define _byteswap_uint64 _byteswap_uint64_
+#endif
+__END_NAMESPACE_EXT;
+
 __END_DECLS;
 #else
 #define atoll(s) 0

@@ -458,11 +458,7 @@ __host_device__ RC runtimeConfigv(CONFIG op, va_list va) //: sqlite3_config
 	}
 	return rc;
 }
-#ifndef __CUDA_ARCH__
-__host_device__ RC runtimeConfig(CONFIG op, ...) { va_list va; va_start(va, op); RC rc = runtimeConfigv(op, va); va_end(va); return rc; }
-#else
-STDARG(RC, runtimeConfig, runtimeConfigv(op, va), CONFIG op);
-#endif
+STDARG(RC, runtimeConfig, runtimeConfigv(op, va), op, CONFIG op);
 
 /* Set up the lookaside buffers for a database connection. Return SQLITE_OK on success.  
 ** If lookaside is already active, return SQLITE_BUSY.

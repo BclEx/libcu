@@ -27,10 +27,10 @@ THE SOFTWARE.
 #ifndef _STRINGCU_H
 #define _STRINGCU_H
 #include <crtdefscu.h>
-#include <stdargcu.h>
 
 #include <string.h>
 #if defined(__CUDA_ARCH__)
+#include <stdarg.h>
 __BEGIN_DECLS;
 
 __BEGIN_NAMESPACE_STD;

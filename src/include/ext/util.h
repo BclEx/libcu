@@ -50,9 +50,5 @@ __host_device__ void util_fileSuffix3(const char *, char *);
 
 __END_DECLS;
 // STDARG
-#ifndef __CUDA_ARCH__
-__forceinline void tagErrorWithMsg(tagbase_t *tag, int errCode, const char *format, ...) { va_list va; va_start(va, format); tagErrorWithMsgv(tag, errCode, format, va); va_end(va); }
-#else
-STDARGvoid(tagErrorWithMsg, tagErrorWithMsgv(tag, errCode, format, va), tagbase_t *tag, int errCode, const char *format);
-#endif
+STDARGvoid(tagErrorWithMsg, tagErrorWithMsgv(tag, errCode, format, va), format, tagbase_t *tag, int errCode, const char *format);
 #endif	/* _EXT_UTIL_H */

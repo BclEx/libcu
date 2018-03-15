@@ -1,10 +1,10 @@
 #include <stdiocu.h>
-#include <stdargcu.h>
 #include <stringcu.h>
 #include <stdlibcu.h>
 #include <ctypecu.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #define xOMIT_PTX
 __BEGIN_DECLS;
@@ -1710,7 +1710,7 @@ __host_device__ void strbldAppend(strbld_t *b, const char *str, int length) //: 
 /* Append the complete text of zero-terminated string str[] to the b string. */
 __host_device__ void strbldAppendAll(strbld_t *b, const char *str) //: sqlite3StrAccumAppendAll
 {
-	strbldAppend(b, str, strlen(str));
+	strbldAppend(b, str, (int)strlen(str));
 }
 
 /*

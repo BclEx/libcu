@@ -10,7 +10,7 @@
 #include "regexTest.cu"
 #include "sentinelTest.cu"
 #include "setjmpTest.cu"
-#include "stdargTest.cu"
+//#include "stdargTest.cu"
 #include "stddefTest.cu"
 #include "stdioTest.cu"
 #include "stdlibTest.cu"

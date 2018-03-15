@@ -483,7 +483,7 @@ static __device__ void JimPanicDump_(int condition, const char *fmt, va_list va)
 #endif
 	exit(1);
 }
-STDARG1void(JimPanicDump, JimPanicDump_(condition, fmt, va), int condition, const char *fmt);
+STDARG1void(JimPanicDump, JimPanicDump_(condition, fmt, va), fmt, int condition, const char *fmt);
 #endif
 
 #pragma endregion

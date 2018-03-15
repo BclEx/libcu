@@ -27,7 +27,6 @@ THE SOFTWARE.
 #ifndef _FCNTLCU_H
 #define _FCNTLCU_H
 #include <crtdefscu.h>
-#include <stdargcu.h>
 #include <sys/statcu.h>
 
 #include <fcntl.h>
@@ -35,31 +34,42 @@ THE SOFTWARE.
 #include <io.h>
 #endif
 #if defined(__CUDA_ARCH__)
+#include <stdarg.h>
 __BEGIN_DECLS;
 
 /* Do the file control operation described by CMD on FD. The remaining arguments are interpreted depending on CMD. */
 #ifndef __USE_FILE_OFFSET64
-extern __device__ int fcntlv_(int fd, int cmd, va_list va);
+extern __device__ int fcntl_(int fd, int cmd, ...);
 #define fcntl fcntl_
+extern __device__ int vfcntl_(int fd, int cmd, va_list va);
+#define vfcntlv vfcntl_
 #else
 #define fcntl fcntl64_
+#define vfcntlv vfcntl64_
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int fcntl64v_(int fd, int cmd, va_list va);
+extern __device__ int fcntl64_(int fd, int cmd, ...);
 #define fcntl64 fcntl64_
+extern __device__ int vfcntl64_(int fd, int cmd, va_list va);
+#define vfcntl64v vfcntl64_
 #endif
 
 /* Open FILE and return a new file descriptor for it, or -1 on error. OFLAG determines the type of access used.  If O_CREAT is on OFLAG,
    the third argument is taken as a `mode_t', the mode of the created file. */
 #ifndef __USE_FILE_OFFSET64
-extern __device__ int openv_(const char *file, int oflag, va_list va);
+extern __device__ int open_(const char *file, int oflag, ...);
 #define open open_
+extern __device__ int vopen_(const char *file, int oflag, va_list va);
+#define vopen vopen_
 #else
 #define open open64_
+#define vopen vopen64_
 #endif
 #ifdef __USE_LARGEFILE64
-extern __device__ int open64v_(const char *file, int oflag, va_list va);
+extern __device__ int open64_(const char *file, int oflag, ...);
 #define open64 open64_
+extern __device__ int open64v_(const char *file, int oflag, va_list va);
+#define vopen64 vopen64_
 #endif
 
 /* Create and open FILE, with mode MODE.  This takes an `int' MODE argument because that is what `mode_t' will be widened to. */
@@ -70,13 +80,15 @@ extern __device__ int open64v_(const char *file, int oflag, va_list va);
 
 __END_DECLS;
 
+#if 0
 #ifndef __USE_FILE_OFFSET64
-STDARG(int, fcntl_, fcntlv_(fd, cmd, va), int fd, int cmd);
-STDARG(int, open_, openv_(file, oflag, va), const char *file, int oflag);
+STDARG(int, fcntl_, vfcntl_(fd, cmd, va), cmd, int fd, int cmd);
+STDARG(int, open_, vopen_(file, oflag, va), oflag, const char *file, int oflag);
 #endif
 #ifdef __USE_LARGEFILE64
-STDARG(int, fcntl64_, fcntl64v_(fd, cmd, va), int fd, int cmd);
-STDARG(int, open64_, open64v_(file, oflag, va), const char *file, int oflag);
+STDARG(int, fcntl64_, vfcntl64_(fd, cmd, va), cmd, int fd, int cmd);
+STDARG(int, open64_, vopen64_(file, oflag, va), oflag, const char *file, int oflag);
+#endif
 #endif
 
 #endif  /* __CUDA_ARCH__ */

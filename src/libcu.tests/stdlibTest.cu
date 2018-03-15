@@ -34,7 +34,7 @@ static __global__ void g_stdlib_test1()
 	//__forceinline__ __device__ unsigned long long int strtoull_(const char *__restrict nptr, char **__restrict endptr, int base):
 	double b0a = strtod("1.0", nullptr); assert(b0a == 1.0);
 	float b1a = strtof("1.0", nullptr); assert(b1a == 1.0F);
-	long double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
+	long_double b2a = strtold("1.0", nullptr); assert(b2a == 1.0);
 	long int b3a = strtol("1.0", nullptr, 10); assert(b3a == 1);
 	unsigned long int b4a = strtoul("1.0", nullptr, 10); assert(b4a == 1L);
 	long long int b5a = strtoll("1.0", nullptr, 10); assert(b5a == 1L);

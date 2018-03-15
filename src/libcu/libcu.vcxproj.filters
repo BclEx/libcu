@@ -19,9 +19,6 @@
     <ClInclude Include="..\include\sentinel.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\stdargcu.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\stringcu.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -106,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\include\ext\pipeline.h">
       <Filter>include\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\stdargcu_.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

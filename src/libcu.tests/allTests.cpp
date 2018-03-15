@@ -21,8 +21,8 @@ cudaError_t pwd_test1();
 cudaError_t regex_test1();
 cudaError_t sentinel_test1();
 cudaError_t setjmp_test1();
-cudaError_t stdarg_parse();
-cudaError_t stdarg_call();
+//cudaError_t stdarg_parse();
+//cudaError_t stdarg_call();
 cudaError_t stddef_test1();
 cudaError_t stdio_test1();
 cudaError_t stdio_64bit();
@@ -103,11 +103,11 @@ namespace libcutests
 	[TestMethod, TestCategory("core")] void setjmp_test1() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::setjmp_test1()))); }
 	__END_TEST;
 
-	// stdarg
-	__BEGIN_TEST(stdarg);
-	[TestMethod, TestCategory("core")] void stdarg_parse() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_parse()))); }
-	[TestMethod, TestCategory("core")] void stdarg_call() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_call()))); }
-	__END_TEST;
+	//// stdarg
+	//__BEGIN_TEST(stdarg);
+	//[TestMethod, TestCategory("core")] void stdarg_parse() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_parse()))); }
+	//[TestMethod, TestCategory("core")] void stdarg_call() { Assert::AreEqual("no error", gcnew String(cudaGetErrorString(::stdarg_call()))); }
+	//__END_TEST;
 
 	// stddef
 	__BEGIN_TEST(stddef);

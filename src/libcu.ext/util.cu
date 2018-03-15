@@ -99,11 +99,7 @@ __host_device__ void sqlite3ErrorMsgv(parsebase_t *parse, const char *format, va
 		parse->rc = RC_ERROR;
 	}
 }
-#ifndef __CUDA_ARCH__
-__host_device__ void sqlite3ErrorMsg(parsebase_t *parse, const char *format, ...) { va_list va; va_start(va, format); sqlite3ErrorMsgv(parse, format, va); va_end(va); }
-#else
-STDARGvoid(sqlite3ErrorMsg, sqlite3ErrorMsgv(parse, format, va), parsebase_t *parse, const char *format);
-#endif
+STDARGvoid(sqlite3ErrorMsg, sqlite3ErrorMsgv(parse, format, va), parse, parsebase_t *parse, const char *format);
 
 /* Convert an SQL-style quoted string into a normal string by removing the quote characters.  The conversion is done in-place.  If the
 ** input does not begin with a quote character, then this routine is a no-op.

@@ -2,7 +2,6 @@
 #include <stdiocu.h>
 #include <sentinel-stdiomsg.h>
 #include <stdlibcu.h>
-#include <stdargcu.h>
 #include <ctypecu.h>
 #include <assert.h>
 #include <unistdcu.h>
@@ -252,6 +251,7 @@ __device__ void setbuf_(FILE *__restrict stream, char *__restrict buf)
 
 /* Write formatted output to S from argument list ARG.  */
 #ifdef __CUDA_ARCH__
+__device__ int snprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, ...) { va_list va; va_start(va, format); int r = vsnprintf_(s, maxlen, format, va); va_end(va); return r; }
 __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restrict format, va_list va)
 {
 	if (maxlen <= 0) return -1;
@@ -263,8 +263,12 @@ __device__ int vsnprintf_(char *__restrict s, size_t maxlen, const char *__restr
 }
 #endif
 
+/* Write formatted output to S.  */
+// moved: extern __device__ int sprintf_(char *__restrict s, const char *__restrict format, ...);
+
 /* Write formatted output to S from argument list ARG. */
 #ifdef __CUDA_ARCH__
+__device__ int fprintf_(FILE *__restrict s, const char *__restrict format, ...) { va_list va; va_start(va, format); int r = vfprintf_(s, format, va, true); va_end(va); return r; }
 __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	char base[PRINT_BUF_SIZE];
@@ -282,19 +286,12 @@ __device__ int vfprintf_(FILE *__restrict s, const char *__restrict format, va_l
 }
 #endif
 
-/* Read formatted input from S into argument list ARG.  */
-//__device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va)
-//{
-//	panic("Not Implemented");
-//	return 0;
-//}
-
-/* Read formatted input from S into argument list ARG.  */
-__device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va)
-{
-	panic("Not Implemented");
-	return 0;
-}
+/* Read formatted input from STREAM.  */
+// moved: extern __device__ int fscanf_(FILE *__restrict stream, const char *__restrict format, ...);
+/* Read formatted input from stdin.  */
+// moved: extern __device__ int scanf_(const char *__restrict format, ...);
+/* Read formatted input from S.  */
+// moved: extern __device__ int sscanf_(const char *__restrict s, const char *__restrict format, ...);
 
 /* Read a character from STREAM.  */
 __device__ int fgetc_(FILE *stream)
@@ -588,14 +585,27 @@ doswitch:
 }
 
 /* Read formatted input from S into argument list ARG.  */
+#if __CUDA_ARCH__
+__device__ int fscanf_(FILE *__restrict s, const char *__restrict format, ...) { va_list va; va_start(va, format); int r = vfscanf_(s, format, va, true); va_end(va); return r; }
+#endif
 __device__ int vfscanf_(FILE *__restrict s, const char *__restrict format, va_list va, bool wait)
 {
 	panic("Not Implemented");
 	return 0;
 }
 
+/* Read formatted input from stdin into argument list ARG. */
+#if __CUDA_ARCH__
+__device__ int scanf_(const char *__restrict format, ...) { va_list va; va_start(va, format); int r = vfscanf_(stdin, format, va, true); va_end(va); return r; }
+#endif
+__device__ int vscanf_(const char *__restrict format, va_list va) { return vfscanf_(stdin, format, va, true); }
+
+/* Read formatted input from S.  */
 static __constant__ const short _basefix[17] = { 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }; // 'basefix' is used to avoid 'if' tests in the integer scanner
-__device__ int _sscanf_(const char *str, const char *fmt, va_list va)
+#if __CUDA_ARCH__
+__device__ int sscanf_(const char *__restrict s, const char *__restrict format, ...) { va_list va; va_start(va, format); int r = vsscanf_(s, format, va); va_end(va); return r; }
+#endif
+__device__ int vsscanf_(const char *__restrict str, const char *__restrict fmt, va_list va)
 {
 	int c; // character from format, or conversion
 	size_t width; // field width, or 0
@@ -942,8 +952,3 @@ match_failure:
 #pragma endregion
 
 __END_DECLS;
-
-///* Read formatted input from stdin into argument list ARG. */
-//__device__ int vscanf_(const char *__restrict format, va_list va) { return -1; }
-///* Read formatted input from S into argument list ARG.  */
-//__device__ int vsscanf_(const char *__restrict s, const char *__restrict format, va_list va) { return -1; }

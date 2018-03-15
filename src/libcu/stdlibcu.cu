@@ -931,4 +931,14 @@ __device__ size_t wcstombs_(char *__restrict s, const wchar_t *__restrict pwcs, 
 	return 0;
 }
 
+#if defined(__GNUC__)
+__device__ uint16_t __builtin_bswap16_(uint16_t x) { char *p = (char *)x; return p[0]<<8|p[1]; }
+__device__ uint32_t __builtin_bswap32_(uint32_t x) { char *p = (char *)x; return p[0]<<24|p[1]<<16|p[2]<<8|p[3]; }
+__device__ uint64_t __builtin_bswap64_(uint64_t x) { char *p = (char *)x; return p[0]<<56|p[1]<<48|p[2]<<40|p[3]<<32|p[0]<<24|p[1]<<16|p[2]<<8|p[3]; }
+#elif defined(_MSC_VER)
+__device__ unsigned short _byteswap_ushort_(unsigned short x) { char *p = (char *)x; return p[0]<<8|p[1]; }
+__device__ unsigned long _byteswap_ulong_(unsigned long x) { char *p = (char *)x; return p[0]<<24|p[1]<<16|p[2]<<8|p[3]; }
+__device__ unsigned __int64 _byteswap_uint64_(unsigned __int64 x) { char *p = (char *)x; return p[0]<<56|p[1]<<48|p[2]<<40|p[3]<<32|p[0]<<24|p[1]<<16|p[2]<<8|p[3]; }
+#endif
+
 __END_DECLS;

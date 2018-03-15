@@ -156,7 +156,7 @@ void InteractivePrompt() {
 __global__ void g_InteractiveExecute(char *line);
 static void InteractiveExecute(char *line) {
 	char *d_line;
-	int size = strlen(line) + 1;
+	int size = (int)strlen(line) + 1;
 	cudaErrorCheck(cudaMalloc((void **)&d_line, size));
 	cudaErrorCheck(cudaMemcpy(d_line, line, size, cudaMemcpyHostToDevice));
 	D_DATAP(); g_InteractiveExecute<<<1,1>>>(d_line); cudaErrorCheck(cudaDeviceSynchronize()); H_DATAP();

@@ -1,10 +1,10 @@
 #include <stdiocu.h>
-#include <stdargcu.h>
+#include <stdargcu_.h>
 #include <assert.h>
 
 static __global__ void g_stdarg_parse()
 {
-#ifdef __CUDA_ARCH__
+#if defined(HASARGCU) && defined(__CUDA_ARCH__)
 	printf("stdarg_parse\n");
 	va_list2<const char*, int> va;
 	va_start(va, "Name", 4);
@@ -21,9 +21,9 @@ __device__ void methodVoid_(int cnt, va_list va)
 	for (int i = 1; i <= cnt; i++)
 		assert((value = va_arg(va, int)) == i);
 }
-STDARG1void(methodVoid, methodVoid_(cnt, va), int cnt);
-STDARG2void(methodVoid, methodVoid_(cnt, va), int cnt);
-STDARG3void(methodVoid, methodVoid_(cnt, va), int cnt);
+STDARG1void(methodVoid, methodVoid_(cnt, va), cnt, int cnt);
+STDARG2void(methodVoid, methodVoid_(cnt, va), cnt, int cnt);
+STDARG3void(methodVoid, methodVoid_(cnt, va), cnt, int cnt);
 
 __device__ int methodRet_(int cnt, va_list va)
 {
@@ -32,9 +32,9 @@ __device__ int methodRet_(int cnt, va_list va)
 		assert((value = va_arg(va, int)) == i);
 	return value;
 }
-STDARG1(int, methodRet, methodRet_(cnt, va), int cnt);
-STDARG2(int, methodRet, methodRet_(cnt, va), int cnt);
-STDARG3(int, methodRet, methodRet_(cnt, va), int cnt);
+STDARG1(int, methodRet, methodRet_(cnt, va), cnt, int cnt);
+STDARG2(int, methodRet, methodRet_(cnt, va), cnt, int cnt);
+STDARG3(int, methodRet, methodRet_(cnt, va), cnt, int cnt);
 
 static __global__ void g_stdarg_call()
 {

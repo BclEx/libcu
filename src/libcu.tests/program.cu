@@ -18,8 +18,8 @@ cudaError_t pwd_test1();
 cudaError_t regex_test1();
 cudaError_t sentinel_test1();
 cudaError_t setjmp_test1();
-cudaError_t stdarg_parse();
-cudaError_t stdarg_call();
+//cudaError_t stdarg_parse();
+//cudaError_t stdarg_call();
 cudaError_t stddef_test1();
 cudaError_t stdio_test1();
 cudaError_t stdio_64bit();
@@ -70,8 +70,8 @@ int main(int argc, char **argv)
 	case 12: cudaStatus = regex_test1(); break;
 	case 13: cudaStatus = sentinel_test1(); break;
 	case 14: cudaStatus = setjmp_test1(); break;
-	case 15: cudaStatus = stdarg_parse(); break;
-	case 16: cudaStatus = stdarg_call(); break;
+	//case 15: cudaStatus = stdarg_parse(); break;
+	//case 16: cudaStatus = stdarg_call(); break;
 	case 17: cudaStatus = stddef_test1(); break;
 	case 18: cudaStatus = stdio_test1(); break; // assert
 	case 19: cudaStatus = stdio_64bit(); break;

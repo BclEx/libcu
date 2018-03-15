@@ -26,16 +26,41 @@ THE SOFTWARE.
 //#pragma once
 #ifndef _STDARGCU_H
 #define _STDARGCU_H
-
+#define xHASARGCU
 #include <stdarg.h>
-#if defined(__CUDA_ARCH__)
 
-#define STDARGvoid(name, body, ...) \
+#if !defined(HASARGCU) || !defined(__CUDA_ARCH__)
+
+//#if defined(__CUDA_ARCH__)
+#define STDARGvoid(name, body, paramN, ...) __forceinline__ void name(__VA_ARGS__, ...) { va_list va; va_start(va, paramN); (body); va_end(va); }
+#define STDARG1void(name, body, paramN, ...) __forceinline__ void name(__VA_ARGS__, ...) { va_list va; va_start(va, paramN); (body); va_end(va); }
+#define STDARG2void(name, body, paramN, ...)
+#define STDARG3void(name, body, paramN, ...)
+#define STDARG(ret, name, body, paramN, ...) __forceinline__ ret name(__VA_ARGS__, ...) { va_list va; va_start(va, paramN); ret r = (body); va_end(va); return r; }
+#define STDARG1(ret, name, body, paramN, ...) __forceinline__ ret name(__VA_ARGS__, ...) { va_list va; va_start(va, paramN); ret r = (body); va_end(va); return r; }
+#define STDARG2(ret, name, body, paramN, ...)
+#define STDARG3(ret, name, body, paramN, ...)
+#define va_restart
+//#else
+//#define STDARGvoid(name, body, paramN, ...) __forceinline__ void name(...) { }
+//#define STDARG1void(name, body, paramN, ...) __forceinline__ void name(...) { }
+//#define STDARG2void(name, body, paramN, ...)
+//#define STDARG3void(name, body, paramN, ...)
+//#define STDARG(ret, name, body, paramN, ...) __forceinline__ ret name(...) { return (ret)0; }
+//#define STDARG1(ret, name, body, paramN, ...) __forceinline__ ret name(...) { return (ret)0; }
+//#define STDARG2(ret, name, body, paramN, ...)
+//#define STDARG3(ret, name, body, paramN, ...)
+//#define va_restart
+//#endif  /* __CUDA_ARCH__ */
+
+#elif defined(HASARGCU) && defined(__CUDA_ARCH__)
+
+#define STDARGvoid(name, body, paramN, ...) \
 	__forceinline__ __device__ void name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); (body); _crt_va_end(va); } \
 	template <typename T1> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3) { _crt_va_list3<T1,T2,T3> va; _crt_va_start(va, arg1, arg2, arg3); (body); _crt_va_end(va); }
-#define STDARG1void(name, body, ...) \
+#define STDARG1void(name, body, paramN, ...) \
 	__forceinline__ __device__ void name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); (body); _crt_va_end(va); } \
 	template <typename T1> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); (body); _crt_va_end(va); } \
@@ -48,26 +73,26 @@ THE SOFTWARE.
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) { _crt_va_list9<T1,T2,T3,T4,T5,T6,T7,T8,T9> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA) { _crt_va_listA<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA); (body); _crt_va_end(va); }
 // extended
-#define STDARG2void(name, body, ...) \
+#define STDARG2void(name, body, paramN, ...) \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB) { _crt_va_listB<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC) { _crt_va_listC<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD) { _crt_va_listD<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE) { _crt_va_listE<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF) { _crt_va_listF<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF); (body); _crt_va_end(va); }
 // extended-2
-#define STDARG3void(name, body, ...) \
+#define STDARG3void(name, body, paramN, ...) \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11) { _crt_va_list11<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12) { _crt_va_list12<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12, typename T13> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12, T13 arg13) { _crt_va_list13<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12,T13> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12, arg13); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12, typename T13, typename T14> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12, T13 arg13, T14 arg14) { _crt_va_list14<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12,T13,T14> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12, arg13, arg14); (body); _crt_va_end(va); } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12, typename T13, typename T14, typename T15> __forceinline__ __device__ void name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15) { _crt_va_list15<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12,T13,T14,T15> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12, arg13, arg14, arg15); (body); _crt_va_end(va); } \
 
-#define STDARG(ret, name, body, ...) \
+#define STDARG(ret, name, body, paramN, ...) \
 	__forceinline__ __device__ ret name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3) { _crt_va_list3<T1,T2,T3> va; _crt_va_start(va, arg1, arg2, arg3); ret r = (body); _crt_va_end(va); return r; }
-#define STDARG1(ret, name, body, ...) \
+#define STDARG1(ret, name, body, paramN, ...) \
 	__forceinline__ __device__ ret name(__VA_ARGS__) { _crt_va_list va; _crt_va_start(va); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1) { _crt_va_list1<T1> va; _crt_va_start(va, arg1); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2) { _crt_va_list2<T1,T2> va; _crt_va_start(va, arg1, arg2); ret r = (body); _crt_va_end(va); return r; } \
@@ -80,14 +105,14 @@ THE SOFTWARE.
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9) { _crt_va_list9<T1,T2,T3,T4,T5,T6,T7,T8,T9> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA) { _crt_va_listA<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA); ret r = (body); _crt_va_end(va); return r; }
 // extended
-#define STDARG2(ret, name, body, ...) \
+#define STDARG2(ret, name, body, paramN, ...) \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB) { _crt_va_listB<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC) { _crt_va_listC<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD) { _crt_va_listD<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE) { _crt_va_listE<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF) { _crt_va_listF<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF); ret r = (body); _crt_va_end(va); return r; }
 // extended-2
-#define STDARG3(ret, name, body, ...) \
+#define STDARG3(ret, name, body, paramN, ...) \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11) { _crt_va_list11<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12) { _crt_va_list12<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12); ret r = (body); _crt_va_end(va); return r; } \
 	template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename TA, typename TB, typename TC, typename TD, typename TE, typename TF, typename T11, typename T12, typename T13> __forceinline__ __device__ ret name(__VA_ARGS__, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, TA argA, TB argB, TC argC, TD argD, TE argE, TF argF, T11 arg11, T12 arg12, T13 arg13) { _crt_va_list13<T1,T2,T3,T4,T5,T6,T7,T8,T9,TA,TB,TC,TD,TE,TF,T11,T12,T13> va; _crt_va_start(va, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA, argB, argC, argD, argE, argF, arg11, arg12, arg13); ret r = (body); _crt_va_end(va); return r; } \
@@ -234,17 +259,5 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5, typen
 #define va_arg _crt_va_arg
 #define va_end _crt_va_end
 
-#else
-
-#define STDARGvoid(name, body, ...) __forceinline__ void name(...) { }
-#define STDARG1void(name, body, ...) __forceinline__ void name(...) { }
-#define STDARG2void(name, body, ...)
-#define STDARG3void(name, body, ...)
-#define STDARG(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
-#define STDARG1(ret, name, body, ...) __forceinline__ ret name(...) { return (ret)0; }
-#define STDARG2(ret, name, body, ...)
-#define STDARG3(ret, name, body, ...)
-#define va_restart
-
-#endif  /* __CUDA_ARCH__ */
+#endif  /* HASARGCU && __CUDA_ARCH__ */
 #endif  /* _STDARGCU_H */
